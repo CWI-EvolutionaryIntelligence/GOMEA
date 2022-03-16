@@ -1,14 +1,16 @@
+all:
+	python setup.py build_ext --inplace
 
-CXX=g++
-CXXFLAGS=-O2
-EXE=GOMEA
-
-$(EXE): build/main.o
-	$(CXX) $(CXXFLAGS) -o $@ $^
-
-build/%.o: src/%.cpp
-	$(CXX) $(CXXFLAGS) -c -o $@ $^
+install:
+	python setup.py install --user
+	
+	#python setup.py sdist bdist_wheel
+	#auditwheel repair $(`ls dist/*-cp38-cp38-linux_x86_64.whl`)
+	#rm dist/*-cp38-cp38-linux_86_64.whl
+	#mv wheelhouse/* dist/
 
 clean:
-	rm build/*.o
-	rm GOMEA
+	rm -rf build/
+	rm -rf dist/
+	rm -f src/cython/*.cpp
+	rm -f src/cython/*.c

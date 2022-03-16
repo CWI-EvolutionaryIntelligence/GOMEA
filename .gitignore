@@ -1,2 +1,6 @@
 **.o
 **.obj
+**.so
+**.swp
+**/__pycache__/
+**/cython/*.cpp
