@@ -19,10 +19,9 @@ ext_discrete = Extension("DiscreteGOMEA",
 
 ext_real_valued = Extension("RealValuedGOMEA",
         glob.glob("modules/real_valued_gomea/src/cython/*.pyx") + glob.glob("modules/real_valued_gomea/src/cpp/*.cpp")+
-        glob.glob("modules/fitness/src/cpp/*.cpp"),
-        #glob.glob("modules/fitness/src/cython/*.cpp"),
+        glob.glob("modules/fitness/src/cpp/*.cpp") + ["modules/fitness/src/cython/pyFitness.cpp"],
         #glob.glob("modules/fitness/src/cython/*.pyx"),
-        include_dirs=["modules/real_valued_gomea/include/","modules/fitness/include/","modules/fitness/src/cython","modules/real_valued_gomea/src/cython/"],
+        include_dirs=["modules/fitness/src/cython/","modules/real_valued_gomea/include/","modules/fitness/include/","modules/real_valued_gomea/src/cython/"],
         language="c++",
         extra_compile_args=["-std=c++17"],
         extra_link_args=["-std=c++17"],
@@ -45,7 +44,7 @@ ext_fitness = Extension("Fitness",
 #        extra_compile_args=["-std=c++17"],
 #        extra_link_args=["-std=c++17"])
 
-extensions = [ext_discrete,ext_real_valued]
+extensions = [ext_fitness,ext_discrete,ext_real_valued]
 
 setup(
     name="gomea",
@@ -56,7 +55,7 @@ setup(
     version=_version.__version__,
     long_description=long_description,
     long_description_content_type='text/markdown',
-    ext_modules=cythonize(extensions,gdb_debug=False,language_level = "3"),
+    ext_modules=cythonize(extensions,include_path=glob.glob("modules/*/src/cython/"),gdb_debug=False,language_level = "3"),
     zip_safe=False
 )
 

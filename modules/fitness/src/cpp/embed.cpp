@@ -1,5 +1,5 @@
 #include "embed.hpp"
-#include "RealValuedGOMEA.h"
+//#include "RealValuedGOMEA.h"
 //#include "pyFitness.h"
 
 #include <cstdlib>
@@ -19,10 +19,8 @@ namespace gomealib{
 			return embedding_initialized;
 		}
 
-		int initializePythonEmbedding()
+		int initializePythonEmbedding( const char *name, PyObject *(*initfunc)(void) )
 		{
-			const char* name = "RealValuedGOMEA";
-			//const char* name = "pyFitness";
 			PyObject *pmodule;
 			embedded_program = Py_DecodeLocale(name, NULL);
 			if (embedded_program == NULL) {
@@ -31,7 +29,7 @@ namespace gomealib{
 			}
 
 			// Add a built-in module, before Py_Initialize
-			if (PyImport_AppendInittab(name, PyInit_RealValuedGOMEA) == -1) {
+			if (PyImport_AppendInittab(name, initfunc) == -1) {
 				fprintf(stderr, "Error: could not extend in-built modules table\n");
 				exit(1);
 			}

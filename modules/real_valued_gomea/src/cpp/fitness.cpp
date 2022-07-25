@@ -38,7 +38,7 @@
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-= Section Includes -=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 #include "fitness.hpp"
 #include "embed.hpp"
-//#include "pyFitness.h"
+#include "pyFitness.h"
 #include "RealValuedGOMEA.h"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 fitness_t::~fitness_t()
@@ -305,7 +305,7 @@ void fitness_t::evaluate( solution_t *solution )
 {
 	if( !gomealib::utils::embeddingInitialized() )
 	{
-		int out = gomealib::utils::initializePythonEmbedding();
+		int out = gomealib::utils::initializePythonEmbedding("RealValuedGOMEA",PyInit_RealValuedGOMEA);
 		assert( out == 0 );
 	}
 	
@@ -2408,12 +2408,15 @@ void fitness_t::ezilaitiniObjectiveRotationMatrix( double **rotation_matrix, dou
 
 int fitness_t::evaluationEmbedded()
 {
-    if (fitness_embedded() < 0) {
+    printf("EMBED TEST - A\n");
+	//if (fitness_embedded() < 0) {
+	if (dummy() < 0) {
         PyErr_Print();
         fprintf(stderr, "Error in Python code, exception was printed.\n");
 		gomealib::utils::freePythonEmbedding();
 		exit(1);
     }
+    printf("EMBED TEST - B\n");
 	return 0;
 }
 		

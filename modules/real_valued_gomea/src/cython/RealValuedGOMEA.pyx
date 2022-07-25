@@ -6,10 +6,16 @@ from libcpp.string cimport string
 from libcpp cimport bool
 import inspect
 
-#cimport pyFitness
+cimport pyFitness
+import pyFitness 
 
-cdef public int fitness_embedded() except -1:
-    print("EMBED TEST")
+#cdef public int fitness_embedded() except -1:
+#    print("EMBED TEST")
+#    return 1
+
+cdef public int dummy() except -1:
+    print("DUMMY EMBEDDING")
+    #pyFitness.fitness_test()
     return 1
 
 # Create a Cython extension type which holds a C++ instance
