@@ -1,0 +1,2 @@
+cdef public int fitness_embedded() except -1
+
