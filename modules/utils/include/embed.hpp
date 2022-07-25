@@ -5,7 +5,6 @@ namespace gomealib{
 
 		bool embeddingInitialized();
 		int initializePythonEmbedding( const char *name, PyObject *(*initfunc)(void) );
-		//int initializePythonEmbedding( const char *name );
 		int freePythonEmbedding();
 	}
 }

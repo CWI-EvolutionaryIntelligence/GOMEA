@@ -6,17 +6,8 @@ from libcpp.string cimport string
 from libcpp cimport bool
 import inspect
 
-cimport pyFitness
-import pyFitness 
-
-#cdef public int fitness_embedded() except -1:
-#    print("EMBED TEST")
-#    return 1
-
-cdef public int dummy() except -1:
-    print("DUMMY EMBEDDING")
-    #pyFitness.fitness_test()
-    return 1
+cimport Fitness
+import Fitness 
 
 # Create a Cython extension type which holds a C++ instance
 # as an attribute and create a bunch of forwarding methods
@@ -97,3 +88,9 @@ cdef class pyRealValuedGOMEA:
 
     def run(self):
         self.c_inst.run()
+
+cdef public int fitness_embedded() except -1:
+    Fitness.fitness_embedded()
+    return 1
+
+

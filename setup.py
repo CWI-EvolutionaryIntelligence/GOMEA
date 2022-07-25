@@ -18,10 +18,9 @@ ext_discrete = Extension("DiscreteGOMEA",
         extra_link_args=["-std=c++17"])
 
 ext_real_valued = Extension("RealValuedGOMEA",
-        glob.glob("modules/real_valued_gomea/src/cython/*.pyx") + glob.glob("modules/real_valued_gomea/src/cpp/*.cpp")+
-        glob.glob("modules/fitness/src/cpp/*.cpp") + ["modules/fitness/src/cython/pyFitness.cpp"],
-        #glob.glob("modules/fitness/src/cython/*.pyx"),
-        include_dirs=["modules/fitness/src/cython/","modules/real_valued_gomea/include/","modules/fitness/include/","modules/real_valued_gomea/src/cython/"],
+        glob.glob("modules/real_valued_gomea/src/cython/*.pyx") + glob.glob("modules/real_valued_gomea/src/cpp/*.cpp") +
+        glob.glob("modules/utils/src/cpp/*.cpp"),
+        include_dirs=["modules/real_valued_gomea/include/","modules/real_valued_gomea/src/cython/","modules/utils/include/"],
         language="c++",
         extra_compile_args=["-std=c++17"],
         extra_link_args=["-std=c++17"],
@@ -32,7 +31,7 @@ ext_real_valued = Extension("RealValuedGOMEA",
 
 ext_fitness = Extension("Fitness",
         glob.glob("modules/fitness/src/cython/*.pyx") + glob.glob("modules/fitness/src/cpp/*.cpp"),
-        include_dirs=["modules/fitness/include/","modules/fitness/src/cython/"],
+        include_dirs=["modules/fitness/include/"],
         language="c++",
         extra_compile_args=["-std=c++17"],
         extra_link_args=["-std=c++17"])

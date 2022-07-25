@@ -1,6 +1,4 @@
 #include "embed.hpp"
-//#include "RealValuedGOMEA.h"
-//#include "pyFitness.h"
 
 #include <cstdlib>
 #include <cstddef>
