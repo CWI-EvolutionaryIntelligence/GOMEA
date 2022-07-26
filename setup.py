@@ -1,8 +1,13 @@
+VERSION_MAJOR = 0
+VERSION_MINOR = 0
+VERSION_PATCH = 1
+VERSION_STRING = '%s.%s.%s' % (VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)
+__version__ = VERSION_STRING
+
 from setuptools import Extension, setup
 from Cython.Build import cythonize
 import sys
 import glob
-import _version
 
 if sys.version_info[0] == 2:
     raise Exception('Python 2.x is no longer supported')
@@ -58,7 +63,7 @@ setup(
     author = 'Anton Bouter',
     author_email = 'Anton.Bouter@cwi.nl',
     url = '',
-    version = _version.__version__,
+    version = __version__,
     long_description = long_description,
     long_description_content_type = 'text/markdown',
     ext_modules = cythonize(extensions,
