@@ -40,6 +40,9 @@
 #include <queue>
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
+namespace gomea{
+namespace realvalued{
+
 /*-=-=-=-=-=-=-=-=-=-=-=- Section Global Variables -=-=-=-=-=-=-=-=-=-=-=-=-*/
 int       FOS_element_ub,                       /* Cut-off value for bounded fixed linkage tree (BFLT). */
 		  use_univariate_FOS,                   /* Whether a univariate FOS is used. */
@@ -1141,3 +1144,4 @@ void fos_t::adaptDistributionMultiplier( int FOS_index, partial_solution_t **sol
 		distributions[FOS_index]->adaptDistributionMultiplier(solutions,num_solutions);
 }
 
+}}

@@ -10,6 +10,13 @@ if sys.version_info[0] == 2:
 with open("README.md", 'r') as f:
     long_description = f.read()
 
+ext_gomea = Extension("GOMEA",
+        glob.glob("modules/gomea/src/cython/*.pyx") + glob.glob("modules/gomea/src/cpp/*.cpp"),
+        include_dirs=["modules/gomea/include/","modules/real_valued_gomea/include/","modules/discrete_gomea/include/"],
+        language="c++",
+        extra_compile_args=["-std=c++17"],
+        extra_link_args=["-std=c++17"])
+
 ext_discrete = Extension("DiscreteGOMEA",
         glob.glob("modules/discrete_gomea/src/cython/*.pyx") + glob.glob("modules/discrete_gomea/src/cpp/*.cpp"),
         include_dirs=["modules/discrete_gomea/include/"],
@@ -43,18 +50,21 @@ ext_fitness = Extension("Fitness",
 #        extra_compile_args=["-std=c++17"],
 #        extra_link_args=["-std=c++17"])
 
-extensions = [ext_fitness,ext_discrete,ext_real_valued]
+extensions = [ext_gomea,ext_discrete,ext_real_valued,ext_fitness]
 
 setup(
-    name="gomea",
-    description='Library for the use of various variants of the Gene-pool Optimal Mixing Evolutionary Algorith (GOMEA).',
-    author='Anton Bouter',
-    author_email='anton.bouter@cwi.nl',
-    url='',
-    version=_version.__version__,
-    long_description=long_description,
-    long_description_content_type='text/markdown',
-    ext_modules=cythonize(extensions,include_path=glob.glob("modules/*/src/cython/"),gdb_debug=False,language_level = "3"),
-    zip_safe=False
+    name = "gomea",
+    description = 'Library for the use of various variants of the Gene-pool Optimal Mixing Evolutionary Algorith (GOMEA).',
+    author = 'Anton Bouter',
+    author_email = 'Anton.Bouter@cwi.nl',
+    url = '',
+    version = _version.__version__,
+    long_description = long_description,
+    long_description_content_type = 'text/markdown',
+    ext_modules = cythonize(extensions,
+        include_path = glob.glob("modules/*/src/cython/"),
+        gdb_debug = False,
+        language_level = "3"),
+    zip_safe = False
 )
 

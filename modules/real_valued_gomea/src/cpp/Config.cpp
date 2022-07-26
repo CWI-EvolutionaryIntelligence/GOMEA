@@ -1,7 +1,9 @@
 #include "Config.hpp"
 
-Config::Config()
-{
+namespace gomea{
+namespace realvalued{
+
+Config::Config(){}
 
 }
-
+}

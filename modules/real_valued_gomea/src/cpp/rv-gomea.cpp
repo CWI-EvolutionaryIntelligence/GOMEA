@@ -41,6 +41,9 @@
 #include "rv-gomea.hpp"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
+namespace gomea{
+namespace realvalued{
+
 std::vector<population_t*> populations;
 
 /*-=-=-=-=-=-=-=-=-=-=- Section Interpret Command Line -=-=-=-=-=-=-=-=-=-=-*/
@@ -1035,3 +1038,4 @@ int main( int argc, char **argv )
 	return( 0 );
 }
 
+}}

@@ -42,6 +42,9 @@
 #include "fitness_buffer.hpp"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
+namespace gomea{
+namespace realvalued{
+
 class partial_solution_t
 {
 	public:
@@ -71,3 +74,4 @@ class partial_solution_t
 		std::map<int,int> touched_index_map;
 };
 
+}}

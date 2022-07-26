@@ -31,6 +31,9 @@
 
 #pragma once
 
+namespace gomea{
+namespace realvalued{
+
 typedef struct individual{
     double *parameters;
     double *objective_values;
@@ -3444,3 +3447,5 @@ void resetIndividualDoseDistributionBuffer(individual* ind)
       ind->dose_distribution_buffer[i] = 0;
   }
 }
+
+}}

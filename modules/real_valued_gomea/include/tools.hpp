@@ -53,6 +53,9 @@
 #include <cassert>
 #include <armadillo>
 
+namespace gomea{
+namespace realvalued{
+
 using namespace arma;
 
 template<class T>
@@ -133,3 +136,5 @@ extern double haveNextNextGaussian,             /* Internally used variable for 
 #define TRUE 1
 #define OMP_NUM_THREADS 1
 #define OPENBLAS_NUM_THREADS 1
+
+}}

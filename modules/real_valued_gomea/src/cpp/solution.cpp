@@ -1,5 +1,8 @@
 #include "solution.hpp"
 
+namespace gomea{
+namespace realvalued{
+
 solution_t::solution_t( int number_of_variables )
 {
 	this->number_of_variables = number_of_variables;
@@ -36,3 +39,4 @@ void solution_t::print()
 	printf("\n");
 }
 
+}}

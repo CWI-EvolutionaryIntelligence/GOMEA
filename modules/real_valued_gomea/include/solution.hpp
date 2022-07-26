@@ -42,6 +42,9 @@
 //#include "fitness_buffer.h"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
+namespace gomea{
+namespace realvalued{
+
 class solution_t
 {
 	public:
@@ -61,3 +64,4 @@ class solution_t
 		void print();
 };
 
+}}

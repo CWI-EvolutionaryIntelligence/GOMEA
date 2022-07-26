@@ -2,6 +2,9 @@
 
 #include "tools.hpp"
 
+namespace gomea{
+namespace realvalued{
+
 double dwellTimeUpperBound( int dimension );
 double dwellTimeLowerBound( int dimension );
 
@@ -2256,3 +2259,5 @@ void ezilaitiniBrachyTherapy()
     free( full_list_of_random_order_dose_calc_points_in_organ );
   }
 }
+
+}}

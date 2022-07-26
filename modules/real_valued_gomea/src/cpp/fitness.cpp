@@ -40,6 +40,9 @@
 #include "embed.hpp"
 #include "RealValuedGOMEA.h"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
+namespace gomea{
+namespace realvalued{
+
 fitness_t::~fitness_t()
 {
  	free( lower_range_bound );
@@ -2484,4 +2487,5 @@ double BD2FunctionHypervolume_t::subfunction_f1( double *x )
 	return( result );
 }
 
+}}
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/

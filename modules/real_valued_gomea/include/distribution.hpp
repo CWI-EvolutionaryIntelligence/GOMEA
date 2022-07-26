@@ -43,6 +43,9 @@
 #include "solution.hpp"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
+namespace gomea{
+namespace realvalued{
+
 class distribution_t {
 	public:
 		virtual ~distribution_t();
@@ -133,3 +136,4 @@ class conditional_distribution_t : public distribution_t {
 			void print();
 };
 
+}}

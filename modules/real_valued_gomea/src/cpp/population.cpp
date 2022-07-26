@@ -39,6 +39,9 @@
 #include "population.hpp"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
+namespace gomea{
+namespace realvalued{
+
 population_t::population_t( fitness_t *fitness, int population_size, double lower_init, double upper_init )
 {
 	this->population_size = population_size;
@@ -806,3 +809,5 @@ void population_t::initializePopulationAndFitnessValues()
 	for(int j = 0; j < linkage_model->getLength(); j++ )
 		sampled_solutions[j] = (partial_solution_t**) Malloc( population_size * sizeof(partial_solution_t*) );
 }
+
+}}

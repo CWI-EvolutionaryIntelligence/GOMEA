@@ -1,5 +1,8 @@
 #include "partial_solution.hpp"
 
+namespace gomea{
+namespace realvalued{
+
 partial_solution_t::partial_solution_t( int num_touched_variables )
 {
 	this->num_touched_variables = num_touched_variables;
@@ -66,3 +69,5 @@ void partial_solution_t::print()
 		printf("[%d][%6.3e]",touched_indices[i],touched_variables[i]);
 	//printf("\n");
 }
+
+}}

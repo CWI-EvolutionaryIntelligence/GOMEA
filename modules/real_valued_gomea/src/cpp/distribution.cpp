@@ -38,6 +38,9 @@
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-= Section Includes -=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 #include "distribution.hpp"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
+namespace gomea{
+namespace realvalued{
+
 distribution_t::~distribution_t() 
 {
 }
@@ -998,3 +1001,5 @@ void conditional_distribution_t::print()
 	}
 	printf("\n");
 }
+
+}}

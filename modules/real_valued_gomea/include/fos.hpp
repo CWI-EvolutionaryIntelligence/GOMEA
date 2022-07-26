@@ -43,6 +43,9 @@
 #include "partial_solution.hpp"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
+namespace gomea{
+namespace realvalued{
+
 class fos_t {
 
 		public:
@@ -122,3 +125,5 @@ extern int FOS_element_ub,                       /* Cut-off value for bounded fi
           static_linkage_tree,                  /* Whether the FOS is fixed throughout optimization. */
           random_linkage_tree;                  /* Whether the fixed linkage tree is learned based on a random distance measure. */
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
+
+}}

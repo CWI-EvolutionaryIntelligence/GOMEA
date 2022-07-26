@@ -39,6 +39,9 @@
 #include "tools.hpp"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
+namespace gomea{
+namespace realvalued{
+
 int64_t    random_seed = 0;                      /* The seed used for the random-number generator. */
 
 long  timestamp_start,                       /* The time stamp in milliseconds for when the program was started. */
@@ -1263,3 +1266,4 @@ int *greedyScatteredSubsetSelection( double **points, int number_of_points, int 
   return( result );
 }
 
+}}

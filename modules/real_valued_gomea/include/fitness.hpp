@@ -45,6 +45,9 @@
 //#include "CECHeader.h"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
+namespace gomea{
+namespace realvalued{
+
 class fitness_t
 {
 	public:
@@ -355,3 +358,5 @@ double ciasBRFunctionUpperRangeBound( int dimension );
 double trapSphereFunctionLowerRangeBound( int dimension );
 double trapSphereFunctionUpperRangeBound( int dimension );
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
+
+}}
