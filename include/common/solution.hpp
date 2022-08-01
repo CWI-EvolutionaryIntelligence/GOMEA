@@ -36,4 +36,7 @@ class solution_t
 		vec_t<double> partial_constraint_values;
 };
 
+template class solution_t<float>;
+template class solution_t<double>;
+
 }}

@@ -39,40 +39,23 @@
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-= Section Includes -=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 #include "tools.hpp"
-//#include "modules/common/include/solution.hpp"
+#include "common/gomea_defs.hpp"
+#include "common/solution.hpp"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
 namespace gomea{
 namespace realvalued{
 
 template<class T>
-class solution_t
+class solution_t : public gomea::common::solution_t<T>
 {
+	using gomea::common::solution_t<T>::solution_t;
+
 	public:
-		vec_t<T> variables;
-		int NIS; // no improvement stretch
-		
-		solution_t();
-		solution_t( int number_of_variables );
-		solution_t( vec_t<T> &variables );
-
-		int getNumberOfVariables();
-		int getNumberOfObjectives();
-		
-		double getObjectiveValue();
-		//double getObjectiveValue( int objective_value_index );
-		double getConstraintValue();
-
-		void setObjectiveValue( double v );
-		//void setObjectiveValue( double v, int objective_value_index );
-		void setConstraintValue( double v );
-
-		void print();
-	
-	private:
-		vec_t<double> objective_values;
-		double constraint_value = 1e308;
-		//double buffer;
+		int NIS = 0; // no improvement stretch
 };
+
+template class solution_t<float>;
+template class solution_t<double>;
 
 }}
