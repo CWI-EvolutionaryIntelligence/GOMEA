@@ -65,11 +65,6 @@ fitness_t *fitness_t::getFitnessClass( int problem_index, int number_of_paramete
 		return( func );
 	}
 
-#ifdef CECLSGOFUNC
-	if( problem_index > 200 && problem_index < 300 )
-		return( new CECLSGOFunctions_t( problem_index-200, number_of_parameters, vtr ) );
-#endif
-
 	switch( problem_index )
 	{
 		case 0 : return( new sphereFunction_t( number_of_parameters, vtr ) );
@@ -122,9 +117,9 @@ short fitness_t::betterFitness( double objective_value_x, double constraint_valu
     return( result );
 }
 
-short fitness_t::betterFitness( solution_t *sol_x, solution_t *sol_y ) 
+short fitness_t::betterFitness( solution_t<double> *sol_x, solution_t<double> *sol_y ) 
 {
-	return( betterFitness( sol_x->objective_value, sol_x->constraint_value, sol_y->objective_value, sol_y->constraint_value ) );
+	return( betterFitness( sol_x->getObjectiveValue(), sol_x->getConstraintValue(), sol_y->getObjectiveValue(), sol_y->getConstraintValue() ) );
 }
 
 void fitness_t::initializeFitnessFunction( void )
@@ -303,7 +298,7 @@ double *fitness_t::rotateVariablesInBlocks( double *variables, int len, int from
     return( rotated_variables );
 }
 
-void fitness_t::evaluate( solution_t *solution )
+void fitness_t::evaluate( solution_t<double> *solution )
 {
 	if( !gomealib::utils::embeddingInitialized() )
 	{
@@ -316,49 +311,49 @@ void fitness_t::evaluate( solution_t *solution )
 	int out = evaluationEmbedded();
 	assert( out == 0 );	
     
-	if( use_vtr && !vtr_hit_status && solution->constraint_value == 0 && solution->objective_value <= vtr  )
+	if( use_vtr && !vtr_hit_status && solution->getConstraintValue() == 0 && solution->getObjectiveValue() <= vtr  )
 	{
 		vtr_hit_status = 1;
-		elitist_objective_value = solution->objective_value;
-		elitist_constraint_value = solution->constraint_value;
+		elitist_objective_value = solution->getObjectiveValue();
+		elitist_constraint_value = solution->getConstraintValue();
 	}
 
-	if( !vtr_hit_status && betterFitness(solution->objective_value, solution->constraint_value, elitist_objective_value, elitist_constraint_value) )
+	if( !vtr_hit_status && betterFitness(solution->getObjectiveValue(), solution->getConstraintValue(), elitist_objective_value, elitist_constraint_value) )
 	{
-		elitist_objective_value = solution->objective_value;
-		elitist_constraint_value = solution->constraint_value;
+		elitist_objective_value = solution->getObjectiveValue();
+		elitist_constraint_value = solution->getConstraintValue();
 	}
 }
 
-void fitness_t::evaluatePartialSolutionBlackBox( solution_t *parent, partial_solution_t *solution )
+void fitness_t::evaluatePartialSolutionBlackBox( solution_t<double> *parent, partial_solution_t<double> *solution )
 {
 	// Make backup of parent
-	double *var_backup = (double*) Malloc(solution->num_touched_variables * sizeof(double));
-	for( int i = 0; i < solution->num_touched_variables; i++ )
+	double *var_backup = (double*) Malloc(solution->getNumberOfTouchedVariables() * sizeof(double));
+	for( int i = 0; i < solution->getNumberOfTouchedVariables(); i++ )
 	{
 		var_backup[i] = parent->variables[solution->touched_indices[i]];
 		parent->variables[solution->touched_indices[i]] = solution->touched_variables[i];
 	}
-	double obj_val_backup = parent->objective_value;
-	double cons_val_backup = parent->constraint_value;
+	double obj_val_backup = parent->getObjectiveValue();
+	double cons_val_backup = parent->getConstraintValue();
 
 	evaluationFunction( parent );
 
 	// Insert calculated objective and constraint values into partial solution	
-	solution->objective_value = parent->objective_value;
-	solution->constraint_value = parent->constraint_value;
+	solution->setObjectiveValue(parent->getObjectiveValue());
+	solution->setConstraintValue(parent->getConstraintValue());
 
 	// Restore parent to original state
-	parent->objective_value = obj_val_backup;
-	parent->constraint_value = cons_val_backup;
-	for( int i = 0; i < solution->num_touched_variables; i++ )
+	parent->setObjectiveValue(obj_val_backup);
+	parent->setConstraintValue(cons_val_backup);
+	for( int i = 0; i < solution->getNumberOfTouchedVariables(); i++ )
 		parent->variables[solution->touched_indices[i]] = var_backup[i];
 	free( var_backup );
 }
 
-void fitness_t::evaluatePartialSolution( solution_t *parent, partial_solution_t *solution )
+void fitness_t::evaluatePartialSolution( solution_t<double> *parent, partial_solution_t<double> *solution )
 {
-	if( black_box_optimization || solution->num_touched_variables == number_of_parameters )
+	if( black_box_optimization || solution->getNumberOfTouchedVariables() == number_of_parameters )
 	{
 		evaluatePartialSolutionBlackBox( parent, solution );
 	}
@@ -366,39 +361,39 @@ void fitness_t::evaluatePartialSolution( solution_t *parent, partial_solution_t 
 	{
 		partialEvaluationFunction( parent, solution );
 #ifdef CHECK_PARTIAL_FITNESS
-		double fbefore = solution->objective_value;
+		double fbefore = solution->getObjectiveValue();
 		evaluatePartialSolutionBlackBox( parent, solution );	
-		double fafter = solution->objective_value;
+		double fafter = solution->getObjectiveValue();
 		if( fabs((fbefore-fafter)/fafter) > 1e-4 )
 		{
 			printf("fbefore = %10.3e; ",fbefore);
 			printf("fafter = %10.3e\n",fafter);
 			exit(0);
 		}
-		solution->objective_value = fbefore;
+		solution->setObjectiveValue(fbefore);
 		number_of_evaluations--;
 #endif
 
-		if( use_vtr && !vtr_hit_status && solution->constraint_value == 0 && solution->objective_value <= vtr  )
+		if( use_vtr && !vtr_hit_status && solution->getConstraintValue() == 0 && solution->getObjectiveValue() <= vtr  )
 		{
 			evaluatePartialSolutionBlackBox( parent, solution );
-			if( solution->constraint_value == 0 && solution->objective_value <= vtr  )
+			if( solution->getConstraintValue() == 0 && solution->getObjectiveValue() <= vtr  )
 			{
 				vtr_hit_status = 1;
-				elitist_objective_value = solution->objective_value;
-				elitist_constraint_value = solution->constraint_value;
+				elitist_objective_value = solution->getObjectiveValue();
+				elitist_constraint_value = solution->getConstraintValue();
 			}
 		}
 	}
 	
-	if( !vtr_hit_status && betterFitness(solution->objective_value, solution->constraint_value, elitist_objective_value, elitist_constraint_value) )
+	if( !vtr_hit_status && betterFitness(solution->getObjectiveValue(), solution->getConstraintValue(), elitist_objective_value, elitist_constraint_value) )
 	{
-		elitist_objective_value = solution->objective_value;
-		elitist_constraint_value = solution->constraint_value;
+		elitist_objective_value = solution->getObjectiveValue();
+		elitist_constraint_value = solution->getConstraintValue();
 	}
 }
 
-void fitness_t::partialEvaluationFunction( solution_t *parent, partial_solution_t *solution )
+void fitness_t::partialEvaluationFunction( solution_t<double> *parent, partial_solution_t<double> *solution )
 {
 	printf("Partial evaluation function not implemented.\n");
 	exit(0);
@@ -434,23 +429,23 @@ sphereFunction_t::sphereFunction_t( int number_of_parameters, double vtr )
 	initializeFitnessFunction();
 }
 		
-void sphereFunction_t::evaluationFunction( solution_t *solution )
+void sphereFunction_t::evaluationFunction( solution_t<double> *solution )
 {
 	double result = 0.0;
 	for( int i = 0; i < number_of_subfunctions; i++ )
 		result += subfunction( solution->variables[i] );
 	//solution->buffer = result;
 
-	solution->objective_value = result;
-	solution->constraint_value = 0;
+	solution->setObjectiveValue(result);
+	solution->setConstraintValue(0);
 	full_number_of_evaluations++;
 	number_of_evaluations++;
 }
 
-void sphereFunction_t::partialEvaluationFunction( solution_t *parent, partial_solution_t *solution )
+void sphereFunction_t::partialEvaluationFunction( solution_t<double> *parent, partial_solution_t<double> *solution )
 {
 	double result = 0.0;
-	for( int i = 0; i < solution->num_touched_variables; i++ )
+	for( int i = 0; i < solution->getNumberOfTouchedVariables(); i++ )
 	{
 		int ind = solution->touched_indices[i];
 		result += subfunction( solution->touched_variables[i] );
@@ -458,10 +453,10 @@ void sphereFunction_t::partialEvaluationFunction( solution_t *parent, partial_so
 	}
 	//solution->buffer = result;
 	
-	solution->objective_value = parent->objective_value + result;
-	solution->constraint_value = parent->constraint_value;
+	solution->setObjectiveValue(parent->getObjectiveValue() + result);
+	solution->setConstraintValue(parent->getConstraintValue());
 	full_number_of_evaluations++;
-	number_of_evaluations += solution->num_touched_variables / (double) number_of_subfunctions;
+	number_of_evaluations += solution->getNumberOfTouchedVariables() / (double) number_of_subfunctions;
 }
 
 double sphereFunction_t::subfunction( double x )
@@ -490,22 +485,22 @@ rosenbrockFunction_t::rosenbrockFunction_t( int number_of_parameters, double vtr
 		initializeVariableInteractionGraph();
 }
 
-void rosenbrockFunction_t::evaluationFunction( solution_t *solution )
+void rosenbrockFunction_t::evaluationFunction( solution_t<double> *solution )
 {
 	double result = 0.0;
 	for( int i = 0; i < number_of_parameters-1; i++ )
 		result += subfunction( solution->variables[i], solution->variables[i+1] );
 	//solution->buffer = result;
 
-	solution->objective_value = result;
-	solution->constraint_value = 0;
+	solution->setObjectiveValue(result);
+	solution->setConstraintValue(0);
 	full_number_of_evaluations++;
 	number_of_evaluations++;
 }
 
-void rosenbrockFunction_t::univariatePartialEvaluationFunction( solution_t *parent, partial_solution_t *solution )
+void rosenbrockFunction_t::univariatePartialEvaluationFunction( solution_t<double> *parent, partial_solution_t<double> *solution )
 {
-	assert( solution->num_touched_variables == 1 );
+	assert( solution->getNumberOfTouchedVariables() == 1 );
 
 	int num_subfunctions_evaluated = 0;	
 	double result = 0.0;
@@ -524,16 +519,16 @@ void rosenbrockFunction_t::univariatePartialEvaluationFunction( solution_t *pare
 	}
 
 	//solution->buffer = result;
-	solution->objective_value = parent->objective_value + result;
-	solution->constraint_value = parent->constraint_value;
+	solution->setObjectiveValue(parent->getObjectiveValue() + result);
+	solution->setConstraintValue(parent->getConstraintValue());
 	full_number_of_evaluations++;
 	number_of_evaluations += num_subfunctions_evaluated / (double) number_of_subfunctions;
 }
 
 
-void rosenbrockFunction_t::partialEvaluationFunction( solution_t *parent, partial_solution_t *solution )
+void rosenbrockFunction_t::partialEvaluationFunction( solution_t<double> *parent, partial_solution_t<double> *solution )
 {
-	if( solution->num_touched_variables == 1 )
+	if( solution->getNumberOfTouchedVariables() == 1 )
 	{
 		univariatePartialEvaluationFunction( parent, solution );
 	}
@@ -541,8 +536,8 @@ void rosenbrockFunction_t::partialEvaluationFunction( solution_t *parent, partia
 	{
 		int num_subfunctions_evaluated = 0;
 		double result = 0.0;
-		int *order = mergeSortInt( solution->touched_indices.data(), solution->num_touched_variables );
-		for( int i = 0; i < solution->num_touched_variables; i++ )
+		int *order = mergeSortInt( solution->touched_indices.data(), solution->getNumberOfTouchedVariables() );
+		for( int i = 0; i < solution->getNumberOfTouchedVariables(); i++ )
 		{
 			int ind = solution->touched_indices[order[i]];
 			if( ind > 0 )
@@ -558,7 +553,7 @@ void rosenbrockFunction_t::partialEvaluationFunction( solution_t *parent, partia
 			if( ind < number_of_subfunctions )
 			{
 				double y = parent->variables[ind+1];
-				if( !(i < solution->num_touched_variables-1 && solution->touched_indices[i+1] == ind+1) )
+				if( !(i < solution->getNumberOfTouchedVariables()-1 && solution->touched_indices[i+1] == ind+1) )
 				{
 					result += subfunction( solution->touched_variables[i], y );
 					result -= subfunction( parent->variables[ind], parent->variables[ind+1] );
@@ -569,8 +564,8 @@ void rosenbrockFunction_t::partialEvaluationFunction( solution_t *parent, partia
 		free( order );
 
 		//solution->buffer = result;
-		solution->objective_value = parent->objective_value + result;
-		solution->constraint_value = parent->constraint_value;
+		solution->setObjectiveValue(parent->getObjectiveValue() + result);
+		solution->setConstraintValue(parent->getConstraintValue());
 		full_number_of_evaluations++;
 		number_of_evaluations += num_subfunctions_evaluated / (double) number_of_subfunctions;
 	}	
@@ -625,19 +620,19 @@ int sorebFunction_t::getStartingIndexOfBlock( int block_index )
 	return( block_index * (rotation_block_size-overlap_size) );
 }
 
-void sorebFunction_t::evaluationFunction( solution_t *solution )
+void sorebFunction_t::evaluationFunction( solution_t<double> *solution )
 {
 	double result = 0.0;
 	for( int i = 0; i < number_of_subfunctions; i++ )
 		result += subfunction( &solution->variables[getStartingIndexOfBlock(i)], rotation_block_size );
 
-	solution->objective_value = result;
-	solution->constraint_value = 0;
+	solution->setObjectiveValue(result);
+	solution->setConstraintValue(0);
 	full_number_of_evaluations++;
 	number_of_evaluations++;
 }
 
-void sorebFunction_t::partialEvaluationFunction( solution_t *parent, partial_solution_t *solution )
+void sorebFunction_t::partialEvaluationFunction( solution_t<double> *parent, partial_solution_t<double> *solution )
 {
 	double result = 0.0;
 	int last_evaluated_block = -1;
@@ -649,16 +644,16 @@ void sorebFunction_t::partialEvaluationFunction( solution_t *parent, partial_sol
 		printf("%.3lf ",parent->variables[i]);
 	printf("\n");
 	evaluationFunction(parent);
-	printf("fbefore = %10.3e\n",parent->objective_value);
+	printf("fbefore = %10.3e\n",parent->getObjectiveValue());
 
 	printf("MODIFIED VARS:\n");
-	for( int i = 0; i < solution->num_touched_variables; i++ )
+	for( int i = 0; i < solution->getNumberOfTouchedVariables(); i++ )
 		printf("%d ",solution->touched_indices[i]);
 	printf("\n");
-	for( int i = 0; i < solution->num_touched_variables; i++ )
+	for( int i = 0; i < solution->getNumberOfTouchedVariables(); i++ )
 		printf("%.3lf ",solution->touched_variables[i]);
 	printf("\n");*/
-	for( int i = 0; i < solution->num_touched_variables; i++ )
+	for( int i = 0; i < solution->getNumberOfTouchedVariables(); i++ )
 	{
 		int ind = solution->touched_indices[i];
 		int block_ind = getIndexOfFirstBlock(ind);
@@ -675,7 +670,7 @@ void sorebFunction_t::partialEvaluationFunction( solution_t *parent, partial_sol
 				result -= subfunction( variables_copy, rotation_block_size );
 
 				int j = 0;
-				while( i+j < solution->num_touched_variables && solution->touched_indices[i+j]-block_start < rotation_block_size ) // find other touched variables in this block and put them in local array
+				while( i+j < solution->getNumberOfTouchedVariables() && solution->touched_indices[i+j]-block_start < rotation_block_size ) // find other touched variables in this block and put them in local array
 				{
 					int cur_ind = solution->touched_indices[i+j];
 					variables_copy[cur_ind-block_start] = solution->touched_variables[i+j];
@@ -691,8 +686,8 @@ void sorebFunction_t::partialEvaluationFunction( solution_t *parent, partial_sol
 		}
 	}
 	
-	solution->objective_value = parent->objective_value + result;
-	solution->constraint_value = parent->constraint_value;
+	solution->setObjectiveValue(parent->getObjectiveValue() + result);
+	solution->setConstraintValue(parent->getConstraintValue());
 	full_number_of_evaluations++;
 	number_of_evaluations += num_subfunctions_evaluated / (double) number_of_subfunctions;
 }
@@ -774,7 +769,7 @@ osorebFunction_t::osorebFunction_t( int number_of_parameters, double vtr )
 	//exit(0); // TODO : check evaluation functions
 }
 
-void osorebFunction_t::evaluationFunction( solution_t *solution )
+void osorebFunction_t::evaluationFunction( solution_t<double> *solution )
 {
 	assert( black_box_optimization );
 	
@@ -790,17 +785,17 @@ void osorebFunction_t::evaluationFunction( solution_t *solution )
 		result += subfunction( &solution->variables[rotation_block_size*i-1], 2 );
 	}
 
-	solution->objective_value = result;
-	solution->constraint_value = 0;
+	solution->setObjectiveValue(result);
+	solution->setConstraintValue(0);
 	full_number_of_evaluations++;
 	number_of_evaluations++;
 }
 
-void osorebFunction_t::partialEvaluationFunction( solution_t *parent, partial_solution_t *solution )
+void osorebFunction_t::partialEvaluationFunction( solution_t<double> *parent, partial_solution_t<double> *solution )
 {
 	int num_subfunctions_evaluated = 0;
 	double result = 0.0;
-	for( int i = 0; i < solution->num_touched_variables; i++ )
+	for( int i = 0; i < solution->getNumberOfTouchedVariables(); i++ )
 	{
 		int ind = solution->touched_indices[i];
 		int block_ind = ind / rotation_block_size;
@@ -824,7 +819,7 @@ void osorebFunction_t::partialEvaluationFunction( solution_t *parent, partial_so
 		result -= subfunction( variables_copy_smallblock, 2 );
 		
 		int j = 0;
-		while( i+j < solution->num_touched_variables && block_ind == solution->touched_indices[i+j] / rotation_block_size )
+		while( i+j < solution->getNumberOfTouchedVariables() && block_ind == solution->touched_indices[i+j] / rotation_block_size )
 		{
 			int cur_ind = solution->touched_indices[i+j];
 			variables_copy[cur_ind % rotation_block_size] = solution->touched_variables[i+j];
@@ -846,8 +841,8 @@ void osorebFunction_t::partialEvaluationFunction( solution_t *parent, partial_so
 	}
 	//solution->buffer = result;
 	
-	solution->objective_value = parent->objective_value + result;
-	solution->constraint_value = parent->constraint_value;
+	solution->setObjectiveValue(parent->getObjectiveValue() + result);
+	solution->setConstraintValue(parent->getConstraintValue());
 	full_number_of_evaluations++;
 	number_of_evaluations += num_subfunctions_evaluated / (double) number_of_subfunctions;
 }
@@ -902,23 +897,23 @@ sorebChainFunction_t::sorebChainFunction_t( int number_of_parameters, double vtr
 		initializeVariableInteractionGraph();
 }
 
-void sorebChainFunction_t::evaluationFunction( solution_t *solution )
+void sorebChainFunction_t::evaluationFunction( solution_t<double> *solution )
 {
 	double result = 0.0;
 	for( int i = 0; i < number_of_subfunctions; i++ )
 		result += subfunction( &solution->variables[i], rotation_block_size );
 
-	solution->objective_value = result;
-	solution->constraint_value = 0;
+	solution->setObjectiveValue(result);
+	solution->setConstraintValue(0);
 	full_number_of_evaluations++;
 	number_of_evaluations++;
 }
 
-void sorebChainFunction_t::partialEvaluationFunction( solution_t *parent, partial_solution_t *solution )
+void sorebChainFunction_t::partialEvaluationFunction( solution_t<double> *parent, partial_solution_t<double> *solution )
 {
 	int num_subfunctions_evaluated = 0;
 	double result = 0.0;
-	for( int i = 0; i < solution->num_touched_variables; i++ )
+	for( int i = 0; i < solution->getNumberOfTouchedVariables(); i++ )
 	{
 		int ind = solution->touched_indices[i];
 		double *variables_copy = new double[rotation_block_size];
@@ -934,14 +929,14 @@ void sorebChainFunction_t::partialEvaluationFunction( solution_t *parent, partia
 			result += subfunction( variables_copy, rotation_block_size );
 			num_subfunctions_evaluated++;
 		}
-		if( ind < number_of_parameters-1 && !(i < solution->num_touched_variables-1 && solution->touched_indices[i+1] == ind+1) )
+		if( ind < number_of_parameters-1 && !(i < solution->getNumberOfTouchedVariables()-1 && solution->touched_indices[i+1] == ind+1) )
 		{
 			variables_copy[0] = parent->variables[ind];
 			variables_copy[1] = parent->variables[ind+1];
 			result -= subfunction( variables_copy, rotation_block_size );
 			
 			variables_copy[0] = solution->touched_variables[i];
-			if( i+1 < solution->num_touched_variables && solution->touched_indices[i+1] == ind+1 )
+			if( i+1 < solution->getNumberOfTouchedVariables() && solution->touched_indices[i+1] == ind+1 )
 				variables_copy[1] = solution->touched_variables[i+1];
 			result += subfunction( variables_copy, rotation_block_size );
 			num_subfunctions_evaluated++;
@@ -949,8 +944,8 @@ void sorebChainFunction_t::partialEvaluationFunction( solution_t *parent, partia
 		delete[] variables_copy;
 	}
 	
-	solution->objective_value = parent->objective_value + result;
-	solution->constraint_value = parent->constraint_value;
+	solution->setObjectiveValue(parent->getObjectiveValue() + result);
+	solution->setConstraintValue(parent->getConstraintValue());
 	full_number_of_evaluations++;
 	number_of_evaluations += num_subfunctions_evaluated / (double) number_of_subfunctions;
 }
@@ -1034,7 +1029,7 @@ sorebGridFunction_t::~sorebGridFunction_t()
 	}
 }
 
-void sorebGridFunction_t::evaluationFunction( solution_t *solution )
+void sorebGridFunction_t::evaluationFunction( solution_t<double> *solution )
 {
 	double result = 0.0;
 	double *var_tmp = new double[5];
@@ -1082,20 +1077,20 @@ void sorebGridFunction_t::evaluationFunction( solution_t *solution )
 	//exit(0);
 	delete[] var_tmp;
 
-	solution->objective_value = result;
+	solution->setObjectiveValue(result);
 	//printf("\n");
 	//exit(0);
-	solution->constraint_value = 0;
+	solution->setConstraintValue(0);
 	full_number_of_evaluations++;
 	number_of_evaluations++;
 }
 
-void sorebGridFunction_t::partialEvaluationFunction( solution_t *parent, partial_solution_t *solution )
+void sorebGridFunction_t::partialEvaluationFunction( solution_t<double> *parent, partial_solution_t<double> *solution )
 {
 	/*double result = 0.0;
 	double *variables_copy = new double[2];
 	int num_subfunctions_evaluated = 0;
-	for( int i = 0; i < solution->num_touched_variables; i++ )
+	for( int i = 0; i < solution->getNumberOfTouchedVariables(); i++ )
 	{
 		int ind = solution->touched_indices[i];
 		int x = ind%grid_width;
@@ -1169,13 +1164,13 @@ void sorebGridFunction_t::partialEvaluationFunction( solution_t *parent, partial
 
 		delete[] variables_copy;
 	}
-	solution->objective_value = parent->objective_value + result;
-	solution->constraint_value = parent->constraint_value;
+	solution->setObjectiveValue(parent->getObjectiveValue() + result);
+	solution->setConstraintValue(parent->getConstraintValue());
 	full_number_of_evaluations++;
 	number_of_evaluations += num_subfunctions_evaluated / (double) number_of_subfunctions;*/
 	
 	std::set<int> subfunction_indices;
-	for( int i = 0; i < solution->num_touched_variables; i++ )
+	for( int i = 0; i < solution->getNumberOfTouchedVariables(); i++ )
 	{
 		int ind = solution->touched_indices[i];
 		subfunction_indices.insert(ind);
@@ -1184,7 +1179,7 @@ void sorebGridFunction_t::partialEvaluationFunction( solution_t *parent, partial
 	}
 
 	int num_subfunctions_evaluated;
-   	if( solution->num_touched_variables == 1 )
+   	if( solution->getNumberOfTouchedVariables() == 1 )
 	{
 		num_subfunctions_evaluated = 1 + getNeighborsInGrid( solution->touched_indices[0] ).size();
 		assert( num_subfunctions_evaluated == subfunction_indices.size() );
@@ -1369,7 +1364,7 @@ void sorebCubeFunction_t::initializeVariableInteractionGraph()
 	
 }
 
-void sorebCubeFunction_t::evaluationFunction( solution_t *solution )
+void sorebCubeFunction_t::evaluationFunction( solution_t<double> *solution )
 {
 	double result = 0.0;
 	double *var_tmp = new double[7];
@@ -1410,18 +1405,18 @@ void sorebCubeFunction_t::evaluationFunction( solution_t *solution )
 	}
 	delete[] var_tmp;
 
-	solution->objective_value = result;
-	solution->constraint_value = 0;
+	solution->setObjectiveValue(result);
+	solution->setConstraintValue(0);
 	full_number_of_evaluations++;
 	number_of_evaluations++;
 }
 
-void sorebCubeFunction_t::partialEvaluationFunction( solution_t *parent, partial_solution_t *solution )
+void sorebCubeFunction_t::partialEvaluationFunction( solution_t<double> *parent, partial_solution_t<double> *solution )
 {
 	/*int num_subfunctions_evaluated = 0;
 	double result = 0.0;
 	double *variables_copy = new double[2];
-	for( int i = 0; i < solution->num_touched_variables; i++ )
+	for( int i = 0; i < solution->getNumberOfTouchedVariables(); i++ )
 	{
 		int ind = solution->touched_indices[i];
 		
@@ -1529,12 +1524,12 @@ void sorebCubeFunction_t::partialEvaluationFunction( solution_t *parent, partial
 
 		delete[] variables_copy;
 	}
-	solution->objective_value = parent->objective_value + result;
-	solution->constraint_value = parent->constraint_value;
+	solution->setObjectiveValue(parent->getObjectiveValue() + result);
+	solution->setConstraintValue(parent->getConstraintValue());
 	full_number_of_evaluations++;
 	number_of_evaluations += num_subfunctions_evaluated / (double) number_of_subfunctions;*/
 	std::set<int> subfunction_indices;
-	for( int i = 0; i < solution->num_touched_variables; i++ )
+	for( int i = 0; i < solution->getNumberOfTouchedVariables(); i++ )
 	{
 		int ind = solution->touched_indices[i];
 		subfunction_indices.insert(ind);
@@ -1543,7 +1538,7 @@ void sorebCubeFunction_t::partialEvaluationFunction( solution_t *parent, partial
 	}
 
 	int num_subfunctions_evaluated;
-   	if( solution->num_touched_variables == 1 )
+   	if( solution->getNumberOfTouchedVariables() == 1 )
 	{
 		num_subfunctions_evaluated = 1 + getNeighborsInGrid( solution->touched_indices[0] ).size();
 		assert( num_subfunctions_evaluated == subfunction_indices.size() );
@@ -1596,53 +1591,6 @@ sorebCubeFunction_t::~sorebCubeFunction_t()
 		free( rot_mat );
 	}
 }
-
-#ifdef CECLSGOFUNC
-CECLSGOFunctions_t::CECLSGOFunctions_t( int id, int number_of_parameters, double vtr )
-{
-	this->name = "CEC Large-scale Global Optimization Benchmarks";
-	this->number_of_parameters = number_of_parameters;
-	this->vtr = vtr;
-	if (id==1){this->function = new F1();}
-	else if (id==2){this->function = new F2();}
-	else if (id==3){this->function = new F3();}
-	else if (id==4){this->function = new F4();}
-	else if (id==5){this->function = new F5();}
-	else if (id==6){this->function = new F6();}
-	else if (id==7){this->function = new F7();}
-	else if (id==8){this->function = new F8();}
-	else if (id==9){this->function = new F9();}
-	else if (id==10){this->function = new F10();}
-	else if (id==11){this->function = new F11();}
-	else if (id==12){this->function = new F12();}
-	else if (id==13){this->function = new F13();}
-	else if (id==14){this->function = new F14();}
-	else if (id==15){this->function = new F15();}
-	initializeFitnessFunction();
-}
-
-double CECLSGOFunctions_t::getLowerRangeBound( int dimension )
-{
-	return( -1e308 );
-}
-		
-double CECLSGOFunctions_t::getUpperRangeBound( int dimension )
-{
-	return( 1e308 );
-}
-
-void CECLSGOFunctions_t::evaluationFunction( solution_t *solution )
-{
-	solution->objective_value = function->compute((double*)solution->variables.mem);
-	/*for( int i = 0; i < number_of_parameters; i++ )
-		printf("%10.3e ",solution->variables[i]);
-	printf("[ %10.3e ]\n",solution->objective_value);*/
-	
-	solution->constraint_value = 0;
-	full_number_of_evaluations++;
-	number_of_evaluations++;
-}
-#endif
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-= Section Problems -=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 /**
@@ -2431,7 +2379,7 @@ BD2FunctionHypervolume_t::BD2FunctionHypervolume_t( int number_of_parameters, do
 	initializeFitnessFunction();
 }
 
-void BD2FunctionHypervolume_t::evaluationFunction( solution_t *solution )
+void BD2FunctionHypervolume_t::evaluationFunction( solution_t<double> *solution )
 {
 	double result = 0.0;
 	double *objective_values_front_f0 = new double[front_size];
@@ -2450,9 +2398,9 @@ void BD2FunctionHypervolume_t::evaluationFunction( solution_t *solution )
 	delete[] objective_values_front_f0;
 	delete[] objective_values_front_f1;
 
-	solution->objective_value = result;
+	solution->setObjectiveValue(result);
 	//printf("%10.3e\n",result);
-	solution->constraint_value = 0;
+	solution->setConstraintValue(0);
 	full_number_of_evaluations++;
 	number_of_evaluations++;
 }

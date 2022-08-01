@@ -40,7 +40,7 @@
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-= Section Includes -=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 #include "tools.hpp"
 #include "distribution.hpp"
-#include "partial_solution.hpp"
+#include "partial_solutionRV.hpp"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
 namespace gomea{
@@ -87,10 +87,10 @@ class fos_t {
 			void initializeNormalDistribution(int FOS_index);
 			void initializeConditionalDistribution( int FOS_index );
 
-			partial_solution_t *generatePartialSolution( int FOS_index, solution_t *solution_conditioned_on );
-			void estimateDistributions( solution_t **selection, int selection_size );
-			void estimateDistribution( int FOS_index, solution_t **selection, int selection_size );
-			void adaptDistributionMultiplier( int FOS_index, partial_solution_t **solutions, int num_solutions );
+			partial_solution_t<double> *generatePartialSolution( int FOS_index, solution_t<double> *solution_conditioned_on );
+			void estimateDistributions( solution_t<double> **selection, int selection_size );
+			void estimateDistribution( int FOS_index, solution_t<double> **selection, int selection_size );
+			void adaptDistributionMultiplier( int FOS_index, partial_solution_t<double> **solutions, int num_solutions );
 
 			int number_of_variables = -1;
 			std::vector<distribution_t*> distributions;

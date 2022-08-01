@@ -1149,9 +1149,10 @@ double distanceEuclidean( double *x, double *y, int number_of_dimensions )
     return( result );
 }
 
-double distanceEuclidean( vec &x, vec &y ) 
+double distanceEuclidean( vec_t<double> &x, vec_t<double> &y ) 
 {
-    return( norm(x-y) );
+    assert( x.size() == y.size() );
+    return( distanceEuclidean(x.data(), y.data(), x.size()) );
 }
 
 /**

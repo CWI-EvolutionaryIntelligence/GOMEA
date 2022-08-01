@@ -498,23 +498,23 @@ void rvg_t::writeGenerationalStatisticsForOnePopulation( int population_index )
     /* Average, best and worst */
     double population_objective_avg    = 0.0;
     double population_constraint_avg   = 0.0;
-    double population_objective_best   = populations[population_index]->individuals[0]->objective_value;
-    double population_constraint_best  = populations[population_index]->individuals[0]->constraint_value;
-    double population_objective_worst  = populations[population_index]->individuals[0]->objective_value;
-    double population_constraint_worst = populations[population_index]->individuals[0]->constraint_value;
+    double population_objective_best   = populations[population_index]->individuals[0]->getObjectiveValue();
+    double population_constraint_best  = populations[population_index]->individuals[0]->getConstraintValue();
+    double population_objective_worst  = populations[population_index]->individuals[0]->getObjectiveValue();
+    double population_constraint_worst = populations[population_index]->individuals[0]->getConstraintValue();
     for(int j = 0; j < populations[population_index]->population_size; j++ )
     {
-        population_objective_avg  += populations[population_index]->individuals[j]->objective_value;
-        population_constraint_avg += populations[population_index]->individuals[j]->constraint_value;
-        if( fitness_t::betterFitness( population_objective_worst, population_constraint_worst, populations[population_index]->individuals[j]->objective_value, populations[population_index]->individuals[j]->constraint_value ) )
+        population_objective_avg  += populations[population_index]->individuals[j]->getObjectiveValue();
+        population_constraint_avg += populations[population_index]->individuals[j]->getConstraintValue();
+        if( fitness_t::betterFitness( population_objective_worst, population_constraint_worst, populations[population_index]->individuals[j]->getObjectiveValue(), populations[population_index]->individuals[j]->getConstraintValue() ) )
         {
-            population_objective_worst = populations[population_index]->individuals[j]->objective_value;
-            population_constraint_worst = populations[population_index]->individuals[j]->constraint_value;
+            population_objective_worst = populations[population_index]->individuals[j]->getObjectiveValue();
+            population_constraint_worst = populations[population_index]->individuals[j]->getConstraintValue();
         }
-        if( fitness_t::betterFitness( populations[population_index]->individuals[j]->objective_value, populations[population_index]->individuals[j]->constraint_value, population_objective_best, population_constraint_best ) )
+        if( fitness_t::betterFitness( populations[population_index]->individuals[j]->getObjectiveValue(), populations[population_index]->individuals[j]->getConstraintValue(), population_objective_best, population_constraint_best ) )
         {
-            population_objective_best = populations[population_index]->individuals[j]->objective_value;
-            population_constraint_best = populations[population_index]->individuals[j]->constraint_value;
+            population_objective_best = populations[population_index]->individuals[j]->getObjectiveValue();
+            population_constraint_best = populations[population_index]->individuals[j]->getConstraintValue();
         }
     }
     population_objective_avg  = population_objective_avg / ((double) populations[population_index]->population_size);
@@ -525,8 +525,8 @@ void rvg_t::writeGenerationalStatisticsForOnePopulation( int population_index )
     double population_constraint_var   = 0.0;
     for(int j = 0; j < populations[population_index]->population_size; j++ )
     {
-        population_objective_var  += (populations[population_index]->individuals[j]->objective_value - population_objective_avg)*(populations[population_index]->individuals[j]->objective_value - population_objective_avg);
-        population_constraint_var += (populations[population_index]->individuals[j]->constraint_value - population_constraint_avg)*(populations[population_index]->individuals[j]->constraint_value - population_constraint_avg);
+        population_objective_var  += (populations[population_index]->individuals[j]->getObjectiveValue() - population_objective_avg)*(populations[population_index]->individuals[j]->getObjectiveValue() - population_objective_avg);
+        population_constraint_var += (populations[population_index]->individuals[j]->getConstraintValue() - population_constraint_avg)*(populations[population_index]->individuals[j]->getConstraintValue() - population_constraint_avg);
     }
     population_objective_var  = population_objective_var / ((double) populations[population_index]->population_size);
     population_constraint_var = population_constraint_var / ((double) populations[population_index]->population_size);
@@ -618,7 +618,7 @@ void rvg_t::writeGenerationalSolutions( short final )
             sprintf( string, "     " );
             fputs( string, file_all );
             fputs( string, file_population );
-            sprintf( string, "%13e %13e", populations[i]->individuals[j]->objective_value, populations[i]->individuals[j]->constraint_value );
+            sprintf( string, "%13e %13e", populations[i]->individuals[j]->getObjectiveValue(), populations[i]->individuals[j]->getConstraintValue() );
             fputs( string, file_all );
             fputs( string, file_population );
             sprintf( string, "\n" );
@@ -703,7 +703,7 @@ void rvg_t::writeGenerationalSolutionsBest( short final )
     }
     sprintf( string, "     " );
     fputs( string, file );
-    sprintf( string, "%13e %13e", populations[population_index_best]->individuals[individual_index_best]->objective_value, populations[population_index_best]->individuals[individual_index_best]->constraint_value );
+    sprintf( string, "%13e %13e", populations[population_index_best]->individuals[individual_index_best]->getObjectiveValue(), populations[population_index_best]->individuals[individual_index_best]->getConstraintValue() );
     fputs( string, file );
     sprintf( string, "\n" );
     fputs( string, file );
@@ -825,8 +825,8 @@ void rvg_t::checkAverageFitnessTerminationConditions( void )
         average_constraint_values[i] = 0;
         for(int j = 0; j < populations[i]->population_size; j++ )
         {
-            average_objective_values[i] += populations[i]->individuals[j]->objective_value;
-            average_constraint_values[i] += populations[i]->individuals[j]->constraint_value;
+            average_objective_values[i] += populations[i]->individuals[j]->getObjectiveValue();
+            average_constraint_values[i] += populations[i]->individuals[j]->getConstraintValue();
         }
         average_objective_values[i] /= populations[i]->population_size;
         average_constraint_values[i] /= populations[i]->population_size;
@@ -853,8 +853,8 @@ void rvg_t::determineBestSolutionInCurrentPopulations( int *population_of_best, 
     {
         for(int j = 0; j < populations[i]->population_size; j++ )
         {
-            if( fitness_t::betterFitness( populations[i]->individuals[j]->objective_value, populations[i]->individuals[j]->constraint_value,
-                               populations[(*population_of_best)]->individuals[(*index_of_best)]->objective_value, populations[(*population_of_best)]->individuals[(*index_of_best)]->constraint_value ) )
+            if( fitness_t::betterFitness( populations[i]->individuals[j]->getObjectiveValue(), populations[i]->individuals[j]->getConstraintValue(),
+                               populations[(*population_of_best)]->individuals[(*index_of_best)]->getObjectiveValue(), populations[(*population_of_best)]->individuals[(*index_of_best)]->getConstraintValue() ) )
             {
                 (*population_of_best) = i;
                 (*index_of_best)      = j;

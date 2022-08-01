@@ -39,8 +39,8 @@
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-= Section Includes -=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 #include "tools.hpp"
-#include "solution.hpp"
-#include "partial_solution.hpp"
+#include "solutionRV.hpp"
+#include "partial_solutionRV.hpp"
 #include "fitness_buffer.hpp"
 //#include "CECHeader.h"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
@@ -80,9 +80,9 @@ class fitness_t
 		static int numberOfInstalledProblems( void );
 		static void printAllInstalledProblems( void );
 
-		void evaluate( solution_t *solution );
-		void evaluatePartialSolution( solution_t *parent, partial_solution_t *solution );
-		void evaluatePartialSolutionBlackBox( solution_t *parent, partial_solution_t *solution );
+		void evaluate( solution_t<double> *solution );
+		void evaluatePartialSolution( solution_t<double> *parent, partial_solution_t<double> *solution );
+		void evaluatePartialSolutionBlackBox( solution_t<double> *parent, partial_solution_t<double> *solution );
 		
 		void initializeFitnessFunction( void );
 		double **initializeObjectiveRotationMatrix( double rotation_angle, int rotation_block_size );
@@ -127,17 +127,17 @@ class fitness_t
 		void trapSphereFunctionProblemEvaluation( double *parameters, double *objective_value, double *constraint_value );
 
 		static fitness_t *getFitnessClass( int problem_index, int number_of_parameters, double vtr );
-		static short betterFitness( solution_t *sol_x, solution_t *sol_y );
+		static short betterFitness( solution_t<double> *sol_x, solution_t<double> *sol_y );
 		static short betterFitness( double objective_value_x, double constraint_value_x, double objective_value_y, double constraint_value_y );
-		solution_t *initializeSolution( int n );
-		solution_t *initializeSolution( double *variables );
+		solution_t<double> *initializeSolution( int n );
+		solution_t<double> *initializeSolution( double *variables );
 		
 		bool hasVariableInteractionGraph();
 		virtual void initializeVariableInteractionGraph();
 
 	private:
-		virtual void evaluationFunction( solution_t *solution ) = 0;
-		virtual void partialEvaluationFunction( solution_t *parent, partial_solution_t *solution );
+		virtual void evaluationFunction( solution_t<double> *solution ) = 0;
+		virtual void partialEvaluationFunction( solution_t<double> *parent, partial_solution_t<double> *solution );
 
 		int evaluationEmbedded();
 };
@@ -151,8 +151,8 @@ class sphereFunction_t : public fitness_t
 		double getUpperRangeBound( int dimension );
 
 	private:
-		void evaluationFunction( solution_t *solution );
-		void partialEvaluationFunction( solution_t *parent, partial_solution_t *solution );
+		void evaluationFunction( solution_t<double> *solution );
+		void partialEvaluationFunction( solution_t<double> *parent, partial_solution_t<double> *solution );
 		double subfunction( double x );
 };
 
@@ -166,9 +166,9 @@ class rosenbrockFunction_t : public fitness_t
 		void initializeVariableInteractionGraph();
 		
 	private:
-		void evaluationFunction( solution_t *solution );
-		void partialEvaluationFunction( solution_t *parent, partial_solution_t *solution );
-		void univariatePartialEvaluationFunction( solution_t *parent, partial_solution_t *solution );
+		void evaluationFunction( solution_t<double> *solution );
+		void partialEvaluationFunction( solution_t<double> *parent, partial_solution_t<double> *solution );
+		void univariatePartialEvaluationFunction( solution_t<double> *parent, partial_solution_t<double> *solution );
 		double subfunction( double x, double y );
 };
 
@@ -188,8 +188,8 @@ class sorebFunction_t : public fitness_t
 		void initializeVariableInteractionGraph();
 
 	private:
-		void evaluationFunction( solution_t *solution );
-		void partialEvaluationFunction( solution_t *parent, partial_solution_t *solution );
+		void evaluationFunction( solution_t<double> *solution );
+		void partialEvaluationFunction( solution_t<double> *parent, partial_solution_t<double> *solution );
 		double subfunction( double *vars, int num_vars );
 
 		int getStartingIndexOfBlock( int block_index );
@@ -210,8 +210,8 @@ class osorebFunction_t : public fitness_t
 		double getUpperRangeBound( int dimension );
 
 	private:
-		void evaluationFunction( solution_t *solution );
-		void partialEvaluationFunction( solution_t *parent, partial_solution_t *solution );
+		void evaluationFunction( solution_t<double> *solution );
+		void partialEvaluationFunction( solution_t<double> *parent, partial_solution_t<double> *solution );
 		double subfunction( double *vars, int num_vars );
 };
 
@@ -231,8 +231,8 @@ class sorebChainFunction_t : public fitness_t
 	private:
 		double conditioning_number;
 
-		void evaluationFunction( solution_t *solution );
-		void partialEvaluationFunction( solution_t *parent, partial_solution_t *solution );
+		void evaluationFunction( solution_t<double> *solution );
+		void partialEvaluationFunction( solution_t<double> *parent, partial_solution_t<double> *solution );
 		double subfunction( double *vars, int num_vars );
 };
 
@@ -256,8 +256,8 @@ class sorebGridFunction_t : public fitness_t
 
 		std::set<int> getNeighborsInGrid( int ind );
 
-		void evaluationFunction( solution_t *solution );
-		void partialEvaluationFunction( solution_t *parent, partial_solution_t *solution );
+		void evaluationFunction( solution_t<double> *solution );
+		void partialEvaluationFunction( solution_t<double> *parent, partial_solution_t<double> *solution );
 		double subfunction( double *vars, int num_vars );
 };
 
@@ -283,26 +283,10 @@ class sorebCubeFunction_t : public fitness_t
 
 		std::set<int> getNeighborsInGrid( int ind );
 
-		void evaluationFunction( solution_t *solution );
-		void partialEvaluationFunction( solution_t *parent, partial_solution_t *solution );
+		void evaluationFunction( solution_t<double> *solution );
+		void partialEvaluationFunction( solution_t<double> *parent, partial_solution_t<double> *solution );
 		double subfunction( double *vars, int num_vars );
 };
-
-#ifdef CECLSGOFUNC
-class CECLSGOFunctions_t: public fitness_t 
-{
-	public:
-		CECLSGOFunctions_t( int id, int number_of_parameters, double vtr );
-		Benchmarks *function;
-
-		double getLowerRangeBound( int dimension );
-		double getUpperRangeBound( int dimension );
-
-	private:
-		void evaluationFunction( solution_t *solution );
-		//void partialEvaluationFunction( solution_t *parent, partial_solution_t *solution );
-};
-#endif
 
 class BD2FunctionHypervolume_t: public fitness_t 
 {
@@ -315,8 +299,8 @@ class BD2FunctionHypervolume_t: public fitness_t
 		int front_size;
 		int subfunction_size;
 	private:
-		void evaluationFunction( solution_t *solution );
-		//void partialEvaluationFunction( solution_t *parent, partial_solution_t *solution );
+		void evaluationFunction( solution_t<double> *solution );
+		//void partialEvaluationFunction( solution_t<double> *parent, partial_solution_t<double> *solution );
 		double subfunction_f0( double *x );
 		double subfunction_f1( double *x );
 };

@@ -114,7 +114,7 @@ void printTimer( void );
 double max( double x, double y );
 double min( double x, double y );
 double distanceEuclidean( double *solution_a, double *solution_b, int n );
-double distanceEuclidean( vec &x, vec &y );
+double distanceEuclidean( vec_t<double> &x, vec_t<double> &y );
 double distanceEuclidean2D( double x1, double y1, double x2, double y2 );
 double normalize( double v, double min, double max );
 

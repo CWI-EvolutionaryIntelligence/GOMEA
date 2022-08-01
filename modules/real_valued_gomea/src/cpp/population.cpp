@@ -101,14 +101,14 @@ void population_t::runGeneration()
 
 void population_t::updateElitist()
 {
-	solution_t *best_so_far = individuals[0];
+	solution_t<double> *best_so_far = individuals[0];
 	for( int i = 1; i < population_size; i++ )
 	{
 		if( fitness->betterFitness( individuals[i], best_so_far ) )
 		   best_so_far = individuals[i];	
 	}
-	objective_value_elitist = best_so_far->objective_value;
-	constraint_value_elitist = best_so_far->constraint_value;
+	objective_value_elitist = best_so_far->getObjectiveValue();
+	constraint_value_elitist = best_so_far->getConstraintValue();
 }
 
 void population_t::makeSelection()
@@ -148,13 +148,13 @@ void population_t::makeSelectionUsingDiversityOnRank0()
 	}
 
 	int index_of_farthest = 0;
-	double distance_of_farthest = individuals[preselection_indices[0]]->objective_value;
+	double distance_of_farthest = individuals[preselection_indices[0]]->getObjectiveValue();
 	for(int i = 1; i < number_of_rank0_solutions; i++ )
 	{
-		if( individuals[preselection_indices[i]]->objective_value > distance_of_farthest )
+		if( individuals[preselection_indices[i]]->getObjectiveValue() > distance_of_farthest )
 		{
 			index_of_farthest    = i;
-			distance_of_farthest = individuals[preselection_indices[i]]->objective_value;
+			distance_of_farthest = individuals[preselection_indices[i]]->getObjectiveValue();
 		}
 	}
 
@@ -206,7 +206,7 @@ void population_t::makeSelectionUsingDiversityOnRank0()
 
 void population_t::computeRanks()
 {
-	std::vector<int> sorted(population_size);
+	vec_t<int> sorted(population_size);
 	for(int i = 0; i < population_size; i++ )
 		sorted[i] = i;
 	std::sort( sorted.begin(), sorted.end(), [&](int x, int y){return fitness->betterFitness(individuals[x],individuals[y]);}); 
@@ -215,7 +215,7 @@ void population_t::computeRanks()
 	ranks[sorted[0]] = rank;
 	for(int i = 1; i < population_size; i++ )
 	{
-		if( individuals[sorted[i]]->objective_value != individuals[sorted[i-1]]->objective_value )
+		if( individuals[sorted[i]]->getObjectiveValue() != individuals[sorted[i-1]]->getObjectiveValue() )
 			rank++;
 
 		ranks[sorted[i]] = rank;
@@ -295,8 +295,8 @@ void population_t::copyBestSolutionsToPopulation()
 		for(int k = 0; k < fitness->number_of_parameters; k++ )
 			individuals[i]->variables[k] = selection[i]->variables[k];
 
-		individuals[i]->objective_value  = selection[i]->objective_value;
-		individuals[i]->constraint_value = selection[i]->constraint_value;
+		individuals[i]->setObjectiveValue(selection[i]->getObjectiveValue());
+		individuals[i]->setConstraintValue(selection[i]->getConstraintValue());
 	}
 }
 
@@ -304,7 +304,7 @@ void population_t::getBestInPopulation( int *individual_index )
 {
 	*individual_index = 0;
 	for(int i = 0; i < population_size; i++ )
-		if( fitness->betterFitness(individuals[i]->objective_value, individuals[i]->constraint_value, individuals[*individual_index]->objective_value, individuals[*individual_index]->constraint_value))
+		if( fitness->betterFitness(individuals[i]->getObjectiveValue(), individuals[i]->getConstraintValue(), individuals[*individual_index]->getObjectiveValue(), individuals[*individual_index]->getConstraintValue()))
 			*individual_index = i;
 }
 
@@ -377,16 +377,16 @@ void population_t::generateAndEvaluateNewSolutions()
 			}
 			else
 			{
-				for(int i = 0; i < sampled_solutions[FOS_index][k]->num_touched_variables; i++ )
+				for(int i = 0; i < sampled_solutions[FOS_index][k]->getNumberOfTouchedVariables(); i++ )
 				{
 					int ind = sampled_solutions[FOS_index][k]->touched_indices[i];
 					sampled_solutions[FOS_index][k]->touched_variables[i] = individuals[k]->variables[ind];
 				}
-				sampled_solutions[FOS_index][k]->objective_value = individuals[k]->objective_value;
-				sampled_solutions[FOS_index][k]->constraint_value = individuals[k]->constraint_value;
+				sampled_solutions[FOS_index][k]->setObjectiveValue(individuals[k]->getObjectiveValue());
+				sampled_solutions[FOS_index][k]->setConstraintValue(individuals[k]->getConstraintValue());
 			}	
 
-			if( fitness->betterFitness( sampled_solutions[FOS_index][k]->objective_value, sampled_solutions[FOS_index][k]->constraint_value, objective_value_elitist, constraint_value_elitist ) )
+			if( fitness->betterFitness( sampled_solutions[FOS_index][k]->getObjectiveValue(), sampled_solutions[FOS_index][k]->getConstraintValue(), objective_value_elitist, constraint_value_elitist ) )
 				sampled_solutions[FOS_index][k]->improves_elitist = 1;
 		}
 		free( accept_improvement );
@@ -450,16 +450,16 @@ void population_t::generateAndEvaluateNewSolutions()
 	free( individual_improved );
 }
 
-void population_t::applyPartialAMS( partial_solution_t *solution, double cmul )
+void population_t::applyPartialAMS( partial_solution_t<double> *solution, double cmul )
 {
 	short out_of_range = 1;
 	double shrink_factor = 2;
-	double *result = (double*) Malloc( solution->num_touched_variables * sizeof(double) );
+	double *result = (double*) Malloc( solution->getNumberOfTouchedVariables() * sizeof(double) );
 	while( (out_of_range == 1) && (shrink_factor > 1e-10) )
 	{
 		shrink_factor *= 0.5;
 		out_of_range   = 0;
-		for(int m = 0; m < solution->num_touched_variables; m++ )
+		for(int m = 0; m < solution->getNumberOfTouchedVariables(); m++ )
 		{
 			int im = solution->touched_indices[m];
 			result[m] = solution->touched_variables[m] + shrink_factor * delta_AMS * cmul * (mean_shift_vector[im]);
@@ -472,7 +472,7 @@ void population_t::applyPartialAMS( partial_solution_t *solution, double cmul )
 	}
 	if( !out_of_range )
 	{
-		for(int m = 0; m < solution->num_touched_variables; m++ )
+		for(int m = 0; m < solution->getNumberOfTouchedVariables(); m++ )
 		{
 			int im = solution->touched_indices[m];
 			solution->touched_variables[m] = result[m];
@@ -481,21 +481,21 @@ void population_t::applyPartialAMS( partial_solution_t *solution, double cmul )
 	free( result );
 }
 		
-short population_t::checkForImprovement( solution_t *solution, partial_solution_t *part )
+short population_t::checkForImprovement( solution_t<double> *solution, partial_solution_t<double> *part )
 {
-	return( fitness_t::betterFitness( part->objective_value, part->constraint_value, solution->objective_value, solution->constraint_value ) );
+	return( fitness_t::betterFitness( part->getObjectiveValue(), part->getConstraintValue(), solution->getObjectiveValue(), solution->getConstraintValue() ) );
 }
 
-void population_t::insertImprovement( solution_t *solution, partial_solution_t *part )
+void population_t::insertImprovement( solution_t<double> *solution, partial_solution_t<double> *part )
 {
-	for(int j = 0; j < part->num_touched_variables; j++ )
+	for(int j = 0; j < part->getNumberOfTouchedVariables(); j++ )
 	{
 		int ind = part->touched_indices[j];
 		solution->variables[ind] = part->touched_variables[j];
 	}
 	//solution->buffer += part->buffer;
-	solution->objective_value = part->objective_value;
-	solution->constraint_value = part->constraint_value;
+	solution->setObjectiveValue(part->getObjectiveValue());
+	solution->setConstraintValue(part->getConstraintValue());
 }
 
 short population_t::applyAMS( int individual_index )
@@ -504,7 +504,7 @@ short population_t::applyAMS( int individual_index )
 	short improvement   = 0;
 	double delta_AMS     = 2;
 	double shrink_factor = 2;
-	solution_t *solution_AMS = new solution_t(fitness->number_of_parameters);
+	solution_t<double> *solution_AMS = new solution_t<double>(fitness->number_of_parameters);
 	while( (out_of_range == 1) && (shrink_factor > 1e-10) )
 	{
 		shrink_factor *= 0.5;
@@ -523,12 +523,12 @@ short population_t::applyAMS( int individual_index )
 	{
 		short improvement;
 		fitness->evaluate( solution_AMS );
-		improvement = fitness->betterFitness(solution_AMS->objective_value, solution_AMS->constraint_value, individuals[individual_index]->objective_value, individuals[individual_index]->constraint_value); 
+		improvement = fitness->betterFitness(solution_AMS->getObjectiveValue(), solution_AMS->getConstraintValue(), individuals[individual_index]->getObjectiveValue(), individuals[individual_index]->getConstraintValue()); 
 		//if( improvement )
 		if( randomRealUniform01() < linkage_model->getAcceptanceRate() || improvement ) // BLA
 		{
-			individuals[individual_index]->objective_value = solution_AMS->objective_value;
-			individuals[individual_index]->constraint_value = solution_AMS->constraint_value;
+			individuals[individual_index]->setObjectiveValue(solution_AMS->getObjectiveValue());
+			individuals[individual_index]->setConstraintValue(solution_AMS->getConstraintValue());
 			for(int m = 0; m < fitness->number_of_parameters; m++ )
 				individuals[individual_index]->variables[m] = solution_AMS->variables[m];
 			improvement = 1;
@@ -551,25 +551,25 @@ void population_t::applyForcedImprovements( int individual_index, int donor_inde
 		for(int io = 0; io < linkage_model->getLength(); io++ )
 		{
 			int i = linkage_model->order[io];
-			std::vector<int> touched_indices = linkage_model->sets[i];
+			vec_t<int> touched_indices = linkage_model->sets[i];
 			int num_touched_indices = linkage_model->getSetLength(i);
 
-			vec FI_vars = vec(num_touched_indices,fill::none);
+			vec_t<double> FI_vars = vec_t<double>(num_touched_indices);
 			for(int j = 0; j < num_touched_indices; j++ )
 			{
 				FI_vars[j] = alpha*individuals[individual_index]->variables[touched_indices[j]] + (1-alpha)*individuals[donor_index]->variables[touched_indices[j]];
 			}
-			partial_solution_t *FI_solution = new partial_solution_t( FI_vars, touched_indices );
+			partial_solution_t<double> *FI_solution = new partial_solution_t<double>( FI_vars, touched_indices );
 			fitness->evaluatePartialSolution( individuals[individual_index], FI_solution );
-			improvement = fitness->betterFitness( FI_solution->objective_value, FI_solution->constraint_value, individuals[individual_index]->objective_value, individuals[individual_index]->constraint_value );
+			improvement = fitness->betterFitness( FI_solution->getObjectiveValue(), FI_solution->getConstraintValue(), individuals[individual_index]->getObjectiveValue(), individuals[individual_index]->getConstraintValue() );
 
 			if( improvement )
 			{
 				for(int j = 0; j < num_touched_indices; j++ )
 					individuals[individual_index]->variables[touched_indices[j]] = FI_solution->touched_variables[j];
 				//individuals[individual_index]->buffer += FI_solution->buffer;
-				individuals[individual_index]->objective_value = FI_solution->objective_value;
-				individuals[individual_index]->constraint_value = FI_solution->constraint_value;
+				individuals[individual_index]->setObjectiveValue(FI_solution->getObjectiveValue());
+				individuals[individual_index]->setConstraintValue(FI_solution->getConstraintValue());
 			}
 			delete FI_solution;
 
@@ -584,8 +584,8 @@ void population_t::applyForcedImprovements( int individual_index, int donor_inde
 	{
 		for(int i = 0; i < fitness->number_of_parameters; i++ )
 			individuals[individual_index]->variables[i] = individuals[donor_index]->variables[i];
-		individuals[individual_index]->objective_value = individuals[donor_index]->objective_value;
-		individuals[individual_index]->constraint_value = individuals[donor_index]->constraint_value;
+		individuals[individual_index]->setObjectiveValue(individuals[donor_index]->getObjectiveValue());
+		individuals[individual_index]->setConstraintValue(individuals[donor_index]->getConstraintValue());
 	}
 }
 
@@ -593,7 +593,7 @@ double population_t::getFitnessMean()
 {
 	double objective_avg = 0.0;
 	for(int i = 0; i < population_size; i++ )
-		objective_avg  += individuals[i]->objective_value;
+		objective_avg  += individuals[i]->getObjectiveValue();
 	objective_avg = objective_avg / ((double) population_size);
 
 	return( objective_avg );
@@ -605,7 +605,7 @@ double population_t::getFitnessVariance()
 
 	double objective_var = 0.0;
 	for(int i = 0; i < population_size; i++ )
-		objective_var  += (individuals[i]->objective_value-objective_avg)*(individuals[i]->objective_value-objective_avg);
+		objective_var  += (individuals[i]->getObjectiveValue()-objective_avg)*(individuals[i]->getObjectiveValue()-objective_avg);
 	objective_var = objective_var / ((double) population_size);
 
 	if( objective_var <= 0.0 )
@@ -627,13 +627,13 @@ void population_t::initializeDefaultParameters()
 
 void population_t::initializeNewPopulationMemory()
 {
-	individuals = (solution_t**) Malloc( population_size*sizeof( solution_t* ) );
+	individuals = (solution_t<double>**) Malloc( population_size*sizeof( solution_t<double>* ) );
 	for(int j = 0; j < population_size; j++ )
-		individuals[j] = new solution_t(fitness->number_of_parameters);
+		individuals[j] = new solution_t<double>(fitness->number_of_parameters);
 
 	ranks = (double *) Malloc( population_size*sizeof( double ) );
 
-	selection = (solution_t**) Malloc( selection_size*sizeof( solution_t * ) );
+	selection = (solution_t<double>**) Malloc( selection_size*sizeof( solution_t<double> * ) );
 
 	mean_shift_vector = (double *) Malloc( fitness->number_of_parameters*sizeof( double ) );
 	prev_mean_vector = (double *) Malloc( fitness->number_of_parameters*sizeof( double ) );
@@ -682,7 +682,7 @@ void population_t::initializeFOS()
 	else if( FOS_element_size == -3 )
 	{
 		new_FOS = new fos_t( fitness->number_of_parameters );
-		std::vector<int> full_fos_element;
+		vec_t<int> full_fos_element;
 		for( int i = 0; i < fitness->number_of_parameters; i++ )
 		{
 			new_FOS->addGroup(i);
@@ -711,7 +711,7 @@ void population_t::initializeFOS()
 		new_FOS->is_conditional = false;
 		for( int i = 0; i < fitness->number_of_parameters-4; i+=4 )
 		{
-			std::vector<int> group;
+			vec_t<int> group;
 			for( int j = 0; j < 5; j++ )
 				group.push_back(i+j);
 			new_FOS->addGroup(group);
@@ -793,21 +793,21 @@ void population_t::initializePopulationAndFitnessValues()
 		//individuals[0]->variables[k] = k;
 	//individuals[0]->variables[0] = 1;
 	/*fitness->evaluate( individuals[0] );
-	printf("f = %10.10e\n", individuals[0]->objective_value);
+	printf("f = %10.10e\n", individuals[0]->getObjectiveValue());
 	exit(0);*/
 	/*individuals[0]->variables[0] = 0;
 	individuals[0]->variables[1] = 1;
 	fitness->evaluate( individuals[0] );
-	printf("f = %10.10e\n", individuals[0]->objective_value);
+	printf("f = %10.10e\n", individuals[0]->getObjectiveValue());
 	individuals[0]->variables[1] = 0;
 	individuals[0]->variables[2] = 1;
 	fitness->evaluate( individuals[0] );
-	printf("f = %10.10e\n", individuals[0]->objective_value);
+	printf("f = %10.10e\n", individuals[0]->getObjectiveValue());
 	exit(0);*/
 
-	sampled_solutions = (partial_solution_t***) Malloc( linkage_model->getLength() * sizeof(partial_solution_t**) );
+	sampled_solutions = (partial_solution_t<double>***) Malloc( linkage_model->getLength() * sizeof(partial_solution_t<double>**) );
 	for(int j = 0; j < linkage_model->getLength(); j++ )
-		sampled_solutions[j] = (partial_solution_t**) Malloc( population_size * sizeof(partial_solution_t*) );
+		sampled_solutions[j] = (partial_solution_t<double>**) Malloc( population_size * sizeof(partial_solution_t<double>*) );
 }
 
 }}

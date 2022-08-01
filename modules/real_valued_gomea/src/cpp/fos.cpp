@@ -190,7 +190,6 @@ fos_t::fos_t( int problem_index, double **covariance_matrix, int n )
 	}
 
 	/* Initialize LT to the initial MPM */
-	int length             = number_of_variables+number_of_variables-1;
 	if( problem_index != 14 )
 	{
 		for(int i = 0; i < mpm_length; i++ )
@@ -1119,24 +1118,24 @@ void fos_t::print()
 	printf("}\n");
 }
 
-partial_solution_t *fos_t::generatePartialSolution( int FOS_index, solution_t *solution_conditioned_on )
+partial_solution_t<double> *fos_t::generatePartialSolution( int FOS_index, solution_t<double> *solution_conditioned_on )
 {
 	return( distributions[FOS_index]->generatePartialSolution(solution_conditioned_on) );
 }
 
-void fos_t::estimateDistributions( solution_t **selection, int selection_size )
+void fos_t::estimateDistributions( solution_t<double> **selection, int selection_size )
 {
 	for( int i = 0; i < getLength(); i++ )
 		estimateDistribution( i, selection, selection_size );
 	order = randomPermutation( getLength() );
 }
 
-void fos_t::estimateDistribution( int FOS_index, solution_t **selection, int selection_size )
+void fos_t::estimateDistribution( int FOS_index, solution_t<double> **selection, int selection_size )
 {
 	distributions[FOS_index]->estimateDistribution(selection,selection_size);
 }
 
-void fos_t::adaptDistributionMultiplier( int FOS_index, partial_solution_t **solutions, int num_solutions )
+void fos_t::adaptDistributionMultiplier( int FOS_index, partial_solution_t<double> **solutions, int num_solutions )
 {
 	if( no_improvement_stretch >= maximum_no_improvement_stretch )
 		distributions[FOS_index]->adaptDistributionMultiplierMaximumStretch(solutions,num_solutions);

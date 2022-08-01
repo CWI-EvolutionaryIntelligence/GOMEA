@@ -41,7 +41,7 @@
 #include "tools.hpp"
 #include "fitness.hpp"
 #include "fos.hpp"
-#include "solution.hpp"
+#include "solutionRV.hpp"
 
 #include <deque>
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
@@ -68,12 +68,12 @@ class population_t {
 		void getBestInPopulation( int *individual_index );
 		void evaluateCompletePopulation();
 		void generateAndEvaluateNewSolutions();
-		void insertImprovement( solution_t *solution, partial_solution_t *part );
-		short checkForImprovement( solution_t *solution, partial_solution_t *part );
-		partial_solution_t *generatePartialSolution( int FOS_index );
-		void applyPartialAMS( partial_solution_t *solution, double cmul );
+		void insertImprovement( solution_t<double> *solution, partial_solution_t<double> *part );
+		short checkForImprovement( solution_t<double> *solution, partial_solution_t<double> *part );
+		partial_solution_t<double> *generatePartialSolution( int FOS_index );
+		void applyPartialAMS( partial_solution_t<double> *solution, double cmul );
 		void generateAndEvaluateNewSolutionsToFillPopulation();
-		partial_solution_t *generateNewSolutionFromFOSElement( int FOS_index, int individual_index, short apply_AMS );
+		partial_solution_t<double> *generateNewSolutionFromFOSElement( int FOS_index, int individual_index, short apply_AMS );
 		short applyAMS( int individual_index );
 		void applyForcedImprovements( int individual_index, int donor_index );
 		double getFitnessMean();
@@ -103,12 +103,12 @@ class population_t {
 		double delta_AMS;
 		short update_elitist_during_gom, selection_during_gom;
 		/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
-		partial_solution_t*** sampled_solutions; 
+		partial_solution_t<double>*** sampled_solutions; 
 		int    number_of_generations,
 			   population_size,                                /* The size of the first population in the multi-start scheme. */
 			   selection_size,                                     /* The size of the selection for each population. */
 			   *individual_NIS;                                      /* The number of generations a solution has not improved. */
-		solution_t **individuals,
+		solution_t<double> **individuals,
 			   		**selection;                                          /* Selected solutions, one for each population. */
 		fitness_t *fitness;
 		double *ranks,                                               /* Ranks of population members. */

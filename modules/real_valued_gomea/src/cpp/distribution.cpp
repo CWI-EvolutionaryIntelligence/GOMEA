@@ -45,7 +45,7 @@ distribution_t::~distribution_t()
 {
 }
 
-void distribution_t::adaptDistributionMultiplier( partial_solution_t** partial_solutions, int num_solutions )
+void distribution_t::adaptDistributionMultiplier( partial_solution_t<double>** partial_solutions, int num_solutions )
 {
 	short improvementForFOSElement = 0;
 	if( (((double) out_of_bounds_draws)/((double) samples_drawn)) > 0.9 )
@@ -72,7 +72,7 @@ void distribution_t::adaptDistributionMultiplier( partial_solution_t** partial_s
 	}
 }
 
-void distribution_t::adaptDistributionMultiplierMaximumStretch( partial_solution_t** partial_solutions, int num_solutions )
+void distribution_t::adaptDistributionMultiplierMaximumStretch( partial_solution_t<double>** partial_solutions, int num_solutions )
 {
 	short improvementForFOSElement = 0;
 	if( (((double) out_of_bounds_draws)/((double) samples_drawn)) > 0.9 )
@@ -98,14 +98,14 @@ void distribution_t::adaptDistributionMultiplierMaximumStretch( partial_solution
 void distribution_t::updateConditionals( const std::map<int,std::set<int>> &variable_interaction_graph, int visited[] )
 {}
 		
-void distribution_t::setOrder( const std::vector<int> &order )
+void distribution_t::setOrder( const vec_t<int> &order )
 {
 	exit(1);
 }
 
 void distribution_t::print(){}
 
-double distribution_t::estimateMean( int var, solution_t **selection, int selection_size )
+double distribution_t::estimateMean( int var, solution_t<double> **selection, int selection_size )
 {
 	double mean = 0.0;
 	for(int j = 0; j < selection_size; j++ )
@@ -114,7 +114,7 @@ double distribution_t::estimateMean( int var, solution_t **selection, int select
 	return( mean );
 }
 
-double distribution_t::estimateCovariance( int vara, int varb, solution_t **selection, int selection_size )
+double distribution_t::estimateCovariance( int vara, int varb, solution_t<double> **selection, int selection_size )
 {
 	double cov = 0.0;
 	double meana = estimateMean(vara,selection,selection_size);
@@ -125,15 +125,15 @@ double distribution_t::estimateCovariance( int vara, int varb, solution_t **sele
 	return( cov );
 }
 
-vec distribution_t::estimateMeanVectorML( std::vector<int> variables, solution_t **selection, int selection_size )
+vec_t<double> distribution_t::estimateMeanVectorML( vec_t<int> &variables, solution_t<double> **selection, int selection_size )
 {
-	vec mean_vector = vec(variables.size(),fill::none);
+	vec_t<double> mean_vector = vec_t<double>(variables.size());
 	for(int i = 0; i < variables.size(); i++ )
 		mean_vector[i] = estimateMean( variables[i], selection, selection_size );
 	return( mean_vector );
 }
 
-mat distribution_t::estimateUnivariateCovarianceMatrixML( std::vector<int> variables, solution_t **selection, int selection_size )
+mat distribution_t::estimateUnivariateCovarianceMatrixML( vec_t<int> &variables, solution_t<double> **selection, int selection_size )
 {
 	/* First do the maximum-likelihood estimate from data */
 	mat covariance_matrix = mat(variables.size(),variables.size(),fill::zeros);
@@ -147,7 +147,7 @@ mat distribution_t::estimateUnivariateCovarianceMatrixML( std::vector<int> varia
 	return( covariance_matrix );
 }
 
-mat distribution_t::estimateRegularCovarianceMatrixML( std::vector<int> variables, vec mean_vector, solution_t **selection, int selection_size )
+mat distribution_t::estimateRegularCovarianceMatrixML( vec_t<int> &variables, vec_t<double> &mean_vector, solution_t<double> **selection, int selection_size )
 {
 	mat covariance_matrix;
 	covariance_matrix = estimateCovarianceMatrixML(variables,selection,selection_size);
@@ -163,7 +163,7 @@ mat distribution_t::estimateRegularCovarianceMatrixML( std::vector<int> variable
 	return( covariance_matrix );
 }
 
-mat distribution_t::estimateCovarianceMatrixML( std::vector<int> variables, solution_t **selection, int selection_size )
+mat distribution_t::estimateCovarianceMatrixML( vec_t<int> &variables, solution_t<double> **selection, int selection_size )
 {
 	/* First do the maximum-likelihood estimate from data */
 	//mat covariance_matrix(variables.size(),variables.size(),fill::none);
@@ -183,7 +183,7 @@ mat distribution_t::estimateCovarianceMatrixML( std::vector<int> variables, solu
 	return( covariance_matrix );
 }
 
-bool distribution_t::regularizeCovarianceMatrix( mat &cov_mat, vec &mean_vector, solution_t **selection, int selection_size )
+bool distribution_t::regularizeCovarianceMatrix( mat &cov_mat, vec_t<double> &mean_vector, solution_t<double> **selection, int selection_size )
 {
 	// regularization for small populations
 	double number_of_samples = (double) selection_size;
@@ -555,12 +555,12 @@ mat distribution_t::choleskyDecomposition( const mat &matrix )
 	return( result );
 }*/
 
-normal_distribution_t::normal_distribution_t( std::vector<int> variables )
+normal_distribution_t::normal_distribution_t( vec_t<int> variables )
 {
 	this->variables = variables;
 }
 
-void normal_distribution_t::estimateDistribution( solution_t **selection, int selection_size )
+void normal_distribution_t::estimateDistribution( solution_t<double> **selection, int selection_size )
 {
 	mean_vector = estimateMeanVectorML(variables,selection,selection_size);
 	
@@ -573,11 +573,11 @@ void normal_distribution_t::estimateDistribution( solution_t **selection, int se
 	cholesky_decomposition = choleskyDecomposition( covariance_matrix );
 }
 
-partial_solution_t *normal_distribution_t::generatePartialSolution( solution_t *parent )
+partial_solution_t<double> *normal_distribution_t::generatePartialSolution( solution_t<double> *parent )
 {
-	std::vector<int> indices = variables; 
+	vec_t<int> indices = variables; 
 	int num_indices = variables.size();
-	vec result = vec(num_indices,fill::none);
+	vec_t<double> result = vec_t<double>(num_indices);
 
 	int times_not_in_bounds = -1;
 	out_of_bounds_draws--;
@@ -604,8 +604,11 @@ partial_solution_t *normal_distribution_t::generatePartialSolution( solution_t *
 		}
 		else
 		{
-			vec sample_zs = random1DNormalUnitVector(num_indices);
-			result = mean_vector + cholesky_decomposition*sample_zs;
+			vec sample = cholesky_decomposition * random1DNormalUnitVector(num_indices);
+			for( int i = 0; i < sample.n_elem; i++ )
+			{
+				result[i] = mean_vector[i] + sample[i];
+			}
 		}
 
 		ready = 1;
@@ -620,15 +623,15 @@ partial_solution_t *normal_distribution_t::generatePartialSolution( solution_t *
 	}
 	while( !ready );
 
-	partial_solution_t *res_sol = new partial_solution_t(result,indices);
+	partial_solution_t<double> *res_sol = new partial_solution_t<double>(result,indices);
 	res_sol->setSampleMean( mean_vector );
 	return( res_sol );
 }
 
-short normal_distribution_t::generationalImprovementForOnePopulationForFOSElement( partial_solution_t** partial_solutions, int num_solutions, double *st_dev_ratio )
+short normal_distribution_t::generationalImprovementForOnePopulationForFOSElement( partial_solution_t<double>** partial_solutions, int num_solutions, double *st_dev_ratio )
 {
 	short generational_improvement = 0;
-	std::vector<int> indices = partial_solutions[0]->touched_indices; 
+	vec_t<int> indices = partial_solutions[0]->touched_indices; 
 	int num_indices = indices.size();
 
 	double average_z_of_improvements[num_indices];
@@ -642,7 +645,12 @@ short normal_distribution_t::generationalImprovementForOnePopulationForFOSElemen
 		if( partial_solutions[i]->improves_elitist )
 		{
 			number_of_improvements++;
-			vec z = cholinv * (partial_solutions[i]->touched_variables - partial_solutions[i]->sample_means);
+			vec d = vec(num_indices,arma::fill::none);
+			for( int j = 0; j < num_indices; j++ )
+			{
+				d[j] = (partial_solutions[i]->touched_variables[j] - partial_solutions[i]->sample_means[j]);
+			}
+			vec z = cholinv * d;
 			for(int j = 0; j < num_indices; j++ )
 			{
 				average_z_of_improvements[j] += z[j];
@@ -670,23 +678,23 @@ conditional_distribution_t::conditional_distribution_t()
 {
 }
 
-conditional_distribution_t::conditional_distribution_t( const std::vector<int> &variables, const std::vector<int> &conditioned_variables )
+conditional_distribution_t::conditional_distribution_t( const vec_t<int> &variables, const vec_t<int> &conditioned_variables )
 {
 	addGroupOfVariables(variables,conditioned_variables);
 	/*for( int x : variables )
 	{
-		std::vector<int> vars;
+		vec_t<int> vars;
 		vars.push_back(x);
 		addGroupOfVariables(vars,conditioned_variables);
 	}*/
 }
 
-conditional_distribution_t::conditional_distribution_t( const std::vector<int> &variables, const std::set<int> &conditioned_variables )
+conditional_distribution_t::conditional_distribution_t( const vec_t<int> &variables, const std::set<int> &conditioned_variables )
 {
 	addGroupOfVariables(variables,conditioned_variables);
 	/*for( int x : variables )
 	{
-		std::vector<int> vars;
+		vec_t<int> vars;
 		vars.push_back(x);
 		addGroupOfVariables(vars,conditioned_variables);
 	}*/
@@ -701,11 +709,11 @@ void conditional_distribution_t::initializeMemory()
 	cholesky_decompositions.resize(variable_groups.size());
 }
 
-void conditional_distribution_t::addGroupOfVariables( std::vector<int> indices, std::vector<int> indices_cond )
+void conditional_distribution_t::addGroupOfVariables( vec_t<int> indices, vec_t<int> indices_cond )
 {
 	std::sort(indices.begin(),indices.end());
 	std::sort(indices_cond.begin(),indices_cond.end());
-	std::vector<int> indices_map;
+	vec_t<int> indices_map;
 	for( int i : indices )
 	{
 		indices_map.push_back(variables.size());
@@ -718,33 +726,33 @@ void conditional_distribution_t::addGroupOfVariables( std::vector<int> indices, 
 	order.push_back(order.size());
 }
 
-void conditional_distribution_t::addGroupOfVariables( const std::vector<int> &indices, const std::set<int> &indices_cond )
+void conditional_distribution_t::addGroupOfVariables( const vec_t<int> &indices, const std::set<int> &indices_cond )
 {
-	std::vector<int> cond;
+	vec_t<int> cond;
 	for( int i : indices_cond )
 		cond.push_back(i);
 	addGroupOfVariables(indices,cond);
 }
 			
-void conditional_distribution_t::addGroupOfVariables( int index, const std::vector<int> &indices_cond )
+void conditional_distribution_t::addGroupOfVariables( int index, const vec_t<int> &indices_cond )
 {
-	std::vector<int> indices;
+	vec_t<int> indices;
 	indices.push_back(index);
 	addGroupOfVariables(indices, indices_cond);
 }
 			
 void conditional_distribution_t::addGroupOfVariables( int index, int index_cond )
 {
-	std::vector<int> indices, indices_cond;
+	vec_t<int> indices, indices_cond;
 	indices.push_back(index);
 	indices_cond.push_back(index_cond);
 	addGroupOfVariables(indices, indices_cond);
 }
 
-void conditional_distribution_t::estimateConditionalGaussianML( int variable_group_index, solution_t **selection, int selection_size )
+void conditional_distribution_t::estimateConditionalGaussianML( int variable_group_index, solution_t<double> **selection, int selection_size )
 {
 	int i = variable_group_index;	
-	std::vector<int> vars = variable_groups[i];
+	vec_t<int> vars = variable_groups[i];
 	int n = vars.size();
 
 	mean_vectors[i] = estimateMeanVectorML(vars,selection,selection_size);
@@ -756,7 +764,7 @@ void conditional_distribution_t::estimateConditionalGaussianML( int variable_gro
 
 	covariance_matrices[i] = estimateRegularCovarianceMatrixML(vars,mean_vectors[i],selection,selection_size);
 		
-	std::vector<int> vars_cond = variables_conditioned_on[i];
+	vec_t<int> vars_cond = variables_conditioned_on[i];
 	int n_cond = vars_cond.size(); 
 	if( n_cond > 0 )
 	{
@@ -797,7 +805,7 @@ void conditional_distribution_t::updateConditionals( const std::map<int,std::set
 		int ind = i;
 		if( order.size() > 0 )
 			ind = order[i];
-		std::vector<int> clique = variable_groups[ind];
+		vec_t<int> clique = variable_groups[ind];
 
 		// Add FOS element of all nodes in clique, conditioned on dependent, already visited variables
 		std::set<int> cond;
@@ -822,30 +830,30 @@ void conditional_distribution_t::updateConditionals( const std::map<int,std::set
 			printf(" %d",c);
 		printf("\n");*/
 	
-		std::vector<int> cond_vec;
+		vec_t<int> cond_vec;
 		for( int x : cond )
 			cond_vec.push_back(x);
 		variables_conditioned_on[ind] = cond_vec;
 	}
 }
 
-void conditional_distribution_t::estimateDistribution( solution_t **selection, int selection_size )
+void conditional_distribution_t::estimateDistribution( solution_t<double> **selection, int selection_size )
 {
 	initializeMemory();
 	for( int i = 0; i < variable_groups.size(); i++ )
 		estimateConditionalGaussianML(i,selection,selection_size);
 }
 
-partial_solution_t *conditional_distribution_t::generatePartialSolution( solution_t *solution_conditioned_on )
+partial_solution_t<double> *conditional_distribution_t::generatePartialSolution( solution_t<double> *solution_conditioned_on )
 {
-	vec result = vec(variables.size(), fill::none);
-	vec means = vec(variables.size(), fill::none);
+	vec_t<double> result = vec_t<double>(variables.size());
+	vec_t<double> means = vec_t<double>(variables.size());
 	std::map<int,int> sampled_indices;
 	//printf("%d\n",variable_groups.size());
 	for( int k = 0; k < variable_groups.size(); k++ )
 	{
 		int og = order[k];
-		std::vector<int> indices = variable_groups[og];
+		vec_t<int> indices = variable_groups[og];
 		int num_indices = indices.size();
 
 		int times_not_in_bounds = -1;
@@ -876,7 +884,7 @@ partial_solution_t *conditional_distribution_t::generatePartialSolution( solutio
 			{
 				sample_means = mean_vectors[og];
 
-				std::vector<int> indices_cond = variables_conditioned_on[og];
+				vec_t<int> indices_cond = variables_conditioned_on[og];
 				int num_indices_cond = indices_cond.size();
 				/*printf("means_nc ");
 				for( double x : sample_means )
@@ -884,7 +892,7 @@ partial_solution_t *conditional_distribution_t::generatePartialSolution( solutio
 				printf("\n");*/
 				if( num_indices_cond > 0 )
 				{
-					vec cond = vec(num_indices_cond, fill::none);
+					arma::vec cond = arma::vec(num_indices_cond, arma::fill::none);
 					for(int i = 0; i < num_indices_cond; i++ )
 					{
 						auto it = sampled_indices.find(indices_cond[i]);
@@ -895,14 +903,14 @@ partial_solution_t *conditional_distribution_t::generatePartialSolution( solutio
 						}
 						else
 							cond[i] = solution_conditioned_on->variables[indices_cond[i]];
+						cond[i] = cond[i] - mean_vectors_conditioned_on[og][i];
 					}
-					sample_means += rho_matrices[og]*(cond-mean_vectors_conditioned_on[og]);
-					/*printf("means_co ");
-					for( double x : sample_means )
-						printf("%10.3e ",x);
-					printf("\n");*/
+					arma::vec sample_mean_inc = rho_matrices[og]*cond;
+					for(int i = 0; i < num_indices_cond; i++ )
+					{
+						sample_means[i] += sample_mean_inc[i];
+					}
 				}
-				//printf("\n");
 				vec sample_zs = random1DNormalUnitVector(num_indices);
 				sample_result = sample_means + cholesky_decompositions[og] * sample_zs;
 			}
@@ -928,19 +936,19 @@ partial_solution_t *conditional_distribution_t::generatePartialSolution( solutio
 		}
 	}
 
-	partial_solution_t *sol_res = new partial_solution_t(result,variables);
+	partial_solution_t<double> *sol_res = new partial_solution_t<double>(result,variables);
 	sol_res->setSampleMean(means);
 	return(sol_res);
 }
 
-short conditional_distribution_t::generationalImprovementForOnePopulationForFOSElement( partial_solution_t** partial_solutions, int num_solutions, double *st_dev_ratio )
+short conditional_distribution_t::generationalImprovementForOnePopulationForFOSElement( partial_solution_t<double>** partial_solutions, int num_solutions, double *st_dev_ratio )
 {
 	*st_dev_ratio = 0.0;
 	short generational_improvement = 0;
 
 	for( int k = 0; k < variable_groups.size(); k++ )
 	{	
-		std::vector<int> indices = variable_groups[k];
+		vec_t<int> indices = variable_groups[k];
 		int num_indices = variable_groups[k].size();
 		int number_of_improvements  = 0;
 
@@ -981,7 +989,7 @@ short conditional_distribution_t::generationalImprovementForOnePopulationForFOSE
 	return( generational_improvement );
 }
 			
-void conditional_distribution_t::setOrder( const std::vector<int> &order ) 
+void conditional_distribution_t::setOrder( const vec_t<int> &order ) 
 {
 	this->order = order;
 }

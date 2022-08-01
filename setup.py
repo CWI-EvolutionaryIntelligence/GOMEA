@@ -15,8 +15,8 @@ if sys.version_info[0] == 2:
 with open("README.md", 'r') as f:
     long_description = f.read()
 
-ext_gomea = Extension("GOMEA",
-        glob.glob("modules/gomea/src/cython/*.pyx") + glob.glob("modules/gomea/src/cpp/*.cpp"),
+ext_gomea = Extension("gomea",
+        glob.glob("modules/gomea/src/cython/*.pyx"),
         include_dirs=["modules/gomea/include/","modules/real_valued_gomea/include/","modules/discrete_gomea/include/"],
         language="c++",
         extra_compile_args=["-std=c++17"],
@@ -31,8 +31,8 @@ ext_discrete = Extension("DiscreteGOMEA",
 
 ext_real_valued = Extension("RealValuedGOMEA",
         glob.glob("modules/real_valued_gomea/src/cython/*.pyx") + glob.glob("modules/real_valued_gomea/src/cpp/*.cpp") +
-        glob.glob("modules/utils/src/cpp/*.cpp"),
-        include_dirs=["modules/real_valued_gomea/include/","modules/real_valued_gomea/src/cython/","modules/utils/include/"],
+        glob.glob("modules/common/src/cpp/*.cpp") + glob.glob("modules/utils/src/cpp/*.cpp"),
+        include_dirs=["modules/real_valued_gomea/include/","modules/real_valued_gomea/src/cython/","modules/common/include/","modules/utils/include/"],
         language="c++",
         extra_compile_args=["-std=c++17"],
         extra_link_args=["-std=c++17"],
