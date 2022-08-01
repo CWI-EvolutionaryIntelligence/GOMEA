@@ -2,6 +2,8 @@
 **.obj
 **.so
 **.swp
+**.log
+**.egg-info/
 **/__pycache__/
 **/cython/*.cpp
 **/*.dat
