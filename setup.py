@@ -16,23 +16,23 @@ with open("README.md", 'r') as f:
     long_description = f.read()
 
 ext_gomea = Extension("gomea",
-        glob.glob("modules/gomea/src/cython/*.pyx"),
-        include_dirs=["modules/gomea/include/","modules/real_valued_gomea/include/","modules/discrete_gomea/include/"],
+        glob.glob("src/gomea/cython/*.pyx"),
+        include_dirs=["include/","include/gomea/","include/real_valued_gomea/","include/discrete_gomea/"],
         language="c++",
         extra_compile_args=["-std=c++17"],
         extra_link_args=["-std=c++17"])
 
 ext_discrete = Extension("DiscreteGOMEA",
-        glob.glob("modules/discrete_gomea/src/cython/*.pyx") + glob.glob("modules/discrete_gomea/src/cpp/*.cpp"),
-        include_dirs=["modules/discrete_gomea/include/"],
+        glob.glob("src/discrete_gomea/cython/*.pyx") + glob.glob("src/discrete_gomea/cpp/*.cpp"),
+        include_dirs=["include/","include/discrete_gomea/"],
         language="c++",
         extra_compile_args=["-std=c++17"],
         extra_link_args=["-std=c++17"])
 
 ext_real_valued = Extension("RealValuedGOMEA",
-        glob.glob("modules/real_valued_gomea/src/cython/*.pyx") + glob.glob("modules/real_valued_gomea/src/cpp/*.cpp") +
-        glob.glob("modules/common/src/cpp/*.cpp") + glob.glob("modules/utils/src/cpp/*.cpp"),
-        include_dirs=["modules/real_valued_gomea/include/","modules/real_valued_gomea/src/cython/","modules/common/include/","modules/utils/include/"],
+        glob.glob("src/real_valued_gomea/cython/*.pyx") + glob.glob("src/real_valued_gomea/cpp/*.cpp") +
+        glob.glob("src/common/cpp/*.cpp") + glob.glob("src/utils/cpp/*.cpp"),
+        include_dirs=["include/","include/real_valued_gomea/","src/real_valued_gomea/cython/","include/common/","include/utils/"],
         language="c++",
         extra_compile_args=["-std=c++17"],
         extra_link_args=["-std=c++17"],
@@ -42,15 +42,15 @@ ext_real_valued = Extension("RealValuedGOMEA",
     #extra_objects=["lib/boost_1_74_0/stage/lib/libboost_timer.a"])
 
 ext_fitness = Extension("Fitness",
-        glob.glob("modules/fitness/src/cython/*.pyx") + glob.glob("modules/fitness/src/cpp/*.cpp"),
-        include_dirs=["modules/fitness/include/"],
+        glob.glob("src/fitness/cython/*.pyx") + glob.glob("src/fitness/cpp/*.cpp"),
+        include_dirs=["include/fitness/"],
         language="c++",
         extra_compile_args=["-std=c++17"],
         extra_link_args=["-std=c++17"])
 
 #ext_utils = Extension("Utils",
-#        glob.glob("modules/utils/src/cython/*.pyx") + glob.glob("modules/utils/src/cpp/*.cpp"),
-#        include_dirs=["modules/utils/include/","modules/fitness/src/cython/"],
+#        glob.glob("src/utils/cython/*.pyx") + glob.glob("src/utils/cpp/*.cpp"),
+#        include_dirs=["include/utils/","include/fitness/cython/"],
 #        language="c++",
 #        extra_compile_args=["-std=c++17"],
 #        extra_link_args=["-std=c++17"])
@@ -67,7 +67,7 @@ setup(
     long_description = long_description,
     long_description_content_type = 'text/markdown',
     ext_modules = cythonize(extensions,
-        include_path = glob.glob("modules/*/src/cython/"),
+        include_path = glob.glob("src/*/cython/"),
         gdb_debug = False,
         language_level = "3"),
     zip_safe = False

@@ -2,7 +2,7 @@ GOMEAlib-py:
 	python setup.py build_ext --inplace -j4
 
 RVGOMEA-cpp: GOMEAlib-py
-	g++ -g -Wall -std=c++17 -fPIC modules/gomea/src/cpp/*.cpp -o build/RealValuedGOMEA -I/usr/include/python3.8/ -Imodules/utils/include/ -Imodules/common/include/ -Imodules/fitness/include/ -Imodules/real_valued_gomea/include/ -Imodules/real_valued_gomea/src/cython/ -L/usr/lib64/ -L./ -lpython3.8 -l:RealValuedGOMEA.cpython-38-x86_64-linux-gnu.so
+	g++ -g -Wall -std=c++17 -fPIC src/gomea/cpp/*.cpp -o build/RealValuedGOMEA -I/usr/include/python3.8/ -Iinclude/utils/ -Iinclude/common/ -Iinclude/fitness/ -Iinclude/real_valued_gomea/ -Isrc/real_valued_gomea/cython/ -L/usr/lib64/ -L./ -lpython3.8 -l:RealValuedGOMEA.cpython-38-x86_64-linux-gnu.so
 
 default: GOMEAlib-py	
 
@@ -24,6 +24,6 @@ clean:
 	rm -f *.so
 	rm -rf build/
 	rm -rf dist/
-	rm -f modules/*/src/cython/*.cpp
-	rm -f modules/*/src/cython/*.c
-	rm -f modules/*/src/cython/*.h
+	rm -f src/*/cython/*.cpp
+	rm -f src/*/cython/*.c
+	rm -f src/*/cython/*.h
