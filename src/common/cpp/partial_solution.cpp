@@ -4,32 +4,64 @@ namespace gomea{
 namespace common{
 
 template<class T>
-partial_solution_t<T>::partial_solution_t( int num_touched_variables )
+partial_solution_t<T>::partial_solution_t() : objective_values(vec_t<double>(1))
+{
+	objective_values[0] = 1e308;
+}
+
+template<class T>
+partial_solution_t<T>::partial_solution_t( int num_touched_variables ) : partial_solution_t()
 {
 	this->touched_variables = std::vector<T>(num_touched_variables); 
 }
 
 template<class T>
-partial_solution_t<T>::partial_solution_t( std::vector<T> &touched_variables, std::vector<int> &touched_indices )
+partial_solution_t<T>::partial_solution_t( std::vector<T> &touched_variables, std::vector<int> &touched_indices ) : partial_solution_t()
 {
 	this->touched_indices = touched_indices;
 	this->touched_variables = touched_variables;
 }
 
 template<class T>
-partial_solution_t<T>::partial_solution_t( partial_solution_t<T> &other )
-{
-	for( int i = 0; i < getNumberOfTouchedVariables(); i++ )
-		this->touched_indices.push_back(other.touched_indices[i]);
-	this->touched_variables = other.touched_variables;
-	this->objective_values = other.objective_values;
-	this->constraint_value = other.constraint_value;
-}
-
-template<class T>
 int partial_solution_t<T>::getNumberOfTouchedVariables()
 {
 	return touched_variables.size();
+}
+
+template<class T>
+double partial_solution_t<T>::getObjectiveValue()
+{
+	return objective_values[0];
+}
+
+template<class T>
+double partial_solution_t<T>::getObjectiveValue( int objective_value_index )
+{
+	return objective_values[objective_value_index];
+}
+
+template<class T>
+double partial_solution_t<T>::getConstraintValue()
+{
+	return constraint_value;
+}
+		
+template<class T>
+void partial_solution_t<T>::setObjectiveValue( double v )
+{
+	objective_values[0] = v;
+}
+
+template<class T>
+void partial_solution_t<T>::setObjectiveValue( int objective_value_index, double v )
+{
+	objective_values[objective_value_index] = v;
+}
+
+template<class T>
+void partial_solution_t<T>::setConstraintValue( double v )
+{
+	constraint_value = v;
 }
 
 template<class T>

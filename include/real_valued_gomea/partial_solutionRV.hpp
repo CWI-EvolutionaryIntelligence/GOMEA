@@ -39,48 +39,29 @@
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-= Section Includes -=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 #include "tools.hpp"
-#include "fitness_buffer.hpp"
+#include "common/gomea_defs.hpp"
+#include "common/solution.hpp"
+#include "common/partial_solution.hpp"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
 namespace gomea{
 namespace realvalued{
 
 template<class T>
-class partial_solution_t
+class partial_solution_t : public gomea::common::partial_solution_t<T>
 {
+	using gomea::common::partial_solution_t<T>::partial_solution_t;
+	
 	public:
-		vec_t<int> touched_indices;
-		vec_t<T> touched_variables;
+		partial_solution_t( vec_t<T> &touched_variables, vec_t<T> &sample_zs, vec_t<int> &touched_indices );
+
 		vec_t<T> sample_zs; // Samples z~N(0,I), later transformed to N(mu,C)
 		vec_t<T> sample_means;
 
-		double buffer;
 		short is_accepted = 0;
 		short improves_elitist = 0;
 
-		partial_solution_t( int num_touched_variables );
-		partial_solution_t( vec_t<T> &touched_variables, vec_t<int> &touched_indices );
-		partial_solution_t( vec_t<T> &touched_variables, vec_t<T> &sample_zs, vec_t<int> &touched_indices );
-		partial_solution_t( partial_solution_t<T> &other);
-
-		int getNumberOfTouchedVariables();
-		double getObjectiveValue();
-		double getObjectiveValue( int objective_value_index );
-		double getConstraintValue();
-
-		void setObjectiveValue( double v );
-		void setObjectiveValue( double v, int objective_value_index );
-		void setConstraintValue( double v );
-
-		int getTouchedIndex( int ind );
 		void setSampleMean( vec_t<T> &means );
-
-		void print();
-	private:
-		double objective_value = 1e308;
-		double constraint_value = 1e308;
-		
-		std::map<int,int> touched_index_map;
 };
 
 }}
