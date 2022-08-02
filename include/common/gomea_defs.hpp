@@ -1,12 +1,19 @@
 #pragma once
 
 #include <stdio.h>
+#include <math.h>
+#include <string>
 #include <vector>
+#include <map>
+#include <set>
+#include <cassert>
+#include <cmath>
+#include <numeric>
+#include <algorithm>
 
 namespace gomea{
-namespace common{
 
 template<class T>
 using vec_t = std::vector<T>;
 
-}}
+}

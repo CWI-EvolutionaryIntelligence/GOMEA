@@ -23,7 +23,8 @@ ext_gomea = Extension("gomea",
         extra_link_args=["-std=c++17"])
 
 ext_discrete = Extension("DiscreteGOMEA",
-        glob.glob("src/discrete_gomea/cython/*.pyx") + glob.glob("src/discrete_gomea/cpp/*.cpp"),
+        glob.glob("src/discrete_gomea/cython/*.pyx") + glob.glob("src/discrete_gomea/cpp/*.cpp") +
+        glob.glob("src/common/cpp/*.cpp") + glob.glob("src/utils/cpp/*.cpp") + glob.glob("src/fitness/cpp/*.cpp"),
         include_dirs=["include/","include/discrete_gomea/"],
         language="c++",
         extra_compile_args=["-std=c++17"],
@@ -31,29 +32,22 @@ ext_discrete = Extension("DiscreteGOMEA",
 
 ext_real_valued = Extension("RealValuedGOMEA",
         glob.glob("src/real_valued_gomea/cython/*.pyx") + glob.glob("src/real_valued_gomea/cpp/*.cpp") +
-        glob.glob("src/common/cpp/*.cpp") + glob.glob("src/utils/cpp/*.cpp"),
-        include_dirs=["include/","include/real_valued_gomea/","src/real_valued_gomea/cython/","include/common/","include/utils/"],
+        glob.glob("src/common/cpp/*.cpp") + glob.glob("src/utils/cpp/*.cpp") + glob.glob("src/fitness/cpp/*.cpp"),
+        include_dirs=["include/","include/real_valued_gomea/","src/real_valued_gomea/cython/"],
         language="c++",
         extra_compile_args=["-std=c++17"],
         extra_link_args=["-std=c++17"],
-        libraries=["armadillo"])
-        #libraries=["m", "armadillo", "blas", "lapack"]),
-        #library_dirs=["../lib/boost_1_74_0/stage/lib/"],
-    #extra_objects=["lib/boost_1_74_0/stage/lib/libboost_timer.a"])
+        libraries=["armadillo"],
+        library_dirs=[],
+        extra_objects=[])
 
 ext_fitness = Extension("Fitness",
-        glob.glob("src/fitness/cython/*.pyx") + glob.glob("src/fitness/cpp/*.cpp"),
-        include_dirs=["include/fitness/"],
+        glob.glob("src/fitness/cython/*.pyx") + glob.glob("src/fitness/cpp/*.cpp") +
+        glob.glob("src/utils/cpp/*.cpp") + glob.glob("src/common/cpp/*.cpp"),
+        include_dirs=["include/"],
         language="c++",
         extra_compile_args=["-std=c++17"],
         extra_link_args=["-std=c++17"])
-
-#ext_utils = Extension("Utils",
-#        glob.glob("src/utils/cython/*.pyx") + glob.glob("src/utils/cpp/*.cpp"),
-#        include_dirs=["include/utils/","include/fitness/cython/"],
-#        language="c++",
-#        extra_compile_args=["-std=c++17"],
-#        extra_link_args=["-std=c++17"])
 
 extensions = [ext_gomea,ext_discrete,ext_real_valued,ext_fitness]
 

@@ -1,11 +1,11 @@
-#include "embed.hpp"
+#include "utils/embed.hpp"
 
 #include <cstdlib>
 #include <cstddef>
 #include <stdio.h>
 #include <cassert>
 
-namespace gomealib{
+namespace gomea{
 	namespace utils{
 		namespace{
 			bool embedding_initialized = false;

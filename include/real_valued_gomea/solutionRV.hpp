@@ -38,7 +38,6 @@
 #pragma once
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-= Section Includes -=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
-#include "tools.hpp"
 #include "common/gomea_defs.hpp"
 #include "common/solution.hpp"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
@@ -47,9 +46,9 @@ namespace gomea{
 namespace realvalued{
 
 template<class T>
-class solution_t : public gomea::common::solution_t<T>
+class solution_t : public gomea::solution_t<T>
 {
-	using gomea::common::solution_t<T>::solution_t;
+	using gomea::solution_t<T>::solution_t;
 
 	public:
 		int NIS = 0; // no improvement stretch

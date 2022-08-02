@@ -1,7 +1,6 @@
-#include "partial_solution.hpp"
+#include "common/partial_solution.hpp"
 
 namespace gomea{
-namespace common{
 
 template<class T>
 partial_solution_t<T>::partial_solution_t() : objective_values(vec_t<double>(1))
@@ -88,4 +87,4 @@ void partial_solution_t<T>::print()
 	//printf("\n");
 }
 
-}}
+}

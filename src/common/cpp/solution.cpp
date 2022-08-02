@@ -1,7 +1,6 @@
-#include "solution.hpp"
+#include "common/solution.hpp"
 
 namespace gomea{
-namespace common{
 
 template<class T>
 solution_t<T>::solution_t() : objective_values(vec_t<double>(1))
@@ -76,4 +75,4 @@ void solution_t<T>::print()
 	printf("\n");
 }
 
-}}
+}

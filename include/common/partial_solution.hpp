@@ -1,12 +1,8 @@
 #pragma once
 
-#include <stdio.h>
-#include <vector>
-#include <map>
-#include "gomea_defs.hpp"
+#include "common/gomea_defs.hpp"
 
 namespace gomea{
-namespace common{
 
 template<class T>
 class partial_solution_t
@@ -42,4 +38,4 @@ class partial_solution_t
 template class partial_solution_t<float>;
 template class partial_solution_t<double>;
 
-}}
+}

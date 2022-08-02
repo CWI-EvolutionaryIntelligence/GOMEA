@@ -1,6 +1,6 @@
 #include "Python.h"
 
-namespace gomealib{
+namespace gomea{
 	namespace utils{
 
 		bool embeddingInitialized();

@@ -42,7 +42,7 @@
 namespace gomea{
 namespace realvalued{
 
-population_t::population_t( fitness_t *fitness, int population_size, double lower_init, double upper_init )
+population_t::population_t( gomea::fitness::fitness_t *fitness, int population_size, double lower_init, double upper_init )
 {
 	this->population_size = population_size;
 	this->fitness = fitness;
@@ -483,7 +483,7 @@ void population_t::applyPartialAMS( partial_solution_t<double> *solution, double
 		
 short population_t::checkForImprovement( solution_t<double> *solution, partial_solution_t<double> *part )
 {
-	return( fitness_t::betterFitness( part->getObjectiveValue(), part->getConstraintValue(), solution->getObjectiveValue(), solution->getConstraintValue() ) );
+	return( gomea::fitness::fitness_t::betterFitness( part->getObjectiveValue(), part->getConstraintValue(), solution->getObjectiveValue(), solution->getConstraintValue() ) );
 }
 
 void population_t::insertImprovement( solution_t<double> *solution, partial_solution_t<double> *part )

@@ -38,7 +38,6 @@
 #pragma once
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-= Section Includes -=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
-#include "tools.hpp"
 #include "common/gomea_defs.hpp"
 #include "common/solution.hpp"
 #include "common/partial_solution.hpp"
@@ -48,9 +47,9 @@ namespace gomea{
 namespace realvalued{
 
 template<class T>
-class partial_solution_t : public gomea::common::partial_solution_t<T>
+class partial_solution_t : public gomea::partial_solution_t<T>
 {
-	using gomea::common::partial_solution_t<T>::partial_solution_t;
+	using gomea::partial_solution_t<T>::partial_solution_t;
 	
 	public:
 		partial_solution_t( vec_t<T> &touched_variables, vec_t<T> &sample_zs, vec_t<int> &touched_indices );

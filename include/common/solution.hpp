@@ -1,11 +1,8 @@
 #pragma once
 
-#include <stdio.h>
-#include <vector>
-#include "gomea_defs.hpp"
+#include "common/gomea_defs.hpp"
 
 namespace gomea{
-namespace common{
 
 template<class T>
 class solution_t
@@ -39,4 +36,4 @@ class solution_t
 template class solution_t<float>;
 template class solution_t<double>;
 
-}}
+}
