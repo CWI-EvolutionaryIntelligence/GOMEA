@@ -10,3 +10,4 @@
 **/cython/*.hpp
 **/*.dat
 build/
+dist/
