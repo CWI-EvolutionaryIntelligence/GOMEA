@@ -36,10 +36,14 @@
  */
 
 #pragma once
+#include "fitness/fitness_basic.hpp"
+#include "fitness/benchmarks-rv.hpp"
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 namespace gomea{
 namespace realvalued{
+
+typedef gomea::fitness::fitness_t fitness_t;
 
 class Config {
 	public:
@@ -47,7 +51,8 @@ class Config {
 		Config(); 
 
 		/*-=-=-=-=-=-=-=-=-=-=-=- Options -=-=-=-=-=-=-=-=-=-=-=-=-*/
-		int problem_index, number_of_parameters;
+		int problem_index;
+		//, number_of_parameters;
 		short  print_verbose_overview,                              /* Whether to print a overview of settings (0 = no). */
 			   fix_seed,                                            /* Whether a fixed seed is used. */
 			   use_vtr,
@@ -73,6 +78,7 @@ class Config {
 		double vtr,                                           /* The value-to-reach (function value of best solution that is feasible). */
 			   lower_user_range,                              /* The initial lower range-bound indicated by the user (same for all dimensions). */
 			   upper_user_range;                              /* The initial upper range-bound indicated by the user (same for all dimensions). */
+		fitness_t *fitness;
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 };
 

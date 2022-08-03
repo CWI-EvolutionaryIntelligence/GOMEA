@@ -56,17 +56,19 @@ rvg_t::rvg_t()
 rvg_t::rvg_t( Config *config )
 {
 	this->config = config;
+    this->fitness = config->fitness;
     use_univariate_FOS = 0;
     learn_linkage_tree = 0;
     static_linkage_tree = 0;
     random_linkage_tree = 0;
     haveNextNextGaussian = 0;
 
+    printf("TEST : vtr=%10.3e\n",config->fitness->vtr);
     if( use_guidelines )
     {
         config->tau                              = 0.35;
         if( config->maximum_number_of_populations == 1 )
-            config->base_population_size         = (int) (36.1 + 7.58*log2((double) config->number_of_parameters));
+            config->base_population_size         = (int) (36.1 + 7.58*log2((double) fitness->number_of_parameters));
         else
             config->base_population_size         = 10;
         //config->base_population_size           = (int) (10.0*pow((double) number_of_parameters,0.5));
@@ -74,10 +76,10 @@ rvg_t::rvg_t( Config *config )
         //config->base_population_size           = (int) (4.0*pow((double) number_of_parameters,0.5));
         config->distribution_multiplier_decrease = 0.9;
         config->st_dev_ratio_threshold           = 1.0;
-        config->maximum_no_improvement_stretch   = 25 + config->number_of_parameters;
+        config->maximum_no_improvement_stretch   = 25 + fitness->number_of_parameters;
     }
-    FOS_element_ub = config->number_of_parameters;
-    if( config->FOS_element_size == -1 ) config->FOS_element_size = config->number_of_parameters;
+    FOS_element_ub = fitness->number_of_parameters;
+    if( config->FOS_element_size == -1 ) config->FOS_element_size = fitness->number_of_parameters;
     if( config->FOS_element_size == -2 ) learn_linkage_tree = 1;
     if( config->FOS_element_size == -3 ) static_linkage_tree = 1;
     if( config->FOS_element_size == -4 ) {static_linkage_tree = 1; FOS_element_ub = 100;}
@@ -104,7 +106,7 @@ rvg_t::rvg_t( int argc, char **argv )
     {
         config->tau                              = 0.35;
         if( config->maximum_number_of_populations == 1 )
-            config->base_population_size         = (int) (36.1 + 7.58*log2((double) config->number_of_parameters));
+            config->base_population_size         = (int) (36.1 + 7.58*log2((double) fitness->number_of_parameters));
         else
             config->base_population_size         = 10;
         //config->base_population_size           = (int) (10.0*pow((double) number_of_parameters,0.5));
@@ -112,10 +114,10 @@ rvg_t::rvg_t( int argc, char **argv )
         //config->base_population_size           = (int) (4.0*pow((double) number_of_parameters,0.5));
         config->distribution_multiplier_decrease = 0.9;
         config->st_dev_ratio_threshold           = 1.0;
-        config->maximum_no_improvement_stretch   = 25 + config->number_of_parameters;
+        config->maximum_no_improvement_stretch   = 25 + fitness->number_of_parameters;
     }
-    FOS_element_ub = config->number_of_parameters;
-    if( config->FOS_element_size == -1 ) config->FOS_element_size = config->number_of_parameters;
+    FOS_element_ub = fitness->number_of_parameters;
+    if( config->FOS_element_size == -1 ) config->FOS_element_size = fitness->number_of_parameters;
     if( config->FOS_element_size == -2 ) learn_linkage_tree = 1;
     if( config->FOS_element_size == -3 ) static_linkage_tree = 1;
     if( config->FOS_element_size == -4 ) {static_linkage_tree = 1; FOS_element_ub = 100;}
@@ -211,10 +213,10 @@ void rvg_t::parseFOSElementSize( int *index, int argc, char** argv )
  */
 void rvg_t::checkOptions( void )
 {
-    if( config->number_of_parameters < 1 )
+    if( fitness->number_of_parameters < 1 )
     {
         printf("\n");
-        printf("Error: number of parameters < 1 (read: %d). Require number of parameters >= 1.", config->number_of_parameters);
+        printf("Error: number of parameters < 1 (read: %d). Require number of parameters >= 1.", fitness->number_of_parameters);
         printf("\n\n");
 
         exit( 0 );
@@ -256,10 +258,10 @@ void rvg_t::checkOptions( void )
         exit( 0 );
     }
 
-    /*if( rotation_angle > 0 && ( !learn_linkage_tree && config->FOS_element_size > 1 && config->FOS_element_size != block_size && config->FOS_element_size != config->number_of_parameters) )
+    /*if( rotation_angle > 0 && ( !learn_linkage_tree && config->FOS_element_size > 1 && config->FOS_element_size != block_size && config->FOS_element_size != fitness->number_of_parameters) )
     {
         printf("\n");
-        printf("Error: invalid FOS element size (read %d). Must be %d, %d or %d.", config->FOS_element_size, 1, block_size, config->number_of_parameters );
+        printf("Error: invalid FOS element size (read %d). Must be %d, %d or %d.", config->FOS_element_size, 1, block_size, fitness->number_of_parameters );
         printf("\n\n");
 
         exit( 0 );
@@ -296,7 +298,7 @@ void rvg_t::parseParameters( int argc, char **argv, int *index )
 
     int noError = 1;
     noError = noError && sscanf( argv[*index+0], "%d", &config->problem_index );
-    noError = noError && sscanf( argv[*index+1], "%d", &config->number_of_parameters );
+    noError = noError && sscanf( argv[*index+1], "%d", &fitness->number_of_parameters );
     noError = noError && sscanf( argv[*index+2], "%lf", &config->lower_user_range );
     noError = noError && sscanf( argv[*index+3], "%lf", &config->upper_user_range );
     noError = noError && sscanf( argv[*index+4], "%lf", &rotation_angle );
@@ -342,13 +344,13 @@ void rvg_t::printVerboseOverview( void )
     printf("###################################################\n");
     printf("#\n");
     printf("# Problem                 = %s\n", fitness_t::installedProblemName( config->problem_index ));
-    printf("# Number of parameters    = %d\n", config->number_of_parameters);
+    printf("# Number of parameters    = %d\n", fitness->number_of_parameters);
     printf("# Initialization ranges   = [%e;%e]\n", config->lower_user_range, config->upper_user_range );
     printf("# Boundary ranges         = ");
-    for( i = 0; i < config->number_of_parameters; i++ )
+    for( i = 0; i < fitness->number_of_parameters; i++ )
     {
         printf("x_%d: [%e;%e]", i, fitness->getLowerRangeBound(i), fitness->getUpperRangeBound(i) );
-        if( i < config->number_of_parameters-1 )
+        if( i < fitness->number_of_parameters-1 )
             printf("\n#                           ");
     }
     printf("\n");
@@ -467,7 +469,7 @@ void rvg_t::initializeNewPopulation()
 
 void rvg_t::initializeProblem()
 {
-	fitness = fitness_t::getFitnessClass( config->problem_index, config->number_of_parameters, config->vtr );
+	fitness = fitness_t::getFitnessClass( config->problem_index, fitness->number_of_parameters, config->vtr );
 	if( fitness == NULL )
 	{
 		printf("Unknown problem index.\n");
@@ -475,9 +477,6 @@ void rvg_t::initializeProblem()
 	}
 	fitness->use_vtr = config->use_vtr;
 	fitness->black_box_optimization = config->black_box_evaluations;
-	fitness->vtr_hit_status = 0;
-	fitness->elitist_objective_value = 1e308;
-	fitness->elitist_constraint_value = 1e308;
 }
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
@@ -603,12 +602,12 @@ void rvg_t::writeGenerationalSolutions( short final )
         /* Populations */
         for( j = 0; j < populations[i]->population_size; j++ )
         {
-            for( k = 0; k < config->number_of_parameters; k++ )
+            for( k = 0; k < fitness->number_of_parameters; k++ )
             {
                 sprintf( string, "%13e", populations[i]->individuals[j]->variables[k] );
                 fputs( string, file_all );
                 fputs( string, file_population );
-                if( k < config->number_of_parameters-1 )
+                if( k < fitness->number_of_parameters-1 )
                 {
                     sprintf( string, " " );
                     fputs( string, file_all );
@@ -633,11 +632,11 @@ void rvg_t::writeGenerationalSolutions( short final )
         {
             for( j = 0; j < populations[i]->selection_size; j++ )
             {
-                for( k = 0; k < config->number_of_parameters; k++ )
+                for( k = 0; k < fitness->number_of_parameters; k++ )
                 {
                     sprintf( string, "%13e", populations[i]->selection[j][k] );
                     fputs( string, file_selection );
-                    if( k < config->number_of_parameters-1 )
+                    if( k < fitness->number_of_parameters-1 )
                     {
                         sprintf( string, " " );
                         fputs( string, file_selection );
@@ -691,11 +690,11 @@ void rvg_t::writeGenerationalSolutionsBest( short final )
         sprintf( string, "best_generation_%05d.dat", c[0] );
     file = fopen( string, "w" );
 
-    for( i = 0; i < config->number_of_parameters; i++ )
+    for( i = 0; i < fitness->number_of_parameters; i++ )
     {
         sprintf( string, "%13e", populations[population_index_best]->individuals[individual_index_best]->variables[i] );
         fputs( string, file );
-        if( i < config->number_of_parameters-1 )
+        if( i < fitness->number_of_parameters-1 )
         {
             sprintf( string, " " );
             fputs( string, file );

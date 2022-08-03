@@ -40,15 +40,12 @@
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-= Section Includes -=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 #include "population.hpp"
 #include "tools.hpp"
-#include "fitness/fitness_basic.hpp"
 #include "fos.hpp"
 #include "Config.hpp"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
 namespace gomea{
 namespace realvalued{
-
-typedef gomea::fitness::fitness_t fitness_t;
 
 class rvg_t {
 	public:

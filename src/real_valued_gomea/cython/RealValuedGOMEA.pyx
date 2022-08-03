@@ -2,6 +2,7 @@
 # cython: c_string_type=unicode, c_string_encoding=utf8
 
 from RealValuedGOMEA cimport rvg_t, Config
+from Fitness cimport FitnessFunction
 from libcpp.string cimport string
 from libcpp cimport bool
 import inspect
@@ -19,7 +20,7 @@ cdef class pyRealValuedGOMEA:
     def __cinit__(self,
         # Optimization problem settings (required)
         problem_index: int,
-        number_of_variables: int,
+        fitness: FitnessFunction, 
         # GOMEA parameters (optional)
         lower_init_range: double=0.0,
         upper_init_range: double=1.0,
@@ -51,7 +52,7 @@ cdef class pyRealValuedGOMEA:
         # Initialize attributes 
         self.c_config = Config()
         self.c_config.problem_index = problem_index
-        self.c_config.number_of_parameters = number_of_variables
+        self.c_config.fitness = (<FitnessFunction?>fitness).c_inst 
         self.c_config.use_vtr = 0
         self.c_config.vtr = 0.0
         #if value_to_reach > -1e100:
@@ -76,6 +77,7 @@ cdef class pyRealValuedGOMEA:
         self.c_config.maximum_number_of_evaluations = max_evals
         self.c_config.maximum_number_of_seconds = max_time
         self.c_config.verbose = verbose
+        self.c_config.print_verbose_overview = verbose
 
         # Initialize C++ instance
         self.c_inst = rvg_t(&self.c_config)

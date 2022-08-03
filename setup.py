@@ -4,7 +4,7 @@ VERSION_PATCH = 1
 VERSION_STRING = '%s.%s.%s' % (VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)
 __version__ = VERSION_STRING
 
-from setuptools import Extension, setup
+from setuptools import Extension, setup, find_namespace_packages
 from Cython.Build import cythonize
 import sys
 import glob

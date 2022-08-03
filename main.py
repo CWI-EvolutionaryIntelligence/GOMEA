@@ -1,5 +1,7 @@
-import gomea 
+import gomea
+import Fitness 
 
-rvgom = gomea.RealValuedGOMEA(problem_index=0, number_of_variables=100)
+f = Fitness.SphereFunction(50,value_to_reach=1e-10)
+rvgom = gomea.RealValuedGOMEA(fitness=f, problem_index=0)
 result = rvgom.run()
 
