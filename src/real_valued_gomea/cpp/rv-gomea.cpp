@@ -38,7 +38,7 @@
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-= Section Includes -=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
-#include "rv-gomea.hpp"
+#include "real_valued_gomea/rv-gomea.hpp"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
 namespace gomea{
@@ -994,6 +994,9 @@ void rvg_t::runAllPopulations()
  */
 void rvg_t::run( void )
 {
+    int out = gomea::utils::initializePythonEmbedding("RealValuedGOMEA", PyInit_RealValuedGOMEA);
+    assert(out == 0);
+
     startTimer();
 	initialize();
 

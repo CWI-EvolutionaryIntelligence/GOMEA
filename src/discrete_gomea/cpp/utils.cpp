@@ -1,4 +1,4 @@
-#include "utils.hpp"
+#include "discrete_gomea/utils.hpp"
 
 void prepareFolder(string &folder)
 {

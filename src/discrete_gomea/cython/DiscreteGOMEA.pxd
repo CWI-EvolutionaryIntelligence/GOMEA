@@ -1,7 +1,7 @@
 from libcpp.string cimport string
 from libcpp cimport bool
 
-cdef extern from "Config.hpp":
+cdef extern from "discrete_gomea/Config.hpp":
     cdef cppclass Config:
         Config() except +
 
@@ -9,7 +9,7 @@ cdef extern from "Config.hpp":
         double maximumNumberOfSeconds
         string folder, problemInstancePath
 
-cdef extern from "gomeaIMS.hpp":
+cdef extern from "discrete_gomea/gomeaIMS.hpp":
     cdef cppclass gomeaIMS:
         gomeaIMS() except +
         gomeaIMS(Config*) except +

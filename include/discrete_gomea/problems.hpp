@@ -11,13 +11,13 @@
 #include <cassert>
 using namespace std;
 
-#include "Individual.hpp"
-#include "utils.hpp"
-#include "time.hpp"
-#include "FOS.hpp"
+#include "discrete_gomea/Individual.hpp"
+#include "discrete_gomea/utils.hpp"
+#include "discrete_gomea/time.hpp"
+#include "discrete_gomea/FOS.hpp"
 
 class Config;
-#include "Config.hpp"
+#include "discrete_gomea/Config.hpp"
 
 class Problem
 {

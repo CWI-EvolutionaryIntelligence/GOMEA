@@ -1,6 +1,6 @@
-#include "Config.hpp"
-#include "gomea.hpp"
-#include "gomeaIMS.hpp"
+#include "discrete_gomea/Config.hpp"
+#include "discrete_gomea/gomea.hpp"
+#include "discrete_gomea/gomeaIMS.hpp"
 
 
 int main(int argc, char **argv)

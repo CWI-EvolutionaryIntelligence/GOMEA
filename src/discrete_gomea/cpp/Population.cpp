@@ -1,4 +1,4 @@
-#include "Population.hpp"
+#include "discrete_gomea/Population.hpp"
 
 Population::Population(Config *config_, Problem *problemInstance_, sharedInformation *sharedInformationPointer_, size_t GOMEAIndex_, size_t populationSize_, FOS_t FOSInstance_ ): 
         config(config_), 

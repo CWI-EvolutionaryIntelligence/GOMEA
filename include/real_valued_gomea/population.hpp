@@ -38,10 +38,10 @@
 #pragma once
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-= Section Includes -=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
-#include "tools.hpp"
+#include "real_valued_gomea/tools.hpp"
 #include "fitness/fitness_basic.hpp"
-#include "fos.hpp"
-#include "solutionRV.hpp"
+#include "real_valued_gomea/fos.hpp"
+#include "real_valued_gomea/solutionRV.hpp"
 
 #include <deque>
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/

@@ -1,4 +1,4 @@
-#include "partial_solutionRV.hpp"
+#include "real_valued_gomea/partial_solutionRV.hpp"
 
 namespace gomea{
 namespace realvalued{

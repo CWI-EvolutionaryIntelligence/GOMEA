@@ -5,11 +5,11 @@
 #include <vector>
 using namespace std;
 
-#include "Individual.hpp"
-#include "Config.hpp"
-#include "shared.hpp"
-#include "problems.hpp"
-#include "FOS.hpp"
+#include "discrete_gomea/Individual.hpp"
+#include "discrete_gomea/Config.hpp"
+#include "discrete_gomea/shared.hpp"
+#include "discrete_gomea/problems.hpp"
+#include "discrete_gomea/FOS.hpp"
 
 class Population
 {

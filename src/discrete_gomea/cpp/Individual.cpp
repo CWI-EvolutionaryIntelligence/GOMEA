@@ -1,4 +1,4 @@
-#include "Individual.hpp"
+#include "discrete_gomea/Individual.hpp"
 
 ostream & operator << (ostream &out, const Individual &individual)
 {

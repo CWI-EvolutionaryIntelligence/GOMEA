@@ -19,6 +19,9 @@ namespace gomea{
 
 		int initializePythonEmbedding( const char *name, PyObject *(*initfunc)(void) )
 		{
+			if( embedding_initialized )
+				return 0;
+
 			PyObject *pmodule;
 			embedded_program = Py_DecodeLocale(name, NULL);
 			if (embedded_program == NULL) {

@@ -38,10 +38,12 @@
 #pragma once
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-= Section Includes -=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
-#include "population.hpp"
-#include "tools.hpp"
-#include "fos.hpp"
-#include "Config.hpp"
+#include "real_valued_gomea/population.hpp"
+#include "real_valued_gomea/tools.hpp"
+#include "real_valued_gomea/fos.hpp"
+#include "real_valued_gomea/Config.hpp"
+#include "utils/embed.hpp"
+#include "real_valued_gomea/cython/RealValuedGOMEA.h"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
 namespace gomea{

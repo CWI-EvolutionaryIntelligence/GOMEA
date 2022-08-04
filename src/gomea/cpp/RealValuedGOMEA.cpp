@@ -1,5 +1,5 @@
 #include <Python.h>
-#include "rv-gomea.hpp"
+#include "real_valued_gomea/rv-gomea.hpp"
 
 /**
  * The main function:

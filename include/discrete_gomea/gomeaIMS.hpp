@@ -4,11 +4,11 @@
 #include <unordered_map>
 using namespace std;
 
-#include "Config.hpp"
-#include "Population.hpp"
-#include "problems.hpp"
-#include "shared.hpp"
-#include "gomea.hpp"
+#include "discrete_gomea/Config.hpp"
+#include "discrete_gomea/Population.hpp"
+#include "discrete_gomea/problems.hpp"
+#include "discrete_gomea/shared.hpp"
+#include "discrete_gomea/gomea.hpp"
 
 class gomeaIMS: public GOMEA
 {

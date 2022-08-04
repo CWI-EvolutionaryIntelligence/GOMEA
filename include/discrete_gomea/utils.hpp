@@ -15,7 +15,7 @@
 
 using namespace std;
 
-#include "Individual.hpp"
+#include "discrete_gomea/Individual.hpp"
 
 typedef std::chrono::time_point<std::chrono::steady_clock> chtime;
 

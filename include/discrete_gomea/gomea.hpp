@@ -4,7 +4,7 @@
 #include <iostream>
 using namespace std;
 
-#include <Config.hpp>
+#include "discrete_gomea/Config.hpp"
 
 class GOMEA
 {

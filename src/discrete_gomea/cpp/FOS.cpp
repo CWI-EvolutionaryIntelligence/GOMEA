@@ -1,4 +1,4 @@
-#include "FOS.hpp"
+#include "discrete_gomea/FOS.hpp"
 
 bool FOSNameByIndex(size_t FOSIndex, string &FOSName)
 {

@@ -11,9 +11,9 @@
 #include <memory>
 using namespace std;
 
-#include "Individual.hpp"
-#include "utils.hpp"
-#include "time.hpp"
+#include "discrete_gomea/Individual.hpp"
+#include "discrete_gomea/utils.hpp"
+#include "discrete_gomea/time.hpp"
 
 template<typename T>
 struct varMat {

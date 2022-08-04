@@ -38,9 +38,9 @@
 #pragma once
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-= Section Includes -=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
-#include "tools.hpp"
-#include "partial_solutionRV.hpp"
-#include "solutionRV.hpp"
+#include "real_valued_gomea/tools.hpp"
+#include "real_valued_gomea/partial_solutionRV.hpp"
+#include "real_valued_gomea/solutionRV.hpp"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
 namespace gomea{

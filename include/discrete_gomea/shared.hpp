@@ -4,8 +4,8 @@
 #include <unordered_map>
 using namespace std;
 
-#include "utils.hpp"
-#include "time.hpp"
+#include "discrete_gomea/utils.hpp"
+#include "discrete_gomea/time.hpp"
 
 class sharedInformation
 {

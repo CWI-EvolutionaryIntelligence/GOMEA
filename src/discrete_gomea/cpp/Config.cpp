@@ -1,4 +1,4 @@
-#include "Config.hpp"
+#include "discrete_gomea/Config.hpp"
 
 Config::Config()
 {

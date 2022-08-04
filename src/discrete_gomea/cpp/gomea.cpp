@@ -1,4 +1,4 @@
-#include <gomea.hpp>
+#include "discrete_gomea/gomea.hpp"
 
 double GOMEA::readVTR(Config *config)
 {

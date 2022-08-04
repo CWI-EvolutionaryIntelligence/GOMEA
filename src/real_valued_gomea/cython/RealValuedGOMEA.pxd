@@ -2,7 +2,7 @@ from libcpp.string cimport string
 from libcpp cimport bool
 from Fitness cimport fitness_t
 
-cdef extern from "Config.hpp" namespace "gomea::realvalued":
+cdef extern from "real_valued_gomea/Config.hpp" namespace "gomea::realvalued":
     cdef cppclass Config:
         Config() except +
 
@@ -11,7 +11,7 @@ cdef extern from "Config.hpp" namespace "gomea::realvalued":
         short use_conditional_sampling, fix_seed, use_vtr, write_generational_statistics, write_generational_solutions, use_black_box_evaluations, selection_during_gom, update_elitist_during_gom, verbose, print_verbose_overview
         fitness_t *fitness
 
-cdef extern from "rv-gomea.hpp" namespace "gomea::realvalued":
+cdef extern from "real_valued_gomea/rv-gomea.hpp" namespace "gomea::realvalued":
     cdef cppclass rvg_t:
         rvg_t() except +
         rvg_t(Config*) except +

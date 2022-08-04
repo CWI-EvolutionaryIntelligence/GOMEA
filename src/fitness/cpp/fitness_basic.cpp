@@ -159,11 +159,6 @@ double *fitness_t::rotateVariablesInBlocks( double *variables, int len, int from
 
 void fitness_t::evaluate( solution_t<double> *solution )
 {
-	/*if( !gomea::utils::embeddingInitialized() )
-	{
-		int out = gomea::utils::initializePythonEmbedding("RealValuedGOMEA",PyInit_RealValuedGOMEA);
-		assert( out == 0 );
-	}*/
 	
 	evaluationFunction( solution );
 	
