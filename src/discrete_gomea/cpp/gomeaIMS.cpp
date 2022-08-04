@@ -2,8 +2,8 @@
 #include <fstream>
 using namespace std;
 
-#include "gomeaIMS.hpp"
-#include "utils.hpp"
+#include "discrete_gomea/gomeaIMS.hpp"
+#include "discrete_gomea/utils.hpp"
 
 gomeaIMS::gomeaIMS()
 {

@@ -1,4 +1,4 @@
-#include "problems.hpp"
+#include "discrete_gomea/problems.hpp"
 
 void createProblemInstance(int problemIndex, int numberOfVariables, Config *config, Problem **problemInstance, string &instancePath, int k, int s)
 {
