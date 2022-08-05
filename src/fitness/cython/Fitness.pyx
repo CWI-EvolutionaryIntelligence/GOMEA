@@ -2,8 +2,12 @@
 
 from Fitness cimport fitness_t, sphereFunction_t, rosenbrockFunction_t
 
+cdef public int fitness_embedded_pub() except -1:
+    print("pyfitness_pub - EMBEDDED TEST")
+    return 1
+
 cdef int fitness_embedded() except -1:
-    #print("pyfitness - EMBEDDED TEST")
+    print("pyfitness - EMBEDDED TEST")
     return 1
 
 cdef class SphereFunction(FitnessFunction):

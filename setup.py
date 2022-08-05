@@ -44,7 +44,7 @@ ext_real_valued = Extension("RealValuedGOMEA",
 ext_fitness = Extension("Fitness",
         glob.glob("src/fitness/cython/*.pyx") + glob.glob("src/fitness/cpp/*.cpp") +
         glob.glob("src/utils/cpp/*.cpp") + glob.glob("src/common/cpp/*.cpp"),
-        include_dirs=["include/"],
+        include_dirs=["include/","src/"],
         language="c++",
         extra_compile_args=["-std=c++17"],
         extra_link_args=["-std=c++17"])

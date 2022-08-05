@@ -61,6 +61,7 @@ class fitness_t
 		// Gray-box specific
 		int number_of_subfunctions;		
 		std::map<int,std::set<int>> variable_interaction_graph;
+		std::map<int,std::set<int>> subfunction_dependency_graph;
 
 		// Options
 		double vtr; // value-to-reach
@@ -109,6 +110,7 @@ class fitness_t
 		
 		bool hasVariableInteractionGraph();
 		virtual void initializeVariableInteractionGraph();
+		virtual void initializeSubfunctionDependencyGraph();
 
 	private:
 		virtual void evaluationFunction( solution_t<double> *solution ) = 0;

@@ -263,6 +263,15 @@ void fitness_t::initializeVariableInteractionGraph()
 	return;
 }
 
+void fitness_t::initializeSubfunctionDependencyGraph()
+{
+	for( int i = 0; i < number_of_parameters; i++ )
+	{
+		subfunction_dependency_graph[i] = std::set<int>();
+		subfunction_dependency_graph[i].insert(i);
+	}
+}
+
 void fitness_t::initializeRangeBounds()
 {
  	lower_range_bound = new double[number_of_parameters];

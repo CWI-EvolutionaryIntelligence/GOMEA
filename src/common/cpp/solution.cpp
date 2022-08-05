@@ -48,6 +48,18 @@ double solution_t<T>::getConstraintValue()
 {
 	return constraint_value;
 }
+
+template<class T>
+double solution_t<T>::getPartialObjectiveValue( int subfunction_index )
+{
+	return partial_objective_values[subfunction_index];
+}
+
+template<class T>
+double solution_t<T>::getPartialConstraintValue( int subfunction_index )
+{
+	return partial_constraint_values[subfunction_index];
+}
 		
 template<class T>
 void solution_t<T>::setObjectiveValue( double v )
@@ -65,6 +77,40 @@ template<class T>
 void solution_t<T>::setConstraintValue( double v )
 {
 	constraint_value = v;
+}
+
+template<class T>
+void solution_t<T>::setPartialObjectiveValue( int subfunction_index, double v )
+{
+	partial_objective_values[subfunction_index] = v;
+}
+
+template<class T>
+void solution_t<T>::setPartialConstraintValue( int subfunction_index, double v )
+{
+	partial_constraint_values[subfunction_index] = v;
+}
+
+template<class T>
+vec_t<T> solution_t<T>::createPartialBackup( vec_t<int> variable_indices )
+{
+	vec_t<T> backup = vec_t<T>(variable_indices.size());
+	for( int i = 0; i < variable_indices.size(); i++ )
+	{
+		int ind = variable_indices[i];
+		backup[i] = variables[ind];
+	}
+	return backup;
+}
+
+template<class T>
+void solution_t<T>::insertPartialBackup( vec_t<T> backup, vec_t<int> variable_indices )
+{
+	for( int i = 0; i < variable_indices.size(); i++ )
+	{
+		int ind = variable_indices[i];
+		variables[ind] = backup[i];
+	}
 }
 
 template<class T>

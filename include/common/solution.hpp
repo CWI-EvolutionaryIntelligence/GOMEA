@@ -18,11 +18,18 @@ class solution_t
 		int getNumberOfObjectives();
 		double getObjectiveValue();
 		double getObjectiveValue( int objective_value_index );
+		double getPartialObjectiveValue( int subfunction_index );
 		double getConstraintValue();
+		double getPartialConstraintValue( int subfunction_index );
 
 		void setObjectiveValue( double v );
 		void setObjectiveValue( int objective_value_index, double v );
 		void setConstraintValue( double v );
+		void setPartialObjectiveValue( int subfunction_index, double v );
+		void setPartialConstraintValue( int subfunction_index, double v );
+
+		vec_t<T> createPartialBackup(vec_t<int> variable_indices);
+		void insertPartialBackup(vec_t<T> backup, vec_t<int> variable_indices);
 
 		void print();
 
@@ -33,6 +40,7 @@ class solution_t
 		vec_t<double> partial_constraint_values;
 };
 
+template class solution_t<int>;
 template class solution_t<float>;
 template class solution_t<double>;
 
