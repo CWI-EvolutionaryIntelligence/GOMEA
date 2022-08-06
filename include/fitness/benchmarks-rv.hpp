@@ -43,8 +43,8 @@
 #include "common/partial_solution.hpp"
 #include "common/gomea_defs.hpp"
 #include "utils/tools.hpp"
-#include "real_valued_gomea/cython/RealValuedGOMEA.h"
-#include "fitness/cython/Fitness.h"
+//#include "real_valued_gomea/cython/RealValuedGOMEA.h"
+//#include "fitness/cython/Fitness.h"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
 namespace gomea{

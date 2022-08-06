@@ -2,7 +2,7 @@ GOMEAlib-py:
 	python setup.py build_ext --inplace -j4
 
 RVGOMEA-cpp: GOMEAlib-py
-	g++ -g -Wall -std=c++17 $(wildcard src/gomea/cpp/*.cpp) -o build/RealValuedGOMEA -I/usr/include/python3.8/ -Iinclude/ -Iinclude/real_valued_gomea/ -Isrc/real_valued_gomea/cython/ -L/usr/lib64/ -L./ -lpython3.8 -l:RealValuedGOMEA.cpython-38-x86_64-linux-gnu.so
+	g++ -g -Wall -std=c++17 $(wildcard src/gomea/cpp/*.cpp) -o build/RealValuedGOMEA -I/usr/include/python3.8/ -Iinclude/ -Isrc/ -L/usr/lib64/ -L./ -lpython3.8 -l:RealValuedGOMEA.cpython-38-x86_64-linux-gnu.so
 
 default: GOMEAlib-py	
 

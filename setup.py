@@ -16,7 +16,8 @@ with open("README.md", 'r') as f:
     long_description = f.read()
 
 ext_gomea = Extension("gomea",
-        glob.glob("src/gomea/cython/*.pyx"),
+        glob.glob("src/gomea/cython/*.pyx") +
+        glob.glob("src/common/cpp/*.cpp") + glob.glob("src/utils/cpp/*.cpp") + glob.glob("src/fitness/cpp/*.cpp"),
         include_dirs=["include/","src/"],
         language="c++",
         extra_compile_args=["-std=c++17"],

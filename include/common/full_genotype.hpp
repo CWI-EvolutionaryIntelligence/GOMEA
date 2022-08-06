@@ -9,13 +9,15 @@ template<class T>
 class full_genotype_t : public genotype_t<T>
 {
 	public:
-		full_genotype_t( int number_of_variables );
+		full_genotype_t();
+		full_genotype_t(int number_of_variables);
 		full_genotype_t( vec_t<T> &variables );
 		
 		T& operator[](std::size_t idx);
   		const T& operator[](std::size_t idx) const;
 
-		int getNumberOfVariables();
+		std::size_t size();
+		vec_t<T> &asVector();
 
 	private:
 		vec_t<T> variables;

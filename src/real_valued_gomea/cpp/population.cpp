@@ -167,7 +167,7 @@ void population_t::makeSelectionUsingDiversityOnRank0()
 
 	double *nn_distances = (double *) Malloc( number_of_rank0_solutions*sizeof( double ) );
 	for(int i = 0; i < number_of_rank0_solutions; i++ )
-		nn_distances[i] = distanceEuclidean( individuals[preselection_indices[i]]->variables, individuals[selection_indices[number_selected_so_far-1]]->variables ); 
+		nn_distances[i] = distanceEuclidean( individuals[preselection_indices[i]]->variables.asVector(), individuals[selection_indices[number_selected_so_far-1]]->variables.asVector() ); 
 
 	while( number_selected_so_far < selection_size )
 	{
@@ -190,7 +190,7 @@ void population_t::makeSelectionUsingDiversityOnRank0()
 
 		for(int i = 0; i < number_of_rank0_solutions; i++ )
 		{
-			double value = distanceEuclidean( individuals[preselection_indices[i]]->variables, individuals[selection_indices[number_selected_so_far-1]]->variables );
+			double value = distanceEuclidean( individuals[preselection_indices[i]]->variables.asVector(), individuals[selection_indices[number_selected_so_far-1]]->variables.asVector() );
 			if( value < nn_distances[i] )
 				nn_distances[i] = value;
 		}

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "common/gomea_defs.hpp"
+#include "common/genotype.hpp"
+#include "common/full_genotype.hpp"
 
 namespace gomea{
 
@@ -12,7 +14,7 @@ class solution_t
 		solution_t( int number_of_variables );
 		solution_t( vec_t<T> &variables );
 		
-		vec_t<T> variables;
+		full_genotype_t<T> variables;
 	
 		int getNumberOfVariables();
 		int getNumberOfObjectives();

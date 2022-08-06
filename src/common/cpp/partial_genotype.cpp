@@ -20,5 +20,10 @@ const T& partial_genotype_t<T>::operator[](std::size_t idx) const {
 	return touched_variables[idx];
 }
 
+template<class T>
+std::size_t partial_genotype_t<T>::size()
+{
+	return parent_genotype->size();
+}
 
 }

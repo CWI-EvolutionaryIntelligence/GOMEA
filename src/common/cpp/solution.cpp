@@ -3,20 +3,24 @@
 namespace gomea{
 
 template<class T>
-solution_t<T>::solution_t() : objective_values(vec_t<double>(1))
+solution_t<T>::solution_t()
 {
+ 	this->objective_values = vec_t<double>(1);
+	this->variables = full_genotype_t<T>(1);
 }
 
 template<class T>
-solution_t<T>::solution_t( int number_of_variables ) : solution_t()
+solution_t<T>::solution_t( int number_of_variables )
 {
-	this->variables = vec_t<T>(number_of_variables);
+ 	this->objective_values = vec_t<double>(1);
+	this->variables = full_genotype_t<T>(number_of_variables);
 }
 
 template<class T>
-solution_t<T>::solution_t( vec_t<T> &variables ) : solution_t()
+solution_t<T>::solution_t( vec_t<T> &variables )
 {
-	this->variables = variables;
+ 	this->objective_values = vec_t<double>(1);
+	this->variables = full_genotype_t<T>(variables);
 }
 
 template<class T>

@@ -59,7 +59,7 @@ class cpp_customFitnessFunction_t : public fitness_t
 	private:
 		void evaluationFunction( solution_t<double> *solution );
 		void partialEvaluationFunction( solution_t<double> *parent, partial_solution_t<double> *solution );
-		virtual double subfunction( int subfunction_index, vec_t<double> &variables );
+		virtual double subfunction( int subfunction_index, genotype_t<double> &variables );
 };
 
 }}

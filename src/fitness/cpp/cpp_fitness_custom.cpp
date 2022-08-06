@@ -57,9 +57,10 @@ void cpp_customFitnessFunction_t::evaluationFunction( solution_t<double> *soluti
 	double result = 0.0;
 	for( int i = 0; i < number_of_subfunctions; i++ )
 	{
-		double fsub = subfunction( i, solution->variables );
-		solution->setPartialObjectiveValue(i,fsub);
-		result += fsub;
+		// TODO
+		//double fsub = subfunction( i, solution->variables );
+		//solution->setPartialObjectiveValue(i,fsub);
+		//result += fsub;
 	}
 
 	solution->setObjectiveValue(result);
@@ -84,9 +85,9 @@ void cpp_customFitnessFunction_t::partialEvaluationFunction( solution_t<double> 
 		// TODO: backup of partial objective values
 		objective_value_delta -= parent->getPartialObjectiveValue(subfunction_index);
 		
-		double subf_result = subfunction( subfunction_index, parent->variables );
-		parent->setPartialObjectiveValue( subfunction_index, subf_result );
-		objective_value_delta += subf_result;
+		//double subf_result = subfunction( subfunction_index, parent->variables );
+		//parent->setPartialObjectiveValue( subfunction_index, subf_result );
+		//objective_value_delta += subf_result;
 	}
 
 	//parent->insertPartialBackup(partial_backup);
@@ -97,7 +98,7 @@ void cpp_customFitnessFunction_t::partialEvaluationFunction( solution_t<double> 
 	number_of_evaluations += solution->getNumberOfTouchedVariables() / (double) number_of_subfunctions;
 }
 
-double cpp_customFitnessFunction_t::subfunction( int subfunction_index, vec_t<double> &variables )
+double cpp_customFitnessFunction_t::subfunction( int subfunction_index, genotype_t<double> &variables )
 {
 	return( variables[subfunction_index] * variables[subfunction_index] );
 }

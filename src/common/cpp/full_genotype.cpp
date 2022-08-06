@@ -3,6 +3,12 @@
 namespace gomea{
 
 template<class T>
+full_genotype_t<T>::full_genotype_t()
+{
+	this->variables = vec_t<T>(1);
+}
+
+template<class T>
 full_genotype_t<T>::full_genotype_t( int number_of_variables )
 {
 	this->variables = vec_t<T>(number_of_variables);
@@ -25,10 +31,15 @@ const T& full_genotype_t<T>::operator[](std::size_t idx) const {
 }
 
 template<class T>
-int full_genotype_t<T>::getNumberOfVariables()
+std::size_t full_genotype_t<T>::size()
 {
 	return variables.size();
 }
 
+template<class T>
+vec_t<T> &full_genotype_t<T>::asVector()
+{
+	return variables;
+}
 
 }

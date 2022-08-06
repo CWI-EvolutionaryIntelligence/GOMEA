@@ -15,6 +15,8 @@ class partial_genotype_t : public genotype_t<T>
 		T& operator[](std::size_t idx);
   		const T& operator[](std::size_t idx) const;
 
+		std::size_t size();
+
 	private:
 		//bool checkParentIdentifierConsistency();
 
