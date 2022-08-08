@@ -3,22 +3,20 @@
 namespace gomea{
 
 template<class T>
-partial_solution_t<T>::partial_solution_t() : objective_values(vec_t<double>(1))
-{
-	objective_values[0] = 1e308;
-}
-
-template<class T>
-partial_solution_t<T>::partial_solution_t( int num_touched_variables ) : partial_solution_t()
+partial_solution_t<T>::partial_solution_t( int num_touched_variables )
 {
 	this->touched_variables = std::vector<T>(num_touched_variables); 
+	this->objective_values = vec_t<double>(1);
+	objective_values[0] = INFINITY;
 }
 
 template<class T>
-partial_solution_t<T>::partial_solution_t( std::vector<T> &touched_variables, std::vector<int> &touched_indices ) : partial_solution_t()
+partial_solution_t<T>::partial_solution_t( std::vector<T> &touched_variables, std::vector<int> &touched_indices )
 {
 	this->touched_indices = touched_indices;
 	this->touched_variables = touched_variables;
+	this->objective_values = vec_t<double>(1);
+	objective_values[0] = INFINITY;
 }
 
 template<class T>

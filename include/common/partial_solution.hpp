@@ -10,8 +10,8 @@ class partial_solution_t
 	public:
 		vec_t<int> touched_indices;
 		vec_t<T> touched_variables;
+		std::map<int,T> partial_objective_values;
 
-		partial_solution_t();
 		partial_solution_t( int num_touched_variables );
 		partial_solution_t( vec_t<T> &touched_variables, vec_t<int> &touched_indices );
 
@@ -35,6 +35,7 @@ class partial_solution_t
 		std::map<int,int> touched_index_map;
 };
 
+template class partial_solution_t<int>;
 template class partial_solution_t<float>;
 template class partial_solution_t<double>;
 
