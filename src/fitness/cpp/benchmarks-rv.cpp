@@ -47,7 +47,6 @@ sphereFunction_t::sphereFunction_t( int number_of_parameters, double vtr )
 {
 	this->name = "Sphere function";
 	this->number_of_parameters = number_of_parameters;
-	this->number_of_subfunctions = number_of_parameters;
 	this->vtr = vtr;
 	initializeFitnessFunction();
 }
@@ -55,7 +54,7 @@ sphereFunction_t::sphereFunction_t( int number_of_parameters, double vtr )
 void sphereFunction_t::evaluationFunction( solution_t<double> *solution )
 {
 	double result = 0.0;
-	for( int i = 0; i < number_of_subfunctions; i++ )
+	for( int i = 0; i < getNumberOfSubfunctions(); i++ )
 		result += subfunction( solution->variables[i] );
 
 	/*if( number_of_evaluations == 0 )
@@ -83,7 +82,7 @@ void sphereFunction_t::partialEvaluationFunction( solution_t<double> *parent, pa
 	solution->setObjectiveValue(parent->getObjectiveValue() + result);
 	solution->setConstraintValue(parent->getConstraintValue());
 	full_number_of_evaluations++;
-	number_of_evaluations += solution->getNumberOfTouchedVariables() / (double) number_of_subfunctions;
+	number_of_evaluations += solution->getNumberOfTouchedVariables() / (double) getNumberOfSubfunctions();
 }
 
 double sphereFunction_t::subfunction( double x )
@@ -91,25 +90,19 @@ double sphereFunction_t::subfunction( double x )
 	return( x * x );
 }
 
-double sphereFunction_t::getLowerRangeBound( int dimension )
-{
-	return( -1e308 );
-}
-		
-double sphereFunction_t::getUpperRangeBound( int dimension )
-{
-	return( 1e308 );
-}
-
 rosenbrockFunction_t::rosenbrockFunction_t( int number_of_parameters, double vtr )
 {
 	this->name = "Rosenbrock function";
 	this->number_of_parameters = number_of_parameters;
 	this->vtr = vtr;
-	this->number_of_subfunctions = number_of_parameters-1;
 	initializeFitnessFunction();
 	if( !black_box_optimization )
 		initializeVariableInteractionGraph();
+}
+
+int rosenbrockFunction_t::getNumberOfSubfunctions()
+{
+	return number_of_parameters-1;
 }
 
 void rosenbrockFunction_t::evaluationFunction( solution_t<double> *solution )
@@ -137,7 +130,7 @@ void rosenbrockFunction_t::univariatePartialEvaluationFunction( solution_t<doubl
 		result -= subfunction( parent->variables[ind-1], parent->variables[ind] );
 		num_subfunctions_evaluated++;
 	}
-	if( ind < number_of_subfunctions )
+	if( ind < getNumberOfSubfunctions() )
 	{
 		result += subfunction( solution->touched_variables[0], parent->variables[ind+1] );
 		result -= subfunction( parent->variables[ind], parent->variables[ind+1] );
@@ -147,7 +140,7 @@ void rosenbrockFunction_t::univariatePartialEvaluationFunction( solution_t<doubl
 	solution->setObjectiveValue(parent->getObjectiveValue() + result);
 	solution->setConstraintValue(parent->getConstraintValue());
 	full_number_of_evaluations++;
-	number_of_evaluations += num_subfunctions_evaluated / (double) number_of_subfunctions;
+	number_of_evaluations += num_subfunctions_evaluated / (double) getNumberOfSubfunctions();
 }
 
 
@@ -175,7 +168,7 @@ void rosenbrockFunction_t::partialEvaluationFunction( solution_t<double> *parent
 				result -= subfunction( parent->variables[ind-1], parent->variables[ind] );
 				num_subfunctions_evaluated++;
 			}
-			if( ind < number_of_subfunctions )
+			if( ind < getNumberOfSubfunctions() )
 			{
 				double y = parent->variables[ind+1];
 				if( !(i < solution->getNumberOfTouchedVariables()-1 && solution->touched_indices[i+1] == ind+1) )
@@ -190,23 +183,13 @@ void rosenbrockFunction_t::partialEvaluationFunction( solution_t<double> *parent
 		solution->setObjectiveValue(parent->getObjectiveValue() + result);
 		solution->setConstraintValue(parent->getConstraintValue());
 		full_number_of_evaluations++;
-		number_of_evaluations += num_subfunctions_evaluated / (double) number_of_subfunctions;
+		number_of_evaluations += num_subfunctions_evaluated / (double) getNumberOfSubfunctions();
 	}	
 }
 
 double rosenbrockFunction_t::subfunction( double x, double y )
 {
 	return( 100*(y-x*x)*(y-x*x) + (1.0-x)*(1.0-x) );
-}
-
-double rosenbrockFunction_t::getLowerRangeBound( int dimension )
-{
-	return( -1e308 );
-}
-		
-double rosenbrockFunction_t::getUpperRangeBound( int dimension )
-{
-	return( 1e308 );
 }
 
 void rosenbrockFunction_t::initializeVariableInteractionGraph()
@@ -220,13 +203,6 @@ void rosenbrockFunction_t::initializeVariableInteractionGraph()
 			dependent_vars.insert(i+1);
 		variable_interaction_graph[i] = dependent_vars;
 	}
-	/*for( auto p : variable_interaction_graph )
-	{
-		printf("[%d] ",p.first);
-		for( int x : p.second )
-			printf("%d ",x);
-	}
-	printf("\n");*/
 }
 
 
@@ -239,7 +215,6 @@ sorebFunction_t::sorebFunction_t( int number_of_parameters, double vtr, double c
 	this->conditioning_number = conditioning_number;
 	this->rotation_block_size = block_size;
 	this->overlap_size = overlap_size;
-	this->number_of_subfunctions = 1+(number_of_parameters-block_size)/(block_size-overlap_size);
 
 	assert( number_of_parameters >= block_size );
 	assert( overlap_size < block_size );
@@ -251,11 +226,16 @@ sorebFunction_t::sorebFunction_t( int number_of_parameters, double vtr, double c
 		initializeVariableInteractionGraph();
 }
 
+int sorebFunction_t::getNumberOfSubfunctions()
+{
+	return 1+(number_of_parameters-rotation_block_size)/(rotation_block_size-overlap_size);
+}
+
 int sorebFunction_t::getIndexOfFirstBlock( int var )
 {
 	int block_index = (var-overlap_size) / (rotation_block_size-overlap_size); // rounded down
 	block_index = fmax( block_index, 0 );
-	block_index = fmin( block_index, number_of_subfunctions-1 );
+	block_index = fmin( block_index, getNumberOfSubfunctions()-1 );
 	return( block_index );
 }
 
@@ -267,7 +247,7 @@ int sorebFunction_t::getStartingIndexOfBlock( int block_index )
 void sorebFunction_t::evaluationFunction( solution_t<double> *solution )
 {
 	double result = 0.0;
-	for( int i = 0; i < number_of_subfunctions; i++ )
+	for( int i = 0; i < getNumberOfSubfunctions(); i++ )
 		result += subfunction( &solution->variables[getStartingIndexOfBlock(i)], rotation_block_size );
 
 	solution->setObjectiveValue(result);
@@ -304,7 +284,7 @@ void sorebFunction_t::partialEvaluationFunction( solution_t<double> *parent, par
 		if( i > 0 )
 			assert( ind > solution->touched_indices[i-1] ); // this partial evaluation requires indices to be sorted
 	
-		while( block_ind < number_of_subfunctions && getStartingIndexOfBlock(block_ind) <= ind ) // while the touched variable is within the block to be evaluated
+		while( block_ind < getNumberOfSubfunctions() && getStartingIndexOfBlock(block_ind) <= ind ) // while the touched variable is within the block to be evaluated
 		{
 			if( block_ind > last_evaluated_block )
 			{
@@ -333,7 +313,7 @@ void sorebFunction_t::partialEvaluationFunction( solution_t<double> *parent, par
 	solution->setObjectiveValue(parent->getObjectiveValue() + result);
 	solution->setConstraintValue(parent->getConstraintValue());
 	full_number_of_evaluations++;
-	number_of_evaluations += num_subfunctions_evaluated / (double) number_of_subfunctions;
+	number_of_evaluations += num_subfunctions_evaluated / (double) getNumberOfSubfunctions();
 }
 
 double sorebFunction_t::subfunction( double *vars, int num_vars )
@@ -358,19 +338,9 @@ double sorebFunction_t::subfunction( double *vars, int num_vars )
 	return( result ); 
 }
 
-double sorebFunction_t::getLowerRangeBound( int dimension )
-{
-	return( -1e308 );
-}
-		
-double sorebFunction_t::getUpperRangeBound( int dimension )
-{
-	return( 1e308 );
-}
-
 void sorebFunction_t::initializeVariableInteractionGraph()
 {
-	for( int i = 0; i < number_of_subfunctions; i++ )
+	for( int i = 0; i < getNumberOfSubfunctions(); i++ )
 	{
 		int block_start = getStartingIndexOfBlock(i);
 		for( int j = 0; j < rotation_block_size; j++ )
@@ -383,13 +353,6 @@ void sorebFunction_t::initializeVariableInteractionGraph()
 			variable_interaction_graph[ind] = dependent_vars;
 		}
 	}
-	/*for( auto p : variable_interaction_graph )
-	{
-		printf("[%d] ",p.first);
-		for( int x : p.second )
-			printf("%d ",x);
-	}
-	printf("\n");*/
 }
 		
 sorebFunction_t::~sorebFunction_t()
@@ -406,11 +369,15 @@ osorebFunction_t::osorebFunction_t( int number_of_parameters, double vtr )
 	this->rotation_block_size = 5;
 	this->number_of_large_rotated_blocks = (number_of_parameters+4)/5;
 	this->number_of_small_rotated_blocks = number_of_large_rotated_blocks-1;
-	this->number_of_subfunctions = number_of_large_rotated_blocks + number_of_small_rotated_blocks;
 	initializeFitnessFunction();
 	rotation_matrix_big = initializeObjectiveRotationMatrix( rotation_angle, rotation_block_size );
 	rotation_matrix_small = initializeObjectiveRotationMatrix( rotation_angle, 2 );
 	//exit(0); // TODO : check evaluation functions
+}
+
+int osorebFunction_t::getNumberOfSubfunctions()
+{
+	return( number_of_large_rotated_blocks + number_of_small_rotated_blocks);
 }
 
 void osorebFunction_t::evaluationFunction( solution_t<double> *solution )
@@ -487,7 +454,7 @@ void osorebFunction_t::partialEvaluationFunction( solution_t<double> *parent, pa
 	solution->setObjectiveValue(parent->getObjectiveValue() + result);
 	solution->setConstraintValue(parent->getConstraintValue());
 	full_number_of_evaluations++;
-	number_of_evaluations += num_subfunctions_evaluated / (double) number_of_subfunctions;
+	number_of_evaluations += num_subfunctions_evaluated / (double) getNumberOfSubfunctions();
 }
 
 double osorebFunction_t::subfunction( double *vars, int num_vars )
@@ -503,16 +470,6 @@ double osorebFunction_t::subfunction( double *vars, int num_vars )
         result += pow( 10.0, 6.0*(((double) (i))/((double) (num_vars-1))) )*rotated_vars[i]*rotated_vars[i];
 	free( rotated_vars );
 	return( result ); 
-}
-
-double osorebFunction_t::getLowerRangeBound( int dimension )
-{
-	return( -1e308 );
-}
-		
-double osorebFunction_t::getUpperRangeBound( int dimension )
-{
-	return( 1e308 );
 }
 
 osorebFunction_t::~osorebFunction_t()
@@ -531,7 +488,6 @@ sorebChainFunction_t::sorebChainFunction_t( int number_of_parameters, double vtr
 	this->vtr = vtr;
 	this->rotation_angle = rotation_angle;
 	this->rotation_block_size = 2;
-	this->number_of_subfunctions = number_of_parameters-1;
 	this->conditioning_number = conditioning_number;
 	this->wrap_around = wrap_around;
 	initializeFitnessFunction();
@@ -540,10 +496,15 @@ sorebChainFunction_t::sorebChainFunction_t( int number_of_parameters, double vtr
 		initializeVariableInteractionGraph();
 }
 
+int sorebChainFunction_t::getNumberOfSubfunctions()
+{
+	return( number_of_parameters-1 );
+}
+
 void sorebChainFunction_t::evaluationFunction( solution_t<double> *solution )
 {
 	double result = 0.0;
-	for( int i = 0; i < number_of_subfunctions; i++ )
+	for( int i = 0; i < getNumberOfSubfunctions(); i++ )
 		result += subfunction( &solution->variables[i], rotation_block_size );
 
 	solution->setObjectiveValue(result);
@@ -590,7 +551,7 @@ void sorebChainFunction_t::partialEvaluationFunction( solution_t<double> *parent
 	solution->setObjectiveValue(parent->getObjectiveValue() + result);
 	solution->setConstraintValue(parent->getConstraintValue());
 	full_number_of_evaluations++;
-	number_of_evaluations += num_subfunctions_evaluated / (double) number_of_subfunctions;
+	number_of_evaluations += num_subfunctions_evaluated / (double) getNumberOfSubfunctions();
 }
 
 double sorebChainFunction_t::subfunction( double *vars, int num_vars )
@@ -604,16 +565,6 @@ double sorebChainFunction_t::subfunction( double *vars, int num_vars )
 	if( rotation_angle != 0.0 )
 		free( rotated_vars );
 	return( result ); 
-}
-
-double sorebChainFunction_t::getLowerRangeBound( int dimension )
-{
-	return( -1e308 );
-}
-		
-double sorebChainFunction_t::getUpperRangeBound( int dimension )
-{
-	return( 1e308 );
 }
 
 void sorebChainFunction_t::initializeVariableInteractionGraph()
@@ -650,7 +601,6 @@ sorebGridFunction_t::sorebGridFunction_t( int number_of_parameters, double vtr, 
 	this->conditioning_number = conditioning_number;
 	this->wrap_around_x = wrap_around_x;
 	this->wrap_around_y = wrap_around_y;
-	this->number_of_subfunctions = number_of_parameters;
 	this->grid_width = round(sqrt(number_of_parameters));
 	assert( grid_width * grid_width == number_of_parameters );
 	//if( !wrap_around_x ) this->number_of_subfunctions -= grid_width;
@@ -810,7 +760,7 @@ void sorebGridFunction_t::partialEvaluationFunction( solution_t<double> *parent,
 	solution->setObjectiveValue(parent->getObjectiveValue() + result);
 	solution->setConstraintValue(parent->getConstraintValue());
 	full_number_of_evaluations++;
-	number_of_evaluations += num_subfunctions_evaluated / (double) number_of_subfunctions;*/
+	number_of_evaluations += num_subfunctions_evaluated / (double) getNumberOfSubfunctions();*/
 	
 	std::set<int> subfunction_indices;
 	for( int i = 0; i < solution->getNumberOfTouchedVariables(); i++ )
@@ -830,10 +780,10 @@ void sorebGridFunction_t::partialEvaluationFunction( solution_t<double> *parent,
 	else
 		num_subfunctions_evaluated = subfunction_indices.size();
 
-	assert( num_subfunctions_evaluated <= number_of_subfunctions );
+	assert( num_subfunctions_evaluated <= getNumberOfSubfunctions() );
 	evaluatePartialSolutionBlackBox( parent, solution );
 	number_of_evaluations--;
-	number_of_evaluations += num_subfunctions_evaluated / (double) number_of_subfunctions;
+	number_of_evaluations += num_subfunctions_evaluated / (double) getNumberOfSubfunctions();
 }
 
 double sorebGridFunction_t::subfunction( double *vars, int num_vars )
@@ -852,16 +802,6 @@ double sorebGridFunction_t::subfunction( double *vars, int num_vars )
 	if( rotation_angle != 0.0 )
 		free( rotated_vars );
 	return( result ); 
-}
-
-double sorebGridFunction_t::getLowerRangeBound( int dimension )
-{
-	return( -1e308 );
-}
-		
-double sorebGridFunction_t::getUpperRangeBound( int dimension )
-{
-	return( 1e308 );
 }
 
 std::set<int> sorebGridFunction_t::getNeighborsInGrid( int ind )
@@ -932,7 +872,6 @@ sorebCubeFunction_t::sorebCubeFunction_t( int number_of_parameters, double vtr, 
 	this->wrap_around_x = wrap_around_x;
 	this->wrap_around_y = wrap_around_y;
 	this->wrap_around_z = wrap_around_z;
-	this->number_of_subfunctions = number_of_parameters;
 	this->cube_width = round(cbrt(number_of_parameters));
 	assert( cube_width * cube_width * cube_width == number_of_parameters );
 	//if( !wrap_around_x ) this->number_of_subfunctions -= cube_width;
@@ -1170,7 +1109,7 @@ void sorebCubeFunction_t::partialEvaluationFunction( solution_t<double> *parent,
 	solution->setObjectiveValue(parent->getObjectiveValue() + result);
 	solution->setConstraintValue(parent->getConstraintValue());
 	full_number_of_evaluations++;
-	number_of_evaluations += num_subfunctions_evaluated / (double) number_of_subfunctions;*/
+	number_of_evaluations += num_subfunctions_evaluated / (double) getNumberOfSubfunctions();*/
 	std::set<int> subfunction_indices;
 	for( int i = 0; i < solution->getNumberOfTouchedVariables(); i++ )
 	{
@@ -1189,10 +1128,10 @@ void sorebCubeFunction_t::partialEvaluationFunction( solution_t<double> *parent,
 	else
 		num_subfunctions_evaluated = subfunction_indices.size();
 	
-	assert( num_subfunctions_evaluated <= number_of_subfunctions );
+	assert( num_subfunctions_evaluated <= getNumberOfSubfunctions() );
 	evaluatePartialSolutionBlackBox( parent, solution );
 	number_of_evaluations--;
-	number_of_evaluations += num_subfunctions_evaluated / (double) number_of_subfunctions;
+	number_of_evaluations += num_subfunctions_evaluated / (double) getNumberOfSubfunctions();
 }
 
 double sorebCubeFunction_t::subfunction( double *vars, int num_vars )
@@ -1211,16 +1150,6 @@ double sorebCubeFunction_t::subfunction( double *vars, int num_vars )
 	if( rotation_angle != 0.0 )
 		free( rotated_vars );
 	return( result ); 
-}
-
-double sorebCubeFunction_t::getLowerRangeBound( int dimension )
-{
-	return( -1e308 );
-}
-		
-double sorebCubeFunction_t::getUpperRangeBound( int dimension )
-{
-	return( 1e308 );
 }
 
 sorebCubeFunction_t::~sorebCubeFunction_t()
