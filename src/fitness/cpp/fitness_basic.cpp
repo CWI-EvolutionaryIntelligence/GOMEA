@@ -5,10 +5,11 @@
 namespace gomea{
 namespace fitness{
 
-fitness_t::~fitness_t()
+fitness_t::fitness_t( int number_of_parameters, double vtr )
 {
-	delete[] lower_range_bound;
-	delete[] upper_range_bound;
+	this->name = "Fitness function (C++)";
+	this->number_of_parameters = number_of_parameters;
+	this->vtr = vtr;
 }
 
 fitness_t *fitness_t::getFitnessClass( int problem_index, int number_of_parameters, double vtr )
@@ -86,11 +87,6 @@ short fitness_t::betterFitness( solution_t<double> *sol_x, solution_t<double> *s
 int fitness_t::getNumberOfSubfunctions()
 {
 	return number_of_parameters;
-}
-
-void fitness_t::initializeFitnessFunction( void )
-{
-	initializeRangeBounds();
 }
 
 double *fitness_t::rotateVariables( double *variables, int num_variables, double **rotation_matrix )
@@ -237,18 +233,6 @@ void fitness_t::initializeSubfunctionDependencyGraph()
 		subfunction_dependency_graph[i] = std::set<int>();
 		subfunction_dependency_graph[i].insert(i);
 	}
-}
-
-void fitness_t::initializeRangeBounds()
-{
- 	lower_range_bound = new double[number_of_parameters];
-    upper_range_bound = new double[number_of_parameters];
-
-    for(int i = 0; i < number_of_parameters; i++ )
-    {
-        lower_range_bound[i] = getLowerRangeBound( i );
-        upper_range_bound[i] = getUpperRangeBound( i );
-    }
 }
 
 double fitness_t::getLowerRangeBound( int dimension )

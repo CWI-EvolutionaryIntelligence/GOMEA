@@ -10,13 +10,11 @@ namespace fitness{
 class fitness_t
 {
 	public:
-		virtual ~fitness_t();
+		fitness_t( int number_of_parameters, double vtr );
 
 		// Properties
 		std::string name;
 		int number_of_parameters;
-		double *lower_range_bound;
-		double *upper_range_bound;
 		double rotation_angle = 0.0;
 		int rotation_block_size = 0;
 		// Gray-box specific
@@ -45,10 +43,8 @@ class fitness_t
 		void evaluatePartialSolution( solution_t<double> *parent, partial_solution_t<double> *solution );
 		void evaluatePartialSolutionBlackBox( solution_t<double> *parent, partial_solution_t<double> *solution );
 		
-		void initializeFitnessFunction( void );
 		double **initializeObjectiveRotationMatrix( double rotation_angle, int rotation_block_size );
 		void initializeObjectiveRotationMatrix( void );
-		void initializeRangeBounds();
 		short isParameterInRangeBounds( double parameter, int dimension );
 		virtual double getLowerRangeBound( int dimension );
 		virtual double getUpperRangeBound( int dimension );

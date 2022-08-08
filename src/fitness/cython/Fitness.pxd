@@ -14,5 +14,10 @@ cdef extern from "fitness/benchmarks-rv.hpp" namespace "gomea::fitness":
         rosenbrockFunction_t() except +
         rosenbrockFunction_t(int,double) except +
 
+cdef extern from "fitness/your_fitness.hpp" namespace "gomea::fitness":
+    cdef cppclass yourFitnessFunction_t(fitness_t):
+        yourFitnessFunction_t() except +
+        yourFitnessFunction_t(int,double) except +
+
 cdef class FitnessFunction:
     cdef fitness_t *c_inst

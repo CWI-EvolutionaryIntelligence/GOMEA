@@ -3,7 +3,7 @@
 namespace gomea{
 namespace fitness{
 
-yourFitnessFunction_t::yourFitnessFunction_t( int number_of_parameters, int number_of_subfunctions, double vtr ) : customFitnessFunction_t(number_of_parameters,number_of_subfunctions,vtr)
+yourFitnessFunction_t::yourFitnessFunction_t( int number_of_parameters, double vtr ) : customFitnessFunction_t(number_of_parameters,vtr)
 {
 	this->name = "Your own fitness function (C++)";
 }

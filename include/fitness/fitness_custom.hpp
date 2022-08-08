@@ -13,7 +13,7 @@ namespace fitness{
 class customFitnessFunction_t : public fitness_t 
 {
 	public:
-		customFitnessFunction_t( int number_of_parameters, int number_of_subfunctions, double vtr );
+		customFitnessFunction_t( int number_of_parameters, double vtr );
 
 	private:
 		void evaluationFunction( solution_t<double> *solution );

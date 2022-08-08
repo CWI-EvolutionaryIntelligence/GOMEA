@@ -43,12 +43,9 @@ namespace fitness{
 
 using namespace gomea;
 
-sphereFunction_t::sphereFunction_t( int number_of_parameters, double vtr )
+sphereFunction_t::sphereFunction_t( int number_of_parameters, double vtr ) : fitness_t(number_of_parameters,vtr)
 {
 	this->name = "Sphere function";
-	this->number_of_parameters = number_of_parameters;
-	this->vtr = vtr;
-	initializeFitnessFunction();
 }
 		
 void sphereFunction_t::evaluationFunction( solution_t<double> *solution )
@@ -90,12 +87,9 @@ double sphereFunction_t::subfunction( double x )
 	return( x * x );
 }
 
-rosenbrockFunction_t::rosenbrockFunction_t( int number_of_parameters, double vtr )
+rosenbrockFunction_t::rosenbrockFunction_t( int number_of_parameters, double vtr ) : fitness_t(number_of_parameters,vtr)
 {
 	this->name = "Rosenbrock function";
-	this->number_of_parameters = number_of_parameters;
-	this->vtr = vtr;
-	initializeFitnessFunction();
 	if( !black_box_optimization )
 		initializeVariableInteractionGraph();
 }
@@ -205,12 +199,9 @@ void rosenbrockFunction_t::initializeVariableInteractionGraph()
 	}
 }
 
-
-sorebFunction_t::sorebFunction_t( int number_of_parameters, double vtr, double conditioning_number, double rotation_angle, int block_size, int overlap_size )
+sorebFunction_t::sorebFunction_t( int number_of_parameters, double vtr, double conditioning_number, double rotation_angle, int block_size, int overlap_size ) : fitness_t(number_of_parameters,vtr)
 {
 	this->name = "Sum of Rotated Ellipsoid Blocks function";
-	this->number_of_parameters = number_of_parameters;
-	this->vtr = vtr;
 	this->rotation_angle = rotation_angle;
 	this->conditioning_number = conditioning_number;
 	this->rotation_block_size = block_size;
@@ -220,7 +211,6 @@ sorebFunction_t::sorebFunction_t( int number_of_parameters, double vtr, double c
 	assert( overlap_size < block_size );
 	assert( (number_of_parameters-block_size) % (block_size-overlap_size) == 0 ); // total number of parameters matches an integer number of blocks
 
-	initializeFitnessFunction();
 	rotation_matrix = initializeObjectiveRotationMatrix( rotation_angle, rotation_block_size );
 	if( !black_box_optimization )
 		initializeVariableInteractionGraph();
@@ -360,16 +350,13 @@ sorebFunction_t::~sorebFunction_t()
 	ezilaitiniObjectiveRotationMatrix( rotation_matrix, rotation_angle, rotation_block_size );
 }
 
-osorebFunction_t::osorebFunction_t( int number_of_parameters, double vtr )
+osorebFunction_t::osorebFunction_t( int number_of_parameters, double vtr ) : fitness_t(number_of_parameters,vtr)
 {
 	this->name = "Overlapping Sum of Rotated Ellipsoid Blocks function";
-	this->number_of_parameters = number_of_parameters;
-	this->vtr = vtr;
 	this->rotation_angle = 45;
 	this->rotation_block_size = 5;
 	this->number_of_large_rotated_blocks = (number_of_parameters+4)/5;
 	this->number_of_small_rotated_blocks = number_of_large_rotated_blocks-1;
-	initializeFitnessFunction();
 	rotation_matrix_big = initializeObjectiveRotationMatrix( rotation_angle, rotation_block_size );
 	rotation_matrix_small = initializeObjectiveRotationMatrix( rotation_angle, 2 );
 	//exit(0); // TODO : check evaluation functions
@@ -481,16 +468,13 @@ osorebFunction_t::~osorebFunction_t()
 	}
 }
 
-sorebChainFunction_t::sorebChainFunction_t( int number_of_parameters, double vtr, double conditioning_number, double rotation_angle, bool wrap_around )
+sorebChainFunction_t::sorebChainFunction_t( int number_of_parameters, double vtr, double conditioning_number, double rotation_angle, bool wrap_around ) : fitness_t(number_of_parameters,vtr)
 {
 	this->name = "Chain of Sum of Rotated Ellipsoid Blocks function";
-	this->number_of_parameters = number_of_parameters;
-	this->vtr = vtr;
 	this->rotation_angle = rotation_angle;
 	this->rotation_block_size = 2;
 	this->conditioning_number = conditioning_number;
 	this->wrap_around = wrap_around;
-	initializeFitnessFunction();
 	rotation_matrix = initializeObjectiveRotationMatrix( rotation_angle, rotation_block_size );
 	if( !black_box_optimization )
 		initializeVariableInteractionGraph();
@@ -592,11 +576,9 @@ sorebChainFunction_t::~sorebChainFunction_t()
 	ezilaitiniObjectiveRotationMatrix( rotation_matrix, rotation_angle, rotation_block_size );
 }
 
-sorebGridFunction_t::sorebGridFunction_t( int number_of_parameters, double vtr, double conditioning_number, double rotation_angle, bool wrap_around_x, bool wrap_around_y )
+sorebGridFunction_t::sorebGridFunction_t( int number_of_parameters, double vtr, double conditioning_number, double rotation_angle, bool wrap_around_x, bool wrap_around_y ) : fitness_t(number_of_parameters,vtr)
 {
 	this->name = "Chain of Sum of Rotated Ellipsoid Blocks function";
-	this->number_of_parameters = number_of_parameters;
-	this->vtr = vtr;
 	this->rotation_angle = rotation_angle;
 	this->conditioning_number = conditioning_number;
 	this->wrap_around_x = wrap_around_x;
@@ -605,7 +587,6 @@ sorebGridFunction_t::sorebGridFunction_t( int number_of_parameters, double vtr, 
 	assert( grid_width * grid_width == number_of_parameters );
 	//if( !wrap_around_x ) this->number_of_subfunctions -= grid_width;
 	//if( !wrap_around_y ) this->number_of_subfunctions -= grid_width;
-	initializeFitnessFunction();
 	if( !black_box_optimization )
 		initializeVariableInteractionGraph();
 }
@@ -862,11 +843,9 @@ void sorebGridFunction_t::initializeVariableInteractionGraph()
 	
 }
 
-sorebCubeFunction_t::sorebCubeFunction_t( int number_of_parameters, double vtr, double conditioning_number, double rotation_angle, bool wrap_around_x, bool wrap_around_y, bool wrap_around_z )
+sorebCubeFunction_t::sorebCubeFunction_t( int number_of_parameters, double vtr, double conditioning_number, double rotation_angle, bool wrap_around_x, bool wrap_around_y, bool wrap_around_z ) : fitness_t(number_of_parameters,vtr)
 {
 	this->name = "Chain of Sum of Rotated Ellipsoid Blocks function";
-	this->number_of_parameters = number_of_parameters;
-	this->vtr = vtr;
 	this->rotation_angle = rotation_angle;
 	this->conditioning_number = conditioning_number;
 	this->wrap_around_x = wrap_around_x;
@@ -877,7 +856,6 @@ sorebCubeFunction_t::sorebCubeFunction_t( int number_of_parameters, double vtr, 
 	//if( !wrap_around_x ) this->number_of_subfunctions -= cube_width;
 	//if( !wrap_around_y ) this->number_of_subfunctions -= cube_width;
 	//if( !wrap_around_z ) this->number_of_subfunctions -= cube_width;
-	initializeFitnessFunction();
 	rotation_matrix = initializeObjectiveRotationMatrix( rotation_angle, rotation_block_size );
 	if( !black_box_optimization )
 		initializeVariableInteractionGraph();

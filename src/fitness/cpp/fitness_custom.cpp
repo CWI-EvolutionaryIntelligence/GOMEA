@@ -3,12 +3,9 @@
 namespace gomea{
 namespace fitness{
 
-customFitnessFunction_t::customFitnessFunction_t( int number_of_parameters, int number_of_subfunctions, double vtr )
+customFitnessFunction_t::customFitnessFunction_t( int number_of_parameters, double vtr ) : fitness_t(number_of_parameters,vtr)
 {
 	this->name = "Custom fitness function (C++)";
-	this->number_of_parameters = number_of_parameters;
-	this->vtr = vtr;
-	initializeFitnessFunction();
 }
 		
 void customFitnessFunction_t::evaluationFunction( solution_t<double> *solution )
