@@ -14,7 +14,7 @@ void customFitnessFunction_t::evaluationFunction( solution_t<double> *solution )
 	for( int i = 0; i < getNumberOfSubfunctions(); i++ )
 	{
 		double fsub = subfunction( i, solution->variables );
-		solution->setPartialObjectiveValue(i,fsub);
+		//solution->setPartialObjectiveValue(i,fsub);
 		result += fsub;
 	}
 
@@ -27,32 +27,40 @@ void customFitnessFunction_t::evaluationFunction( solution_t<double> *solution )
 void customFitnessFunction_t::partialEvaluationFunction( solution_t<double> *parent, partial_solution_t<double> *solution )
 {
 	std::set<int> touched_subfunctions;
-	for( int ind : solution->touched_variables )
+	for( int ind : solution->touched_indices )
 	{
-		touched_subfunctions.insert(subfunction_dependency_graph[ind].begin(), subfunction_dependency_graph[ind].end());
+		assert( subfunction_dependency_map[ind].size() > 0 );
+		touched_subfunctions.insert(subfunction_dependency_map[ind].begin(), subfunction_dependency_map[ind].end());
 	}
 
-	vec_t<double> partial_backup = parent->createPartialBackup( solution->touched_indices );
-	
+
 	double objective_value_delta = 0.0;
+	// Calculate sum of touched subfunctions for parent
+	for( int subfunction_index : touched_subfunctions )
+	{
+		double subf_result = subfunction( subfunction_index, parent->variables );
+		objective_value_delta -= subf_result; 
+	}
+	
+	// Create backup of parent variables before modification
+	vec_t<double> partial_backup = parent->createPartialBackup( solution->touched_indices );
+
+	// Insert variables of partial solution and then calculate sum of touched subfunctions for offspring
+	parent->insertVariables( solution->touched_variables, solution->touched_indices );
 	for( int subfunction_index : touched_subfunctions ) 
 	{
 		double subf_result = subfunction( subfunction_index, parent->variables );
-		solution->partial_objective_values[subfunction_index] = subf_result;
-		objective_value_delta += subf_result - parent->getPartialObjectiveValue(subfunction_index);
+		//solution->partial_objective_values[subfunction_index] = subf_result;
+		objective_value_delta += subf_result;
 	}
 
-	parent->insertPartialBackup(partial_backup,solution->touched_indices);
+	// Return parent to original state
+	parent->insertVariables(partial_backup, solution->touched_indices);
 	
 	solution->setObjectiveValue(parent->getObjectiveValue() + objective_value_delta);
 	solution->setConstraintValue(parent->getConstraintValue());
 	full_number_of_evaluations++;
-	number_of_evaluations += solution->getNumberOfTouchedVariables() / (double) getNumberOfSubfunctions();
-}
-
-double customFitnessFunction_t::subfunction( int subfunction_index, vec_t<double> &variables )
-{
-	return( variables[subfunction_index] * variables[subfunction_index] );
+	number_of_evaluations += touched_subfunctions.size() / (double) getNumberOfSubfunctions();
 }
 
 }}

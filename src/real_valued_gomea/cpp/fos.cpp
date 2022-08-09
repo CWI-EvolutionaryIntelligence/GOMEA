@@ -44,11 +44,11 @@ namespace gomea{
 namespace realvalued{
 
 /*-=-=-=-=-=-=-=-=-=-=-=- Section Global Variables -=-=-=-=-=-=-=-=-=-=-=-=-*/
-int       FOS_element_ub,                       /* Cut-off value for bounded fixed linkage tree (BFLT). */
-		  use_univariate_FOS,                   /* Whether a univariate FOS is used. */
-		  learn_linkage_tree,                   /* Whether the FOS is learned at the start of each generation. */
-		  static_linkage_tree,                  /* Whether the FOS is fixed throughout optimization. */
-		  random_linkage_tree;                  /* Whether the fixed linkage tree is learned based on a random distance measure. */
+int       FOS_element_ub = 0,                       /* Cut-off value for bounded fixed linkage tree (BFLT). */
+		  use_univariate_FOS = 0,                   /* Whether a univariate FOS is used. */
+		  learn_linkage_tree = 0,                   /* Whether the FOS is learned at the start of each generation. */
+		  static_linkage_tree = 0,                  /* Whether the FOS is fixed throughout optimization. */
+		  random_linkage_tree = 0;                  /* Whether the fixed linkage tree is learned based on a random distance measure. */
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
 // Dummy FOS
@@ -1102,7 +1102,7 @@ void fos_t::hungarianAlgorithmAddToTree(int x, int prevx, short *S, int *prev, i
 
 void fos_t::print()
 {
-	printf("{");
+	printf("FOS: {");
 	for(int i = 0; i < getLength(); i++ )
 	{
 		printf("[");

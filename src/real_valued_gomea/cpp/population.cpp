@@ -741,7 +741,7 @@ void population_t::initializeFOS()
 		assert(0);
 	}
 
-	new_FOS->print();
+	//new_FOS->print();
 	linkage_model = new_FOS;
 }
 

@@ -94,17 +94,16 @@ class rvg_t {
 		/*-=-=-=-=-=-=-=-=-=-=-=- Variables -=-=-=-=-=-=-=-=-=-=-=-=-*/
 		std::vector<population_t*> populations;
 		fitness_t *fitness;
-		int total_number_of_writes = 0.0;                              /* Total number of times a statistics file has been written. */
+		int total_number_of_writes = 0;                              /* Total number of times a statistics file has been written. */
 		
 		/*-=-=-=-=-=-=-=-=-=-=-=- Options -=-=-=-=-=-=-=-=-=-=-=-=-*/
 		Config *config;
 		double eta_ams = 1.0,
 			   eta_cov = 1.0;
 		bool   is_initialized = false;
-short use_guidelines = 0;                                      /* Whether to override parameters with guidelines (for those that exist). */
-double rotation_angle = 0.0;                                /* The angle of rotation to be applied to the problem. */
-short use_FOS_parallelization = 1;
-/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
+		short use_guidelines = 0;	 /* Whether to override parameters with guidelines (for those that exist). */
+		double rotation_angle = 0.0; /* The angle of rotation to be applied to the problem. */
+		/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 };
 
 }}

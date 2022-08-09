@@ -249,15 +249,6 @@ void rvg_t::checkOptions( void )
         exit( 0 );
     }
 
-    if( fitness_t::installedProblemName( config->problem_index ) == NULL )
-    {
-        printf("\n");
-        printf("Error: unknown index for problem (read index %d).", config->problem_index );
-        printf("\n\n");
-
-        exit( 0 );
-    }
-
     /*if( rotation_angle > 0 && ( !learn_linkage_tree && config->FOS_element_size > 1 && config->FOS_element_size != block_size && config->FOS_element_size != fitness->number_of_parameters) )
     {
         printf("\n");
@@ -343,7 +334,7 @@ void rvg_t::printVerboseOverview( void )
     printf("#\n");
     printf("###################################################\n");
     printf("#\n");
-    printf("# Problem                 = %s\n", fitness_t::installedProblemName( config->problem_index ));
+    printf("# Problem                 = %s\n", fitness->name.c_str());
     printf("# Number of parameters    = %d\n", fitness->number_of_parameters);
     printf("# Initialization ranges   = [%e;%e]\n", config->lower_user_range, config->upper_user_range );
     printf("# Boundary ranges         = ");
@@ -443,6 +434,9 @@ void rvg_t::restartLargestPopulation()
 	new_pop->distribution_multiplier_decrease = config->distribution_multiplier_decrease;
 	new_pop->maximum_no_improvement_stretch = config->maximum_no_improvement_stretch;
 	new_pop->tau = config->tau;
+	new_pop->selection_during_gom = config->selection_during_gom;
+	new_pop->update_elitist_during_gom = config->update_elitist_during_gom;
+	new_pop->FOS_element_size = config->FOS_element_size;
 	new_pop->initialize();
 	delete( populations[populations.size()-1] );
 	populations[populations.size()-1] = new_pop;
@@ -462,15 +456,14 @@ void rvg_t::initializeNewPopulation()
 	new_pop->selection_during_gom = config->selection_during_gom;
 	new_pop->update_elitist_during_gom = config->update_elitist_during_gom;
 	new_pop->FOS_element_size = config->FOS_element_size;
-	new_pop->initializeProblem(config->problem_index);
 	new_pop->initialize();
 	populations.push_back(new_pop);
 }
 
 void rvg_t::initializeProblem()
 {
-	fitness = fitness_t::getFitnessClass( config->problem_index, fitness->number_of_parameters, config->vtr );
-	if( fitness == NULL )
+	fitness = config->fitness;
+    if( fitness == NULL )
 	{
 		printf("Unknown problem index.\n");
 		exit(0);

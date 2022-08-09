@@ -19,7 +19,6 @@ cdef class pyRealValuedGOMEA:
 
     def __cinit__(self,
         # Optimization problem settings (required)
-        problem_index: int,
         fitness: FitnessFunction, 
         # GOMEA parameters (optional)
         lower_init_range: double=0.0,
@@ -29,15 +28,15 @@ cdef class pyRealValuedGOMEA:
         st_dev_ratio_threshold: double=1.0,
         fitness_variance_tolerance: double=0.0,
         maximum_no_improvement_stretch: int=100,
-        linkage_model_index: int=-1,
+        linkage_model_index: int=1,
         use_conditional_sampling: short=0,
         selection_during_gom: short=1,
         update_elitist_during_gom: short=1,
         fix_seed : short=0,
         # IMS settings (optional)
-        maximum_number_of_GOMEAs: int=25,
-        IMS_subgeneration_factor: int=4,
-        base_population_size: int=50,
+        maximum_number_of_populations: int=25,
+        IMS_subgeneration_factor: int=8,
+        base_population_size: int=10,
         # Termination settings (optional)
         max_evals : double=-1,
         max_time : double=-1,
@@ -51,7 +50,7 @@ cdef class pyRealValuedGOMEA:
 
         # Initialize attributes 
         self.c_config = Config()
-        self.c_config.problem_index = problem_index
+        self.c_config.problem_index = 0 
         self.c_config.fitness = (<FitnessFunction?>fitness).c_inst 
         self.c_config.use_vtr = 0
         self.c_config.vtr = 0.0
@@ -71,11 +70,12 @@ cdef class pyRealValuedGOMEA:
         self.c_config.selection_during_gom = selection_during_gom 
         self.c_config.update_elitist_during_gom = update_elitist_during_gom 
         self.c_config.fix_seed = fix_seed
-        self.c_config.maximum_number_of_populations = maximum_number_of_GOMEAs
+        self.c_config.maximum_number_of_populations = maximum_number_of_populations
         self.c_config.number_of_subgenerations_per_population_factor = IMS_subgeneration_factor
         self.c_config.base_population_size = base_population_size
         self.c_config.maximum_number_of_evaluations = max_evals
         self.c_config.maximum_number_of_seconds = max_time
+        self.c_config.black_box_evaluations = black_box_evaluations
         self.c_config.verbose = verbose
         self.c_config.print_verbose_overview = verbose
 

@@ -216,6 +216,36 @@ void fitness_t::partialEvaluationFunction( solution_t<double> *parent, partial_s
 	exit(0);
 }
 
+void fitness_t::initialize()
+{
+	initializeSubfunctionDependencyMap();
+	initializeVariableInteractionGraph();
+}
+
+void fitness_t::initializeSubfunctionDependencyMap()
+{
+	for( int i = 0; i < number_of_parameters; i++ )
+	{
+		subfunction_dependency_map[i] = std::set<int>();
+	}
+	for( int i = 0; i < getNumberOfSubfunctions(); i++ )
+	{
+		vec_t<int> dependent_variables = inputsToSubfunction(i);
+		for( int j : dependent_variables )
+		{
+			subfunction_dependency_map[j].insert(i);
+		}
+	}
+}
+
+vec_t<int> fitness_t::inputsToSubfunction( int subfunction_index )
+{
+	vec_t<int> dependencies;
+	int parameter_index = subfunction_index;
+	dependencies.push_back(parameter_index);
+	return dependencies;
+}
+
 bool fitness_t::hasVariableInteractionGraph()
 {
 	return( variable_interaction_graph.size() > 0 );
@@ -224,15 +254,6 @@ bool fitness_t::hasVariableInteractionGraph()
 void fitness_t::initializeVariableInteractionGraph() 
 {
 	return;
-}
-
-void fitness_t::initializeSubfunctionDependencyGraph()
-{
-	for( int i = 0; i < number_of_parameters; i++ )
-	{
-		subfunction_dependency_graph[i] = std::set<int>();
-		subfunction_dependency_graph[i].insert(i);
-	}
 }
 
 double fitness_t::getLowerRangeBound( int dimension )

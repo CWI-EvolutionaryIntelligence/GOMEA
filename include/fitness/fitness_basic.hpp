@@ -18,8 +18,8 @@ class fitness_t
 		double rotation_angle = 0.0;
 		int rotation_block_size = 0;
 		// Gray-box specific
-		std::map<int,std::set<int>> variable_interaction_graph;
-		std::map<int,std::set<int>> subfunction_dependency_graph;
+		std::map<int,std::set<int>> variable_interaction_graph; // VIG[i] lists all variables dependent on variable x_i, excluding itself
+		std::map<int,std::set<int>> subfunction_dependency_map; // map[i] lists all subfunctions dependent on variable x_i
 
 		// Options
 		double vtr; // value-to-reach
@@ -65,10 +65,14 @@ class fitness_t
 		static short betterFitness( double objective_value_x, double constraint_value_x, double objective_value_y, double constraint_value_y );
 		solution_t<double> *initializeSolution( int n );
 		solution_t<double> *initializeSolution( double *variables );
+
+		void initialize();	
 		
+		void initializeSubfunctionDependencyMap();
+		virtual vec_t<int> inputsToSubfunction(int subfunction_index);
+
 		bool hasVariableInteractionGraph();
 		virtual void initializeVariableInteractionGraph();
-		virtual void initializeSubfunctionDependencyGraph();
 
 	private:
 		virtual void evaluationFunction( solution_t<double> *solution ) = 0;

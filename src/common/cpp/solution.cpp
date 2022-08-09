@@ -103,12 +103,12 @@ vec_t<T> solution_t<T>::createPartialBackup( vec_t<int> variable_indices )
 }
 
 template<class T>
-void solution_t<T>::insertPartialBackup( vec_t<T> backup, vec_t<int> variable_indices )
+void solution_t<T>::insertVariables( vec_t<T> vars_to_insert, vec_t<int> indices_to_insert )
 {
-	for( int i = 0; i < variable_indices.size(); i++ )
+	for( int i = 0; i < indices_to_insert.size(); i++ )
 	{
-		int ind = variable_indices[i];
-		variables[ind] = backup[i];
+		int ind = indices_to_insert[i];
+		variables[ind] = vars_to_insert[i];
 	}
 }
 

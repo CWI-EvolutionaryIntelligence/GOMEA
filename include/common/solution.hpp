@@ -1,8 +1,6 @@
 #pragma once
 
 #include "common/gomea_defs.hpp"
-//#include "common/genotype.hpp"
-//#include "common/full_genotype.hpp"
 
 namespace gomea{
 
@@ -30,7 +28,7 @@ class solution_t
 		void setPartialConstraintValue( int subfunction_index, double v );
 
 		vec_t<T> createPartialBackup(vec_t<int> variable_indices);
-		void insertPartialBackup(vec_t<T> backup, vec_t<int> variable_indices);
+		void insertVariables(vec_t<T> vars_to_insert, vec_t<int> indices_to_insert);
 
 		void print();
 
