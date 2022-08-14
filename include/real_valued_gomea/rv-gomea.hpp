@@ -44,6 +44,7 @@
 #include "real_valued_gomea/Config.hpp"
 #include "utils/embed.hpp"
 #include "real_valued_gomea/cython/RealValuedGOMEA.h"
+#include "fitness/cython/Fitness.h"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
 namespace gomea{

@@ -11,22 +11,21 @@ yourFitnessFunction_t::yourFitnessFunction_t( int number_of_parameters, double v
 
 int yourFitnessFunction_t::getNumberOfSubfunctions()
 {
-	return number_of_parameters-1;
+	return number_of_parameters;
 }
 
 vec_t<int> yourFitnessFunction_t::inputsToSubfunction( int subfunction_index )
 {
 	vec_t<int> dependencies;
 	dependencies.push_back(subfunction_index);
-	dependencies.push_back(subfunction_index+1);
 	return dependencies;
 }
 		
 double yourFitnessFunction_t::subfunction( int subfunction_index, vec_t<double> &variables )
 {
 	double x = variables[subfunction_index];
-	double y = variables[subfunction_index+1];
-	return( 100*(y-x*x)*(y-x*x) + (1.0-x)*(1.0-x) );
+	return( x*x );
+	//return( 100*(y-x*x)*(y-x*x) + (1.0-x)*(1.0-x) );
 }
 
 double yourFitnessFunction_t::getLowerRangeBound( int dimension )

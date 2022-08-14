@@ -6,6 +6,8 @@ from RealValuedGOMEA import pyRealValuedGOMEA
 cimport DiscreteGOMEA
 from DiscreteGOMEA import pyDiscreteGOMEA
 
+include "Fitness.pyx"
+
 def RealValuedGOMEA(**kwargs):
     return pyRealValuedGOMEA(**kwargs)
 

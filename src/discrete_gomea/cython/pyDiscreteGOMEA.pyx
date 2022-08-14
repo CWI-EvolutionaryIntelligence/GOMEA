@@ -8,6 +8,8 @@ from cpython.exc cimport PyErr_CheckSignals
 from tqdm import tqdm
 import inspect
 
+include "Fitness.pyx"
+
 # Create a Cython extension type which holds a C++ instance
 # as an attribute and create a bunch of forwarding methods
 # Python extension type.

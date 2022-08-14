@@ -2,13 +2,11 @@
 # cython: c_string_type=unicode, c_string_encoding=utf8
 
 from RealValuedGOMEA cimport rvg_t, Config
-from Fitness cimport FitnessFunction
 from libcpp.string cimport string
 from libcpp cimport bool
 import inspect
 
-cimport Fitness
-import Fitness 
+include "Fitness.pyx"
 
 # Create a Cython extension type which holds a C++ instance
 # as an attribute and create a bunch of forwarding methods
@@ -90,9 +88,4 @@ cdef class pyRealValuedGOMEA:
 
     def run(self):
         self.c_inst.run()
-
-cdef public int fitness_embedded() except -1:
-    Fitness.fitness_embedded()
-    return 1
-
 

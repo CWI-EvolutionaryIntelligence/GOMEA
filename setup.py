@@ -8,6 +8,7 @@ from setuptools import Extension, setup, find_namespace_packages
 from Cython.Build import cythonize
 import sys
 import glob
+import numpy as np
 
 if sys.version_info[0] == 2:
     raise Exception('Python 2.x is no longer supported')
@@ -62,9 +63,11 @@ setup(
     long_description = long_description,
     long_description_content_type = 'text/markdown',
     ext_modules = cythonize(extensions,
-        include_path = glob.glob("src/*/cython/"),
+        include_path = glob.glob("src/*/cython/") + [np.get_include()],
         gdb_debug = False,
         language_level = "3"),
     zip_safe = False
+    #packages=['fitness'],
+    #package_data={'fitness': ['src/fitness/cython/Fitness.pxd']},
 )
 
