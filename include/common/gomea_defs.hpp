@@ -7,6 +7,7 @@
 #include <map>
 #include <set>
 #include <cassert>
+#include <stdexcept>
 #include <cmath>
 #include <numeric>
 #include <algorithm>

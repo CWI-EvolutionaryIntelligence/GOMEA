@@ -1,6 +1,7 @@
 from libcpp.vector cimport vector
 import numpy as np
 cimport numpy as np
+from numpy.math cimport INFINITY
 
 cdef extern from "fitness/fitness_basic.hpp" namespace "gomea::fitness":
     cdef cppclass fitness_t:

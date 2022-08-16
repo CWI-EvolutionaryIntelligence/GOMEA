@@ -12,19 +12,25 @@ pyFitnessFunction_t::pyFitnessFunction_t( int number_of_parameters, double vtr, 
 
 int pyFitnessFunction_t::getNumberOfSubfunctions()
 {
-	return number_of_parameters;
+	int number_of_subfunctions = gomea_pyfitness_numberOfSubfunctions(py_class);
+	if( number_of_subfunctions == -1 )
+		throw std::runtime_error("FitnessFunction does not implement number_of_subfunctions().");
+	return number_of_subfunctions;
 }
 
 vec_t<int> pyFitnessFunction_t::inputsToSubfunction( int subfunction_index )
 {
-	vec_t<int> dependencies;
-	dependencies.push_back(subfunction_index);
+	vec_t<int> dependencies = gomea_pyfitness_inputsToSubfunction(py_class,subfunction_index);
+	if( dependencies.size() == 0 )
+		throw std::runtime_error("FitnessFunction does not implement inputsToSubfunction(int).");
 	return dependencies;
 }
 		
 double pyFitnessFunction_t::subfunction( int subfunction_index, vec_t<double> &variables )
 {
 	double subf = gomea_pyfitness_subfunction(py_class,subfunction_index,variables);
+	if( subf == 1e308 )
+		throw std::runtime_error("FitnessFunction does not implement subfunction(int).");
 	return subf;
 }
 
