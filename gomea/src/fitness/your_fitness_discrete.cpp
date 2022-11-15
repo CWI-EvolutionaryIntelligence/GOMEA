@@ -1,0 +1,38 @@
+#include "gomea/src/fitness/your_fitness_discrete.hpp"
+
+namespace gomea{
+namespace fitness{
+
+yourFitnessFunctionDiscrete::yourFitnessFunctionDiscrete( int number_of_variables, double vtr ) : customFitnessFunction_t(number_of_variables,vtr) 
+{
+	fprintf(stderr,"yourFitnessFunctionDiscrete(int,double) constructor");
+	this->name = "Your own fitness function (C++)";
+	this->vtr = vtr;
+	assert( number_of_variables % trap_size == 0 );
+	initialize();
+}
+
+int yourFitnessFunctionDiscrete::getNumberOfSubfunctions()
+{
+	return number_of_variables / trap_size;
+}
+
+vec_t<int> yourFitnessFunctionDiscrete::inputsToSubfunction( int subfunction_index )
+{
+	vec_t<int> dependencies;
+	for( int i = 0; i < trap_size; i++ )
+		dependencies.push_back(subfunction_index*trap_size + i);
+	return dependencies;
+}
+
+double yourFitnessFunctionDiscrete::subfunction( int subfunction_index, vec_t<char> &variables )
+{
+	int unitation = 0;
+	for( int i = 0; i < trap_size; i++ )
+		unitation += variables[trap_size * subfunction_index + i];
+	if( unitation == trap_size )
+		return trap_size;
+	return( (double) (trap_size - 1 - unitation) );
+}
+
+}}

@@ -5,6 +5,9 @@ using namespace std;
 #include "gomea/src/discrete/gomeaIMS.hpp"
 #include "gomea/src/discrete/utils.hpp"
 
+namespace gomea{
+namespace discrete{
+
 gomeaIMS::gomeaIMS()
 {
 	return;
@@ -15,6 +18,7 @@ gomeaIMS::gomeaIMS(Config *config_): config(config_)
     maximumNumberOfGOMEAs   = config->maximumNumberOfGOMEAs;
     IMSsubgenerationFactor  = config->IMSsubgenerationFactor;
     basePopulationSize      = config->basePopulationSize;
+	problemInstance 		= config->fitness;
 }
 
 gomeaIMS::~gomeaIMS()
@@ -24,7 +28,7 @@ gomeaIMS::~gomeaIMS()
 		for (int i = 0; i < numberOfGOMEAs; ++i)
 			delete GOMEAs[i];
 
-		delete problemInstance;
+		//delete problemInstance;
 		delete sharedInformationInstance;
 	}
 }
@@ -35,8 +39,7 @@ void gomeaIMS::initialize()
 
 	prepareFolder(config->folder);
     initElitistFile(config->folder);
-    
-	createProblemInstance(config->problemIndex, config->numberOfVariables, config, &problemInstance, config->problemInstancePath);
+
     #ifdef DEBUG
         cout << "Problem Instance created! Problem number is " << config->problemIndex << endl;
     #endif
@@ -66,7 +69,9 @@ void gomeaIMS::run()
 		}
 	}
 	catch( customException const& )
-	{}
+	{
+		hasTerminated = true;
+	}
 }
 
 void gomeaIMS::runGeneration()
@@ -98,7 +103,9 @@ void gomeaIMS::runGeneration()
 			currentGOMEAIndex = minimumGOMEAIndex;
 	}
 	catch( customException const& )
-	{}
+	{
+		hasTerminated = true;
+	}
 }
 
 void gomeaIMS::runGeneration( int GOMEAIndex )
@@ -121,7 +128,7 @@ bool gomeaIMS::checkTermination()
     int i;
 
 	if( checkTimeLimitTerminationCriterion() )
-		return true;
+		hasTerminated = true;
 
     if (numberOfGOMEAs == maximumNumberOfGOMEAs)
     {
@@ -131,10 +138,10 @@ bool gomeaIMS::checkTermination()
                 return false;
         }
 
-        return true;
+		hasTerminated = true;
     }
     
-    return false;
+    return hasTerminated;
 }
 
 bool gomeaIMS::checkTimeLimitTerminationCriterion()
@@ -142,8 +149,8 @@ bool gomeaIMS::checkTimeLimitTerminationCriterion()
 	if( !isInitialized )
 		return( false );
 	if( config->maximumNumberOfSeconds > 0 && getElapsedTime() > config->maximumNumberOfSeconds )
-		return true;
-	return false;
+		hasTerminated = true;
+	return hasTerminated; 
 }
 
 double gomeaIMS::getProgressUntilTermination()
@@ -251,16 +258,12 @@ bool gomeaIMS::checkTerminationGOMEA(int GOMEAIndex)
 		}
 	}
 
-    for (size_t i = 1; i < GOMEAs[GOMEAIndex]->populationSize; i++)
-    {
-        for (size_t j = 0; j < config->numberOfVariables; j++)
-        {
-            if (GOMEAs[GOMEAIndex]->population[i]->genotype[j] != GOMEAs[GOMEAIndex]->population[0]->genotype[j])
-                return false;
-        }
-    }
+	if (!GOMEAs[GOMEAIndex]->allSolutionsAreEqual())
+		return false;
 
 	if( GOMEAIndex == minimumGOMEAIndex )
 		minimumGOMEAIndex = GOMEAIndex+1;
     return true;
 }
+
+}}

@@ -5,10 +5,11 @@
 namespace gomea{
 namespace fitness{
 
-class yourFitnessFunction_t : public customFitnessFunction_t 
+class yourFitnessFunctionRealValued : public customFitnessFunction_t<double> 
 {
 	public:
-		yourFitnessFunction_t( int number_of_parameters, double vtr );
+		yourFitnessFunctionRealValued( int number_of_variables, double vtr );
+		
 		int getNumberOfSubfunctions();
 		vec_t<int> inputsToSubfunction( int subfunction_index );
 		double getLowerRangeBound( int dimension );

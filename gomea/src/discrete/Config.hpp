@@ -11,8 +11,14 @@
 
 using namespace std;
 
-#include "gomea/src/discrete/problems.hpp"
 #include "gomea/src/discrete/FOS.hpp"
+#include "gomea/src/fitness/fitness.hpp"
+#include "gomea/src/fitness/benchmarks-discrete.hpp"
+
+namespace gomea{
+namespace discrete{
+
+typedef gomea::fitness::fitness_t<char> fitness_t;
 
 class Config
 {
@@ -27,6 +33,7 @@ public:
     void printUsage();
     void printOverview();
     
+	fitness_t *fitness;
 	int usePartialEvaluations              = 0,                  
 		useParallelGOM		               = 1,                  
 		useParallelFOSOrder	               = 0,
@@ -41,16 +48,15 @@ public:
 		maximumNumberOfGenerations		   = -1;
 	double maximumNumberOfSeconds = -1;
     double vtr = 1e+308;
-    size_t problemIndex = 0, k = 1, s = 1,   
-        FOSIndex = 0,              
-        numberOfVariables = 10;
+    size_t k = 1, s = 1,   
+        FOSIndex = 0;
 	int GPUIndex = -1;
     int similarityMeasure = 0;
 	int maximumFOSSetSize = -1;
 
     string folder = "test";
-    string problemName,
-           FOSName;
+    //string problemName,
+    string FOSName;
     string problemInstancePath = "";
 
     //long long timelimitMilliseconds = -1,
@@ -64,4 +70,9 @@ public:
         basePopulationSize     = 2;
     
     mt19937 rng;
+
+    private:
+        int problemIndex = 0, numberOfVariables = 10;
 };
+
+}}

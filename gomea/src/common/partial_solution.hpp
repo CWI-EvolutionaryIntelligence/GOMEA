@@ -10,6 +10,7 @@ class partial_solution_t
 	public:
 		vec_t<int> touched_indices;
 		vec_t<T> touched_variables;
+		std::set<int> touched_subfunctions;
 		std::map<int,T> partial_objective_values;
 
 		partial_solution_t( int num_touched_variables );
@@ -19,6 +20,7 @@ class partial_solution_t
 		
 		double getObjectiveValue();
 		double getObjectiveValue( int objective_value_index );
+		vec_t<double> getObjectiveValues();
 		double getConstraintValue();
 
 		void setObjectiveValue( double v );
@@ -35,6 +37,7 @@ class partial_solution_t
 		std::map<int,int> touched_index_map;
 };
 
+template class partial_solution_t<char>;
 template class partial_solution_t<int>;
 template class partial_solution_t<float>;
 template class partial_solution_t<double>;

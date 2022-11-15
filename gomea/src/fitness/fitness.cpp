@@ -5,22 +5,20 @@
 namespace gomea{
 namespace fitness{
 
-fitness_t::fitness_t( int number_of_parameters, double vtr )
-{
-	this->name = "Fitness function (C++)";
-	this->number_of_parameters = number_of_parameters;
-	this->vtr = vtr;
-}
+template<>
+fitness_t<char>::fitness_t( int number_of_variables ) : fitness_t(number_of_variables,0,false,MAX) {}
+template<>
+fitness_t<char>::fitness_t( int number_of_variables, double vtr ) : fitness_t(number_of_variables,vtr,true,MAX) {}
 
-fitness_t *fitness_t::getFitnessClass( int problem_index, int number_of_parameters, double vtr )
-{
-	switch( problem_index )
-	{
-		case 0 : return( new sphereFunction_t( number_of_parameters, vtr ) );
-		case 7 : return( new rosenbrockFunction_t( number_of_parameters, vtr ) );
-		default: return NULL;
-	}
-}
+template<>
+fitness_t<double>::fitness_t( int number_of_variables ) : fitness_t(number_of_variables,0,false,MIN) {}
+template<>
+fitness_t<double>::fitness_t( int number_of_variables, double vtr ) : fitness_t(number_of_variables,vtr,true,MIN) {}
+
+template<class T>
+fitness_t<T>::fitness_t( int number_of_variables, double vtr, bool use_vtr, opt_mode optimization_mode )
+	: name("Fitness function"), number_of_variables(number_of_variables), vtr(vtr), use_vtr(use_vtr), optimization_mode(optimization_mode)
+{}
 
 /**
  * Returns 1 if x is better than y, 0 otherwise.
@@ -29,7 +27,8 @@ fitness_t *fitness_t::getFitnessClass( int problem_index, int number_of_paramete
  * - x is feasible and y is not, or
  * - x and y are both feasible and x has a smaller objective value than y
  */
-short fitness_t::betterFitness( double objective_value_x, double constraint_value_x, double objective_value_y, double constraint_value_y )
+template<class T>
+short fitness_t<T>::betterFitness( double objective_value_x, double constraint_value_x, double objective_value_y, double constraint_value_y )
 {
     short result = 0;
 
@@ -47,7 +46,9 @@ short fitness_t::betterFitness( double objective_value_x, double constraint_valu
             result = 1;
         else /* Both are feasible */
         {
-            if( objective_value_x < objective_value_y )
+            if( optimization_mode == MIN && objective_value_x < objective_value_y )
+                result = 1;
+            else if( optimization_mode == MAX && objective_value_x > objective_value_y )
                 result = 1;
         }
     }
@@ -55,58 +56,26 @@ short fitness_t::betterFitness( double objective_value_x, double constraint_valu
     return( result );
 }
 
-short fitness_t::betterFitness( solution_t<double> *sol_x, solution_t<double> *sol_y ) 
+template<class T>
+short fitness_t<T>::betterFitness( solution_t<T> *sol_x, solution_t<T> *sol_y ) 
 {
 	return( betterFitness( sol_x->getObjectiveValue(), sol_x->getConstraintValue(), sol_y->getObjectiveValue(), sol_y->getConstraintValue() ) );
 }
 
-int fitness_t::getNumberOfSubfunctions()
+template<class T>
+int fitness_t<T>::getNumberOfSubfunctions()
 {
-	return number_of_parameters;
+	return number_of_variables;
 }
 
-double *fitness_t::rotateVariables( double *variables, int num_variables, double **rotation_matrix )
+template<class T>
+void fitness_t<T>::evaluate( solution_t<T> *solution )
 {
-	double *rotated_variables = gomea::utils::matrixVectorMultiplication( rotation_matrix, variables, num_variables, num_variables );
-    return( rotated_variables );
-}
-
-double *fitness_t::rotateVariablesInBlocks( double *variables, int len, int from, int to, double **rotation_matrix )
-{
-	assert( len % rotation_block_size == 0 );
-    int num_blocks = len / rotation_block_size;
-	double *rotated_variables = new double[len];
-    for( int i = 0; i < from; i++ )
-		rotated_variables[i] = variables[i];
-	double *cluster = new double[rotation_block_size];
-    for( int i = 0; i < num_blocks; i++ )
-    {
-        for( int j = 0; j < rotation_block_size; j++ )
-            cluster[j] = variables[from + i*rotation_block_size + j];
-        double *rotated_cluster = gomea::utils::matrixVectorMultiplication( rotation_matrix, cluster, rotation_block_size, rotation_block_size );
-        for( int j = 0; j < rotation_block_size; j++ )
-            rotated_variables[from + i*rotation_block_size + j] = rotated_cluster[j];
-        delete[] rotated_cluster;
-    }
-	delete[] cluster;
-
-    for( int i = to+1; i < len; i++ )
-		rotated_variables[i] = variables[i];
-
-    return( rotated_variables );
-}
-
-void fitness_t::evaluate( solution_t<double> *solution )
-{
-	
 	evaluationFunction( solution );
 	
-	//int out = evaluationEmbedded();
-	//assert( out == 0 );	
-    
 	if( use_vtr && !vtr_hit_status && solution->getConstraintValue() == 0 && solution->getObjectiveValue() <= vtr  )
 	{
-		vtr_hit_status = 1;
+		vtr_hit_status = true;
 		elitist_objective_value = solution->getObjectiveValue();
 		elitist_constraint_value = solution->getConstraintValue();
 	}
@@ -118,7 +87,8 @@ void fitness_t::evaluate( solution_t<double> *solution )
 	}
 }
 
-void fitness_t::evaluatePartialSolutionBlackBox( solution_t<double> *parent, partial_solution_t<double> *solution )
+template<class T>
+void fitness_t<T>::evaluatePartialSolutionBlackBox( solution_t<T> *parent, partial_solution_t<T> *solution )
 {
 	// Make backup of parent
 	double *var_backup = new double[solution->getNumberOfTouchedVariables()];
@@ -144,9 +114,10 @@ void fitness_t::evaluatePartialSolutionBlackBox( solution_t<double> *parent, par
 	delete[] var_backup;
 }
 
-void fitness_t::evaluatePartialSolution( solution_t<double> *parent, partial_solution_t<double> *solution )
+template<class T>
+void fitness_t<T>::evaluatePartialSolution( solution_t<T> *parent, partial_solution_t<T> *solution )
 {
-	if( black_box_optimization || solution->getNumberOfTouchedVariables() == number_of_parameters )
+	if( black_box_optimization || solution->getNumberOfTouchedVariables() == number_of_variables )
 	{
 		evaluatePartialSolutionBlackBox( parent, solution );
 	}
@@ -172,7 +143,7 @@ void fitness_t::evaluatePartialSolution( solution_t<double> *parent, partial_sol
 			evaluatePartialSolutionBlackBox( parent, solution );
 			if( solution->getConstraintValue() == 0 && solution->getObjectiveValue() <= vtr  )
 			{
-				vtr_hit_status = 1;
+				vtr_hit_status = true;
 				elitist_objective_value = solution->getObjectiveValue();
 				elitist_constraint_value = solution->getConstraintValue();
 			}
@@ -186,21 +157,24 @@ void fitness_t::evaluatePartialSolution( solution_t<double> *parent, partial_sol
 	}
 }
 
-void fitness_t::partialEvaluationFunction( solution_t<double> *parent, partial_solution_t<double> *solution )
+template<class T>
+void fitness_t<T>::partialEvaluationFunction( solution_t<T> *parent, partial_solution_t<T> *solution )
 {
 	printf("Partial evaluation function not implemented.\n");
 	exit(0);
 }
 
-void fitness_t::initialize()
+template<class T>
+void fitness_t<T>::initialize()
 {
 	initializeSubfunctionDependencyMap();
 	initializeVariableInteractionGraph();
 }
 
-void fitness_t::initializeSubfunctionDependencyMap()
+template<class T>
+void fitness_t<T>::initializeSubfunctionDependencyMap()
 {
-	for( int i = 0; i < number_of_parameters; i++ )
+	for( int i = 0; i < number_of_variables; i++ )
 	{
 		subfunction_dependency_map[i] = std::set<int>();
 	}
@@ -214,7 +188,8 @@ void fitness_t::initializeSubfunctionDependencyMap()
 	}
 }
 
-vec_t<int> fitness_t::inputsToSubfunction( int subfunction_index )
+template<class T>
+vec_t<int> fitness_t<T>::inputsToSubfunction( int subfunction_index )
 {
 	vec_t<int> dependencies;
 	int parameter_index = subfunction_index;
@@ -222,33 +197,59 @@ vec_t<int> fitness_t::inputsToSubfunction( int subfunction_index )
 	return dependencies;
 }
 
-bool fitness_t::hasVariableInteractionGraph()
+template<class T>
+bool fitness_t<T>::hasVariableInteractionGraph()
 {
 	return( variable_interaction_graph.size() > 0 );
 }
 
-void fitness_t::initializeVariableInteractionGraph() 
+template<class T>
+void fitness_t<T>::initializeVariableInteractionGraph() 
 {
 	return;
 }
 
-double fitness_t::getLowerRangeBound( int dimension )
+
+template<class T>
+vec_t<vec_t<double>> fitness_t<T>::getMIMatrix()
+{
+	assert(0);
+	return( vec_t<vec_t<double>>() );
+}
+
+/*-=-=-=-=-=-=-=-=-=-=-=-=-=-= Section Problems -=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
+template<class T>
+double fitness_t<T>::getLowerRangeBound( int dimension )
+{
+	assert(0);
+	return -1;
+}
+
+template<class T>
+double fitness_t<T>::getUpperRangeBound( int dimension )
+{
+	assert(0);
+	return -1;
+}
+
+template<>
+double fitness_t<double>::getLowerRangeBound( int dimension )
 {
 	return( -INFINITY );
 }
 		
-double fitness_t::getUpperRangeBound( int dimension )
+template<>
+double fitness_t<double>::getUpperRangeBound( int dimension )
 {
 	return( INFINITY );
 }
 
-
-/*-=-=-=-=-=-=-=-=-=-=-=-=-=-= Section Problems -=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 /**
  * Returns whether a parameter is inside the range bound of
  * every problem.
  */
-short fitness_t::isParameterInRangeBounds( double parameter, int dimension )
+template<>
+short fitness_t<double>::isParameterInRangeBounds( double parameter, int dimension )
 {
     if( parameter < getLowerRangeBound( dimension ) ||
 		parameter > getUpperRangeBound( dimension ) ||
@@ -265,7 +266,8 @@ short fitness_t::isParameterInRangeBounds( double parameter, int dimension )
  * before evaluating it (i.e. turns the evaluation functions
  * into rotated evaluation functions).
  */
-double **fitness_t::initializeObjectiveRotationMatrix( double rotation_angle, int rotation_block_size )
+template<>
+double **fitness_t<double>::initializeObjectiveRotationMatrix( double rotation_angle, int rotation_block_size )
 {
     if( rotation_angle == 0.0 )
         return NULL;
@@ -325,7 +327,8 @@ double **fitness_t::initializeObjectiveRotationMatrix( double rotation_angle, in
 	return( rotation_matrix );
 }
 
-void fitness_t::ezilaitiniObjectiveRotationMatrix( double **rotation_matrix, double rotation_angle, int rotation_block_size )
+template<>
+void fitness_t<double>::ezilaitiniObjectiveRotationMatrix( double **rotation_matrix, double rotation_angle, int rotation_block_size )
 {
     int i;
 
@@ -337,15 +340,37 @@ void fitness_t::ezilaitiniObjectiveRotationMatrix( double **rotation_matrix, dou
     delete[] rotation_matrix;
 }
 
-/*int fitness_t::evaluationEmbedded()
+template<>
+double *fitness_t<double>::rotateVariables( double *variables, int num_variables, double **rotation_matrix )
 {
-	if (fitness_embedded() < 0) {
-        PyErr_Print();
-        fprintf(stderr, "Error in Python code, exception was printed.\n");
-		gomea::utils::freePythonEmbedding();
-		exit(1);
+	double *rotated_variables = gomea::utils::matrixVectorMultiplication( rotation_matrix, variables, num_variables, num_variables );
+    return( rotated_variables );
+}
+
+template<>
+double *fitness_t<double>::rotateVariablesInBlocks( double *variables, int len, int from, int to, double **rotation_matrix )
+{
+	assert( len % rotation_block_size == 0 );
+    int num_blocks = len / rotation_block_size;
+	double *rotated_variables = new double[len];
+    for( int i = 0; i < from; i++ )
+		rotated_variables[i] = variables[i];
+	double *cluster = new double[rotation_block_size];
+    for( int i = 0; i < num_blocks; i++ )
+    {
+        for( int j = 0; j < rotation_block_size; j++ )
+            cluster[j] = variables[from + i*rotation_block_size + j];
+        double *rotated_cluster = gomea::utils::matrixVectorMultiplication( rotation_matrix, cluster, rotation_block_size, rotation_block_size );
+        for( int j = 0; j < rotation_block_size; j++ )
+            rotated_variables[from + i*rotation_block_size + j] = rotated_cluster[j];
+        delete[] rotated_cluster;
     }
-	return 0;
-}*/
-		
+	delete[] cluster;
+
+    for( int i = to+1; i < len; i++ )
+		rotated_variables[i] = variables[i];
+
+    return( rotated_variables );
+}
+
 }}

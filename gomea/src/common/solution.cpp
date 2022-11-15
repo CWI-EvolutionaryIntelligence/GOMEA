@@ -19,43 +19,49 @@ solution_t<T>::solution_t( vec_t<T> &variables )
 }
 
 template<class T>
-int solution_t<T>::getNumberOfVariables()
+int solution_t<T>::getNumberOfVariables() const
 {
 	return variables.size();
 }
 
 template<class T>
-int solution_t<T>::getNumberOfObjectives()
+int solution_t<T>::getNumberOfObjectives() const
 {
 	return objective_values.size();
 }
 
 template<class T>
-double solution_t<T>::getObjectiveValue()
+double solution_t<T>::getObjectiveValue() const
 {
 	return objective_values[0];
 }
 
 template<class T>
-double solution_t<T>::getObjectiveValue( int objective_value_index )
+double solution_t<T>::getObjectiveValue( int objective_value_index ) const
 {
 	return objective_values[objective_value_index];
 }
 
 template<class T>
-double solution_t<T>::getConstraintValue()
+vec_t<double> solution_t<T>::getObjectiveValues() const
+{
+	return objective_values;
+}
+
+template<class T>
+double solution_t<T>::getConstraintValue() const
 {
 	return constraint_value;
 }
 
 template<class T>
-double solution_t<T>::getPartialObjectiveValue( int subfunction_index )
+double solution_t<T>::getPartialObjectiveValue( int subfunction_index ) const
 {
 	return partial_objective_values[subfunction_index];
 }
 
 template<class T>
-double solution_t<T>::getPartialConstraintValue( int subfunction_index )
+double solution_t<T>::getPartialConstraintValue( int subfunction_index ) const
 {
 	return partial_constraint_values[subfunction_index];
 }
@@ -70,6 +76,13 @@ template<class T>
 void solution_t<T>::setObjectiveValue( int objective_value_index, double v )
 {
 	objective_values[objective_value_index] = v;
+}
+		
+template<class T>
+void solution_t<T>::setObjectiveValues( vec_t<double> v )
+{
+	for( size_t i = 0; i < objective_values.size(); i++ )
+		setObjectiveValue(i, v[i]);
 }
 
 template<class T>
@@ -110,6 +123,14 @@ void solution_t<T>::insertVariables( vec_t<T> vars_to_insert, vec_t<int> indices
 		int ind = indices_to_insert[i];
 		variables[ind] = vars_to_insert[i];
 	}
+}
+
+template<class T>
+void solution_t<T>::insertPartialSolution( partial_solution_t<T> *solution )
+{
+	insertVariables(solution->touched_variables,solution->touched_indices);
+	setObjectiveValues( solution->getObjectiveValues() );
+	setConstraintValue( solution->getConstraintValue() );
 }
 
 template<class T>

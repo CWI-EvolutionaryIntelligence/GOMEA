@@ -1,5 +1,8 @@
 #include "gomea/src/discrete/Config.hpp"
 
+namespace gomea{
+namespace discrete{
+
 Config::Config()
 {
 	randomSeed = std::chrono::system_clock::now().time_since_epoch().count() % 1000000;
@@ -110,7 +113,6 @@ bool Config::parseCommandLine(int argc, char **argv)
                     s = atoi(tmp[2].c_str());
                     cout << problemIndex << endl;
                 }
-                
             }
             break;
         case 'p':
@@ -159,6 +161,11 @@ bool Config::parseCommandLine(int argc, char **argv)
     printUsage();
     exit(0);
   }
+
+  // TODO
+  // fitness = fitness::getFitnessClassDiscrete(problemIndex,numberOfVariables);
+  assert(0);
+
   return 1;
 }
 
@@ -205,7 +212,7 @@ void Config::printOverview()
   cout << "#\n";
   cout << "###################################################\n";
   cout << "#\n";
-  cout << "# Problem                      = " << problemName << endl;
+  cout << "# Problem                      = " << fitness->name << endl;
   cout << "# Problem Instance Filename    = " << problemInstancePath << endl;
   cout << "# FOS                          = " << FOSName << endl;
   cout << "# Number of variables          = " << numberOfVariables << endl;
@@ -219,12 +226,6 @@ void Config::printOverview()
 
 void Config::checkOptions()
 {
-    if (!problemNameByIndex(this, problemName))
-    {
-        cerr << "No problem with index " << problemIndex << " installed!\n";
-        exit(0);
-    }
-
     if (!FOSNameByIndex(FOSIndex, FOSName))
     {
         cerr << "No FOS with index " << FOSIndex << " installed!\n";
@@ -232,4 +233,4 @@ void Config::checkOptions()
     }
 }
 
-
+}}

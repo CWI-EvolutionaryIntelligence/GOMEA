@@ -5,5 +5,10 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"files.associations": {
+			"chrono": "cpp"
+		},
+		"python.terminal.executeInFileDir": true
+	}
 }

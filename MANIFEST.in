@@ -1,1 +1,2 @@
-include src/cython/*pxd
+include src/gomea/cython/*pxd
+include src/fitness/cython/*pxd

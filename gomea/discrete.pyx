@@ -8,6 +8,9 @@ from cpython.exc cimport PyErr_CheckSignals
 from tqdm import tqdm
 import inspect
 
+from gomea.fitness cimport FitnessFunction, PythonFitnessFunction
+include "gomea/EmbeddedFitness.pxi"
+
 # Create a Cython extension type which holds a C++ instance
 # as an attribute and create a bunch of forwarding methods
 # Python extension type.
@@ -16,9 +19,8 @@ cdef class DiscreteGOMEA:
     cdef Config c_config
 
     def __cinit__(self,
-        # Required settings
-        problem_index: int,
-        number_of_variables: int,
+        # Optimization problem settings (required)
+        fitness: FitnessFunction, 
         # Optional settings
         folder: string=string(b"test"),
         maximum_number_of_GOMEAs: int=25,
@@ -39,8 +41,7 @@ cdef class DiscreteGOMEA:
             #setattr(self, arg, val)
 
         self.c_config = Config()
-        self.c_config.problemIndex = problem_index
-        self.c_config.numberOfVariables = number_of_variables
+        self.c_config.fitness = (<FitnessFunction?>fitness).c_inst_discrete
         self.c_config.folder = folder
         self.c_config.maximumNumberOfGOMEAs = maximum_number_of_GOMEAs
         self.c_config.IMSsubgenerationFactor = IMS_subgeneration_factor
@@ -59,7 +60,9 @@ cdef class DiscreteGOMEA:
         return self.c_inst.getProgressUntilTermination()
 
     def check_termination(self):
-        return self.c_inst.checkTermination()
+        cdef bool t = self.c_inst.checkTermination()
+        #print("TERMINATION: ",t)
+        return t
 
     def run_generation(self):
         self.c_inst.runGeneration()
@@ -71,11 +74,17 @@ cdef class DiscreteGOMEA:
     def update_progress_bar(self, progress_bar):
         progress_bar.n = self.get_progress()
         progress_bar.refresh()
-
+    
     def run(self):
+        self.c_inst.run()
+
+    def run_with_progress(self):
         with self.init_progress_bar() as progress_bar:
             while( not self.check_termination() ):
                 self.run_generation()
                 self.update_progress_bar(progress_bar)
-                PyErr_CheckSignals()
+                #print("PyErr:",PyErr_CheckSignals() )
+                if( PyErr_CheckSignals() == -1 ):
+                    break
+            self.update_progress_bar(progress_bar)
         #self.c_inst.run()

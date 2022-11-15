@@ -5,7 +5,10 @@
 using namespace std;
 
 #include "gomea/src/discrete/utils.hpp"
-#include "gomea/src/discrete/time.hpp"
+#include "gomea/src/utils/time.hpp"
+
+namespace gomea{
+namespace discrete{
 
 class sharedInformation
 {
@@ -18,7 +21,7 @@ class sharedInformation
 		solutionsArchive *evaluatedSolutions;
 		bool firstEvaluationEver;
 		double elitistFitness;
-		Individual elitist;
+		Individual elitist = Individual(1,2);
 
     sharedInformation(int maxArchiveSize)
     {
@@ -33,3 +36,5 @@ class sharedInformation
         delete evaluatedSolutions;
     }
 };
+
+}}

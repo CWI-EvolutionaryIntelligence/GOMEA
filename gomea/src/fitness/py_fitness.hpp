@@ -7,18 +7,24 @@
 namespace gomea{
 namespace fitness{
 
-class pyFitnessFunction_t : public customFitnessFunction_t 
+template<class T>
+class pyFitnessFunction_t : public customFitnessFunction_t<T>
 {
 	public:
+		pyFitnessFunction_t( int number_of_parameters, PyObject *obj );
 		pyFitnessFunction_t( int number_of_parameters, double vtr, PyObject *obj );
 		int getNumberOfSubfunctions();
 		vec_t<int> inputsToSubfunction( int subfunction_index );
+		
 		double getLowerRangeBound( int dimension );
 		double getUpperRangeBound( int dimension );
-
-	private:
+	
+	protected:
 		PyObject *py_class;
-		double subfunction( int subfunction_index, vec_t<double> &variables );
+		double subfunction( int subfunction_index, vec_t<T> &variables );
 };
+
+template class pyFitnessFunction_t<char>;
+template class pyFitnessFunction_t<double>;
 
 }}

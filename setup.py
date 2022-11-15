@@ -17,7 +17,7 @@ with open("README.md", 'r') as f:
     long_description = f.read()
 
 common_src = glob.glob("gomea/src/common/*.cpp") + glob.glob("gomea/src/utils/*.cpp")
-fitness_src = glob.glob("gomea/src/fitness/*.cpp") + glob.glob("gomea/src/fitness/benchmarks-rv/*.cpp")
+fitness_src = glob.glob("gomea/src/fitness/*.cpp") + glob.glob("gomea/src/fitness/benchmarks-rv/*.cpp") + glob.glob("gomea/src/fitness/benchmarks-discrete/*.cpp")
 
 extensions = []
 
@@ -62,6 +62,8 @@ setup(
         include_path = ["."] + [np.get_include()],
         gdb_debug = False,
         language_level = "3"),
+    #packages=['src/fitness'],
+    #package_data={'src/fitness': ['src/fitness/cython/Fitness.pxd']},
     zip_safe = False
 )
 

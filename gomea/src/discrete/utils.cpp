@@ -1,5 +1,8 @@
 #include "gomea/src/discrete/utils.hpp"
 
+namespace gomea{
+namespace discrete{
+
 void prepareFolder(string &folder)
 {
     if (!filesystem::exists(folder))
@@ -43,7 +46,7 @@ void writeStatisticsToFile(string &folder, long long numberOfEvaluations, long l
         exit(0);
     }
 
-    outFile << (int)numberOfEvaluations << " " << fixed << setprecision(3) << time/1000.0 << " " <<  setprecision(6) << solution->fitness;
+    outFile << (int)numberOfEvaluations << " " << fixed << setprecision(3) << time/1000.0 << " " <<  setprecision(6) << solution->getObjectiveValue();
     outFile << endl;
 
     outFile.close();
@@ -58,9 +61,9 @@ void writeElitistSolutionToFile(string &folder, long long numberOfEvaluations, l
         exit(0);
     }
 
-    outFile << (int)numberOfEvaluations << " " << fixed << setprecision(3) << time/1000.0 << " " <<  setprecision(6) << solution->fitness << " ";
-    for (size_t i = 0; i < solution->genotype.size(); ++i)
-        outFile << +solution->genotype[i];
+    outFile << (int)numberOfEvaluations << " " << fixed << setprecision(3) << time/1000.0 << " " <<  setprecision(6) << solution->getObjectiveValue() << " ";
+    for (size_t i = 0; i < solution->getNumberOfVariables(); ++i)
+        outFile << +solution->variables[i];
     outFile << endl;
 
     outFile.close();
@@ -90,12 +93,6 @@ void solutionsArchive::insertSolution(vector<char> &genotype, double fitness)
     archive.insert(pair<vector<char>, double> (genotype, fitness));
 }
 
-bool isPowerOfK(int n, int k)
-{
-    double logNBaseK = log(n) / log(k);
-    return (ceil(logNBaseK) == floor(logNBaseK));
-}
-
 std::chrono::high_resolution_clock::time_point start_time;
 double getElapsedTime()
 {
@@ -111,3 +108,4 @@ void startTimer()
 	getElapsedTime();
 }
 
+}}

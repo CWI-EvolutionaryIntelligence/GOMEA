@@ -16,6 +16,10 @@
 using namespace std;
 
 #include "gomea/src/discrete/Individual.hpp"
+#include "gomea/src/common/gomea_defs.hpp"
+
+namespace gomea{
+namespace discrete{
 
 typedef std::chrono::time_point<std::chrono::steady_clock> chtime;
 
@@ -65,7 +69,7 @@ void initElitistFile(string &folder);
 void writeStatisticsToFile(string &folder, long long numberOfEvaluations, long long time, Individual *solution);
 void writeElitistSolutionToFile(string &folder, long long numberOfEvaluations, long long time, Individual *solution);
 
-bool isPowerOfK(int n, int k);
-
 void startTimer();
 double getElapsedTime();
+
+}}

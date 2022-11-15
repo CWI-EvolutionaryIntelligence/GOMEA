@@ -43,7 +43,7 @@
 namespace gomea{
 namespace realvalued{
 
-typedef gomea::fitness::fitness_t fitness_t;
+typedef gomea::fitness::fitness_t<double> fitness_t;
 
 class Config {
 	public:
@@ -52,10 +52,9 @@ class Config {
 
 		/*-=-=-=-=-=-=-=-=-=-=-=- Options -=-=-=-=-=-=-=-=-=-=-=-=-*/
 		int problem_index;
-		//, number_of_parameters;
+		bool   use_vtr;
 		short  print_verbose_overview,                              /* Whether to print a overview of settings (0 = no). */
 			   fix_seed,                                            /* Whether a fixed seed is used. */
-			   use_vtr,
 			   black_box_evaluations,                         /* Whether full (black-box) evaluations must always be performed. */
 			   write_generational_statistics,                 /* Whether to compute and write statistics every generation (0 = no). */
 			   write_generational_solutions,                  /* Whether to write the population every generation (0 = no). */

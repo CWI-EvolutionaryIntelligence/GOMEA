@@ -43,7 +43,7 @@ namespace fitness{
 
 using namespace gomea;
 
-rosenbrockFunction_t::rosenbrockFunction_t( int number_of_parameters, double vtr ) : fitness_t(number_of_parameters,vtr)
+rosenbrockFunction_t::rosenbrockFunction_t( int number_of_variables, double vtr ) : fitness_t(number_of_variables,vtr)
 {
 	this->name = "Rosenbrock function";
 	if( !black_box_optimization )
@@ -52,13 +52,13 @@ rosenbrockFunction_t::rosenbrockFunction_t( int number_of_parameters, double vtr
 
 int rosenbrockFunction_t::getNumberOfSubfunctions()
 {
-	return number_of_parameters-1;
+	return number_of_variables-1;
 }
 
 void rosenbrockFunction_t::evaluationFunction( solution_t<double> *solution )
 {
 	double result = 0.0;
-	for( int i = 0; i < number_of_parameters-1; i++ )
+	for( int i = 0; i < number_of_variables-1; i++ )
 		result += subfunction( solution->variables[i], solution->variables[i+1] );
 
 	solution->setObjectiveValue(result);
@@ -144,12 +144,12 @@ double rosenbrockFunction_t::subfunction( double x, double y )
 
 void rosenbrockFunction_t::initializeVariableInteractionGraph()
 {
-	for( int i = 0; i < number_of_parameters; i++ )
+	for( int i = 0; i < number_of_variables; i++ )
 	{
 		std::set<int> dependent_vars; 
 		if( i > 0 )
 			dependent_vars.insert(i-1);
-		if( i < number_of_parameters-1 )
+		if( i < number_of_variables-1 )
 			dependent_vars.insert(i+1);
 		variable_interaction_graph[i] = dependent_vars;
 	}

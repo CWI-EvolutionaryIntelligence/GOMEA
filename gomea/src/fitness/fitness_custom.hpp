@@ -10,15 +10,20 @@
 namespace gomea{
 namespace fitness{
 
-class customFitnessFunction_t : public fitness_t 
+template<class T>
+class customFitnessFunction_t : public fitness_t<T> 
 {
 	public:
+		customFitnessFunction_t( int number_of_parameters );
 		customFitnessFunction_t( int number_of_parameters, double vtr );
 
 	private:
-		void evaluationFunction( solution_t<double> *solution );
-		void partialEvaluationFunction( solution_t<double> *parent, partial_solution_t<double> *solution );
-		virtual double subfunction( int subfunction_index, vec_t<double> &variables ) = 0;
+		void evaluationFunction( solution_t<T> *solution );
+		void partialEvaluationFunction( solution_t<T> *parent, partial_solution_t<T> *solution );
+		virtual double subfunction( int subfunction_index, vec_t<T> &variables ) = 0;
 };
+
+template class customFitnessFunction_t<char>;
+template class customFitnessFunction_t<double>;
 
 }}

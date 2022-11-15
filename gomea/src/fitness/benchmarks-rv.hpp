@@ -10,10 +10,10 @@
 namespace gomea{
 namespace fitness{
 
-class sphereFunction_t : public fitness_t 
+class sphereFunction_t : public fitness_t<double>
 {
 	public:
-		sphereFunction_t( int number_of_parameters, double vtr );
+		sphereFunction_t( int number_of_variables, double vtr );
 		
 	private:
 		void evaluationFunction( solution_t<double> *solution );
@@ -21,10 +21,10 @@ class sphereFunction_t : public fitness_t
 		double subfunction( double x );
 };
 
-class rosenbrockFunction_t : public fitness_t 
+class rosenbrockFunction_t : public fitness_t<double>
 {
 	public:
-		rosenbrockFunction_t( int number_of_parameters, double vtr );
+		rosenbrockFunction_t( int number_of_variables, double vtr );
 
 		int getNumberOfSubfunctions();
 

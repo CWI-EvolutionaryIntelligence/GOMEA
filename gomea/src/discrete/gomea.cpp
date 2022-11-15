@@ -1,5 +1,8 @@
 #include "gomea/src/discrete/gomea.hpp"
 
+namespace gomea{
+namespace discrete{
+
 double GOMEA::readVTR(Config *config)
 {
     string filename = config->folder + "/vtr.txt";
@@ -14,3 +17,5 @@ double GOMEA::readVTR(Config *config)
 
     return vtr;
 }
+
+}}

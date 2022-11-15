@@ -3,60 +3,41 @@
 #include <iostream> 
 #include <vector>
 #include <random>
+#include "gomea/src/common/solution.hpp"
 using namespace std;
 
-class Individual
+namespace gomea{
+namespace discrete{
+
+class Individual : public gomea::solution_t<char>
 {
 public:
-    size_t numberOfVariables;
     size_t alphabetSize;
-    vector<char> genotype;
-    double fitness;
 
-    Individual() {};
-
-    Individual(size_t numberOfVariables_, size_t alphabetSize_): numberOfVariables(numberOfVariables_), alphabetSize(alphabetSize_)
+    Individual(size_t numberOfVariables_, size_t alphabetSize_): solution_t(numberOfVariables_), alphabetSize(alphabetSize_)
     {
-        genotype.resize(numberOfVariables_);
-        fill(genotype.begin(), genotype.end(), 0);
-    }
-
-    Individual(vector<char> &genotype_, double fitness_): fitness(fitness_)
-    {
-        numberOfVariables = genotype_.size();
-        genotype.resize(numberOfVariables);
-        copy(genotype_.begin(), genotype_.end(), genotype.begin());
+        fill(variables.begin(), variables.end(), 0);
     }
 
     void randomInit(mt19937 *rng)
     {
-        for (size_t i = 0; i < numberOfVariables; ++i)
+        for (size_t i = 0; i < getNumberOfVariables(); ++i)
         {
-            genotype[i] = (*rng)() % alphabetSize;
+            variables[i] = (*rng)() % alphabetSize;
         }
     }
 
     friend ostream & operator << (ostream &out, const Individual &individual);
 
-    Individual& operator=(const Individual& other)
-    {
-        alphabetSize = other.alphabetSize;
-        numberOfVariables = other.numberOfVariables;
-
-        genotype = other.genotype;
-        fitness = other.fitness;
-
-        return *this;
-    }
-
     bool operator==(const Individual& solutionB)
     {
-        for (size_t i = 0; i < numberOfVariables; ++i)
+        for (size_t i = 0; i < getNumberOfVariables(); ++i)
         {
-            if (this->genotype[i] != solutionB.genotype[i])
+            if (this->variables[i] != solutionB.variables[i])
                 return false;
         }
         return true;
     }
 };
 
+}}

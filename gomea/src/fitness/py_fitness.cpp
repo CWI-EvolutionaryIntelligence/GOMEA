@@ -3,14 +3,24 @@
 namespace gomea{
 namespace fitness{
 
-pyFitnessFunction_t::pyFitnessFunction_t( int number_of_parameters, double vtr, PyObject *obj ) : customFitnessFunction_t(number_of_parameters,vtr)
+template<class T>
+pyFitnessFunction_t<T>::pyFitnessFunction_t( int number_of_parameters, PyObject *obj ) : customFitnessFunction_t<T>(number_of_parameters)
 {
 	this->name = "Your own fitness function (Python)";
 	this->py_class = obj;
-	initialize();
+	this->initialize();
 }
 
-int pyFitnessFunction_t::getNumberOfSubfunctions()
+template<class T>
+pyFitnessFunction_t<T>::pyFitnessFunction_t( int number_of_parameters, double vtr, PyObject *obj ) : customFitnessFunction_t<T>(number_of_parameters,vtr)
+{
+	this->name = "Your own fitness function (Python)";
+	this->py_class = obj;
+	this->initialize();
+}
+
+template<class T>
+int pyFitnessFunction_t<T>::getNumberOfSubfunctions()
 {
 	int number_of_subfunctions = gomea_pyfitness_numberOfSubfunctions(py_class);
 	if( number_of_subfunctions == -1 )
@@ -18,28 +28,55 @@ int pyFitnessFunction_t::getNumberOfSubfunctions()
 	return number_of_subfunctions;
 }
 
-vec_t<int> pyFitnessFunction_t::inputsToSubfunction( int subfunction_index )
+template<class T>
+vec_t<int> pyFitnessFunction_t<T>::inputsToSubfunction( int subfunction_index )
 {
 	vec_t<int> dependencies = gomea_pyfitness_inputsToSubfunction(py_class,subfunction_index);
 	if( dependencies.size() == 0 )
 		throw std::runtime_error("FitnessFunction does not implement inputsToSubfunction(int).");
 	return dependencies;
 }
-		
-double pyFitnessFunction_t::subfunction( int subfunction_index, vec_t<double> &variables )
+
+template<>	
+double pyFitnessFunction_t<double>::subfunction( int subfunction_index, vec_t<double> &variables )
 {
-	double subf = gomea_pyfitness_subfunction(py_class,subfunction_index,variables);
+	double subf = gomea_pyfitness_subfunction_realvalued(py_class,subfunction_index,variables);
 	if( subf == 1e308 )
 		throw std::runtime_error("FitnessFunction does not implement subfunction(int).");
 	return subf;
 }
 
-double pyFitnessFunction_t::getLowerRangeBound( int dimension )
+template<>	
+double pyFitnessFunction_t<char>::subfunction( int subfunction_index, vec_t<char> &variables )
+{
+	double subf = gomea_pyfitness_subfunction_discrete(py_class,subfunction_index,variables);
+	if( subf == 1e308 )
+		throw std::runtime_error("FitnessFunction does not implement subfunction(int).");
+	return subf;
+}
+
+template<class T>
+double pyFitnessFunction_t<T>::getLowerRangeBound( int dimension )
+{
+	assert(0);
+	return( -1 );
+}
+
+template<class T>	
+double pyFitnessFunction_t<T>::getUpperRangeBound( int dimension )
+{
+	assert(0);
+	return( -1 );
+}
+
+template<>
+double pyFitnessFunction_t<double>::getLowerRangeBound( int dimension )
 {
 	return( -1000 );
 }
-		
-double pyFitnessFunction_t::getUpperRangeBound( int dimension )
+
+template<>	
+double pyFitnessFunction_t<double>::getUpperRangeBound( int dimension )
 {
 	return( 1000 );
 }

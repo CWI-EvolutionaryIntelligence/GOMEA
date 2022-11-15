@@ -10,6 +10,8 @@ namespace gomea{
 	vec_t<int> getSortedOrder( vec_t<int> &data );
 	//template vec_t<int> getSortedOrder( vec_t<float> &data );
 	//template vec_t<int> getSortedOrder( vec_t<double> &data );
+
+	bool isPowerOfK(int n, int k);
 	
 	}
 }

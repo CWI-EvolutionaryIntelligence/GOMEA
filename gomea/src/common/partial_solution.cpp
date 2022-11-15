@@ -38,6 +38,12 @@ double partial_solution_t<T>::getObjectiveValue( int objective_value_index )
 }
 
 template<class T>
+vec_t<double> partial_solution_t<T>::getObjectiveValues()
+{
+	return objective_values;
+}
+
+template<class T>
 double partial_solution_t<T>::getConstraintValue()
 {
 	return constraint_value;

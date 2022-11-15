@@ -48,4 +48,11 @@ double vectorDotProduct( double *vector0, double *vector1, int n0 )
     return( result );
 }
 
+bool isPowerOfK(int n, int k)
+{
+    double logNBaseK = log(n) / log(k);
+    return (ceil(logNBaseK) == floor(logNBaseK));
+}
+
+
 }}

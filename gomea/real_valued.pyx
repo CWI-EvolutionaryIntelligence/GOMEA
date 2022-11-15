@@ -50,7 +50,7 @@ cdef class RealValuedGOMEA:
         # Initialize attributes 
         self.c_config = Config()
         self.c_config.problem_index = 0 
-        self.c_config.fitness = (<FitnessFunction?>fitness).c_inst 
+        self.c_config.fitness = (<FitnessFunction?>fitness).c_inst_realvalued
         self.c_config.use_vtr = 0
         self.c_config.vtr = 0.0
         #if value_to_reach > -1e100:

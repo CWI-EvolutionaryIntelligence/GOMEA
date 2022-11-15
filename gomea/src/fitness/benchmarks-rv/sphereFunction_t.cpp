@@ -43,7 +43,7 @@ namespace fitness{
 
 using namespace gomea;
 
-sphereFunction_t::sphereFunction_t( int number_of_parameters, double vtr ) : fitness_t(number_of_parameters,vtr)
+sphereFunction_t::sphereFunction_t( int number_of_variables, double vtr ) : fitness_t(number_of_variables,vtr)
 {
 	this->name = "Sphere function";
 }

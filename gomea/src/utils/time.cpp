@@ -1,4 +1,4 @@
-#include "gomea/src/discrete/time.hpp"
+#include "gomea/src/utils/time.hpp"
 
 long long getTimestamp()
 {

@@ -2,6 +2,8 @@
 #include "gomea/src/discrete/gomea.hpp"
 #include "gomea/src/discrete/gomeaIMS.hpp"
 
+namespace gomea{
+namespace discrete{
 
 int main(int argc, char **argv)
 {
@@ -26,3 +28,5 @@ int main(int argc, char **argv)
     
     return 0;
 }
+
+}}

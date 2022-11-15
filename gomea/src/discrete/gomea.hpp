@@ -6,6 +6,9 @@ using namespace std;
 
 #include "gomea/src/discrete/Config.hpp"
 
+namespace gomea{
+namespace discrete{
+
 class GOMEA
 {
 public:
@@ -14,3 +17,5 @@ public:
 
     double readVTR(Config *config);
 };
+
+}}
