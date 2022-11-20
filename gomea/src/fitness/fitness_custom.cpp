@@ -18,16 +18,23 @@ customFitnessFunction_t<T>::customFitnessFunction_t( int number_of_variables, do
 template<class T>
 void customFitnessFunction_t<T>::evaluationFunction( solution_t<T> *solution )
 {
-	double result = 0.0;
+	solution->clearFitnessBuffers();
 	for( int i = 0; i < this->getNumberOfSubfunctions(); i++ )
 	{
+		int buffer_index = this->getIndexOfFitnessBuffer(i);
 		double fsub = subfunction( i, solution->variables );
 		//solution->setPartialObjectiveValue(i,fsub);
-		result += fsub;
+		solution->addToFitnessBuffer(buffer_index, fsub);
 	}
 
-	solution->setObjectiveValue(result);
-	solution->setConstraintValue(0);
+	for( int i = 0; i < this->number_of_objectives; i++ )
+	{
+		double ffitness = mappingFunction( i, solution );
+		solution->setObjectiveValue(ffitness);
+	}
+	double fcons = mappingFunctionConstraintValue(solution);
+	solution->setConstraintValue(fcons);
+
 	this->full_number_of_evaluations++;
 	this->number_of_evaluations++;
 }
@@ -35,6 +42,8 @@ void customFitnessFunction_t<T>::evaluationFunction( solution_t<T> *solution )
 template<class T>
 void customFitnessFunction_t<T>::partialEvaluationFunction( solution_t<T> *parent, partial_solution_t<T> *solution )
 {
+	solution->resetFitnessBuffers();
+
 	std::set<int> touched_subfunctions;
 	for( int ind : solution->touched_indices )
 	{
@@ -48,6 +57,8 @@ void customFitnessFunction_t<T>::partialEvaluationFunction( solution_t<T> *paren
 	{
 		double subf_result = subfunction( subfunction_index, parent->variables );
 		objective_value_delta -= subf_result; 
+		int buffer_index = this->getIndexOfFitnessBuffer(subfunction_index);
+		solution->subtractFromFitnessBuffer( buffer_index, subf_result );
 	}
 	
 	// Create backup of parent variables before modification
@@ -60,15 +71,69 @@ void customFitnessFunction_t<T>::partialEvaluationFunction( solution_t<T> *paren
 		double subf_result = subfunction( subfunction_index, parent->variables );
 		//solution->partial_objective_values[subfunction_index] = subf_result;
 		objective_value_delta += subf_result;
+		int buffer_index = this->getIndexOfFitnessBuffer(subfunction_index);
+		solution->addToFitnessBuffer( buffer_index, subf_result );
 	}
 
 	// Return parent to original state
 	parent->insertVariables(partial_backup, solution->touched_indices);
-	
+
+	// Update fitness of partial solution
 	solution->setObjectiveValue(parent->getObjectiveValue() + objective_value_delta);
 	solution->setConstraintValue(parent->getConstraintValue());
+
+	// Add parent buffer for final result of buffer	
+	vec_t<double> parent_buffers = parent->fitness_buffers;
+	for( size_t i = 0; i < parent_buffers.size(); i++ )
+		solution->addToFitnessBuffer(i,parent_buffers[i]);
+
+	// Apply mapping function
+	for( int i = 0; i < this->number_of_objectives; i++ )
+	{
+		double ffitness = mappingFunction( i, solution );
+		solution->setObjectiveValue(ffitness);
+	}
+	double fcons = mappingFunctionConstraintValue(solution);
+	solution->setConstraintValue(fcons);
+
 	this->full_number_of_evaluations++;
 	this->number_of_evaluations += touched_subfunctions.size() / (double) this->getNumberOfSubfunctions();
+}
+
+template<class T>
+double customFitnessFunction_t<T>::mappingFunction( int objective_index, solution_t<T> *solution )
+{
+	return mappingFunction(objective_index,solution->fitness_buffers);
+}
+
+template<class T>
+double customFitnessFunction_t<T>::mappingFunction( int objective_index, partial_solution_t<T> *solution )
+{
+	return mappingFunction(objective_index,solution->fitness_buffers);
+}
+
+template<class T>
+double customFitnessFunction_t<T>::mappingFunction( int objective_index, vec_t<double> &fitness_buffers )
+{
+	return fitness_buffers[objective_index];
+}
+
+template<class T>
+double customFitnessFunction_t<T>::mappingFunctionConstraintValue( solution_t<T> *solution )
+{
+	return mappingFunctionConstraintValue(solution->fitness_buffers);
+}
+
+template<class T>
+double customFitnessFunction_t<T>::mappingFunctionConstraintValue( partial_solution_t<T> *solution )
+{
+	return mappingFunctionConstraintValue(solution->fitness_buffers);
+}
+
+template<class T>
+double customFitnessFunction_t<T>::mappingFunctionConstraintValue( vec_t<double> &fitness_buffers )
+{
+	return 0;
 }
 
 }}

@@ -43,8 +43,13 @@ cdef class FitnessFunction:
 
 cdef class PythonFitnessFunction(FitnessFunction):
     cpdef subfunction( self, int subfunction_index, np.ndarray variables )
+    cpdef mapping_function( self, int objective_index, np.ndarray fitness_buffers )
+    cpdef mapping_function_constraint_value( self, np.ndarray fitness_buffers )
     cpdef inputs_to_subfunction( self, int )
     cpdef number_of_subfunctions( self )
+
+    cpdef number_of_fitness_buffers( self )
+    cpdef fitness_buffer_index_for_subfunction( self, int ) 
 
 cdef class PythonFitnessFunctionDiscrete(PythonFitnessFunction):
     pass

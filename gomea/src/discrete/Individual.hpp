@@ -14,7 +14,7 @@ class Individual : public gomea::solution_t<char>
 public:
     size_t alphabetSize;
 
-    Individual(size_t numberOfVariables_, size_t alphabetSize_): solution_t(numberOfVariables_), alphabetSize(alphabetSize_)
+    Individual(size_t numberOfVariables_, size_t alphabetSize_ ): solution_t(numberOfVariables_), alphabetSize(alphabetSize_)
     {
         fill(variables.begin(), variables.end(), 0);
     }

@@ -63,7 +63,6 @@ rvg_t::rvg_t( Config *config )
     random_linkage_tree = 0;
     haveNextNextGaussian = 0;
 
-    printf("TEST : vtr=%10.3e\n",config->fitness->vtr);
     if( use_guidelines )
     {
         config->tau                              = 0.35;
@@ -986,7 +985,8 @@ void rvg_t::runAllPopulations()
  */
 void rvg_t::run( void )
 {
-    //int out = gomea::utils::initializePythonEmbedding("RealValuedGOMEA", PyInit_gomea);
+    printf("Running RV-GOMEA\n");
+
     int out = gomea::utils::initializePythonEmbedding("gomea", PyInit_real_valued);
     assert(out == 0);
 

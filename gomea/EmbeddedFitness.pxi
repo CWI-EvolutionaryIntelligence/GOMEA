@@ -29,6 +29,28 @@ cdef public double gomea_pyfitness_subfunction_discrete(obj, int subfunction_ind
     cdef double subf = fitness_obj.subfunction(subfunction_index,npvars)
     return subf
 
+cdef public double gomea_pyfitness_mapping_function(obj, int objective_index, vector[double] &fitness_buffers ):
+    fitness_obj = <PythonFitnessFunction?>obj
+    
+    cdef void *vec_ptr = &fitness_buffers[0]
+    cdef np.npy_intp shape[1]
+    shape[0] = <np.npy_intp> fitness_buffers.size()
+    npvars = np.PyArray_SimpleNewFromData(1, shape, np.NPY_FLOAT64, vec_ptr)
+    
+    cdef double result = fitness_obj.mapping_function(objective_index,npvars)
+    return result
+
+cdef public double gomea_pyfitness_mapping_function_constraint_value(obj, vector[double] &fitness_buffers ):
+    fitness_obj = <PythonFitnessFunction?>obj
+    
+    cdef void *vec_ptr = &fitness_buffers[0]
+    cdef np.npy_intp shape[1]
+    shape[0] = <np.npy_intp> fitness_buffers.size()
+    npvars = np.PyArray_SimpleNewFromData(1, shape, np.NPY_FLOAT64, vec_ptr)
+    
+    cdef double result = fitness_obj.gomea_pyfitness_mapping_function_constraint_value(npvars)
+    return result 
+
 cdef public vector[int] gomea_pyfitness_inputsToSubfunction(obj, int subfunction_index ):
     fitness_obj = <PythonFitnessFunction?>obj
     cdef np.ndarray indices = fitness_obj.inputs_to_subfunction(subfunction_index)
@@ -38,6 +60,11 @@ cdef public vector[int] gomea_pyfitness_inputsToSubfunction(obj, int subfunction
     return vec
 
 cdef public int gomea_pyfitness_numberOfSubfunctions(obj):
+    fitness_obj = <PythonFitnessFunction?>obj
+    cdef int n = fitness_obj.number_of_subfunctions()
+    return n
+
+cdef public int gomea_pyfitness_(obj):
     fitness_obj = <PythonFitnessFunction?>obj
     cdef int n = fitness_obj.number_of_subfunctions()
     return n

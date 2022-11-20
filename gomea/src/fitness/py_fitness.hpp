@@ -15,6 +15,9 @@ class pyFitnessFunction_t : public customFitnessFunction_t<T>
 		pyFitnessFunction_t( int number_of_parameters, double vtr, PyObject *obj );
 		int getNumberOfSubfunctions();
 		vec_t<int> inputsToSubfunction( int subfunction_index );
+
+		double mappingFunction( int objective_index, vec_t<double> &fitness_buffers );
+		double mappingFunctionConstraintValue( int objective_index, vec_t<double> &fitness_buffers );
 		
 		double getLowerRangeBound( int dimension );
 		double getUpperRangeBound( int dimension );

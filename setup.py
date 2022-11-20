@@ -19,22 +19,30 @@ with open("README.md", 'r') as f:
 common_src = glob.glob("gomea/src/common/*.cpp") + glob.glob("gomea/src/utils/*.cpp")
 fitness_src = glob.glob("gomea/src/fitness/*.cpp") + glob.glob("gomea/src/fitness/benchmarks-rv/*.cpp") + glob.glob("gomea/src/fitness/benchmarks-discrete/*.cpp")
 
+compile_args_debug = ["-std=c++17","-UNDEBUG","-g"]
+link_args_debug = ["-std=c++17","-UNDEBUG","-g"]
+compile_args_release = ["-std=c++17","-O3"]
+link_args_release = ["-std=c++17","-O3"]
+compile_args = compile_args_release
+link_args = link_args_release
+
+
 extensions = []
 
 extensions.append( Extension("gomea.discrete",
         ["gomea/discrete.pyx"] + glob.glob("gomea/src/discrete/*.cpp") + common_src + fitness_src,
         include_dirs=["."],
         language="c++",
-        extra_compile_args=["-std=c++17"],
-        extra_link_args=["-std=c++17"])
+        extra_compile_args=compile_args,
+        extra_link_args=link_args)
 )
 
 extensions.append( Extension("gomea.real_valued",
         ["gomea/real_valued.pyx"] + glob.glob("gomea/src/real_valued/*.cpp") + common_src + fitness_src,
         include_dirs=["."],
         language="c++",
-        extra_compile_args=["-std=c++17"],
-        extra_link_args=["-std=c++17"],
+        extra_compile_args=compile_args,
+        extra_link_args=link_args,
         libraries=["armadillo"],
         library_dirs=[],
         extra_objects=[])
@@ -44,8 +52,8 @@ extensions.append( Extension("gomea.fitness",
         ["gomea/fitness.pyx"] + fitness_src + common_src,
         include_dirs=["."],
         language="c++",
-        extra_compile_args=["-std=c++17"],
-        extra_link_args=["-std=c++17"])
+        extra_compile_args=compile_args,
+        extra_link_args=link_args)
 )
 
 setup(

@@ -25,6 +25,18 @@ cdef class PythonFitnessFunction(FitnessFunction):
     
     cpdef subfunction( self, int subfunction_index, np.ndarray variables ):
         return 1e308
+    
+    cpdef mapping_function( self, int objective_index, np.ndarray fitness_buffers ):
+        return fitness_buffers[objective_index]
+    
+    cpdef mapping_function_constraint_value( self, np.ndarray fitness_buffers ):
+        return 0
+    
+    cpdef number_of_fitness_buffers( self ):
+        return 1
+
+    cpdef fitness_buffer_index_for_subfunction( self, int subfunction_index ): 
+        return 0
 
 cdef class PythonFitnessFunctionDiscrete(PythonFitnessFunction):
     def __cinit__(self, 

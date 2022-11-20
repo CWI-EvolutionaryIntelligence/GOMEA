@@ -12,10 +12,12 @@ class partial_solution_t
 		vec_t<T> touched_variables;
 		std::set<int> touched_subfunctions;
 		std::map<int,T> partial_objective_values;
+		vec_t<double> fitness_buffers;
 
 		partial_solution_t( int num_touched_variables );
 		partial_solution_t( vec_t<T> &touched_variables, vec_t<int> &touched_indices );
 
+		void init( int number_of_fitness_buffers, int number_of_objectives );
 		int getNumberOfTouchedVariables();
 		
 		double getObjectiveValue();
@@ -26,14 +28,24 @@ class partial_solution_t
 		void setObjectiveValue( double v );
 		void setObjectiveValue( int objective_value_index, double v );
 		void setConstraintValue( double v );
+
+		double getFitnessBuffer(int buffer_index);
+		void setFitnessBuffers( vec_t<double> buffers ); 
+		void resetFitnessBuffers();
+		void addToFitnessBuffer( int buffer_index, double partial_fitness );
+		void subtractFromFitnessBuffer( int buffer_index, double partial_fitness );
 		
 		int getTouchedIndex( int ind );
 
 		void print();
 
 	private:
+		void initObjectiveValues( int number_of_objectives );
+		void initFitnessBuffers( int number_of_fitness_buffers );
+		
 		vec_t<double> objective_values;
 		double constraint_value;
+		
 		std::map<int,int> touched_index_map;
 };
 

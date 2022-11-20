@@ -22,6 +22,8 @@ class fitness_t
 		// Properties
 		std::string name;
 		int number_of_variables;
+		int number_of_objectives = 1;
+		int number_of_fitness_buffers = 1;
 		opt_mode optimization_mode;
 
 		// Gray-box specific
@@ -51,20 +53,18 @@ class fitness_t
 		static fitness_t *getFitnessClass( int problem_index, int number_of_variables, double vtr );
 		short betterFitness( solution_t<T> *sol_x, solution_t<T> *sol_y );
 		short betterFitness( double objective_value_x, double constraint_value_x, double objective_value_y, double constraint_value_y );
-		solution_t<T> *initializeSolution( int n );
-		solution_t<T> *initializeSolution( T *variables );
 
 		void initialize();	
 		void initializeSubfunctionDependencyMap();
 		
 		virtual vec_t<int> inputsToSubfunction( int subfunction_index );
+		virtual int getIndexOfFitnessBuffer( int subfunction_index );
 
 		bool hasVariableInteractionGraph();
 		virtual void initializeVariableInteractionGraph();
 
 		virtual vec_t<vec_t<double>> getMIMatrix();
 		
-		// Methods
 		short isParameterInRangeBounds( double parameter, int dimension );
 		virtual double getLowerRangeBound( int dimension );
 		virtual double getUpperRangeBound( int dimension );

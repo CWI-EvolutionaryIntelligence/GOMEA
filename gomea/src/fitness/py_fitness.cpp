@@ -42,7 +42,7 @@ double pyFitnessFunction_t<double>::subfunction( int subfunction_index, vec_t<do
 {
 	double subf = gomea_pyfitness_subfunction_realvalued(py_class,subfunction_index,variables);
 	if( subf == 1e308 )
-		throw std::runtime_error("FitnessFunction does not implement subfunction(int).");
+		throw std::runtime_error("FitnessFunction does not implement subfunction(int,vector[double]).");
 	return subf;
 }
 
@@ -51,8 +51,22 @@ double pyFitnessFunction_t<char>::subfunction( int subfunction_index, vec_t<char
 {
 	double subf = gomea_pyfitness_subfunction_discrete(py_class,subfunction_index,variables);
 	if( subf == 1e308 )
-		throw std::runtime_error("FitnessFunction does not implement subfunction(int).");
+		throw std::runtime_error("FitnessFunction does not implement subfunction(int,vector[char]).");
 	return subf;
+}
+
+template<class T>
+double pyFitnessFunction_t<T>::mappingFunction( int objective_index, vec_t<double> &fitness_buffers )
+{
+	double result = gomea_pyfitness_mapping_function(py_class,objective_index,fitness_buffers);
+	return result;
+}
+
+template<class T>
+double pyFitnessFunction_t<T>::mappingFunctionConstraintValue( int objective_index, vec_t<double> &fitness_buffers )
+{
+	double result = gomea_pyfitness_mapping_function_constraint_value(py_class,fitness_buffers);
+	return result;
 }
 
 template<class T>
@@ -72,13 +86,13 @@ double pyFitnessFunction_t<T>::getUpperRangeBound( int dimension )
 template<>
 double pyFitnessFunction_t<double>::getLowerRangeBound( int dimension )
 {
-	return( -1000 );
+	return( -1e308 );
 }
 
 template<>	
 double pyFitnessFunction_t<double>::getUpperRangeBound( int dimension )
 {
-	return( 1000 );
+	return( 1e308 );
 }
 
 }}

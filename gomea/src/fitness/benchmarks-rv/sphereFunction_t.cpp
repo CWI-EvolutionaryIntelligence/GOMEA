@@ -54,12 +54,6 @@ void sphereFunction_t::evaluationFunction( solution_t<double> *solution )
 	for( int i = 0; i < getNumberOfSubfunctions(); i++ )
 		result += subfunction( solution->variables[i] );
 
-	/*if( number_of_evaluations == 0 )
-	{
-		fitness_embedded_pub();
-		printf("TEST - SPHERE\n");
-	}*/
-
 	solution->setObjectiveValue(result);
 	solution->setConstraintValue(0);
 	full_number_of_evaluations++;

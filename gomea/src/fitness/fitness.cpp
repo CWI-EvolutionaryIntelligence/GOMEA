@@ -71,6 +71,8 @@ int fitness_t<T>::getNumberOfSubfunctions()
 template<class T>
 void fitness_t<T>::evaluate( solution_t<T> *solution )
 {
+	solution->init(number_of_objectives, number_of_fitness_buffers);
+
 	evaluationFunction( solution );
 	
 	if( use_vtr && !vtr_hit_status && solution->getConstraintValue() == 0 && solution->getObjectiveValue() <= vtr  )
@@ -90,6 +92,8 @@ void fitness_t<T>::evaluate( solution_t<T> *solution )
 template<class T>
 void fitness_t<T>::evaluatePartialSolutionBlackBox( solution_t<T> *parent, partial_solution_t<T> *solution )
 {
+	solution->init(number_of_objectives, number_of_fitness_buffers);
+	
 	// Make backup of parent
 	double *var_backup = new double[solution->getNumberOfTouchedVariables()];
 	for( int i = 0; i < solution->getNumberOfTouchedVariables(); i++ )
@@ -117,6 +121,7 @@ void fitness_t<T>::evaluatePartialSolutionBlackBox( solution_t<T> *parent, parti
 template<class T>
 void fitness_t<T>::evaluatePartialSolution( solution_t<T> *parent, partial_solution_t<T> *solution )
 {
+	solution->init(number_of_objectives,number_of_fitness_buffers);
 	if( black_box_optimization || solution->getNumberOfTouchedVariables() == number_of_variables )
 	{
 		evaluatePartialSolutionBlackBox( parent, solution );
@@ -198,6 +203,12 @@ vec_t<int> fitness_t<T>::inputsToSubfunction( int subfunction_index )
 }
 
 template<class T>
+int fitness_t<T>::getIndexOfFitnessBuffer( int subfunction_index )
+{
+	return 0;
+}
+
+template<class T>
 bool fitness_t<T>::hasVariableInteractionGraph()
 {
 	return( variable_interaction_graph.size() > 0 );
@@ -208,7 +219,6 @@ void fitness_t<T>::initializeVariableInteractionGraph()
 {
 	return;
 }
-
 
 template<class T>
 vec_t<vec_t<double>> fitness_t<T>::getMIMatrix()

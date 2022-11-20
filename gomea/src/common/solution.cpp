@@ -3,19 +3,34 @@
 namespace gomea{
 
 template<class T>
-solution_t<T>::solution_t( int number_of_variables )
+solution_t<T>::solution_t( int number_of_variables ) : variables(vec_t<T>(number_of_variables)) {}
+
+template<class T>
+solution_t<T>::solution_t( vec_t<T> &variables ) : variables(vec_t<T>(variables)){}
+
+template<class T>
+void solution_t<T>::init( int number_of_objectives, int number_of_fitness_buffers )
 {
-	this->variables = vec_t<T>(number_of_variables);
- 	this->objective_values = vec_t<double>(1);
-	objective_values[0] = INFINITY;
+	if( objective_values.size() == 0 )
+		initObjectiveValues( number_of_objectives );
+	if( fitness_buffers.size() == 0 )
+		initFitnessBuffers( number_of_fitness_buffers );
 }
 
 template<class T>
-solution_t<T>::solution_t( vec_t<T> &variables )
+void solution_t<T>::initObjectiveValues( int number_of_objectives )
 {
-	this->variables = vec_t<T>(variables);
- 	this->objective_values = vec_t<double>(1);
-	objective_values[0] = INFINITY;
+ 	this->objective_values.resize(number_of_objectives);
+	for( int i = 0; i < number_of_objectives; i++ )
+		this->objective_values[i] = INFINITY;
+}
+
+template<class T>
+void solution_t<T>::initFitnessBuffers( int number_of_fitness_buffers ) 
+{
+	this->fitness_buffers.resize(number_of_fitness_buffers);
+	for( int i = 0; i < number_of_fitness_buffers; i++ )
+		this->fitness_buffers[i] = INFINITY;
 }
 
 template<class T>
@@ -104,6 +119,43 @@ void solution_t<T>::setPartialConstraintValue( int subfunction_index, double v )
 }
 
 template<class T>
+double solution_t<T>::getFitnessBuffer( int buffer_index ) 
+{
+	return( fitness_buffers[buffer_index] );
+}
+
+template<class T>
+void solution_t<T>::addToFitnessBuffer( int buffer_index, double partial_fitness )
+{
+	fitness_buffers[buffer_index] += partial_fitness;	
+}
+
+template<class T>
+void solution_t<T>::subtractFromFitnessBuffer( int buffer_index, double partial_fitness )
+{
+	fitness_buffers[buffer_index] -= partial_fitness;	
+}
+
+template<class T>		
+void solution_t<T>::setFitnessBuffers( vec_t<double> buffers )
+{
+	assert( this->fitness_buffers.size() == buffers.size() );
+	for( size_t i = 0; i < this->fitness_buffers.size(); i++ )
+	{
+		this->fitness_buffers[i] = buffers[i];
+	}
+}
+
+template<class T>
+void solution_t<T>::clearFitnessBuffers()
+{
+	for( size_t i = 0; i < fitness_buffers.size(); i++ )
+	{
+		fitness_buffers[i] = 0.0;
+	}
+}
+
+template<class T>
 vec_t<T> solution_t<T>::createPartialBackup( vec_t<int> variable_indices )
 {
 	vec_t<T> backup = vec_t<T>(variable_indices.size());
@@ -131,6 +183,7 @@ void solution_t<T>::insertPartialSolution( partial_solution_t<T> *solution )
 	insertVariables(solution->touched_variables,solution->touched_indices);
 	setObjectiveValues( solution->getObjectiveValues() );
 	setConstraintValue( solution->getConstraintValue() );
+	setFitnessBuffers( solution->fitness_buffers );
 }
 
 template<class T>

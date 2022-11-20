@@ -297,6 +297,7 @@ void population_t::copyBestSolutionsToPopulation()
 
 		individuals[i]->setObjectiveValue(selection[i]->getObjectiveValue());
 		individuals[i]->setConstraintValue(selection[i]->getConstraintValue());
+		individuals[i]->setFitnessBuffers(selection[i]->fitness_buffers);
 	}
 }
 
@@ -384,6 +385,7 @@ void population_t::generateAndEvaluateNewSolutions()
 				}
 				sampled_solutions[FOS_index][k]->setObjectiveValue(individuals[k]->getObjectiveValue());
 				sampled_solutions[FOS_index][k]->setConstraintValue(individuals[k]->getConstraintValue());
+				sampled_solutions[FOS_index][k]->setFitnessBuffers(individuals[k]->fitness_buffers);
 			}	
 
 			if( fitness->betterFitness( sampled_solutions[FOS_index][k]->getObjectiveValue(), sampled_solutions[FOS_index][k]->getConstraintValue(), objective_value_elitist, constraint_value_elitist ) )
@@ -496,6 +498,7 @@ void population_t::insertImprovement( solution_t<double> *solution, partial_solu
 	//solution->buffer += part->buffer;
 	solution->setObjectiveValue(part->getObjectiveValue());
 	solution->setConstraintValue(part->getConstraintValue());
+	solution->setFitnessBuffers(part->fitness_buffers);
 }
 
 short population_t::applyAMS( int individual_index )
@@ -529,6 +532,7 @@ short population_t::applyAMS( int individual_index )
 		{
 			individuals[individual_index]->setObjectiveValue(solution_AMS->getObjectiveValue());
 			individuals[individual_index]->setConstraintValue(solution_AMS->getConstraintValue());
+			individuals[individual_index]->setFitnessBuffers(solution_AMS->fitness_buffers);
 			for(int m = 0; m < fitness->number_of_variables; m++ )
 				individuals[individual_index]->variables[m] = solution_AMS->variables[m];
 			improvement = 1;
@@ -570,6 +574,7 @@ void population_t::applyForcedImprovements( int individual_index, int donor_inde
 				//individuals[individual_index]->buffer += FI_solution->buffer;
 				individuals[individual_index]->setObjectiveValue(FI_solution->getObjectiveValue());
 				individuals[individual_index]->setConstraintValue(FI_solution->getConstraintValue());
+				individuals[individual_index]->setFitnessBuffers(FI_solution->fitness_buffers);
 			}
 			delete FI_solution;
 
@@ -586,6 +591,7 @@ void population_t::applyForcedImprovements( int individual_index, int donor_inde
 			individuals[individual_index]->variables[i] = individuals[donor_index]->variables[i];
 		individuals[individual_index]->setObjectiveValue(individuals[donor_index]->getObjectiveValue());
 		individuals[individual_index]->setConstraintValue(individuals[donor_index]->getConstraintValue());
+		individuals[individual_index]->setFitnessBuffers(individuals[donor_index]->fitness_buffers);
 	}
 }
 
