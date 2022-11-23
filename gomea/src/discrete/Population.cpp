@@ -3,7 +3,7 @@
 namespace gomea{
 namespace discrete{
 
-Population::Population(Config *config_, fitness_t *problemInstance_, sharedInformation *sharedInformationPointer_, size_t GOMEAIndex_, size_t populationSize_, FOS_t FOSInstance_ ): 
+Population::Population(Config *config_, fitness_t *problemInstance_, sharedInformation *sharedInformationPointer_, size_t GOMEAIndex_, size_t populationSize_, linkage_model_pt FOSInstance_ ): 
         config(config_), 
         problemInstance(problemInstance_),
         sharedInformationPointer(sharedInformationPointer_),
@@ -25,18 +25,18 @@ Population::Population(Config *config_, fitness_t *problemInstance_, sharedInfor
         {
             noImprovementStretches[i] = 0;
 
-            population[i] = new Individual(problemInstance->number_of_variables, config->alphabetSize);
-            population[i]->randomInit(&config->rng);
+            population[i] = new solution_t<char>(problemInstance->number_of_variables, config->alphabetSize);
+            population[i]->randomInit(&gomea::utils::rng);
             problemInstance->evaluate(population[i]);
             updateElitistAndCheckVTR(population[i]);
             
-            offspringPopulation[i] = new Individual(problemInstance->number_of_variables, config->alphabetSize);
+            offspringPopulation[i] = new solution_t<char>(problemInstance->number_of_variables, config->alphabetSize);
             *offspringPopulation[i] = *population[i];
         }
 			
 		if( FOSInstance_ == NULL )
 		{
-			FOSInstance = createFOSInstance(config->FOSIndex, problemInstance->number_of_variables, config->alphabetSize, config->similarityMeasure, config->maximumFOSSetSize);
+			FOSInstance = gomea::createFOSInstance(config->FOSIndex, problemInstance->number_of_variables, config->similarityMeasure, config->maximumFOSSetSize);
 		}
 		else FOSInstance = FOSInstance_;
         
@@ -67,7 +67,7 @@ bool Population::allSolutionsAreEqual()
 {
     for (size_t i = 1; i < populationSize; i++)
     {
-        for (size_t j = 0; j < problemInstance->number_of_variables; j++)
+        for (int j = 0; j < problemInstance->number_of_variables; j++)
         {
             if (population[i]->variables[j] != population[0]->variables[j])
                 return false;
@@ -94,14 +94,17 @@ void Population::copyOffspringToPopulation()
 
 void Population::makeOffspring()
 {
-	if( config->similarityMeasure == 2 )
-	{
-		if( FOSInstance->FOSSize() == 0 )
-    		FOSInstance->learnFOS(problemInstance->getMIMatrix(), &config->rng);
-	}
-	else
-    	FOSInstance->learnFOS(population, &config->rng);
-    
+    if( FOSInstance->type == gomea::LINKAGE_TREE )
+    {
+        if (config->similarityMeasure == 2)
+        {
+            if (FOSInstance->size() == 0)
+                FOSInstance->learnLinkageTreeFOS(problemInstance->getMIMatrix(), &gomea::utils::rng);
+        }
+        else
+            FOSInstance->learnLinkageTreeFOS(population, config->alphabetSize, &gomea::utils::rng);
+    }
+
     FOSInstance->setCountersToZero();
     if (config->AnalyzeFOS)
     {
@@ -120,30 +123,29 @@ void Population::generateOffspring()
     vec_t<vec_t<int> > neighbors;
    
 	assert( !config->useParallelFOSOrder || !config->fixFOSOrderForPopulation );
-    vec_t<int> FOSOrder;
    	if( config->fixFOSOrderForPopulation )
-    	FOSInstance->shuffleFOS(FOSOrder, &config->rng); 
+    	FOSInstance->shuffleFOS(); 
 	else if( config->useParallelFOSOrder )
     {
         assert( problemInstance->hasVariableInteractionGraph() );
-		FOSInstance->determineParallelFOSOrder(FOSOrder, problemInstance->variable_interaction_graph, &config->rng);
+		FOSInstance->determineParallelFOSOrder(problemInstance->variable_interaction_graph, &gomea::utils::rng);
     }
 
     for(size_t i = 0; i < populationSize; i++)
     {
 			if( !config->useParallelFOSOrder && !config->fixFOSOrderForPopulation )
-				FOSInstance->shuffleFOS(FOSOrder, &config->rng); 
+				FOSInstance->shuffleFOS(); 
 
-            Individual backup = *population[i];
+            solution_t<char> backup = *population[i];
             
             bool solutionHasChanged;
-            solutionHasChanged = GOM(i, FOSOrder );
+            solutionHasChanged = GOM(i);
             
             /* Phase 2 (Forced Improvement): optimal mixing with elitist solution */
             if (config->useForcedImprovements)
             {
                 if ((!solutionHasChanged) || (noImprovementStretches[i] > (1+(log(populationSize)/log(10)))))
-                    FI(i, FOSOrder);
+                    FI(i);
             }
 
         if(!(offspringPopulation[i]->getObjectiveValue() > population[i]->getObjectiveValue()))
@@ -153,7 +155,7 @@ void Population::generateOffspring()
     }
 }
 
-bool Population::GOM(size_t offspringIndex, vec_t<int> FOSOrder )
+bool Population::GOM(size_t offspringIndex)
 {
     size_t donorIndex;
     bool solutionHasChanged = false;
@@ -164,11 +166,11 @@ bool Population::GOM(size_t offspringIndex, vec_t<int> FOSOrder )
     vec_t<int> donorIndices(populationSize);
     iota(donorIndices.begin(), donorIndices.end(), 0);
 
-    for (size_t i = 0; i < FOSInstance->FOSSize(); i++)
+    for (size_t i = 0; i < FOSInstance->size(); i++)
     {
-        int ind = FOSOrder[i];
+        int ind = FOSInstance->FOSorder[i];
 
-        if (FOSInstance->FOSElementSize(ind) == 0 || FOSInstance->FOSElementSize(ind) == problemInstance->number_of_variables)
+        if (FOSInstance->elementSize(ind) == 0 || (int) FOSInstance->elementSize(ind) == problemInstance->number_of_variables)
             continue;
 
         bool donorEqualToOffspring = true;
@@ -176,7 +178,7 @@ bool Population::GOM(size_t offspringIndex, vec_t<int> FOSOrder )
 
         while (donorEqualToOffspring && indicesTried < donorIndices.size())
         {
-            int j = config->rng() % (donorIndices.size() - indicesTried);
+            int j = gomea::utils::rng() % (donorIndices.size() - indicesTried);
             swap(donorIndices[indicesTried], donorIndices[indicesTried + j]);
             donorIndex = donorIndices[indicesTried];
             indicesTried++;
@@ -185,7 +187,7 @@ bool Population::GOM(size_t offspringIndex, vec_t<int> FOSOrder )
                 continue;
 
             vec_t<char> donorGenes;
-            for(size_t j = 0; j < FOSInstance->FOSElementSize(ind); j++)
+            for(size_t j = 0; j < FOSInstance->elementSize(ind); j++)
             {
                 int variableFromFOS = FOSInstance->FOSStructure[ind][j];
                 //offspringPopulation[offspringIndex]->variables[variableFromFOS] = population[donorIndex]->variables[variableFromFOS];
@@ -226,19 +228,19 @@ bool Population::GOM(size_t offspringIndex, vec_t<int> FOSOrder )
 }
 
 
-bool Population::FI(size_t offspringIndex, vec_t<int> FOSOrder )
+bool Population::FI(size_t offspringIndex)
 {
     if (!config->useParallelFOSOrder && !config->fixFOSOrderForPopulation)
-        FOSInstance->shuffleFOS(FOSOrder, &config->rng);
+        FOSInstance->shuffleFOS();
 
     bool solutionHasChanged = 0;
 
-    for (size_t i = 0; i < FOSInstance->FOSSize(); i++)
+    for (size_t i = 0; i < FOSInstance->size(); i++)
     {
-        int ind = FOSOrder[i];
-        vec_t<char> touchedGenes = vec_t<char>(FOSInstance->FOSElementSize(ind));
+        int ind = FOSInstance->FOSorder[i];
+        vec_t<char> touchedGenes = vec_t<char>(FOSInstance->elementSize(ind));
         bool donorEqualToOffspring = true;
-        for (size_t j = 0; j < FOSInstance->FOSElementSize(ind); j++)
+        for (size_t j = 0; j < FOSInstance->elementSize(ind); j++)
         {
             int variableFromFOS = FOSInstance->FOSStructure[ind][j];
             touchedGenes[j] = sharedInformationPointer->elitist.variables[variableFromFOS];
@@ -271,7 +273,7 @@ bool Population::FI(size_t offspringIndex, vec_t<int> FOSOrder )
     return solutionHasChanged;
 }
 
-/*void Population::evaluateSolution(Individual *parent, gomea::partial_solution_t<char> *solution ) 
+/*void Population::evaluateSolution(solution_t<char> *parent, gomea::partial_solution_t<char> *solution ) 
 {
     checkTimeLimit();
 
@@ -290,7 +292,7 @@ bool Population::FI(size_t offspringIndex, vec_t<int> FOSOrder )
     updateElitistAndCheckVTR(solution);
 }*/
 
-/*void Population::evaluateSolution(Individual *solution, Individual *solutionBefore, vec_t<int> &touchedGenes, double fitnessBefore)
+/*void Population::evaluateSolution(solution_t<char> *solution, solution_t<char> *solutionBefore, vec_t<int> &touchedGenes, double fitnessBefore)
 {
     checkTimeLimit();
 
@@ -336,7 +338,7 @@ void Population::checkTimeLimit()
     }
 }
 
-void Population::updateElitistAndCheckVTR(Individual *solution)
+void Population::updateElitistAndCheckVTR(solution_t<char> *solution)
 {
     /* Update elitist solution */
     if (sharedInformationPointer->firstEvaluationEver || (solution->getObjectiveValue() > sharedInformationPointer->elitist.getObjectiveValue()))

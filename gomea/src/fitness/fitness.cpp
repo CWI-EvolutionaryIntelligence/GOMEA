@@ -17,8 +17,11 @@ fitness_t<double>::fitness_t( int number_of_variables, double vtr ) : fitness_t(
 
 template<class T>
 fitness_t<T>::fitness_t( int number_of_variables, double vtr, bool use_vtr, opt_mode optimization_mode )
-	: name("Fitness function"), number_of_variables(number_of_variables), vtr(vtr), use_vtr(use_vtr), optimization_mode(optimization_mode)
-{}
+	: name("Fitness function"), number_of_variables(number_of_variables), optimization_mode(optimization_mode), vtr(vtr), use_vtr(use_vtr)
+	{}
+
+template<class T>
+fitness_t<T>::~fitness_t(){}
 
 /**
  * Returns 1 if x is better than y, 0 otherwise.
@@ -71,7 +74,7 @@ int fitness_t<T>::getNumberOfSubfunctions()
 template<class T>
 void fitness_t<T>::evaluate( solution_t<T> *solution )
 {
-	solution->init(number_of_objectives, number_of_fitness_buffers);
+	solution->initMemory(number_of_objectives, number_of_fitness_buffers);
 
 	evaluationFunction( solution );
 	
@@ -92,7 +95,7 @@ void fitness_t<T>::evaluate( solution_t<T> *solution )
 template<class T>
 void fitness_t<T>::evaluatePartialSolutionBlackBox( solution_t<T> *parent, partial_solution_t<T> *solution )
 {
-	solution->init(number_of_objectives, number_of_fitness_buffers);
+	solution->initMemory(number_of_objectives, number_of_fitness_buffers);
 	
 	// Make backup of parent
 	double *var_backup = new double[solution->getNumberOfTouchedVariables()];
@@ -121,7 +124,7 @@ void fitness_t<T>::evaluatePartialSolutionBlackBox( solution_t<T> *parent, parti
 template<class T>
 void fitness_t<T>::evaluatePartialSolution( solution_t<T> *parent, partial_solution_t<T> *solution )
 {
-	solution->init(number_of_objectives,number_of_fitness_buffers);
+	solution->initMemory(number_of_objectives,number_of_fitness_buffers);
 	if( black_box_optimization || solution->getNumberOfTouchedVariables() == number_of_variables )
 	{
 		evaluatePartialSolutionBlackBox( parent, solution );

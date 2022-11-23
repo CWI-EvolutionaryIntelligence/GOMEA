@@ -18,6 +18,7 @@ class fitness_t
 	public:
 		fitness_t( int number_of_variables ); 
 		fitness_t( int number_of_variables, double vtr );
+		virtual ~fitness_t();
 		
 		// Properties
 		std::string name;
@@ -35,7 +36,7 @@ class fitness_t
 		// Options
 		double vtr; // value-to-reach
 		short black_box_optimization = 0;
-		bool use_vtr = false;
+		bool use_vtr;
 		bool vtr_hit_status = false;
 		
 		// Optimization progress

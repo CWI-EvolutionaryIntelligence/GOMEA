@@ -17,7 +17,7 @@ class partial_solution_t
 		partial_solution_t( int num_touched_variables );
 		partial_solution_t( vec_t<T> &touched_variables, vec_t<int> &touched_indices );
 
-		void init( int number_of_fitness_buffers, int number_of_objectives );
+		void initMemory( int number_of_fitness_buffers, int number_of_objectives );
 		int getNumberOfTouchedVariables();
 		
 		double getObjectiveValue();

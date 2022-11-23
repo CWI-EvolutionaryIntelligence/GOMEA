@@ -16,7 +16,7 @@ partial_solution_t<T>::partial_solution_t( vec_t<T> &touched_variables, vec_t<in
 }
 
 template<class T>
-void partial_solution_t<T>::init( int number_of_objectives, int number_of_fitness_buffers )
+void partial_solution_t<T>::initMemory( int number_of_objectives, int number_of_fitness_buffers )
 {
 	if( objective_values.size() == 0 )
 		initObjectiveValues( number_of_objectives );
@@ -140,7 +140,23 @@ template<class T>
 void partial_solution_t<T>::print()
 {
 	for( int i = 0; i < getNumberOfTouchedVariables(); i++ )
-		printf("[%d][%6.3e]",touched_indices[i],touched_variables[i]);
+		printf("[%d][%6.3e]",touched_indices[i],(double)touched_variables[i]);
+	//printf("\n");
+}
+
+template<>
+void partial_solution_t<char>::print()
+{
+	for( int i = 0; i < getNumberOfTouchedVariables(); i++ )
+		printf("[%d][%c]",touched_indices[i],touched_variables[i]);
+	//printf("\n");
+}
+
+template<>
+void partial_solution_t<int>::print()
+{
+	for( int i = 0; i < getNumberOfTouchedVariables(); i++ )
+		printf("[%d][%d]",touched_indices[i],touched_variables[i]);
 	//printf("\n");
 }
 

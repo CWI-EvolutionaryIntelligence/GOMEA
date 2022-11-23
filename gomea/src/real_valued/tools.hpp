@@ -95,7 +95,7 @@ int *getRanks(double *array, int array_size );
 int *getRanksFromSorted(int *sorted, int array_size );
 
 void initializeRandomNumberGenerator( void );
-uvec randomPermutation( int n );
+//uvec randomPermutation( int n );
 double randomRealUniform01( void );
 int randomInt( int max );
 vec random1DNormalUnitVector( int length );

@@ -3,10 +3,8 @@
 namespace gomea{
 namespace discrete{
 
-Config::Config()
-{
-	randomSeed = std::chrono::system_clock::now().time_since_epoch().count() % 1000000;
-	rng.seed(randomSeed);
+Config::Config(){
+	gomea::utils::initializeRandomNumberGenerator();
 }
 
 /**
@@ -139,7 +137,7 @@ bool Config::parseCommandLine(int argc, char **argv)
         case 'S':
 			{
 				randomSeed = atoll(optarg);
-				rng.seed(randomSeed);
+				gomea::utils::initializeRandomNumberGenerator(randomSeed);
 			}
             break;
         case 'I':

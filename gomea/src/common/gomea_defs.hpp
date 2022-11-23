@@ -11,6 +11,8 @@
 #include <cmath>
 #include <numeric>
 #include <algorithm>
+#include <iostream> 
+#include <random>
 
 namespace gomea{
 

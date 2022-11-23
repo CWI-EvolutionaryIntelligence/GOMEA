@@ -239,7 +239,7 @@ void gomeaIMS::GOMEAGenerationalStepAllGOMEAsRecursiveFold(int GOMEAIndexSmalles
 
 bool gomeaIMS::checkTerminationGOMEA(int GOMEAIndex)
 {
-	if( config->maximumNumberOfGenerations > 0 && GOMEAs[GOMEAIndex]->numberOfGenerations >= config->maximumNumberOfGenerations )
+	if( config->maximumNumberOfGenerations > 0 && (int) GOMEAs[GOMEAIndex]->numberOfGenerations >= config->maximumNumberOfGenerations )
 	{
         if( GOMEAIndex == minimumGOMEAIndex )
 			minimumGOMEAIndex = GOMEAIndex+1;

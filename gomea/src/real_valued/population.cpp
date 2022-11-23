@@ -67,11 +67,9 @@ population_t::~population_t()
 	free( lower_init_ranges );
 	free( upper_init_ranges );
 	
-	for(int j = 0; j < linkage_model->getLength(); j++ )
+	for(int j = 0; j < linkage_model->size(); j++ )
 		free( sampled_solutions[j] );
 	free( sampled_solutions );
-
-	delete linkage_model;
 }
 
 void population_t::initialize()
@@ -231,9 +229,9 @@ void population_t::estimateDistribution()
 		/*if( fitness->hasVariableInteractionGraph() )
 			linkage_model->randomizeOrder(fitness->variable_interaction_graph);
 		else*/
-		linkage_model->randomizeOrder();
+		linkage_model->shuffleFOS();
 	}
-	for( int i = 0; i < linkage_model->getLength(); i++ )
+	for( int i = 0; i < linkage_model->size(); i++ )
 		estimateDistribution(i);
 	updateAMSMeans();
 }
@@ -263,29 +261,6 @@ void population_t::updateAMSMeans()
 		prev_mean_vector[i] = new_mean;
 	}
 }
-
-/*void population_t::printCovarianceMatrices()
-{
-	// First do the maximum-likelihood estimate from data
-	for(int i = 0; i < linkage_model->getLength(); i++ )
-	{
-		printf("F = [");
-		for(int j = 0; j < linkage_model->getSetLength(i); j++ )
-		{
-			printf("%d",linkage_model->sets[i][j]);
-			if( j < linkage_model->getSetLength(i)-1 )
-				printf(",");
-		}
-		printf("]\n");
-		printf("Cov[%d] = \n",i);
-		for(int j = 0; j < linkage_model->getSetLength(i); j++ )
-		{
-			for(int k = 0; k < linkage_model->getSetLength(i); k++ )
-				printf("%10.3e ",covariance_matrices[i](j,k));
-			printf("\n");
-		}
-	}
-}*/
 
 void population_t::copyBestSolutionsToPopulation()
 {
@@ -326,19 +301,16 @@ void population_t::generateAndEvaluateNewSolutions()
 
 	double alpha_AMS = 0.5*tau*(((double) population_size)/((double) (population_size-1)));
 	int number_of_AMS_solutions = (int) (alpha_AMS*(population_size-1));
-	/*for(int j = 0; j < linkage_model->getLength(); j++ )
+	/*for(int j = 0; j < linkage_model->size(); j++ )
 	{
 		samples_drawn_from_normal[j] = 0;
 		out_of_bounds_draws[j]       = 0;
 	}*/ // BLA - resets every generation in distribution class?
 
-	int first_to_adapt = 0;
-
-	linkage_model->randomizeOrder();
-	for(int g = 0; g < linkage_model->getLength(); g++ )
+	linkage_model->shuffleFOS();
+	for(int g = 0; g < linkage_model->size(); g++ )
 	{
-		int FOS_index = linkage_model->order[g];
-		double t = getTimer();
+		int FOS_index = linkage_model->FOSorder[g];
 
 		if( selection_during_gom )
 		{
@@ -396,7 +368,7 @@ void population_t::generateAndEvaluateNewSolutions()
 		linkage_model->adaptDistributionMultiplier( FOS_index, &sampled_solutions[FOS_index][num_elitists_to_copy], population_size-num_elitists_to_copy );
 	}
 
-	for(int g = 0; g < linkage_model->getLength(); g++ )
+	for(int g = 0; g < linkage_model->size(); g++ )
 		for(int k = num_elitists_to_copy; k < population_size; k++ )
 			delete( sampled_solutions[g][k] );
 	
@@ -429,7 +401,7 @@ void population_t::generateAndEvaluateNewSolutions()
 	else
 	{
 		short all_multipliers_leq_one = 1;
-		for(int j = 0; j < linkage_model->getLength(); j++ )
+		for(int j = 0; j < linkage_model->size(); j++ )
 			if( linkage_model->getDistributionMultiplier(j) > 1.0 )
 			{
 				all_multipliers_leq_one = 0;
@@ -439,15 +411,6 @@ void population_t::generateAndEvaluateNewSolutions()
 		if( all_multipliers_leq_one )
 			linkage_model->no_improvement_stretch++;
 	}
-
-	/*printf("[%d] NIS = ",number_of_generations);
-	for(int i = 0; i < population_size; i++ )
-		printf("%3d ",individual_NIS[i]);
-	printf("\n");
-	printf("[%d] MUL = ",number_of_generations);	
-	for(int i = 0; i < linkage_model->getLength(); i++ )
-		printf("%6.2lf ",distribution_multipliers[i]);
-	printf("\n");*/
 
 	free( individual_improved );
 }
@@ -476,7 +439,6 @@ void population_t::applyPartialAMS( partial_solution_t<double> *solution, double
 	{
 		for(int m = 0; m < solution->getNumberOfTouchedVariables(); m++ )
 		{
-			int im = solution->touched_indices[m];
 			solution->touched_variables[m] = result[m];
 		}
 	}
@@ -545,18 +507,17 @@ short population_t::applyAMS( int individual_index )
 
 void population_t::applyForcedImprovements( int individual_index, int donor_index )
 {
-	double obj_val, cons_val;
 	short improvement = 0;
 	double alpha = 1.0;
 
 	while( alpha >= 0.01 )
 	{
 		alpha *= 0.5;
-		for(int io = 0; io < linkage_model->getLength(); io++ )
+		for(int io = 0; io < linkage_model->size(); io++ )
 		{
-			int i = linkage_model->order[io];
+			int i = linkage_model->FOSorder[io];
 			vec_t<int> touched_indices = linkage_model->sets[i];
-			int num_touched_indices = linkage_model->getSetLength(i);
+			int num_touched_indices = linkage_model->elementSize(i);
 
 			vec_t<double> FI_vars = vec_t<double>(num_touched_indices);
 			for(int j = 0; j < num_touched_indices; j++ )
@@ -658,77 +619,37 @@ void population_t::initializeNewPopulationMemory()
  */
 void population_t::initializeFOS()
 {
-	FILE    *file;
-	fos_t *new_FOS;
-
-	/*fflush( stdout ); // TODO
-	  file = fopen( "FOS.in", "r" );
-	  if( file != NULL )
-	  {
-	  if( population_index == 0 )
-	  new_FOS = new fos_t( file );
-	  else
-	  new_FOS = new fos_t( linkage_model[0] );
-	  }
-	  else if( static_linkage_tree )
-	  {
-	  if( population_index == 0 )
-	  new_FOS = learnLinkageTreeRVGOMEA();
-	  else
-	  new_FOS = new fos_t( linkage_model[0] );
-	  }
-	  else*/
+	linkage_model_rv_pt new_FOS = NULL;
 
 	int max_clique_size;
 	bool include_cliques_as_fos_elements, include_full_fos_element; 
 	if( FOS_element_size > 0 )
 	{
-		new_FOS = new fos_t( fitness->number_of_variables, FOS_element_size );
+		//new_FOS = new linkage_model_rv_t( fitness->number_of_variables, FOS_element_size );
+		new_FOS = linkage_model_rv_t::marginal_product_model( fitness->number_of_variables, FOS_element_size );
 	}
 	else if( FOS_element_size == -3 )
 	{
-		new_FOS = new fos_t( fitness->number_of_variables );
+		vec_t<vec_t<int>> FOS;
 		vec_t<int> full_fos_element;
 		for( int i = 0; i < fitness->number_of_variables; i++ )
 		{
-			new_FOS->addGroup(i);
+			vec_t<int> e;
+			e.push_back(i);
 			full_fos_element.push_back(i);
+			FOS.push_back(e);
 		}
-		new_FOS->addGroup(full_fos_element);
+		FOS.push_back(full_fos_element);
+		//new_FOS = new linkage_model_rv_t( fitness->number_of_variables );
+		new_FOS = linkage_model_rv_t::custom_fos( fitness->number_of_variables, FOS );
 	}
 	else if( FOS_element_size == -4 )
 	{
 		static_linkage_tree = 1;
 		FOS_element_ub = 100;
 		double **cov = NULL;
-		new_FOS = new fos_t( problem_index, cov, fitness->number_of_variables);
-	}
-	else if( FOS_element_size == -5 )
-	{
-		int id = 100011; 
-		id /= 10;
-		include_full_fos_element = (id%10) == 1;
-		id /= 10;
-		include_cliques_as_fos_elements = (id%10) == 1;
-		id /= 10;
-		max_clique_size = id;
-		//new_FOS = new fos_t(fitness->variable_interaction_graph,max_clique_size,include_cliques_as_fos_elements,include_full_fos_element,VIG_order);
-		new_FOS = new fos_t(fitness->number_of_variables,fitness->variable_interaction_graph,max_clique_size,include_cliques_as_fos_elements,include_full_fos_element);
-		new_FOS->is_conditional = false;
-		for( int i = 0; i < fitness->number_of_variables-4; i+=4 )
-		{
-			vec_t<int> group;
-			for( int j = 0; j < 5; j++ )
-				group.push_back(i+j);
-			new_FOS->addGroup(group);
-		}
-	}
-	else if( FOS_element_size == -6 )
-	{
-		static_linkage_tree = 1;
-		FOS_element_ub = 10;
-		double **cov = NULL;
-		new_FOS = new fos_t(problem_index, cov, fitness->number_of_variables);
+		new_FOS = linkage_model_rv_t::linkage_tree( fitness->number_of_variables );
+		// TODO
 	}
 	else if( FOS_element_size <= -10 )
 	{
@@ -739,8 +660,7 @@ void population_t::initializeFOS()
 		include_cliques_as_fos_elements = (id%10) == 1;
 		id /= 10;
 		max_clique_size = id;
-		//new_FOS = new fos_t(fitness->variable_interaction_graph,max_clique_size,include_cliques_as_fos_elements,include_full_fos_element,VIG_order);
-		new_FOS = new fos_t(fitness->number_of_variables,fitness->variable_interaction_graph,max_clique_size,include_cliques_as_fos_elements,include_full_fos_element);
+		new_FOS = linkage_model_rv_t::conditional(fitness->number_of_variables,fitness->variable_interaction_graph,max_clique_size,include_cliques_as_fos_elements,include_full_fos_element);
 	}
 	else
 	{
@@ -796,8 +716,8 @@ void population_t::initializePopulationAndFitnessValues()
 		fitness->evaluate( individuals[j] );
 	}
 
-	sampled_solutions = (partial_solution_t<double>***) Malloc( linkage_model->getLength() * sizeof(partial_solution_t<double>**) );
-	for(int j = 0; j < linkage_model->getLength(); j++ )
+	sampled_solutions = (partial_solution_t<double>***) Malloc( linkage_model->size() * sizeof(partial_solution_t<double>**) );
+	for(int j = 0; j < linkage_model->size(); j++ )
 		sampled_solutions[j] = (partial_solution_t<double>**) Malloc( population_size * sizeof(partial_solution_t<double>*) );
 }
 

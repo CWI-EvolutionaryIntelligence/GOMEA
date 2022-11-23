@@ -8,8 +8,42 @@ solution_t<T>::solution_t( int number_of_variables ) : variables(vec_t<T>(number
 template<class T>
 solution_t<T>::solution_t( vec_t<T> &variables ) : variables(vec_t<T>(variables)){}
 
+template<>
+solution_t<char>::solution_t(size_t numberOfVariables_, size_t alphabetSize_) : solution_t(numberOfVariables_)
+{
+	this->alphabetSize = alphabetSize_;
+	fill(variables.begin(), variables.end(), 0);
+}
+
 template<class T>
-void solution_t<T>::init( int number_of_objectives, int number_of_fitness_buffers )
+std::ostream & operator << (std::ostream &out, const solution_t<T> &individual)
+{
+	for (int i = 0; i < individual.getNumberOfVariables(); ++i)
+		out << +individual.variables[i];
+	out << " | " << individual.getObjectiveValue();
+	return out;
+}
+
+
+template<class T>
+void solution_t<T>::randomInit(std::mt19937 *rng)
+{
+	char buf[256];
+	sprintf(buf,"solution_t<%s> does not implement randomInit(mt19937*)\n",typeid(T).name());
+	throw std::runtime_error(buf);
+}
+
+template<>
+void solution_t<char>::randomInit(std::mt19937 *rng)
+{
+	for (int i = 0; i < getNumberOfVariables(); ++i)
+	{
+		variables[i] = (*rng)() % alphabetSize;
+	}
+}
+
+template<class T>
+void solution_t<T>::initMemory( int number_of_objectives, int number_of_fitness_buffers )
 {
 	if( objective_values.size() == 0 )
 		initObjectiveValues( number_of_objectives );
@@ -43,6 +77,20 @@ template<class T>
 int solution_t<T>::getNumberOfObjectives() const
 {
 	return objective_values.size();
+}
+
+template<class T>
+size_t solution_t<T>::getAlphabetSize()
+{
+	char buf[256];
+	sprintf(buf,"solution_t<%s> does not implement getAlphabetSize()\n",typeid(T).name());
+	throw std::runtime_error(buf);
+}
+
+template<>
+size_t solution_t<char>::getAlphabetSize()
+{
+	return alphabetSize;
 }
 
 template<class T>
@@ -159,7 +207,7 @@ template<class T>
 vec_t<T> solution_t<T>::createPartialBackup( vec_t<int> variable_indices )
 {
 	vec_t<T> backup = vec_t<T>(variable_indices.size());
-	for( int i = 0; i < variable_indices.size(); i++ )
+	for( size_t i = 0; i < variable_indices.size(); i++ )
 	{
 		int ind = variable_indices[i];
 		backup[i] = variables[ind];
@@ -170,7 +218,7 @@ vec_t<T> solution_t<T>::createPartialBackup( vec_t<int> variable_indices )
 template<class T>
 void solution_t<T>::insertVariables( vec_t<T> vars_to_insert, vec_t<int> indices_to_insert )
 {
-	for( int i = 0; i < indices_to_insert.size(); i++ )
+	for( size_t i = 0; i < indices_to_insert.size(); i++ )
 	{
 		int ind = indices_to_insert[i];
 		variables[ind] = vars_to_insert[i];
@@ -189,8 +237,24 @@ void solution_t<T>::insertPartialSolution( partial_solution_t<T> *solution )
 template<class T>
 void solution_t<T>::print()
 {
-	for( int i = 0; i < variables.size(); i++ )
-		printf("%6.3e ",variables[i]);
+	for( size_t i = 0; i < variables.size(); i++ )
+		printf("%6.3e ",(double)variables[i]);
+	printf("\n");
+}
+
+template<>
+void solution_t<char>::print()
+{
+	for( size_t i = 0; i < variables.size(); i++ )
+		printf("%c ",variables[i]);
+	printf("\n");
+}
+
+template<>
+void solution_t<int>::print()
+{
+	for( size_t i = 0; i < variables.size(); i++ )
+		printf("%d ",variables[i]);
 	printf("\n");
 }
 

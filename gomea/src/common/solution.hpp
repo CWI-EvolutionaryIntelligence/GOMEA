@@ -11,9 +11,24 @@ class solution_t
 	public:
 		solution_t( int number_of_variables );
 		solution_t( vec_t<T> &variables );
+		solution_t( size_t numberOfVariables_, size_t alphabetSize_ );
 
-		void init( int number_of_objectives, int number_of_fitness_buffers );
-		
+		bool operator==(const solution_t<T> &solutionB)
+		{
+			for (int i = 0; i < getNumberOfVariables(); ++i)
+			{
+				if (this->variables[i] != solutionB.variables[i])
+					return false;
+			}
+			return true;
+		}
+
+		template<class U>
+		friend std::ostream &operator<<(std::ostream &out, const solution_t<U> &solution);
+		void randomInit(std::mt19937 *rng);
+
+		void initMemory(int number_of_objectives, int number_of_fitness_buffers);
+
 		int getNumberOfVariables() const;
 		int getNumberOfObjectives() const;
 		double getObjectiveValue() const;
@@ -41,6 +56,8 @@ class solution_t
 		void insertPartialSolution( partial_solution_t<T> *solution );
 
 		void print();
+
+		size_t getAlphabetSize();
 		
 		vec_t<T> variables;
 		vec_t<double> fitness_buffers;
@@ -54,6 +71,8 @@ class solution_t
 		
 		vec_t<double> partial_objective_values;
 		vec_t<double> partial_constraint_values;
+
+		size_t alphabetSize = 0;
 };
 
 template class solution_t<char>;

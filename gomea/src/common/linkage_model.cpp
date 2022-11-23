@@ -1,8 +1,6 @@
-#include "gomea/src/discrete/FOS.hpp"
+#include "gomea/src/common/linkage_model.hpp"
 
 namespace gomea{
-namespace discrete{
-
 
 bool FOSNameByIndex(size_t FOSIndex, string &FOSName)
 {
@@ -16,18 +14,175 @@ bool FOSNameByIndex(size_t FOSIndex, string &FOSName)
     return true;
 }
 
-FOS_t createFOSInstance(size_t FOSIndex, size_t numberOfVariables, size_t alphabetSize, int similarityMeasure, int maximumFOSSetSize )
+linkage_model_pt createFOSInstance(size_t FOSIndex, size_t numberOfVariables, int similarityMeasure, int maximumFOSSetSize )
 {
     switch (FOSIndex)
     {
-        case 0: return make_shared<LTFOS>(numberOfVariables, alphabetSize, similarityMeasure, false, maximumFOSSetSize);
-        case 1: return make_shared<LTFOS>(numberOfVariables, alphabetSize, similarityMeasure, true, maximumFOSSetSize);
-        default: break;
+        case 0: return linkage_model_t::linkage_tree(numberOfVariables,similarityMeasure,false,maximumFOSSetSize);
+        case 1: return linkage_model_t::linkage_tree(numberOfVariables,similarityMeasure,true,maximumFOSSetSize);
+        default: return( NULL );
     }
 	return NULL;
 }
 
-void FOS::writeToFileFOS(string folder, int populationIndex, int generation)
+linkage_model_t::linkage_model_t( size_t numberOfVariables_, size_t block_size ) : linkage_model_t(numberOfVariables_)
+{
+	if( block_size == 0 )
+	{
+		for (size_t i = 0; i < numberOfVariables_; i++)
+			addGroup(i);
+		type = UNIVARIATE;
+	}
+	else
+	{
+		assert(numberOfVariables_ % block_size == 0);
+		for (int i = 0; i < numberOfVariables_ / block_size; i++)
+		{
+			std::vector<int> group;
+			for (size_t j = 0; j < block_size; j++)
+				group.push_back(i * block_size + j);
+			addGroup(group);
+		}
+		if( numberOfVariables == block_size )
+			type = FULL;
+		else
+			type = MPM;
+	}
+	shuffleFOS();
+}
+
+linkage_model_t::linkage_model_t( size_t numberOfVariables_, const vec_t<vec_t<int>> &FOS )
+{
+	size_t tot_size = 0;
+	for( vec_t<int> group : FOS )
+	{
+		addGroup(group);
+		tot_size += group.size();
+	}
+	assert( tot_size == numberOfVariables_ );
+	type = MPM;
+	shuffleFOS();
+}
+
+linkage_model_t::linkage_model_t(size_t numberOfVariables_, int similarityMeasure_, bool filtered_, int maximumSetSize_) : linkage_model_t(numberOfVariables_)
+{
+	similarityMeasure = similarityMeasure_;
+	filtered = filtered_;
+	if (maximumSetSize_ > 0)
+		maximumSetSize = maximumSetSize_;
+	else
+		maximumSetSize = numberOfVariables;
+
+	S_Matrix.resize(numberOfVariables);
+	for (size_t i = 0; i < numberOfVariables; ++i)
+		S_Matrix[i].resize(numberOfVariables);
+	type = LINKAGE_TREE;
+}
+
+// Read a FOS from a file
+linkage_model_t::linkage_model_t( FILE *file )
+{
+	char    c, string[1000];
+	int     i, j, k;
+
+	/* Length */
+	k = 0;
+	int length = 0;
+	c = fgetc( file );
+	while( (c != EOF) )
+	{
+		while( c != '\n' )
+			c = fgetc( file );
+		length++;
+		c = fgetc( file );
+	}
+
+	fclose( file );
+	fflush( stdout );
+	file = fopen( "FOS.in", "r" );
+
+	for( i = 0; i < length; i++ )
+	{
+		std::vector<int> vec;
+		c = fgetc( file );
+		j = 0;
+		while( (c != '\n') && (c != EOF) )
+		{
+			k = 0;
+			while( (c == ' ') || (c == '\n') || (c == '\t') )
+				c = fgetc( file );
+			while( (c != ' ') && (c != '\n') && (c != '\t') )
+			{
+				string[k] = (char) c;
+				c = fgetc( file );
+				k++;
+			}
+			string[k] = '\0';
+			//printf("FOS[%d][%d] = %d\n",i,j,(int) atoi( string ));
+			int e = ((int) atoi(string));
+			this->numberOfVariables = fmax(this->numberOfVariables, e);
+			vec.push_back(e);
+			j++;
+		}
+		addGroup(vec);
+	}
+	fclose( file );
+	shuffleFOS();
+	type = CUSTOM_LM;
+}
+    
+linkage_model_pt linkage_model_t::univariate(size_t numberOfVariables_)
+{
+	linkage_model_pt new_fos = shared_ptr<linkage_model_t>(new linkage_model_t(numberOfVariables_,0));
+	return( new_fos );
+}
+
+linkage_model_pt linkage_model_t::marginal_product_model( size_t numberOfVariables_, size_t block_size )
+{
+	linkage_model_pt new_fos = shared_ptr<linkage_model_t>(new linkage_model_t(numberOfVariables_,block_size));
+	return( new_fos );
+}
+        
+linkage_model_pt linkage_model_t::linkage_tree(size_t numberOfVariables_, int similarityMeasure_, bool filtered_, int maximumSetSize_ )
+{
+	linkage_model_pt new_fos = shared_ptr<linkage_model_t>(new linkage_model_t(numberOfVariables_, similarityMeasure_, filtered_, maximumSetSize_));
+	return( new_fos );
+}
+    
+linkage_model_pt linkage_model_t::from_file( FILE *file )
+{
+	linkage_model_pt new_fos = shared_ptr<linkage_model_t>(new linkage_model_t(file));
+	return( new_fos );
+}
+
+linkage_model_pt linkage_model_t::custom_fos( size_t numberOfVariables_, const vec_t<vec_t<int>> &FOS )
+{
+	linkage_model_pt new_fos = shared_ptr<linkage_model_t>(new linkage_model_t(numberOfVariables_,FOS));
+	return( new_fos );
+}
+
+void linkage_model_t::addGroup( int var_index )
+{
+	std::vector<int> vec;
+	vec.push_back(var_index);
+	addGroup(vec);
+}
+
+void linkage_model_t::addGroup( const std::set<int> &group ) 
+{
+	std::vector<int> vec;
+	for( int x : group )
+		vec.push_back(x);
+	addGroup(vec);
+}
+
+void linkage_model_t::addGroup( vec_t<int> group ) 
+{
+	std::sort(group.begin(),group.end());
+	FOSStructure.push_back(group);
+}
+
+void linkage_model_t::writeToFileFOS(string folder, int populationIndex, int generation)
 {
     ofstream outFile;
     outFile.open(folder + "/fos/" + to_string(populationIndex) + "_" + to_string(generation) + ".txt");
@@ -43,7 +198,7 @@ void FOS::writeToFileFOS(string folder, int populationIndex, int generation)
     outFile.close();
 }
 
-void FOS::setCountersToZero()
+void linkage_model_t::setCountersToZero()
 {
     improvementCounters.resize(FOSStructure.size());
     usageCounters.resize(FOSStructure.size());
@@ -54,7 +209,7 @@ void FOS::setCountersToZero()
     }
 }
 
-void FOS::writeFOSStatistics(string folder, int populationIndex, int generation)
+void linkage_model_t::writeFOSStatistics(string folder, int populationIndex, int generation)
 {
     ofstream outFile;
     outFile.open(folder + "/fos/statistics_" + to_string(populationIndex) + "_" + to_string(generation) + ".txt");
@@ -68,16 +223,16 @@ void FOS::writeFOSStatistics(string folder, int populationIndex, int generation)
     outFile.close();
 }
 
-void FOS::shuffleFOS(vec_t<int> &indices, mt19937 *rng)
+void linkage_model_t::shuffleFOS()
 {
-    indices.resize(FOSSize());
-    iota(indices.begin(), indices.end(), 0);   
-    shuffle(indices.begin(), indices.end(), *rng);
+    FOSorder.resize(size());
+    iota(FOSorder.begin(), FOSorder.end(), 0);   
+    shuffle(FOSorder.begin(), FOSorder.end(), gomea::utils::rng);
 }
 
-void FOS::determineParallelFOSOrder(vec_t<int> &indices, std::map<int,std::set<int>> VIG, mt19937 *rng)
+void linkage_model_t::determineParallelFOSOrder(std::map<int,std::set<int>> VIG, mt19937 *rng)
 {
-    indices.clear();
+    FOSorder.clear();
 	
 	parallelFOSGroups.clear();
 	if( colors.size() == 0 )
@@ -89,7 +244,7 @@ void FOS::determineParallelFOSOrder(vec_t<int> &indices, std::map<int,std::set<i
 	
 	vec_t<vec_t<int>> parallelFOSGroups;
 	parallelFOSGroups.resize(numColors);
-	for( size_t i = 0; i < numColors; i++ )
+	for( int i = 0; i < numColors; i++ )
 		parallelFOSGroups[i].resize(0);
 	for( size_t i = 0; i < colors.size(); i++ )
 	{
@@ -105,14 +260,14 @@ void FOS::determineParallelFOSOrder(vec_t<int> &indices, std::map<int,std::set<i
 	{
 		int groupInd = groupIndices[i];
 		for( int fos_ind : parallelFOSGroups[groupInd] )
-			indices.push_back(fos_ind);
+			FOSorder.push_back(fos_ind);
 	}
 
-	assert( indices.size() == FOSStructure.size() ); 
+	assert( FOSorder.size() == FOSStructure.size() ); 
 }
 
 // VIG_i is the list of all variables dependent on i
-vec_t<int> FOS::graphColoring( std::map<int,std::set<int>> &VIG )
+vec_t<int> linkage_model_t::graphColoring( std::map<int,std::set<int>> &VIG )
 {
 	// FOSReverseMap[i] is a list containing the indices of FOS elements that contain variable x_i
 	vec_t<vec_t<int>> FOSReverseMap;
@@ -129,10 +284,10 @@ vec_t<int> FOS::graphColoring( std::map<int,std::set<int>> &VIG )
 		for( int v : FOSStructure[i] ) // loop over variables in FOS element
 		{
 			for( int x : FOSReverseMap[v] ) // add FOS elements that include dependent variables
-				if( x != i ) FOSVIG[i].insert(x);
+				if( x != (int) i ) FOSVIG[i].insert(x);
 			for( int neighbor : VIG[v] ) // find dependent variables
 				for( int x : FOSReverseMap[neighbor] ) // add FOS elements that include dependent variables
-					if( x != i ) FOSVIG[i].insert(x);
+					if( x != (int) i ) FOSVIG[i].insert(x);
 		}
 	}
 
@@ -186,7 +341,7 @@ vec_t<int> FOS::graphColoring( std::map<int,std::set<int>> &VIG )
 		if( availableColor == -1 )
 		{
 			assert( numColorsSeen != numColors );
-			for( size_t j = 0; j < numColors; j++ )
+			for( int j = 0; j < numColors; j++ )
 			{
 				if( !colorsSeen[j] )
 				{
@@ -214,41 +369,28 @@ vec_t<int> FOS::graphColoring( std::map<int,std::set<int>> &VIG )
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-
-LTFOS::LTFOS(size_t numberOfVariables_, size_t alphabetSize_, int similarityMeasure_, bool filtered_, int maximumSetSize_): FOS(numberOfVariables_, alphabetSize_)
-{
-    similarityMeasure = similarityMeasure_;
-    filtered = filtered_;
-	if( maximumSetSize_ > 0 )
-		maximumSetSize = maximumSetSize_;
-	else	
-		maximumSetSize = numberOfVariables;
     
-	S_Matrix.resize(numberOfVariables);
-    for (size_t i = 0; i < numberOfVariables; ++i)
-        S_Matrix[i].resize(numberOfVariables);
-}
-
-void LTFOS::learnFOS(vec_t<Individual*> &population, mt19937 *rng )
+void linkage_model_t::learnLinkageTreeFOS(vec_t<solution_t<char>*> &population, size_t alphabetSize, mt19937 *rng )
 {
-	//printf("Initializing MI Matrix.\n");
-	long long t = getTimestamp();
 	vec_t<vec_t<double>> MI_matrix;
 
     /* Compute Mutual Information matrix */
-    if (similarityMeasure == 0) // MI
-        MI_matrix = computeMIMatrix(population);
-    else if (similarityMeasure == 1) // normalized MI
-        MI_matrix = computeNMIMatrix(population);
-	//printf("Initialized MI matrix (%.3fs).\n",getTime(t)/1000.0);
+	if (similarityMeasure == 0) // MI
+	{
+		MI_matrix = computeMIMatrix(population, alphabetSize);
+	}
+	else if (similarityMeasure == 1) // normalized MI
+	{
+		MI_matrix = computeNMIMatrix(population, alphabetSize);
+	}
     
-	learnFOS(MI_matrix, rng);
+	learnLinkageTreeFOS(MI_matrix, rng);
 }
 
-void LTFOS::learnFOS( vec_t<vec_t<double>> MI_Matrix, mt19937 *rng )
+void linkage_model_t::learnLinkageTreeFOS( vec_t<vec_t<double>> MI_Matrix, mt19937 *rng )
 {
-	//printf("Learning Linkage Tree.\n");
-	long long t = getTimestamp();
+	assert( type == LINKAGE_TREE );
+
     FOSStructure.clear();
     vec_t<int> mpmFOSMap;
     vec_t<int> mpmFOSMapNew;
@@ -336,7 +478,7 @@ void LTFOS::learnFOS( vec_t<vec_t<double>> MI_Matrix, mt19937 *rng )
 
 		if (r1 < mpm.size()) 
 		{
-			if( mpm[r0].size() + mpm[r1].size() > maximumSetSize )
+			if( (int) (mpm[r0].size() + mpm[r1].size()) > maximumSetSize )
 			{
 				done = true;
 				break;
@@ -442,13 +584,12 @@ void LTFOS::learnFOS( vec_t<vec_t<double>> MI_Matrix, mt19937 *rng )
     }
     FOSStructure.erase( std::remove_if(FOSStructure.begin(), FOSStructure.end(), [](std::vec_t<int> e){return e.empty();} ), FOSStructure.end());
   }*/
-  //printf("Finished learning Linkage Tree in %.3fs.\n",getTime(t)/1000.0);
 }
 
 /**
  * Determines nearest neighbour according to similarity values.
  */
-int LTFOS::determineNearestNeighbour(size_t index, vec_t<vec_t< int> > &mpm)
+int linkage_model_t::determineNearestNeighbour(size_t index, vec_t<vec_t< int> > &mpm)
 {
     size_t result = 0;
 
@@ -459,14 +600,14 @@ int LTFOS::determineNearestNeighbour(size_t index, vec_t<vec_t< int> > &mpm)
     {
         if (i != index)
         {
-			if( mpm[i].size() > maximumSetSize)
+			if( (int) mpm[i].size() > maximumSetSize)
 			{
 				if( mpm[i].size() < mpm[result].size() )
 					result = i;
 			}
 			else
 			{
-				if( mpm[result].size() > maximumSetSize)
+				if( (int) mpm[result].size() > maximumSetSize)
 					result = i;
 				else if((S_Matrix[index][i] > S_Matrix[index][result]) || ((S_Matrix[index][i] == S_Matrix[index][result]) && (mpm[i].size() < mpm[result].size())))
 					result = i;
@@ -476,7 +617,7 @@ int LTFOS::determineNearestNeighbour(size_t index, vec_t<vec_t< int> > &mpm)
     return result;
 }
 
-vec_t<vec_t<double>> LTFOS::computeMIMatrix(vec_t<Individual*> &population)
+vec_t<vec_t<double>> linkage_model_t::computeMIMatrix( vec_t<solution_t<char>*> &population, size_t alphabetSize )
 {
     vec_t<vec_t<double>> MI_Matrix;
 	MI_Matrix.resize(numberOfVariables);        
@@ -493,7 +634,7 @@ vec_t<vec_t<double>> LTFOS::computeMIMatrix(vec_t<Individual*> &population)
         {
             vec_t<size_t> indices{i, j};
             vec_t<double> factorProbabilities;
-            estimateParametersForSingleBinaryMarginal(population, indices, factorSize, factorProbabilities);
+            estimateParametersForSingleBinaryMarginal(population, alphabetSize, indices, factorSize, factorProbabilities);
 
             MI_Matrix[i][j] = 0.0;
             for(size_t k = 0; k < factorSize; k++)
@@ -507,7 +648,7 @@ vec_t<vec_t<double>> LTFOS::computeMIMatrix(vec_t<Individual*> &population)
 
         vec_t<size_t> indices{i};
         vec_t<double> factorProbabilities;
-        estimateParametersForSingleBinaryMarginal(population, indices, factorSize, factorProbabilities);
+        estimateParametersForSingleBinaryMarginal(population, alphabetSize, indices, factorSize, factorProbabilities);
 
         MI_Matrix[i][i] = 0.0;
         for (size_t k = 0; k < factorSize; k++)
@@ -532,12 +673,14 @@ vec_t<vec_t<double>> LTFOS::computeMIMatrix(vec_t<Individual*> &population)
 	return( MI_Matrix );
 }
 
-vec_t<vec_t<double>> LTFOS::computeNMIMatrix(vec_t<Individual*> &population)
+vec_t<vec_t<double>> linkage_model_t::computeNMIMatrix( vec_t<solution_t<char>*> &population, size_t alphabetSize )
 {
     vec_t<vec_t<double>> MI_Matrix;
 	MI_Matrix.resize(numberOfVariables);        
     for (size_t i = 0; i < numberOfVariables; ++i)
-        MI_Matrix[i].resize(numberOfVariables);         
+    {
+		MI_Matrix[i].resize(numberOfVariables);
+	}
     
 	double p;
     
@@ -552,13 +695,13 @@ vec_t<vec_t<double>> LTFOS::computeNMIMatrix(vec_t<Individual*> &population)
             size_t factorSize_joint, factorSize_i, factorSize_j;
 
             vec_t<size_t> indices_joint{i, j};
-            estimateParametersForSingleBinaryMarginal(population, indices_joint, factorSize_joint, factorProbabilities_joint);
+            estimateParametersForSingleBinaryMarginal(population, alphabetSize, indices_joint, factorSize_joint, factorProbabilities_joint);
             
             vec_t<size_t> indices_i{i};
-            estimateParametersForSingleBinaryMarginal(population, indices_i, factorSize_i, factorProbabilities_i);
+            estimateParametersForSingleBinaryMarginal(population, alphabetSize, indices_i, factorSize_i, factorProbabilities_i);
             
             vec_t<size_t> indices_j{j};
-            estimateParametersForSingleBinaryMarginal(population, indices_j, factorSize_j, factorProbabilities_j);
+            estimateParametersForSingleBinaryMarginal(population, alphabetSize, indices_j, factorSize_j, factorProbabilities_j);
 
             MI_Matrix[i][j] = 0.0;
             
@@ -598,7 +741,7 @@ vec_t<vec_t<double>> LTFOS::computeNMIMatrix(vec_t<Individual*> &population)
 	return( MI_Matrix );
 }
 
-void LTFOS::writeMIMatrixToFile(vec_t<vec_t<double>> MI_Matrix, string folder, int populationIndex, int generation)
+void linkage_model_t::writeMIMatrixToFile(vec_t<vec_t<double>> MI_Matrix, string folder, int populationIndex, int generation)
 {
     ofstream outFile;
     outFile.open(folder + "/fos/MI_" + to_string(populationIndex) + "_" + to_string(generation) + ".txt");
@@ -617,7 +760,7 @@ void LTFOS::writeMIMatrixToFile(vec_t<vec_t<double>> MI_Matrix, string folder, i
  * Estimates the cumulative probability distribution of a
  * single binary marginal.
  */
-void LTFOS::estimateParametersForSingleBinaryMarginal(vec_t<Individual*> &population, vec_t<size_t> &indices, size_t &factorSize, vec_t<double> &result)
+void linkage_model_t::estimateParametersForSingleBinaryMarginal(vec_t<solution_t<char>*> &population, size_t alphabetSize, vec_t<size_t> &indices, size_t &factorSize, vec_t<double> &result)
 {
     size_t numberOfIndices = indices.size();
     factorSize = (int)pow(alphabetSize, numberOfIndices);
@@ -642,4 +785,4 @@ void LTFOS::estimateParametersForSingleBinaryMarginal(vec_t<Individual*> &popula
         result[i] /= (double)population.size();
 }
 
-}}
+}

@@ -1108,11 +1108,11 @@ vec random1DNormalUnitVector( int length )
  * Returns a random compact (using integers 0,1,...,n-1) permutation
  * of length n using the Fisher-Yates shuffle.
  */
-uvec randomPermutation( int n )
+/*uvec randomPermutation( int n )
 {
 	uvec perm = randperm(n);
 	return( perm );
-}
+}*/
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
 double min( double x, double y )

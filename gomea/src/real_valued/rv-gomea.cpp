@@ -538,7 +538,7 @@ void rvg_t::writeGenerationalStatisticsForOnePopulation( int population_index )
     else
         file = fopen( "statistics.dat", "a" );
 
-    sprintf( string, "%10d %11lf %11.3lf %20.15e %13e  ", populations.size(), fitness->number_of_evaluations, getTimer(), fitness->elitist_objective_value, fitness->elitist_constraint_value );
+    sprintf( string, "%10d %11lf %11.3lf %20.15e %13e  ", (int) populations.size(), fitness->number_of_evaluations, getTimer(), fitness->elitist_objective_value, fitness->elitist_constraint_value );
     fputs( string, file );
 
     //sprintf( string, "[ %4d %6d %10d %13e %13e %13e %13e %13e %13e %13e %13e %13e ]", population_index, number_of_generations[population_index], population_sizes[population_index], distribution_multipliers[population_index][0], population_objective_best, population_objective_avg, population_objective_var, population_objective_worst, population_constraint_best, population_constraint_avg, population_constraint_var, population_constraint_worst );
@@ -564,7 +564,6 @@ void rvg_t::writeGenerationalStatisticsForOnePopulation( int population_index )
  */
 void rvg_t::writeGenerationalSolutions( short final )
 {
-    int   i, j, k;
     char  string[1000];
     FILE *file_all, *file_population, *file_selection;
 
@@ -572,28 +571,28 @@ void rvg_t::writeGenerationalSolutions( short final )
     if( final )
         sprintf( string, "all_populations_generation_final.dat" );
     else
-        sprintf( string, "all_populations_generation_%05d.dat", populations.size() );
+        sprintf( string, "all_populations_generation_%05d.dat", (int) populations.size() );
     file_all = fopen( string, "w" );
 
-    for( i = 0; i < populations.size(); i++ )
+    for( size_t i = 0; i < populations.size(); i++ )
     {
         if( final )
-            sprintf( string, "population_%05d_generation_final.dat", i );
+            sprintf( string, "population_%05d_generation_final.dat", (int) i );
         else
-            sprintf( string, "population_%05d_generation_%05d.dat", i, populations[i]->number_of_generations );
+            sprintf( string, "population_%05d_generation_%05d.dat", (int) i, populations[i]->number_of_generations );
         file_population = fopen( string, "w" );
 
         //if( populations[i]->number_of_generations > 0 && !final )
         {
 			populations[i]->makeSelection();
-            sprintf( string, "selection_%05d_generation_%05d.dat", i, populations[i]->number_of_generations );
+            sprintf( string, "selection_%05d_generation_%05d.dat", (int) i, populations[i]->number_of_generations );
             file_selection = fopen( string, "w" );
         }
 
         /* Populations */
-        for( j = 0; j < populations[i]->population_size; j++ )
+        for( int j = 0; j < populations[i]->population_size; j++ )
         {
-            for( k = 0; k < fitness->number_of_variables; k++ )
+            for( int k = 0; k < fitness->number_of_variables; k++ )
             {
                 sprintf( string, "%13e", populations[i]->individuals[j]->variables[k] );
                 fputs( string, file_all );
@@ -621,9 +620,9 @@ void rvg_t::writeGenerationalSolutions( short final )
         /* Selections */
         /*if( populations[i]->number_of_generations > 0 && !final )
         {
-            for( j = 0; j < populations[i]->selection_size; j++ )
+            for( int j = 0; j < populations[i]->selection_size; j++ )
             {
-                for( k = 0; k < fitness->number_of_variables; k++ )
+                for( int k = 0; k < fitness->number_of_variables; k++ )
                 {
                     sprintf( string, "%13e", populations[i]->selection[j][k] );
                     fputs( string, file_selection );
@@ -715,7 +714,6 @@ void rvg_t::writeGenerationalSolutionsBest( short final )
 short rvg_t::checkTerminationCondition( void )
 {
 	short allTrue;
-	int   i;
 
 	if( checkNumberOfEvaluationsTerminationCondition() )
 	{
@@ -734,11 +732,13 @@ short rvg_t::checkTerminationCondition( void )
 
 	checkAverageFitnessTerminationConditions();
 
-	if( populations.size() < config->maximum_number_of_populations )
+	if((int) populations.size() < config->maximum_number_of_populations )
+    {
 		return( 0 );
+    }
 
 	allTrue = 1;
-	for( i = 0; i < populations.size(); i++ )
+	for( size_t i = 0; i < populations.size(); i++ )
 	{
 		if( !populations[i]->population_terminated )
 		{
@@ -758,10 +758,14 @@ short rvg_t::checkTerminationCondition( void )
 short rvg_t::checkPopulationTerminationConditions( int population_index )
 {
 	if( checkFitnessVarianceTermination(population_index) )
-		return( 1 );
+	{
+        return( 1 );
+    }
     
 	if( checkDistributionMultiplierTerminationCondition(population_index) )
-		return( 1 );
+	{
+        return( 1 );
+    }
 
     return( 0 );
 }
@@ -769,14 +773,20 @@ short rvg_t::checkPopulationTerminationConditions( int population_index )
 short rvg_t::checkSubgenerationTerminationConditions()
 {
 	if( checkNumberOfEvaluationsTerminationCondition() )
-        return( 1 );
+    {
+        return (1);
+    }
 
     if( checkVTRTerminationCondition() )
+    {
         return( 1 );
+    }
 
     if( checkTimeLimitTerminationCondition() )
+    {
         return( 1 );
-    
+    }
+
 	return( 0 );
 }
 
@@ -809,7 +819,7 @@ void rvg_t::checkAverageFitnessTerminationConditions( void )
 {
     double *average_objective_values = (double*) Malloc( populations.size() * sizeof(double) );
     double *average_constraint_values = (double*) Malloc( populations.size() * sizeof(double) );
-    for(int i = populations.size()-1; i >= 0; i-- )
+    for(int i = ((int)populations.size())-1; i >= 0; i-- )
     {
         average_objective_values[i] = 0;
         average_constraint_values[i] = 0;
@@ -820,7 +830,7 @@ void rvg_t::checkAverageFitnessTerminationConditions( void )
         }
         average_objective_values[i] /= populations[i]->population_size;
         average_constraint_values[i] /= populations[i]->population_size;
-        if( i < populations.size()-1 && fitness->betterFitness(average_objective_values[i+1], average_constraint_values[i+1], average_objective_values[i], average_constraint_values[i]) )
+        if( i < ((int)populations.size())-1 && fitness->betterFitness(average_objective_values[i+1], average_constraint_values[i+1], average_objective_values[i], average_constraint_values[i]) )
         {
             for(int j = i; j >= 0; j-- )
                 populations[j]->population_terminated = 1;
@@ -839,7 +849,7 @@ void rvg_t::determineBestSolutionInCurrentPopulations( int *population_of_best, 
 {
     (*population_of_best) = 0;
     (*index_of_best)      = 0;
-    for(int i = 0; i < populations.size(); i++ )
+    for(size_t i = 0; i < populations.size(); i++ )
     {
         for(int j = 0; j < populations[i]->population_size; j++ )
         {
@@ -875,7 +885,7 @@ short rvg_t::checkDistributionMultiplierTerminationCondition( int population_ind
 	if( !populations[i]->population_terminated )
 	{
 		short converged = 1;
-		for(int j = 0; j < populations[i]->linkage_model->getLength(); j++ )
+		for(int j = 0; j < populations[i]->linkage_model->size(); j++ )
 		{
 			if( populations[i]->linkage_model->getDistributionMultiplier(j) > 1e-10 )
 			{
@@ -896,7 +906,7 @@ rvg_t::~rvg_t()
 {
 	if( is_initialized )
 	{
-		for( int i = 0; i < populations.size(); i++ )
+		for( size_t i = 0; i < populations.size(); i++ )
 			delete( populations[i] );
 		delete( fitness );
 	}
@@ -940,7 +950,7 @@ void rvg_t::generationalStepAllPopulationsRecursiveFold( int population_index_sm
 
                 if( checkSubgenerationTerminationConditions() )
                 {
-                    for(int j = 0; j < populations.size(); j++ )
+                    for(size_t j = 0; j < populations.size(); j++ )
                         populations[j]->population_terminated = 1;
                     return;
                 }
@@ -959,7 +969,7 @@ void rvg_t::runAllPopulations()
 {
     while( !checkTerminationCondition() )
     {
-        if( populations.size() < config->maximum_number_of_populations )
+        if( (int) populations.size() < config->maximum_number_of_populations )
         {
             initializeNewPopulation();
             
@@ -1007,7 +1017,7 @@ void rvg_t::run( void )
 	if( populations.size() > 1 )
 	{
 		printf("[ ");
-		for(int i = 0; i < populations.size(); i++ )
+		for(size_t i = 0; i < populations.size(); i++ )
 			printf("%d ",populations[i]->number_of_generations);
 		printf("]");
 	}

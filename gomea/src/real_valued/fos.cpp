@@ -51,126 +51,22 @@ int       FOS_element_ub = 0,                       /* Cut-off value for bounded
 		  random_linkage_tree = 0;                  /* Whether the fixed linkage tree is learned based on a random distance measure. */
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
-// Dummy FOS
-fos_t::fos_t( int number_of_variables )
-{
-	this->number_of_variables = number_of_variables;
-}
-
-// Problem-specific FOS
-fos_t::fos_t( int problem_index, int number_of_variables, int FOS_type )
-{
-	this->number_of_variables = number_of_variables;
-	if( problem_index == 16 )
-	{
-		int FOS_element_size = 5;
-		int num_large_blocks = (number_of_variables+FOS_element_size-1) / FOS_element_size;
-		int num_small_blocks = num_large_blocks - 1;
-		int length      = num_large_blocks + num_small_blocks;
-		for( int i = 0; i < num_large_blocks; i++ )
-		{
-			std::vector<int> vec;
-			for( int j = 0; j < FOS_element_size; j++ )
-				vec.push_back(i*FOS_element_size + j);
-			addGroup(vec);
-		}
-		for( int i = num_large_blocks; i < length; i++ )
-		{
-			std::vector<int> vec;
-			for( int j = 0; j < 2; j++ )
-				vec.push_back((i-num_large_blocks+1)*FOS_element_size - 1 + j);
-			addGroup(vec);
-		}
-	}
-	//print();
-	order = randomPermutation( getLength() );
-}
-
-// MPM
-fos_t::fos_t( int number_of_variables, int FOS_element_size )
-{
-	this->number_of_variables = number_of_variables;
-	assert( number_of_variables % FOS_element_size == 0 );
-	for( int i = 0; i < number_of_variables/FOS_element_size; i++ )
-	{
-		std::vector<int> group;
-		for( int j = 0; j < FOS_element_size; j++ )
-			group.push_back(i*FOS_element_size + j);
-		addGroup(group);
-	}
-	order = randomPermutation( getLength() );
-}
-
-// Read a FOS from a file
-fos_t::fos_t( FILE *file )
-{
-	char    c, string[1000];
-	int     i, j, k;
-
-	/* Length */
-	k = 0;
-	int length = 0;
-	c = fgetc( file );
-	while( (c != EOF) )
-	{
-		while( c != '\n' )
-			c = fgetc( file );
-		length++;
-		c = fgetc( file );
-	}
-
-	fclose( file );
-	fflush( stdout );
-	file = fopen( "FOS.in", "r" );
-
-	for( i = 0; i < length; i++ )
-	{
-		std::vector<int> vec;
-		c = fgetc( file );
-		j = 0;
-		while( (c != '\n') && (c != EOF) )
-		{
-			k = 0;
-			while( (c == ' ') || (c == '\n') || (c == '\t') )
-				c = fgetc( file );
-			while( (c != ' ') && (c != '\n') && (c != '\t') )
-			{
-				string[k] = (char) c;
-				c = fgetc( file );
-				k++;
-			}
-			string[k] = '\0';
-			//printf("FOS[%d][%d] = %d\n",i,j,(int) atoi( string ));
-			int e = ((int) atoi(string));
-			this->number_of_variables = fmax(this->number_of_variables, e);
-			vec.push_back(e);
-			j++;
-		}
-		addGroup(vec);
-	}
-	fclose( file );
-	order = randomPermutation( getLength() );
-}
-
 // Copy a FOS
-fos_t::fos_t( const fos_t &other )
+linkage_model_rv_t::linkage_model_rv_t( const linkage_model_rv_t &other ) : linkage_model_t(other.number_of_variables)
 {
-	for(int i = 0; i < other.sets.size(); i++ )
+	for(size_t i = 0; i < other.sets.size(); i++ )
 	{
 		std::vector<int> vec;
-		for(int j = 0; j < sets[i].size(); j++ )
+		for(size_t j = 0; j < sets[i].size(); j++ )
 			vec.push_back(other.sets[i][j]);
 		addGroup(vec);
 	}
 	p_accept = other.p_accept;
-	number_of_variables = other.number_of_variables;
 }
 
 // Learn a linkage tree
-fos_t::fos_t( int problem_index, double **covariance_matrix, int n ) 
+linkage_model_rv_t::linkage_model_rv_t( int problem_index, double **covariance_matrix, int n ) : linkage_model_t(n)
 {
-	this->number_of_variables = n;
-
 	/* Compute Mutual Information matrix */
 	double **MI_matrix = NULL;
 	if( learn_linkage_tree )
@@ -431,7 +327,7 @@ fos_t::fos_t( int problem_index, double **covariance_matrix, int n )
 			}
 
 			mpm_new[r0] = (int*) Malloc( vec.size() * sizeof(int) );
-			for(int i = 0; i < vec.size(); i++ )
+			for(size_t i = 0; i < vec.size(); i++ )
 				mpm_new[r0][i] = vec[i];
 			mpm_new_number_of_indices[r0] = mpm_num_ind[r0]+mpm_num_ind[r1];
 			if( r1 < mpm_length-1 )
@@ -492,12 +388,11 @@ fos_t::fos_t( int problem_index, double **covariance_matrix, int n )
 			free( S_matrix[i] );
 		free( S_matrix );
 	}
-	order = randomPermutation( getLength() );
+	shuffleFOS();	
 }
 
-fos_t::fos_t( int number_of_variables, const std::map<int,std::set<int>> &variable_interaction_graph, int max_clique_size, bool include_cliques_as_fos_elements, bool include_full_fos_element )
+linkage_model_rv_t::linkage_model_rv_t( size_t number_of_variables, const std::map<int,std::set<int>> &variable_interaction_graph, int max_clique_size, bool include_cliques_as_fos_elements, bool include_full_fos_element ) : linkage_model_t(number_of_variables)
 {
-	this->number_of_variables = number_of_variables;
 	this->include_cliques_as_fos_elements = include_cliques_as_fos_elements;
 	this->include_full_fos_element = include_full_fos_element;
 	this->is_conditional = true;
@@ -509,10 +404,10 @@ fos_t::fos_t( int number_of_variables, const std::map<int,std::set<int>> &variab
 	const int IN_CLIQUE = 2;
 	const int IN_QUEUE = 3;
 	int visited[number_of_variables]{};
-	uvec var_order = randomPermutation( number_of_variables );
+	vec_t<int> var_order = gomea::utils::randomPermutation( number_of_variables );
 
 	std::vector<int> VIG_order;
-	conditional_distribution_t *full_cond;
+	conditional_distribution_t *full_cond = NULL;
 	if( include_full_fos_element )
 		full_cond = new conditional_distribution_t();
 	for( int i = 0; i < number_of_variables; i++ )
@@ -545,17 +440,13 @@ fos_t::fos_t( int number_of_variables, const std::map<int,std::set<int>> &variab
 					cond.insert(x);
 			}
 
-			/*printf("VIG:\n");
-			for( int x : variable_interaction_graph.at(ind) )
-				printf("%d,",x);
-			printf("\n");*/
 			for( int x : variable_interaction_graph.at(ind) ) // neighbors of ind
 			{
 				if( visited[x] != IS_VISITED )
 				{
 					bool add_to_clique = true;
 					std::set<int> neighbors = variable_interaction_graph.at(x);
-					if( clique.size() >= max_clique_size )
+					if( (int) clique.size() >= max_clique_size )
 						add_to_clique = false;
 					if( add_to_clique )
 					{
@@ -585,10 +476,6 @@ fos_t::fos_t( int number_of_variables, const std::map<int,std::set<int>> &variab
 						clique.push_back(x);
 				}
 			}
-			/*printf("C[%d]: ",ind);
-			for( int x : clique )
-				printf("%d,",x);
-			printf("\n");*/
 			for( int x : clique )
 			{
 				visited[x] = IS_VISITED;
@@ -609,112 +496,109 @@ fos_t::fos_t( int number_of_variables, const std::map<int,std::set<int>> &variab
 	}
 	if( include_full_fos_element ) 
 	{
-		if( getLength() != 1 ) // if length == 1, only 1 clique was found, which must have been the full model; in that case, do not add it again	
+		if( size() != 1 ) // if length == 1, only 1 clique was found, which must have been the full model; in that case, do not add it again	
 			addGroup( full_cond );
 		else
 			delete full_cond;
 	}
-	/*print();
-	for( auto d : distributions )
-		d->print();*/
-	//exit(0);
 }
 
-
-
-/*fos_t::fos_t( const std::map<int,std::set<int>> &variable_interaction_graph, int max_clique_size, bool include_cliques_as_fos_elements, bool include_full_fos_element, int VIG_order )
-{
-	this->include_cliques_as_fos_elements = include_cliques_as_fos_elements;
-	this->include_full_fos_element = include_full_fos_element;
-	this->is_conditional = true;
-	assert( include_cliques_as_fos_elements || include_full_fos_element );
-	if( include_cliques_as_fos_elements )
-	{
-		for(int i = 0; i < number_of_variables; i++ )
-		{
-			std::vector<int> vars;
-			vars.push_back(i);
-			addConditionedGroup( vars );
-		}
-	}
-	if( include_full_fos_element )
-	{
-		std::vector<int> vars;
-		for(int i = 0; i < number_of_variables; i++ )
-			vars.push_back(i);
-		addConditionedGroup( vars );
-	}
-
-	randomizeOrder( variable_interaction_graph );
-}*/
-
-fos_t::~fos_t()
+linkage_model_rv_t::~linkage_model_rv_t()
 {
 	for( auto d : distributions )
 		delete( d );
 }
-			
-int fos_t::getLength()
+
+linkage_model_rv_pt linkage_model_rv_t::univariate(size_t numberOfVariables_)
 {
-	return( sets.size() );
+	linkage_model_rv_pt new_fos = shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(numberOfVariables_,0));
+	return( new_fos );
+}
+			
+linkage_model_rv_pt linkage_model_rv_t::full(size_t numberOfVariables_)
+{
+	linkage_model_rv_pt new_fos = shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(numberOfVariables_,numberOfVariables_));
+	return( new_fos );
 }
 
-std::vector<int> fos_t::getSet( int element_index )
+linkage_model_rv_pt linkage_model_rv_t::marginal_product_model( size_t numberOfVariables_, size_t block_size )
+{
+	linkage_model_rv_pt new_fos = shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(numberOfVariables_,block_size));
+	return( new_fos );
+}
+			
+linkage_model_rv_pt linkage_model_rv_t::conditional( size_t numberOfVariables_, const std::map<int,std::set<int>> &variable_interaction_graph, int max_clique_size, bool include_cliques_as_fos_elements, bool include_full_fos_element )
+{
+	linkage_model_rv_pt new_fos = shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(numberOfVariables_,variable_interaction_graph,max_clique_size,include_cliques_as_fos_elements,include_full_fos_element));
+	return( new_fos );
+}
+    
+linkage_model_rv_pt linkage_model_rv_t::custom_fos( size_t numberOfVariables_, const vec_t<vec_t<int>> &FOS )
+{
+	linkage_model_rv_pt new_fos = shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(numberOfVariables_,FOS));
+	return( new_fos );
+}
+    
+linkage_model_rv_pt linkage_model_rv_t::linkage_tree(size_t numberOfVariables_, int similarityMeasure_, bool filtered_, int maximumSetSize_ )
+{
+	linkage_model_rv_pt new_fos = shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(numberOfVariables_, similarityMeasure_, filtered_, maximumSetSize_));
+	return( new_fos );
+}
+    
+linkage_model_rv_pt linkage_model_rv_t::from_file( FILE *file )
+{
+	linkage_model_rv_pt new_fos = shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(file));
+	return( new_fos );
+}
+
+void linkage_model_rv_t::initializeDistributions()
+{
+	distributions.clear();
+	for( vec_t<int> group : FOSStructure )
+		distributions.push_back( new normal_distribution_t(group) );
+}
+			
+std::vector<int> linkage_model_rv_t::getSet( int element_index )
 {
 	return( sets[element_index] );
 }
 
-int fos_t::getSetLength( int element_index )
+size_t linkage_model_rv_t::elementSize( int element_index )
 {
 	return( sets[element_index].size() );
 }
 
-int fos_t::getDistributionMultiplier( int element_index )
+int linkage_model_rv_t::getDistributionMultiplier( int element_index )
 {
 	return( distributions[element_index]->distribution_multiplier );
 }
 
-double fos_t::getAcceptanceRate() 
+double linkage_model_rv_t::getAcceptanceRate() 
 {
 	return( p_accept );
 }
 
-void fos_t::addGroup( int var_index )
-{
-	std::vector<int> vec;
-	vec.push_back(var_index);
-	addGroup(vec);
-}
-
-void fos_t::addGroup( const std::set<int> &group ) 
-{
-	std::vector<int> vec;
-	for( int x : group )
-		vec.push_back(x);
-	addGroup(vec);
-}
-
-void fos_t::addGroup( std::vector<int> group ) 
+void linkage_model_rv_t::addGroup( std::vector<int> group ) 
 {
 	std::sort(group.begin(),group.end());
 	sets.push_back(group);
 	distributions.push_back( new normal_distribution_t(group) );
 }
 
-void fos_t::addGroup( distribution_t *dist )
+void linkage_model_rv_t::addGroup( distribution_t *dist )
 {
 	//std::sort(dist->variables.begin(),dist->variables.end());
 	sets.push_back(dist->variables);
 	distributions.push_back( dist );
 }
 
-void fos_t::addConditionedGroup( std::vector<int> variables ) 
+void linkage_model_rv_t::addConditionedGroup( std::vector<int> variables ) 
 {
 	std::set<int> cond;
 	addConditionedGroup(variables,cond);
 }
 
-void fos_t::addConditionedGroup( std::vector<int> variables, std::set<int> conditioned_variables )
+void linkage_model_rv_t::addConditionedGroup( std::vector<int> variables, std::set<int> conditioned_variables )
 {
 	std::sort(variables.begin(),variables.end());
 	sets.push_back(variables);
@@ -722,14 +606,14 @@ void fos_t::addConditionedGroup( std::vector<int> variables, std::set<int> condi
 	distributions.push_back(dist);
 }
 
-double fos_t::getSimilarity( int a, int b, int *mpm_num_ind )
+double linkage_model_rv_t::getSimilarity( int a, int b, int *mpm_num_ind )
 {
 	if( FOS_element_ub < number_of_variables && mpm_num_ind[a] + mpm_num_ind[b] > FOS_element_ub ) return( 0 );
 	if( random_linkage_tree ) return( 1.0-fabs(S_vector[a]-S_vector[b]) );
 	return( S_matrix[a][b] );
 }
 
-int fos_t::determineNearestNeighbour( int index, double **S_matrix, int *mpm_num_ind, int mpm_length )
+int linkage_model_rv_t::determineNearestNeighbour( int index, double **S_matrix, int *mpm_num_ind, int mpm_length )
 {
 	int result = 0;
 	if( result == index )
@@ -743,12 +627,7 @@ int fos_t::determineNearestNeighbour( int index, double **S_matrix, int *mpm_num
 	return( result );
 }
 
-void fos_t::randomizeOrder() 
-{
-	order = randomPermutation( getLength() );
-}
-
-void fos_t::randomizeOrder( const std::map<int,std::set<int>> &variable_interaction_graph ) 
+void linkage_model_rv_t::randomizeOrder( const std::map<int,std::set<int>> &variable_interaction_graph ) 
 {
 	int visited[number_of_variables]{};
 	std::vector<int> VIG_order = getVIGOrderBreadthFirst(variable_interaction_graph);
@@ -758,15 +637,15 @@ void fos_t::randomizeOrder( const std::map<int,std::set<int>> &variable_interact
 	printf("\n");*/
 
 	int FOS_length = 0;
-	order = uvec(getLength(),fill::none);
+	FOSorder = vec_t<int>(size());
 	if( include_cliques_as_fos_elements )
 	{
 		for(int i = 0; i < number_of_variables; i++ )
 		{
 			assert( sets[i][0] == i );
-			assert( getSetLength(i) == 1 );
-			order[i] = VIG_order[i];
-			distributions[order[i]]->updateConditionals(variable_interaction_graph,visited);
+			assert( elementSize(i) == 1 );
+			FOSorder[i] = VIG_order[i];
+			distributions[FOSorder[i]]->updateConditionals(variable_interaction_graph,visited);
 		}
 		FOS_length = number_of_variables;
 	}
@@ -774,28 +653,21 @@ void fos_t::randomizeOrder( const std::map<int,std::set<int>> &variable_interact
 		visited[i] = 0;
 	if( include_full_fos_element )
 	{
-		order[FOS_length] = number_of_variables;
+		FOSorder[FOS_length] = number_of_variables;
 		distributions[FOS_length]->setOrder(VIG_order);
 		distributions[FOS_length]->updateConditionals(variable_interaction_graph,visited);
 		//distributions[FOS_length]->print();
 	}
-	/*if( getLength() > 1 )
-	{
-		printf("ORDER: ");
-		for(int i = 0; i < getLength(); i++ )
-			printf("%d ",order[i]);
-		printf("\n");
-	}*/
 }
 
-std::vector<int> fos_t::getVIGOrderBreadthFirst( const std::map<int,std::set<int>> &variable_interaction_graph ) 
+std::vector<int> linkage_model_rv_t::getVIGOrderBreadthFirst( const std::map<int,std::set<int>> &variable_interaction_graph ) 
 {
 	const int UNVISITED = 0;
 	const int IS_VISITED = 1;
 	const int IN_CLIQUE = 2;
 	const int IN_QUEUE = 3;
 	int visited[number_of_variables]{};
-	uvec var_order = randomPermutation( number_of_variables );
+	vec_t<int> var_order = gomea::utils::randomPermutation( number_of_variables );
 
 	std::vector<int> VIG_order;
 	for( int i = 0; i < number_of_variables; i++ )
@@ -832,23 +704,8 @@ std::vector<int> fos_t::getVIGOrderBreadthFirst( const std::map<int,std::set<int
 	}
 	return( VIG_order );
 }
-/*{
-	order = randomPermutation( getLength() );
-	
-	int visited[number_of_variables]{};
 
-	for( int i = 0; i < getLength(); i++ )
-	{
-		int group_index = order[i];
-		std::vector<int> clique = getSet(group_index);
-		if( getSetLength(group_index) == variable_interaction_graph.size() )
-			continue;
-	
-		distributions[group_index]->updateConditionals( variable_interaction_graph, visited );
-	}
-}*/
-
-double **fos_t::computeMIMatrix( double **covariance_matrix, int n )
+double **linkage_model_rv_t::computeMIMatrix( double **covariance_matrix, int n )
 {
 	double **MI_matrix = (double **) Malloc( n*sizeof( double * ) );
 	for(int j = 0; j < n; j++ )
@@ -870,30 +727,30 @@ double **fos_t::computeMIMatrix( double **covariance_matrix, int n )
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
-void fos_t::inheritDistributionMultipliers( fos_t *other, double *multipliers )
+void linkage_model_rv_t::inheritDistributionMultipliers( linkage_model_rv_t *other, double *multipliers )
 {
 	int      i, *permutation;
 	double   *multipliers_copy;
 
-	multipliers_copy = (double*) Malloc(getLength()*sizeof(double));
-	for( i = 0; i < getLength(); i++ )
+	multipliers_copy = (double*) Malloc(size()*sizeof(double));
+	for( i = 0; i < size(); i++ )
 		multipliers_copy[i] = multipliers[i];
 
 	permutation = matchFOSElements( other );
 
-	for( i = 0; i < getLength(); i++ )
+	for( i = 0; i < size(); i++ )
 		multipliers[permutation[i]] = multipliers_copy[i];
 
 	free( multipliers_copy );
 	free( permutation );
 }
 
-int *fos_t::matchFOSElements( fos_t *other )
+int *linkage_model_rv_t::matchFOSElements( linkage_model_rv_t *other )
 {
-	int *permutation = (int *) Malloc( getLength()*sizeof(int));
-	int **FOS_element_similarity_matrix = (int**) Malloc((getLength()-number_of_variables)*sizeof(int*));
-	for(int i = 0; i < getLength()-number_of_variables; i++ )
-		FOS_element_similarity_matrix[i] = (int*) Malloc((getLength()-number_of_variables)*sizeof(int));
+	int *permutation = (int *) Malloc( size()*sizeof(int));
+	int **FOS_element_similarity_matrix = (int**) Malloc((size()-number_of_variables)*sizeof(int*));
+	for(int i = 0; i < size()-number_of_variables; i++ )
+		FOS_element_similarity_matrix[i] = (int*) Malloc((size()-number_of_variables)*sizeof(int));
 	for(int i = 0; i < number_of_variables; i++ )
 	{
 		for(int j = 0; j < number_of_variables; j++ )
@@ -905,12 +762,12 @@ int *fos_t::matchFOSElements( fos_t *other )
 			}
 		}
 	}
-	for(int i = number_of_variables; i < getLength(); i++ )
+	for(int i = number_of_variables; i < size(); i++ )
 	{
-		for(int j = number_of_variables; j < getLength(); j++ )
+		for(int j = number_of_variables; j < size(); j++ )
 		{
-			int a = 0;
-			int b = 0;
+			size_t a = 0;
+			size_t b = 0;
 			int matches = 0;
 			while( a < other->sets[i].size() && b < sets[j].size() )
 			{
@@ -929,11 +786,11 @@ int *fos_t::matchFOSElements( fos_t *other )
 		}
 	}
 
-	int *hungarian_permutation = hungarianAlgorithm(FOS_element_similarity_matrix, getLength()-number_of_variables);
-	for(int i = 0; i < getLength()-number_of_variables; i++ )
+	int *hungarian_permutation = hungarianAlgorithm(FOS_element_similarity_matrix, size()-number_of_variables);
+	for(int i = 0; i < size()-number_of_variables; i++ )
 		permutation[i+number_of_variables] = hungarian_permutation[i]+number_of_variables;
 
-	for(int i = 0; i < getLength()-number_of_variables; i++ )
+	for(int i = 0; i < size()-number_of_variables; i++ )
 		free( FOS_element_similarity_matrix[i] );
 	free( FOS_element_similarity_matrix );
 	free( hungarian_permutation );
@@ -941,7 +798,7 @@ int *fos_t::matchFOSElements( fos_t *other )
 	return( permutation );
 }
 
-int *fos_t::hungarianAlgorithm( int **similarity_matrix, int dim )
+int *linkage_model_rv_t::hungarianAlgorithm( int **similarity_matrix, int dim )
 {
 	int x,y,ty;
 
@@ -1086,7 +943,7 @@ int *fos_t::hungarianAlgorithm( int **similarity_matrix, int dim )
 	return xy;
 }
 
-void fos_t::hungarianAlgorithmAddToTree(int x, int prevx, short *S, int *prev, int *slack, int *slackx, int* lx, int *ly, int** similarity_matrix, int dim) 
+void linkage_model_rv_t::hungarianAlgorithmAddToTree(int x, int prevx, short *S, int *prev, int *slack, int *slackx, int* lx, int *ly, int** similarity_matrix, int dim) 
 {
 	S[x] = 1;
 	prev[x] = prevx;
@@ -1100,16 +957,16 @@ void fos_t::hungarianAlgorithmAddToTree(int x, int prevx, short *S, int *prev, i
 	}
 }
 
-void fos_t::print()
+void linkage_model_rv_t::print()
 {
 	printf("FOS: {");
-	for(int i = 0; i < getLength(); i++ )
+	for(int i = 0; i < size(); i++ )
 	{
 		printf("[");
-		for(int j = 0; j < sets[i].size(); j++ )
+		for(int j = 0; j < (int) sets[i].size(); j++ )
 		{
 			printf("%d", sets[i][j]);
-			if( j != sets[i].size()-1)
+			if( j != ((int)sets[i].size())-1)
 				printf(",");
 		}
 		printf("]");
@@ -1118,24 +975,24 @@ void fos_t::print()
 	printf("}\n");
 }
 
-partial_solution_t<double> *fos_t::generatePartialSolution( int FOS_index, solution_t<double> *solution_conditioned_on )
+partial_solution_t<double> *linkage_model_rv_t::generatePartialSolution( int FOS_index, solution_t<double> *solution_conditioned_on )
 {
 	return( distributions[FOS_index]->generatePartialSolution(solution_conditioned_on) );
 }
 
-void fos_t::estimateDistributions( solution_t<double> **selection, int selection_size )
+void linkage_model_rv_t::estimateDistributions( solution_t<double> **selection, int selection_size )
 {
-	for( int i = 0; i < getLength(); i++ )
+	for( int i = 0; i < size(); i++ )
 		estimateDistribution( i, selection, selection_size );
-	order = randomPermutation( getLength() );
+	FOSorder = gomea::utils::randomPermutation( size() );
 }
 
-void fos_t::estimateDistribution( int FOS_index, solution_t<double> **selection, int selection_size )
+void linkage_model_rv_t::estimateDistribution( int FOS_index, solution_t<double> **selection, int selection_size )
 {
 	distributions[FOS_index]->estimateDistribution(selection,selection_size);
 }
 
-void fos_t::adaptDistributionMultiplier( int FOS_index, partial_solution_t<double> **solutions, int num_solutions )
+void linkage_model_rv_t::adaptDistributionMultiplier( int FOS_index, partial_solution_t<double> **solutions, int num_solutions )
 {
 	if( no_improvement_stretch >= maximum_no_improvement_stretch )
 		distributions[FOS_index]->adaptDistributionMultiplierMaximumStretch(solutions,num_solutions);

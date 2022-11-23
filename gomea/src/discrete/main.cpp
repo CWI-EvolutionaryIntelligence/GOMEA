@@ -12,8 +12,6 @@ int main(int argc, char **argv)
     config->checkOptions();
     config->printOverview();
 
-    config->rng.seed(config->randomSeed);
-
     GOMEA *gomeaInstance = new gomeaIMS(config);
 
     try

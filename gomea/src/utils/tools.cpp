@@ -54,5 +54,23 @@ bool isPowerOfK(int n, int k)
     return (ceil(logNBaseK) == floor(logNBaseK));
 }
 
+vec_t<int> randomPermutation( int size )
+{
+    vec_t<int> perm(size);
+    iota(perm.begin(), perm.end(), 0);
+    std::random_shuffle( perm.begin(), perm.end() );
+    return( perm );
+}
+
+void initializeRandomNumberGenerator()
+{
+	long long seed = std::chrono::system_clock::now().time_since_epoch().count() % 1000000;
+	rng.seed(seed);
+}
+
+void initializeRandomNumberGenerator( long long seed )
+{
+	rng.seed(seed);
+}
 
 }}

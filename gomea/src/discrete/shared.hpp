@@ -21,7 +21,7 @@ class sharedInformation
 		solutionsArchive *evaluatedSolutions;
 		bool firstEvaluationEver;
 		double elitistFitness;
-		Individual elitist = Individual(1,2);
+		solution_t<char> elitist = solution_t<char>(1,2);
 
     sharedInformation(int maxArchiveSize)
     {

@@ -38,6 +38,8 @@
 #pragma once
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-= Section Includes -=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
+#include "gomea/src/common/linkage_model.hpp"
+#include "gomea/src/utils/tools.hpp"
 #include "gomea/src/real_valued/tools.hpp"
 #include "gomea/src/real_valued/distribution.hpp"
 #include "gomea/src/real_valued/partial_solutionRV.hpp"
@@ -46,39 +48,39 @@
 namespace gomea{
 namespace realvalued{
 
-class fos_t {
-
+class linkage_model_rv_t : public linkage_model_t {
 		public:
-			fos_t( int number_of_variables );
-			fos_t( int number_of_variables, int FOS_element_size );
-			fos_t( int problem_index, int number_of_variables, int FOS_type );
-			fos_t( int problem_index, double **covariance_matrix, int n );
-			fos_t( FILE *file );
-			//fos_t( const std::map<int,std::set<int>> &variable_interaction_graph, int max_clique_size, bool include_cliques_as_fos_elements, bool include_full_fos_element, int VIG_order );
-			fos_t( int number_of_variables, const std::map<int,std::set<int>> &variable_interaction_graph, int max_clique_size, bool include_cliques_as_fos_elements, bool include_full_fos_element );
-			fos_t( const fos_t &f );
-			~fos_t();
-			
-			int getLength();
-			std::vector<int> getSet( int element_index );
-			int getSetLength( int element_index );
+			linkage_model_rv_t( int problem_index, double **covariance_matrix, int n );
+			linkage_model_rv_t( int number_of_variables, const std::map<int,std::set<int>> &variable_interaction_graph, int max_clique_size, bool include_cliques_as_fos_elements, bool include_full_fos_element );
+			linkage_model_rv_t( const linkage_model_rv_t &f );
+			~linkage_model_rv_t();
+
+			static std::shared_ptr<linkage_model_rv_t> univariate(size_t numberOfvariables_);
+			static std::shared_ptr<linkage_model_rv_t> full(size_t numberOfvariables_);
+			static std::shared_ptr<linkage_model_rv_t> linkage_tree(size_t numberOfVariables_, int similarityMeasure_ = 0, bool filtered_ = false, int maximumSetSize_ = -1);
+			static std::shared_ptr<linkage_model_rv_t> marginal_product_model(size_t numberOfvariables_, size_t block_size);
+			static std::shared_ptr<linkage_model_rv_t> conditional( size_t number_of_variables, const std::map<int,std::set<int>> &variable_interaction_graph, int max_clique_size = 1, bool include_cliques_as_fos_elements = true, bool include_full_fos_element = true );
+			static std::shared_ptr<linkage_model_rv_t> custom_fos(size_t numberOfvariables_, const vec_t<vec_t<int>> &FOS);
+			static std::shared_ptr<linkage_model_rv_t> from_file(FILE *file);
+
+			void initializeDistributions();
+
+			vec_t<int> getSet( int element_index );
+			size_t elementSize( int element_index );
 			double getAcceptanceRate(); 
 			int getDistributionMultiplier( int element_index );
 			
-			void addGroup( int var_index );
-			void addGroup( const std::set<int> &group );
-			void addGroup( std::vector<int> group );
+			void addGroup( vec_t<int> group );
 			void addGroup( distribution_t *dist );
-			void addConditionedGroup( std::vector<int> variables );
-			void addConditionedGroup( std::vector<int> variables, std::set<int> conditioned_variables );
-			void randomizeOrder();
+			void addConditionedGroup( vec_t<int> variables );
+			void addConditionedGroup( vec_t<int> variables, std::set<int> conditioned_variables );
 			void randomizeOrder( const std::map<int,std::set<int>> &variable_interaction_graph ); 
-			std::vector<int> getVIGOrderBreadthFirst( const std::map<int,std::set<int>> &variable_interaction_graph );
+			vec_t<int> getVIGOrderBreadthFirst( const std::map<int,std::set<int>> &variable_interaction_graph );
 
 			double getSimilarity( int a, int b, int *mpm_num_ind );
 			double **computeMIMatrix( double **covariance_matrix, int n );
-			void inheritDistributionMultipliers( fos_t *other, double *multipliers );
-			int *matchFOSElements( fos_t *other );
+			void inheritDistributionMultipliers( linkage_model_rv_t *other, double *multipliers );
+			int *matchFOSElements( linkage_model_rv_t *other );
 			int *hungarianAlgorithm( int** similarity_matrix, int dim );
 			void hungarianAlgorithmAddToTree(int x, int prevx, short *S, int *prev, int *slack, int *slackx, int* lx, int *ly, int** similarity_matrix, int dim );
 			int determineNearestNeighbour(int index, double **S_matrix, int *mpm_num_ind, int mpm_length );
@@ -93,13 +95,13 @@ class fos_t {
 			void adaptDistributionMultiplier( int FOS_index, partial_solution_t<double> **solutions, int num_solutions );
 
 			int number_of_variables = -1;
-			std::vector<distribution_t*> distributions;
+			vec_t<distribution_t*> distributions;
 			int no_improvement_stretch = 0;
 			int maximum_no_improvement_stretch = 100;
 			
-			double p_accept = 0.00;
-			std::vector<std::vector<int>> sets;
-			std::vector<uvec> variables_conditioned_on; 
+			double p_accept = 0.05;
+			vec_t<vec_t<int>> sets;
+			vec_t<uvec> variables_conditioned_on; 
 
 			bool is_conditional = false;
 			int max_clique_size;
@@ -108,12 +110,21 @@ class fos_t {
 
 			void print();
 
-			uvec order;
 			int *next_variable_to_sample = NULL;
 
 			double **S_matrix;
 			double *S_vector;                             /* Avoids quadratic memory requirements when a linkage tree is learned based on a random distance measure. */
-};
+		
+		private:
+			linkage_model_rv_t(size_t numberOfVariables_) : linkage_model_t(numberOfVariables_) {initializeDistributions();};
+ 	  	   	linkage_model_rv_t(size_t numberOfVariables_, size_t block_size ) : linkage_model_t(numberOfVariables_,block_size){initializeDistributions();};
+		    linkage_model_rv_t(size_t numberOfVariables_, const vec_t<vec_t<int>> &FOS ) : linkage_model_t(numberOfVariables_, FOS){initializeDistributions();};
+			linkage_model_rv_t(size_t numberOfVariables_, int similarityMeasure, bool filtered, int maximumSetSize) : linkage_model_t(numberOfVariables_,similarityMeasure,filtered,maximumSetSize){initializeDistributions();};
+			linkage_model_rv_t(size_t number_of_variables, const std::map<int,std::set<int>> &variable_interaction_graph, int max_clique_size, bool include_cliques_as_fos_elements, bool include_full_fos_element );
+			linkage_model_rv_t(FILE *file) : linkage_model_t(file){initializeDistributions();};
+	};
+
+typedef std::shared_ptr<linkage_model_rv_t> linkage_model_rv_pt;
 
 /*-=-=-=-=-=-=-=-=-=-=-=-= Section Header Functions -=-=-=-=-=-=-=-=-=-=-=-=*/
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/

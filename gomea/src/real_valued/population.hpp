@@ -118,7 +118,7 @@ class population_t {
 			   *mean_shift_vector,                                   /* The mean vectors of the previous generation, one for each population. */
 			   *prev_mean_vector;                                   /* The mean vectors of the previous generation, one for each population. */
 		short  population_terminated;
-		fos_t *linkage_model;
+		linkage_model_rv_pt linkage_model;
 		/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 };
 

@@ -15,7 +15,7 @@
 
 using namespace std;
 
-#include "gomea/src/discrete/Individual.hpp"
+#include "gomea/src/common/solution.hpp"
 #include "gomea/src/common/gomea_defs.hpp"
 
 namespace gomea{
@@ -66,8 +66,8 @@ public:
 
 void prepareFolder(string &folder);
 void initElitistFile(string &folder);
-void writeStatisticsToFile(string &folder, long long numberOfEvaluations, long long time, Individual *solution);
-void writeElitistSolutionToFile(string &folder, long long numberOfEvaluations, long long time, Individual *solution);
+void writeStatisticsToFile(string &folder, long long numberOfEvaluations, long long time, solution_t<char> *solution);
+void writeElitistSolutionToFile(string &folder, long long numberOfEvaluations, long long time, solution_t<char> *solution);
 
 void startTimer();
 double getElapsedTime();

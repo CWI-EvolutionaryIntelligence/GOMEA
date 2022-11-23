@@ -1,3 +1,6 @@
+#pragma once
+
+#include <chrono>
 #include "gomea/src/common/gomea_defs.hpp"
 
 namespace gomea{
@@ -8,11 +11,16 @@ namespace gomea{
 	double vectorDotProduct( double *vector0, double *vector1, int n0 );
 
 	vec_t<int> getSortedOrder( vec_t<int> &data );
-	//template vec_t<int> getSortedOrder( vec_t<float> &data );
-	//template vec_t<int> getSortedOrder( vec_t<double> &data );
 
 	bool isPowerOfK(int n, int k);
-	
+
+	vec_t<int> randomPermutation( int size );
+
+	void initializeRandomNumberGenerator();
+	void initializeRandomNumberGenerator( long long seed );
+
+	static std::mt19937 rng;
+
 	}
 }
 

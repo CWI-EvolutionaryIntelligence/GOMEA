@@ -37,7 +37,7 @@ void initElitistFile(string &folder)
     outFile.close();
 }
 
-void writeStatisticsToFile(string &folder, long long numberOfEvaluations, long long time, Individual *solution)
+void writeStatisticsToFile(string &folder, long long numberOfEvaluations, long long time, solution_t<char> *solution)
 {
     ofstream outFile(folder + "/statistics.txt", ofstream::app);
     if (outFile.fail())
@@ -52,7 +52,7 @@ void writeStatisticsToFile(string &folder, long long numberOfEvaluations, long l
     outFile.close();
 }
 
-void writeElitistSolutionToFile(string &folder, long long numberOfEvaluations, long long time, Individual *solution)
+void writeElitistSolutionToFile(string &folder, long long numberOfEvaluations, long long time, solution_t<char> *solution)
 {
     ofstream outFile(folder + "/elitists.txt", ofstream::app);
     if (outFile.fail())
@@ -62,7 +62,7 @@ void writeElitistSolutionToFile(string &folder, long long numberOfEvaluations, l
     }
 
     outFile << (int)numberOfEvaluations << " " << fixed << setprecision(3) << time/1000.0 << " " <<  setprecision(6) << solution->getObjectiveValue() << " ";
-    for (size_t i = 0; i < solution->getNumberOfVariables(); ++i)
+    for (int i = 0; i < solution->getNumberOfVariables(); ++i)
         outFile << +solution->variables[i];
     outFile << endl;
 

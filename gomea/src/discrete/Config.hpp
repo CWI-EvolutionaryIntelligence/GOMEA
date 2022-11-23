@@ -11,7 +11,7 @@
 
 using namespace std;
 
-#include "gomea/src/discrete/FOS.hpp"
+#include "gomea/src/common/linkage_model.hpp"
 #include "gomea/src/fitness/fitness.hpp"
 #include "gomea/src/fitness/benchmarks-discrete.hpp"
 
@@ -60,16 +60,13 @@ public:
     string problemInstancePath = "";
 
     //long long timelimitMilliseconds = -1,
-    long long randomSeed,
-			  cudaRandstateOffset;
+    long long randomSeed;
     
     size_t alphabetSize = 2;
     size_t maxArchiveSize = 1000000;
     int maximumNumberOfGOMEAs  = 100,
         IMSsubgenerationFactor = 4,
         basePopulationSize     = 2;
-    
-    mt19937 rng;
 
     private:
         int problemIndex = 0, numberOfVariables = 10;

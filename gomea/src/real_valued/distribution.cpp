@@ -128,7 +128,7 @@ double distribution_t::estimateCovariance( int vara, int varb, solution_t<double
 vec_t<double> distribution_t::estimateMeanVectorML( vec_t<int> &variables, solution_t<double> **selection, int selection_size )
 {
 	vec_t<double> mean_vector = vec_t<double>(variables.size());
-	for(int i = 0; i < variables.size(); i++ )
+	for( size_t i = 0; i < variables.size(); i++ )
 		mean_vector[i] = estimateMean( variables[i], selection, selection_size );
 	return( mean_vector );
 }
@@ -137,7 +137,7 @@ mat distribution_t::estimateUnivariateCovarianceMatrixML( vec_t<int> &variables,
 {
 	/* First do the maximum-likelihood estimate from data */
 	mat covariance_matrix = mat(variables.size(),variables.size(),fill::zeros);
-	for(int j = 0; j < variables.size(); j++ )
+	for( size_t j = 0; j < variables.size(); j++ )
 	{
 		int vara = variables[j];
 		double cov = estimateCovariance(vara,vara,selection,selection_size);
@@ -168,10 +168,10 @@ mat distribution_t::estimateCovarianceMatrixML( vec_t<int> &variables, solution_
 	/* First do the maximum-likelihood estimate from data */
 	//mat covariance_matrix(variables.size(),variables.size(),fill::none);
 	mat covariance_matrix = mat(variables.size(),variables.size());
-	for(int j = 0; j < variables.size(); j++ )
+	for( size_t j = 0; j < variables.size(); j++ )
 	{
 		int vara = variables[j];
-		for(int k = j; k < variables.size(); k++ )
+		for( size_t k = j; k < variables.size(); k++ )
 		{
 			int varb = variables[k];
 			double cov = estimateCovariance(vara,varb,selection,selection_size);
@@ -276,7 +276,7 @@ mat distribution_t::pseudoInverse( const mat &matrix )
 	{
 		//printf("Warning: pseudo-inverse failed.\n"); // Diag = [ ");
 		result = mat( matrix.n_cols, matrix.n_cols, fill::zeros );
-		for( int i = 0; i < matrix.n_cols; i++ )
+		for( size_t i = 0; i < matrix.n_cols; i++ )
 		{
 			if( matrix(i,i) == 0 ) result(i,i) = 1e38;
 			else result(i,i) = 1.0/matrix(i,i);
@@ -566,7 +566,7 @@ void normal_distribution_t::estimateDistribution( solution_t<double> **selection
 	
 	/* Change the focus of the search to the best solution */
 	if( distribution_multiplier < 1.0 )
-		for(int j = 0; j < variables.size(); j++)
+		for(size_t j = 0; j < variables.size(); j++)
 			mean_vector[j] = selection[0]->variables[variables[j]];
 
 	covariance_matrix = estimateRegularCovarianceMatrixML(variables,mean_vector,selection,selection_size);
@@ -605,7 +605,7 @@ partial_solution_t<double> *normal_distribution_t::generatePartialSolution( solu
 		else
 		{
 			vec sample = cholesky_decomposition * random1DNormalUnitVector(num_indices);
-			for( int i = 0; i < sample.n_elem; i++ )
+			for( size_t i = 0; i < sample.n_elem; i++ )
 			{
 				result[i] = mean_vector[i] + sample[i];
 			}
@@ -800,7 +800,7 @@ void conditional_distribution_t::updateConditionals( const std::map<int,std::set
 	variables_conditioned_on.clear();
 	variables_conditioned_on.resize(variable_groups.size());
 	
-	for( int i = 0; i < variable_groups.size(); i++ )
+	for( size_t i = 0; i < variable_groups.size(); i++ )
 	{
 		int ind = i;
 		if( order.size() > 0 )
@@ -822,14 +822,6 @@ void conditional_distribution_t::updateConditionals( const std::map<int,std::set
 		for( int v : clique )
 			visited[v] = IS_VISITED;
 		
-		/*printf("C [ ");
-		for( int v : clique )
-			printf("%d ",v);
-		printf("]");
-		for( int c : cond )
-			printf(" %d",c);
-		printf("\n");*/
-	
 		vec_t<int> cond_vec;
 		for( int x : cond )
 			cond_vec.push_back(x);
@@ -840,7 +832,7 @@ void conditional_distribution_t::updateConditionals( const std::map<int,std::set
 void conditional_distribution_t::estimateDistribution( solution_t<double> **selection, int selection_size )
 {
 	initializeMemory();
-	for( int i = 0; i < variable_groups.size(); i++ )
+	for( size_t i = 0; i < variable_groups.size(); i++ )
 		estimateConditionalGaussianML(i,selection,selection_size);
 }
 
@@ -849,8 +841,7 @@ partial_solution_t<double> *conditional_distribution_t::generatePartialSolution(
 	vec_t<double> result = vec_t<double>(variables.size());
 	vec_t<double> means = vec_t<double>(variables.size());
 	std::map<int,int> sampled_indices;
-	//printf("%d\n",variable_groups.size());
-	for( int k = 0; k < variable_groups.size(); k++ )
+	for( size_t k = 0; k < variable_groups.size(); k++ )
 	{
 		int og = order[k];
 		vec_t<int> indices = variable_groups[og];
@@ -946,7 +937,7 @@ short conditional_distribution_t::generationalImprovementForOnePopulationForFOSE
 	*st_dev_ratio = 0.0;
 	short generational_improvement = 0;
 
-	for( int k = 0; k < variable_groups.size(); k++ )
+	for( size_t k = 0; k < variable_groups.size(); k++ )
 	{	
 		vec_t<int> indices = variable_groups[k];
 		int num_indices = variable_groups[k].size();
@@ -996,7 +987,7 @@ void conditional_distribution_t::setOrder( const vec_t<int> &order )
 
 void conditional_distribution_t::print()
 {
-	for(int i = 0; i < variable_groups.size(); i++ )
+	for(size_t i = 0; i < variable_groups.size(); i++ )
 	{
 		int og = order[i];
 		printf("[");
