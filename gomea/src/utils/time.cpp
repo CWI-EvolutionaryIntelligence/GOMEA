@@ -1,23 +1,24 @@
 #include "gomea/src/utils/time.hpp"
 
-long long getTimestamp()
+namespace gomea{
+namespace utils{
+
+time_t getTimestamp()
 {
-    struct timeval tv;
-    long long result;
-
-    gettimeofday (&tv, NULL);
-    result = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
-
-    return  result;
+	return std::chrono::high_resolution_clock::now();
 }
 
-long long getTime(long long startTimestamp)
+long long getElapsedTimeMilliseconds(time_t startTimestamp)
 {
-    long long timestamp_now, difference;
-
-    timestamp_now = getTimestamp();
-
-    difference = timestamp_now-startTimestamp;
-
-    return difference;
+    auto timestamp_now = getTimestamp();
+	auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(timestamp_now - startTimestamp);
+	return( diff.count() );
 }
+
+double getElapsedTimeSeconds(time_t startTimestamp)
+{
+	return( getElapsedTimeMilliseconds(startTimestamp) / 1000.0 );
+}
+
+}}
+

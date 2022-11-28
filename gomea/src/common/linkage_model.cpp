@@ -1,8 +1,15 @@
 #include "gomea/src/common/linkage_model.hpp"
 
 namespace gomea{
+        
+linkage_config_t::linkage_config_t(){type = linkage::UNIVARIATE;}
+linkage_config_t::linkage_config_t( size_t block_size_ ) : mpm_block_size(block_size_){type = linkage::MPM;}
+linkage_config_t::linkage_config_t(int similarityMeasure_, bool filtered_, int maximumSetSize_ ) 
+	: lt_similarity_measure(similarityMeasure_), lt_filtered(filtered_), lt_maximum_set_size(maximumSetSize_) {type = linkage::LINKAGE_TREE;}
+linkage_config_t::linkage_config_t( const vec_t<vec_t<int>> &FOS_ ) : FOS(FOS_){type = linkage::CUSTOM_LM;}
+linkage_config_t::linkage_config_t( std::string filename_ ) : filename(filename_){type = linkage::FROM_FILE;}
 
-bool FOSNameByIndex(size_t FOSIndex, string &FOSName)
+bool linkage_model_t::FOSNameByIndex(size_t FOSIndex, string &FOSName)
 {
     switch (FOSIndex)
     {
@@ -14,7 +21,7 @@ bool FOSNameByIndex(size_t FOSIndex, string &FOSName)
     return true;
 }
 
-linkage_model_pt createFOSInstance(size_t FOSIndex, size_t numberOfVariables, int similarityMeasure, int maximumFOSSetSize )
+linkage_model_pt linkage_model_t::createLinkageTreeFOSInstance(size_t FOSIndex, size_t numberOfVariables, int similarityMeasure, int maximumFOSSetSize )
 {
     switch (FOSIndex)
     {
@@ -25,13 +32,28 @@ linkage_model_pt createFOSInstance(size_t FOSIndex, size_t numberOfVariables, in
 	return NULL;
 }
 
+linkage_model_pt linkage_model_t::createFOSInstance( const linkage_config_t &config, size_t numberOfVariables )
+{
+	if( config.type != linkage::FROM_FILE )
+		assert( numberOfVariables > 0 );
+	switch( config.type )
+	{
+		case linkage::UNIVARIATE: return univariate(numberOfVariables);
+		case linkage::MPM: return marginal_product_model(numberOfVariables, config.mpm_block_size);
+		case linkage::LINKAGE_TREE: return linkage_tree(numberOfVariables, config.lt_similarity_measure, config.lt_filtered, config.lt_maximum_set_size );
+		case linkage::CUSTOM_LM: return custom_fos(numberOfVariables,config.FOS);
+		case linkage::FROM_FILE: return from_file(config.filename);
+	}
+}
+
 linkage_model_t::linkage_model_t( size_t numberOfVariables_, size_t block_size ) : linkage_model_t(numberOfVariables_)
 {
-	if( block_size == 0 )
+	assert( block_size > 0 );
+	if( block_size == 1 )
 	{
 		for (size_t i = 0; i < numberOfVariables_; i++)
 			addGroup(i);
-		type = UNIVARIATE;
+		type = linkage::UNIVARIATE;
 	}
 	else
 	{
@@ -44,9 +66,9 @@ linkage_model_t::linkage_model_t( size_t numberOfVariables_, size_t block_size )
 			addGroup(group);
 		}
 		if( numberOfVariables == block_size )
-			type = FULL;
+			type = linkage::FULL;
 		else
-			type = MPM;
+			type = linkage::MPM;
 	}
 	shuffleFOS();
 }
@@ -59,8 +81,7 @@ linkage_model_t::linkage_model_t( size_t numberOfVariables_, const vec_t<vec_t<i
 		addGroup(group);
 		tot_size += group.size();
 	}
-	assert( tot_size == numberOfVariables_ );
-	type = MPM;
+	type = linkage::CUSTOM_LM;
 	shuffleFOS();
 }
 
@@ -76,59 +97,67 @@ linkage_model_t::linkage_model_t(size_t numberOfVariables_, int similarityMeasur
 	S_Matrix.resize(numberOfVariables);
 	for (size_t i = 0; i < numberOfVariables; ++i)
 		S_Matrix[i].resize(numberOfVariables);
-	type = LINKAGE_TREE;
+	type = linkage::LINKAGE_TREE;
 }
 
 // Read a FOS from a file
-linkage_model_t::linkage_model_t( FILE *file )
+linkage_model_t::linkage_model_t( std::string filename )
 {
 	char    c, string[1000];
 	int     i, j, k;
-
-	/* Length */
-	k = 0;
-	int length = 0;
-	c = fgetc( file );
-	while( (c != EOF) )
+	FILE *file = fopen( filename.c_str(), "r" );
+	if( file != NULL )
 	{
-		while( c != '\n' )
-			c = fgetc( file );
-		length++;
-		c = fgetc( file );
-	}
-
-	fclose( file );
-	fflush( stdout );
-	file = fopen( "FOS.in", "r" );
-
-	for( i = 0; i < length; i++ )
-	{
-		std::vector<int> vec;
-		c = fgetc( file );
-		j = 0;
-		while( (c != '\n') && (c != EOF) )
+		/* Length */
+		k = 0;
+		int length = 0;
+		c = fgetc(file);
+		while ((c != EOF))
 		{
-			k = 0;
-			while( (c == ' ') || (c == '\n') || (c == '\t') )
-				c = fgetc( file );
-			while( (c != ' ') && (c != '\n') && (c != '\t') )
-			{
-				string[k] = (char) c;
-				c = fgetc( file );
-				k++;
-			}
-			string[k] = '\0';
-			//printf("FOS[%d][%d] = %d\n",i,j,(int) atoi( string ));
-			int e = ((int) atoi(string));
-			this->numberOfVariables = fmax(this->numberOfVariables, e);
-			vec.push_back(e);
-			j++;
+			while (c != '\n')
+				c = fgetc(file);
+			length++;
+			c = fgetc(file);
 		}
-		addGroup(vec);
+
+		fclose(file);
+		fflush(stdout);
+		file = fopen(filename.c_str(), "r");
+
+		for (i = 0; i < length; i++)
+		{
+			std::vector<int> vec;
+			c = fgetc(file);
+			j = 0;
+			while ((c != '\n') && (c != EOF))
+			{
+				k = 0;
+				while ((c == ' ') || (c == '\n') || (c == '\t'))
+					c = fgetc(file);
+				while ((c != ' ') && (c != '\n') && (c != '\t'))
+				{
+					string[k] = (char)c;
+					c = fgetc(file);
+					k++;
+				}
+				string[k] = '\0';
+				// printf("FOS[%d][%d] = %d\n",i,j,(int) atoi( string ));
+				int e = ((int)atoi(string));
+				this->numberOfVariables = fmax(this->numberOfVariables, e);
+				vec.push_back(e);
+				j++;
+			}
+			addGroup(vec);
+		}
+		fclose(file);
+		shuffleFOS();
+		type = linkage::CUSTOM_LM;
 	}
-	fclose( file );
-	shuffleFOS();
-	type = CUSTOM_LM;
+	else
+	{
+		sprintf( string, "Error reading file %s.\n", filename.c_str() );
+		throw std::runtime_error(string);
+	}
 }
     
 linkage_model_pt linkage_model_t::univariate(size_t numberOfVariables_)
@@ -149,9 +178,9 @@ linkage_model_pt linkage_model_t::linkage_tree(size_t numberOfVariables_, int si
 	return( new_fos );
 }
     
-linkage_model_pt linkage_model_t::from_file( FILE *file )
+linkage_model_pt linkage_model_t::from_file( std::string filename )
 {
-	linkage_model_pt new_fos = shared_ptr<linkage_model_t>(new linkage_model_t(file));
+	linkage_model_pt new_fos = shared_ptr<linkage_model_t>(new linkage_model_t(filename));
 	return( new_fos );
 }
 
@@ -389,7 +418,7 @@ void linkage_model_t::learnLinkageTreeFOS(vec_t<solution_t<char>*> &population, 
 
 void linkage_model_t::learnLinkageTreeFOS( vec_t<vec_t<double>> MI_Matrix, mt19937 *rng )
 {
-	assert( type == LINKAGE_TREE );
+	assert( type == linkage::LINKAGE_TREE );
 
     FOSStructure.clear();
     vec_t<int> mpmFOSMap;

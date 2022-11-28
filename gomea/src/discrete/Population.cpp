@@ -36,7 +36,7 @@ Population::Population(Config *config_, fitness_t *problemInstance_, sharedInfor
 			
 		if( FOSInstance_ == NULL )
 		{
-			FOSInstance = gomea::createFOSInstance(config->FOSIndex, problemInstance->number_of_variables, config->similarityMeasure, config->maximumFOSSetSize);
+			FOSInstance = gomea::linkage_model_t::createLinkageTreeFOSInstance(config->FOSIndex, problemInstance->number_of_variables, config->similarityMeasure, config->maximumFOSSetSize);
 		}
 		else FOSInstance = FOSInstance_;
         
@@ -94,7 +94,7 @@ void Population::copyOffspringToPopulation()
 
 void Population::makeOffspring()
 {
-    if( FOSInstance->type == gomea::LINKAGE_TREE )
+    if( FOSInstance->type == linkage::LINKAGE_TREE )
     {
         if (config->similarityMeasure == 2)
         {
@@ -331,7 +331,7 @@ bool Population::FI(size_t offspringIndex)
 
 void Population::checkTimeLimit()
 {
-    if ( config->maximumNumberOfSeconds > 0 && getTime(sharedInformationPointer->startTimeMilliseconds)/1000.0 > config->maximumNumberOfSeconds)
+    if ( config->maximumNumberOfSeconds > 0 && utils::getElapsedTimeSeconds(sharedInformationPointer->startTime) > config->maximumNumberOfSeconds)
     {
         terminated = true;
         throw customException("time");
@@ -343,8 +343,8 @@ void Population::updateElitistAndCheckVTR(solution_t<char> *solution)
     /* Update elitist solution */
     if (sharedInformationPointer->firstEvaluationEver || (solution->getObjectiveValue() > sharedInformationPointer->elitist.getObjectiveValue()))
     {
-        sharedInformationPointer->elitistSolutionHittingTimeMilliseconds = getTime(sharedInformationPointer->startTimeMilliseconds);
-        sharedInformationPointer->elitistSolutionHittingTimeEvaluations = sharedInformationPointer->numberOfEvaluations;
+        sharedInformationPointer->elitistSolutionHittingTimeMilliseconds = utils::getElapsedTimeMilliseconds(sharedInformationPointer->startTime);
+        sharedInformationPointer->elitistSolutionHittingTimeEvaluations = problemInstance->number_of_evaluations;
 
         sharedInformationPointer->elitist = *solution;
         

@@ -13,8 +13,7 @@ namespace discrete{
 class sharedInformation
 {
 	public:
-		double numberOfEvaluations;
-		long long startTimeMilliseconds;
+		time_t startTime;
 		double elitistSolutionHittingTimeMilliseconds,
 			   elitistSolutionHittingTimeEvaluations;
 
@@ -25,8 +24,7 @@ class sharedInformation
 
     sharedInformation(int maxArchiveSize)
     {
-        numberOfEvaluations = 0;
-        startTimeMilliseconds = getTimestamp();
+        startTime = utils::getTimestamp();
         firstEvaluationEver = true;
         evaluatedSolutions = new solutionsArchive(maxArchiveSize);
     }

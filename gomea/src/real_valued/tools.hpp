@@ -53,6 +53,8 @@
 #include <cassert>
 #include <armadillo>
 
+#include "gomea/src/utils/tools.hpp"
+
 namespace gomea{
 namespace realvalued{
 
@@ -94,22 +96,9 @@ void mergeSortMergeInt( int *array, int *sorted, int *tosort, int p, int r, int 
 int *getRanks(double *array, int array_size );
 int *getRanksFromSorted(int *sorted, int array_size );
 
-void initializeRandomNumberGenerator( void );
-//uvec randomPermutation( int n );
-double randomRealUniform01( void );
-int randomInt( int max );
 vec random1DNormalUnitVector( int length );
 
 int *greedyScatteredSubsetSelection( double **points, int number_of_points, int number_of_dimensions, int number_to_select );
-
-long getMilliSecondsRunning();
-long getMilliSecondsRunningAfterInit();
-long getMilliSecondsRunningSinceTimeStamp( long timestamp );
-long getCurrentTimeStampInMilliSeconds();
-
-void startTimer( void );
-double getTimer( void );
-void printTimer( void );
 
 double max( double x, double y );
 double min( double x, double y );
@@ -119,14 +108,6 @@ double distanceEuclidean2D( double x1, double y1, double x2, double y2 );
 double normalize( double v, double min, double max );
 
 double *matrixVectorPartialMultiplication( double **matrix, double *vector, int n0, int n1, int number_of_elements, int *element_indices );
-
-extern int64_t    random_seed;                      /* The seed used for the random-number generator. */
-
-extern long  timestamp_start,                       /* The time stamp in milliseconds for when the program was started. */
-      timestamp_start_after_init;            /* The time stamp in milliseconds for when the algorithm was started */
-
-extern double haveNextNextGaussian,             /* Internally used variable for sampling the normal distribution. */
-       nextNextGaussian;                     /* Internally used variable for sampling the normal distribution. */
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-= Section Constants -=-=-=-=-=-=-=-=-=-=-=-=-=-*/
 #ifndef PI

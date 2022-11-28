@@ -8,6 +8,7 @@ from setuptools import Extension, setup, find_namespace_packages
 from Cython.Build import cythonize
 import sys
 import glob
+import getopt
 import numpy as np
 
 if sys.version_info[0] == 2:
@@ -15,6 +16,10 @@ if sys.version_info[0] == 2:
 
 with open("README.md", 'r') as f:
     long_description = f.read()
+
+debug_mode = False
+if '--debug' in sys.argv:
+        debug_mode = True
 
 common_src = glob.glob("gomea/src/common/*.cpp") + glob.glob("gomea/src/utils/*.cpp")
 fitness_src = glob.glob("gomea/src/fitness/*.cpp") + glob.glob("gomea/src/fitness/benchmarks-rv/*.cpp") + glob.glob("gomea/src/fitness/benchmarks-discrete/*.cpp")
@@ -25,7 +30,9 @@ compile_args_release = ["-std=c++17","-O3"]
 link_args_release = ["-std=c++17","-O3"]
 compile_args = compile_args_release
 link_args = link_args_release
-
+if debug_mode:
+        compile_args = compile_args_debug
+        link_args = link_args_debug
 
 extensions = []
 
@@ -56,6 +63,14 @@ extensions.append( Extension("gomea.fitness",
         extra_link_args=link_args)
 )
 
+extensions.append( Extension("gomea.linkage",
+        ["gomea/linkage.pyx"] + common_src,
+        include_dirs=["."],
+        language="c++",
+        extra_compile_args=compile_args,
+        extra_link_args=link_args)
+)
+
 setup(
     name = "gomea",
     description = 'Library for the use of various variants of the Gene-pool Optimal Mixing Evolutionary Algorith (GOMEA).',
@@ -68,7 +83,7 @@ setup(
     packages=["gomea"],
     ext_modules = cythonize(extensions,
         include_path = ["."] + [np.get_include()],
-        gdb_debug = False,
+        gdb_debug = debug_mode,
         language_level = "3"),
     #packages=['src/fitness'],
     #package_data={'src/fitness': ['src/fitness/cython/Fitness.pxd']},

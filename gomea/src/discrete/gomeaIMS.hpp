@@ -9,6 +9,7 @@ using namespace std;
 #include "gomea/src/discrete/shared.hpp"
 #include "gomea/src/discrete/gomea.hpp"
 #include "gomea/src/fitness/benchmarks-discrete.hpp"
+#include "gomea/src/utils/time.hpp"
 
 namespace gomea{
 namespace discrete{
@@ -25,6 +26,7 @@ public:
 		currentGOMEAIndex = 0;
 	bool isInitialized = false,
         hasTerminated = false;
+    time_t start_time;
 
     Config *config;
     vector<Population*> GOMEAs;

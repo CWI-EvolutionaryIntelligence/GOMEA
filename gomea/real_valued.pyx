@@ -7,6 +7,7 @@ from libcpp cimport bool
 import inspect
 
 from gomea.fitness cimport FitnessFunction, PythonFitnessFunction
+from gomea.linkage cimport LinkageModel
 include "gomea/EmbeddedFitness.pxi"
 
 # Create a Cython extension type which holds a C++ instance
@@ -19,7 +20,8 @@ cdef class RealValuedGOMEA:
     def __cinit__(self,
         # Optimization problem settings (required)
         fitness: FitnessFunction, 
-        # GOMEA parameters (optional)
+        # GOMEA parameters
+        linkage_model : LinkageModel,
         lower_init_range: double=0.0,
         upper_init_range: double=1.0,
         tau: double=0.35,
@@ -31,7 +33,7 @@ cdef class RealValuedGOMEA:
         use_conditional_sampling: short=0,
         selection_during_gom: short=1,
         update_elitist_during_gom: short=1,
-        fix_seed : short=0,
+        random_seed: int=-1,
         # IMS settings (optional)
         maximum_number_of_populations: int=25,
         IMS_subgeneration_factor: int=8,
@@ -51,6 +53,7 @@ cdef class RealValuedGOMEA:
         self.c_config = Config()
         self.c_config.problem_index = 0 
         self.c_config.fitness = (<FitnessFunction?>fitness).c_inst_realvalued
+        self.c_config.linkage_config = linkage_model.c_inst
         self.c_config.use_vtr = 0
         self.c_config.vtr = 0.0
         #if value_to_reach > -1e100:
@@ -68,7 +71,6 @@ cdef class RealValuedGOMEA:
         self.c_config.use_conditional_sampling = use_conditional_sampling
         self.c_config.selection_during_gom = selection_during_gom 
         self.c_config.update_elitist_during_gom = update_elitist_during_gom 
-        self.c_config.fix_seed = fix_seed
         self.c_config.maximum_number_of_populations = maximum_number_of_populations
         self.c_config.number_of_subgenerations_per_population_factor = IMS_subgeneration_factor
         self.c_config.base_population_size = base_population_size
@@ -77,6 +79,10 @@ cdef class RealValuedGOMEA:
         self.c_config.black_box_evaluations = black_box_evaluations
         self.c_config.verbose = verbose
         self.c_config.print_verbose_overview = verbose
+        self.c_config.fix_seed = 0
+        if random_seed != -1:
+            self.c_config.random_seed = random_seed
+            self.c_config.fix_seed = 1
 
         # Initialize C++ instance
         self.c_inst = rvg_t(&self.c_config)

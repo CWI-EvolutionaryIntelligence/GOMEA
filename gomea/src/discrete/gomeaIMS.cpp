@@ -19,6 +19,11 @@ gomeaIMS::gomeaIMS(Config *config_): config(config_)
     IMSsubgenerationFactor  = config->IMSsubgenerationFactor;
     basePopulationSize      = config->basePopulationSize;
 	problemInstance 		= config->fitness;
+	if( config->fix_seed )
+		utils::initializeRandomNumberGenerator(config->randomSeed);
+	else
+		utils::initializeRandomNumberGenerator();
+
 }
 
 gomeaIMS::~gomeaIMS()
@@ -35,7 +40,7 @@ gomeaIMS::~gomeaIMS()
 
 void gomeaIMS::initialize()
 {
-	startTimer();
+	start_time = utils::getTimestamp();
 
 	prepareFolder(config->folder);
     initElitistFile(config->folder);
@@ -148,7 +153,7 @@ bool gomeaIMS::checkTimeLimitTerminationCriterion()
 {
 	if( !isInitialized )
 		return( false );
-	if( config->maximumNumberOfSeconds > 0 && getElapsedTime() > config->maximumNumberOfSeconds )
+	if( config->maximumNumberOfSeconds > 0 && utils::getElapsedTimeSeconds(start_time) > config->maximumNumberOfSeconds )
 		hasTerminated = true;
 	return hasTerminated; 
 }
@@ -162,7 +167,7 @@ double gomeaIMS::getProgressUntilTermination()
 
 	if( config->maximumNumberOfSeconds > 0 )
 	{
-		double time_progress = 100.0*getElapsedTime()/(config->maximumNumberOfSeconds);
+		double time_progress = 100.0*utils::getElapsedTimeSeconds(start_time)/(config->maximumNumberOfSeconds);
 		overall_progress = fmax( overall_progress, time_progress );
 	}
 
@@ -174,7 +179,7 @@ double gomeaIMS::getProgressUntilTermination()
 
 	if( config->maximumNumberOfEvaluations > 0 )
 	{
-		double evaluation_progress = 100.0*sharedInformationInstance->numberOfEvaluations / config->maximumNumberOfEvaluations;
+		double evaluation_progress = 100.0*problemInstance->number_of_evaluations / config->maximumNumberOfEvaluations;
 		overall_progress = fmax( overall_progress, evaluation_progress );
 	}
 

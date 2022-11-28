@@ -343,7 +343,7 @@ void population_t::generateAndEvaluateNewSolutions()
 
 		for(int k = num_elitists_to_copy; k < population_size; k++ )
 		{
-			if( accept_improvement[k] || randomRealUniform01() < linkage_model->getAcceptanceRate() )
+			if( accept_improvement[k] || utils::randomRealUniform01() < linkage_model->getAcceptanceRate() )
 			{
 				sampled_solutions[FOS_index][k]->is_accepted = 1;
 				insertImprovement( individuals[k], sampled_solutions[FOS_index][k] );
@@ -490,7 +490,7 @@ short population_t::applyAMS( int individual_index )
 		fitness->evaluate( solution_AMS );
 		improvement = fitness->betterFitness(solution_AMS->getObjectiveValue(), solution_AMS->getConstraintValue(), individuals[individual_index]->getObjectiveValue(), individuals[individual_index]->getConstraintValue()); 
 		//if( improvement )
-		if( randomRealUniform01() < linkage_model->getAcceptanceRate() || improvement ) // BLA
+		if( utils::randomRealUniform01() < linkage_model->getAcceptanceRate() || improvement ) // BLA
 		{
 			individuals[individual_index]->setObjectiveValue(solution_AMS->getObjectiveValue());
 			individuals[individual_index]->setConstraintValue(solution_AMS->getConstraintValue());
@@ -516,7 +516,7 @@ void population_t::applyForcedImprovements( int individual_index, int donor_inde
 		for(int io = 0; io < linkage_model->size(); io++ )
 		{
 			int i = linkage_model->FOSorder[io];
-			vec_t<int> touched_indices = linkage_model->sets[i];
+			vec_t<int> touched_indices = linkage_model->FOSStructure[i];
 			int num_touched_indices = linkage_model->elementSize(i);
 
 			vec_t<double> FI_vars = vec_t<double>(num_touched_indices);
@@ -607,11 +607,17 @@ void population_t::initializeNewPopulationMemory()
 
 	individual_NIS = (int*) Malloc( population_size*sizeof(int));
 
-	initializeFOS();
+	initializeFOS(linkage_config);
+	//initializeFOS();
 
 	population_terminated = 0;
 
 	number_of_generations = 0;
+}
+
+void population_t::initializeFOS( linkage_config_t *linkage_config )
+{
+	linkage_model = linkage_model_rv_t::createFOSInstance(*linkage_config, fitness->number_of_variables);
 }
 
 /**
@@ -711,7 +717,7 @@ void population_t::initializePopulationAndFitnessValues()
 	{
 		individual_NIS[j] = 0;
 		for(int k = 0; k < fitness->number_of_variables; k++ )
-			individuals[j]->variables[k] = lower_init_ranges[k] + (upper_init_ranges[k] - lower_init_ranges[k])*randomRealUniform01();
+			individuals[j]->variables[k] = lower_init_ranges[k] + (upper_init_ranges[k] - lower_init_ranges[k])*utils::randomRealUniform01();
 
 		fitness->evaluate( individuals[j] );
 	}

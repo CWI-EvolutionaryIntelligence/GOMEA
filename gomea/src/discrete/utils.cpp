@@ -93,19 +93,5 @@ void solutionsArchive::insertSolution(vector<char> &genotype, double fitness)
     archive.insert(pair<vector<char>, double> (genotype, fitness));
 }
 
-std::chrono::high_resolution_clock::time_point start_time;
-double getElapsedTime()
-{
-	auto end = std::chrono::high_resolution_clock::now();
-	auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(end - start_time);
-	double seconds = diff.count() / 1000.0;
-	return( seconds );
-}
-
-void startTimer()
-{
-	start_time = std::chrono::high_resolution_clock::now();
-	getElapsedTime();
-}
 
 }}

@@ -3,9 +3,7 @@
 namespace gomea{
 namespace discrete{
 
-Config::Config(){
-	gomea::utils::initializeRandomNumberGenerator();
-}
+Config::Config(){}
 
 /**
  * Parses the command line.
@@ -136,8 +134,8 @@ bool Config::parseCommandLine(int argc, char **argv)
             break;
         case 'S':
 			{
+                fix_seed = true;
 				randomSeed = atoll(optarg);
-				gomea::utils::initializeRandomNumberGenerator(randomSeed);
 			}
             break;
         case 'I':
@@ -224,7 +222,7 @@ void Config::printOverview()
 
 void Config::checkOptions()
 {
-    if (!FOSNameByIndex(FOSIndex, FOSName))
+    if (!linkage_model_t::FOSNameByIndex(FOSIndex, FOSName))
     {
         cerr << "No FOS with index " << FOSIndex << " installed!\n";
         exit(0);

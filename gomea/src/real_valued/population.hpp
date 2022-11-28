@@ -41,7 +41,7 @@
 #include "gomea/src/fitness/fitness.hpp"
 #include "gomea/src/real_valued/Config.hpp"
 #include "gomea/src/real_valued/tools.hpp"
-#include "gomea/src/real_valued/fos.hpp"
+#include "gomea/src/real_valued/linkage_model.hpp"
 #include "gomea/src/real_valued/solutionRV.hpp"
 
 #include <deque>
@@ -84,6 +84,7 @@ class population_t {
 		void initializeDefaultParameters();
 		void initializeNewPopulationMemory();
 		void initializeFOS();
+		void initializeFOS( linkage_config_t *linkage_config );
 		void initializeParameterRangeBounds( double lower_user_range, double upper_user_range );
 		void initializeProblem( int problem_index );
 		void initializePopulationAndFitnessValues();
@@ -118,6 +119,7 @@ class population_t {
 			   *mean_shift_vector,                                   /* The mean vectors of the previous generation, one for each population. */
 			   *prev_mean_vector;                                   /* The mean vectors of the previous generation, one for each population. */
 		short  population_terminated;
+		linkage_config_t *linkage_config;
 		linkage_model_rv_pt linkage_model;
 		/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 };

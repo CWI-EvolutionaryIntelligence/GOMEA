@@ -42,14 +42,6 @@
 namespace gomea{
 namespace realvalued{
 
-int64_t    random_seed = 0;                      /* The seed used for the random-number generator. */
-
-long  timestamp_start,                       /* The time stamp in milliseconds for when the program was started. */
-      timestamp_start_after_init;            /* The time stamp in milliseconds for when the algorithm was started */
-
-double haveNextNextGaussian,             /* Internally used variable for sampling the normal distribution. */
-       nextNextGaussian;                     /* Internally used variable for sampling the normal distribution. */
-
 /*-=-=-=-=-=-=-=-=-=-=-= Section Elementary Operations -=-=-=-=-=-=-=-=-=-=-*/
 /**
  * Allocates memory and exits the program in case of a memory allocation failure.
@@ -1012,92 +1004,7 @@ int *getRanksFromSorted( int *sorted, int array_size )
     return( ranks );
 }
 
-/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=- Section Time -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
-long getMilliSecondsRunning()
-{
-    return( getMilliSecondsRunningSinceTimeStamp( timestamp_start ) );
-}
-
-long getMilliSecondsRunningAfterInit()
-{
-    return( getMilliSecondsRunningSinceTimeStamp( timestamp_start_after_init ) );
-}
-
-long getMilliSecondsRunningSinceTimeStamp( long timestamp )
-{
-    long timestamp_now, difference;
-
-    timestamp_now = getCurrentTimeStampInMilliSeconds();
-
-    difference = timestamp_now-timestamp;
-
-    return( difference );
-}
-
-long getCurrentTimeStampInMilliSeconds()
-{
-    struct timeval tv;
-    //struct tm *timep;
-    long   result;
-
-    gettimeofday( &tv, NULL );
-    //timep = localtime( &tv.tv_sec );
-    //result = timep->tm_hour * 3600 * 1000 + timep->tm_min * 60 * 1000 + timep->tm_sec * 1000 + tv.tv_usec / 1000;
-    result = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
-    return( result );
-}
-
-void startTimer( void )
-{
-    timestamp_start = getCurrentTimeStampInMilliSeconds();
-}
-
-double getTimer( void )
-{
-    return ( (double) (getMilliSecondsRunningSinceTimeStamp( timestamp_start )/1000.0) );
-}
-
-void printTimer( void )
-{
-    double cpu_time_used;
-
-    cpu_time_used = (double) (getMilliSecondsRunningSinceTimeStamp( timestamp_start )/1000.0);
-    printf("%.3f\n",cpu_time_used);
-}
-
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
-
-/**
- * Initializes the random number generator.
- */
-void initializeRandomNumberGenerator( void )
-{
-    struct timeval tv;
-   
-    while( random_seed == 0 )
-    {
-        gettimeofday(&tv, NULL);
-        random_seed = (int64_t) tv.tv_usec;
-    }
-
-	arma_rng::set_seed(random_seed);
-
-    FILE *file;
-    file = fopen( "random_seed.dat", "w");
-    fprintf( file, "%ld\n", random_seed );
-    fclose(file);
-
-}
-
-double randomRealUniform01( void )
-{
-	return randu<double>();
-}
-
-int randomInt( int max )
-{
-	return randi<int>( distr_param(0,max-1) );
-}
 
 vec random1DNormalUnitVector( int length )
 {
@@ -1211,7 +1118,7 @@ int *greedyScatteredSubsetSelection( double **points, int number_of_points, int 
     indices_left[i] = i;
 
   /* Find the first point: maximum value in a randomly chosen dimension */
-  random_dimension_index = randomInt( number_of_dimensions );
+  random_dimension_index = utils::randomInt( number_of_dimensions );
 
   index_of_farthest    = 0;
   distance_of_farthest = points[indices_left[index_of_farthest]][random_dimension_index];

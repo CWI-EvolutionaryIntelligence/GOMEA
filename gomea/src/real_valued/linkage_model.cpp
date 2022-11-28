@@ -36,7 +36,7 @@
  */
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-= Section Includes -=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
-#include "gomea/src/real_valued/fos.hpp"
+#include "gomea/src/real_valued/linkage_model.hpp"
 #include <queue>
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
@@ -51,14 +51,29 @@ int       FOS_element_ub = 0,                       /* Cut-off value for bounded
 		  random_linkage_tree = 0;                  /* Whether the fixed linkage tree is learned based on a random distance measure. */
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
+linkage_model_rv_pt linkage_model_rv_t::createFOSInstance( const linkage_config_t &config, size_t numberOfVariables )
+{
+	if( config.type != linkage::FROM_FILE )
+		assert( numberOfVariables > 0 );
+	switch( config.type )
+	{
+		case linkage::UNIVARIATE: return univariate(numberOfVariables);
+		case linkage::MPM: return marginal_product_model(numberOfVariables, config.mpm_block_size);
+		case linkage::LINKAGE_TREE: return linkage_tree(numberOfVariables, config.lt_similarity_measure, config.lt_filtered, config.lt_maximum_set_size );
+		case linkage::CUSTOM_LM: return custom_fos(numberOfVariables,config.FOS);
+		case linkage::FROM_FILE: return from_file(config.filename);
+	}
+}
+
+
 // Copy a FOS
 linkage_model_rv_t::linkage_model_rv_t( const linkage_model_rv_t &other ) : linkage_model_t(other.number_of_variables)
 {
-	for(size_t i = 0; i < other.sets.size(); i++ )
+	for(size_t i = 0; i < other.FOSStructure.size(); i++ )
 	{
 		std::vector<int> vec;
-		for(size_t j = 0; j < sets[i].size(); j++ )
-			vec.push_back(other.sets[i][j]);
+		for(size_t j = 0; j < FOSStructure[i].size(); j++ )
+			vec.push_back(other.FOSStructure[i][j]);
 		addGroup(vec);
 	}
 	p_accept = other.p_accept;
@@ -224,7 +239,7 @@ linkage_model_rv_t::linkage_model_rv_t( int problem_index, double **covariance_m
 	{
 		if( NN_chain_length == 0 )
 		{
-			NN_chain[NN_chain_length] = randomInt( mpm_length );
+			NN_chain[NN_chain_length] = utils::randomInt( mpm_length );
 			NN_chain_length++;
 		}
 
@@ -511,7 +526,7 @@ linkage_model_rv_t::~linkage_model_rv_t()
 
 linkage_model_rv_pt linkage_model_rv_t::univariate(size_t numberOfVariables_)
 {
-	linkage_model_rv_pt new_fos = shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(numberOfVariables_,0));
+	linkage_model_rv_pt new_fos = shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(numberOfVariables_,1));
 	return( new_fos );
 }
 			
@@ -545,9 +560,9 @@ linkage_model_rv_pt linkage_model_rv_t::linkage_tree(size_t numberOfVariables_, 
 	return( new_fos );
 }
     
-linkage_model_rv_pt linkage_model_rv_t::from_file( FILE *file )
+linkage_model_rv_pt linkage_model_rv_t::from_file( std::string filename )
 {
-	linkage_model_rv_pt new_fos = shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(file));
+	linkage_model_rv_pt new_fos = shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(filename));
 	return( new_fos );
 }
 
@@ -558,16 +573,6 @@ void linkage_model_rv_t::initializeDistributions()
 		distributions.push_back( new normal_distribution_t(group) );
 }
 			
-std::vector<int> linkage_model_rv_t::getSet( int element_index )
-{
-	return( sets[element_index] );
-}
-
-size_t linkage_model_rv_t::elementSize( int element_index )
-{
-	return( sets[element_index].size() );
-}
-
 int linkage_model_rv_t::getDistributionMultiplier( int element_index )
 {
 	return( distributions[element_index]->distribution_multiplier );
@@ -581,14 +586,14 @@ double linkage_model_rv_t::getAcceptanceRate()
 void linkage_model_rv_t::addGroup( std::vector<int> group ) 
 {
 	std::sort(group.begin(),group.end());
-	sets.push_back(group);
+	FOSStructure.push_back(group);
 	distributions.push_back( new normal_distribution_t(group) );
 }
 
 void linkage_model_rv_t::addGroup( distribution_t *dist )
 {
 	//std::sort(dist->variables.begin(),dist->variables.end());
-	sets.push_back(dist->variables);
+	FOSStructure.push_back(dist->variables);
 	distributions.push_back( dist );
 }
 
@@ -601,7 +606,7 @@ void linkage_model_rv_t::addConditionedGroup( std::vector<int> variables )
 void linkage_model_rv_t::addConditionedGroup( std::vector<int> variables, std::set<int> conditioned_variables )
 {
 	std::sort(variables.begin(),variables.end());
-	sets.push_back(variables);
+	FOSStructure.push_back(variables);
 	conditional_distribution_t *dist = new conditional_distribution_t(variables,conditioned_variables);
 	distributions.push_back(dist);
 }
@@ -642,7 +647,7 @@ void linkage_model_rv_t::randomizeOrder( const std::map<int,std::set<int>> &vari
 	{
 		for(int i = 0; i < number_of_variables; i++ )
 		{
-			assert( sets[i][0] == i );
+			assert( FOSStructure[i][0] == i );
 			assert( elementSize(i) == 1 );
 			FOSorder[i] = VIG_order[i];
 			distributions[FOSorder[i]]->updateConditionals(variable_interaction_graph,visited);
@@ -755,7 +760,7 @@ int *linkage_model_rv_t::matchFOSElements( linkage_model_rv_t *other )
 	{
 		for(int j = 0; j < number_of_variables; j++ )
 		{
-			if( other->sets[i][0] == sets[j][0] )
+			if( other->FOSStructure[i][0] == FOSStructure[j][0] )
 			{
 				permutation[i] = j;
 				break;
@@ -769,11 +774,11 @@ int *linkage_model_rv_t::matchFOSElements( linkage_model_rv_t *other )
 			size_t a = 0;
 			size_t b = 0;
 			int matches = 0;
-			while( a < other->sets[i].size() && b < sets[j].size() )
+			while( a < other->FOSStructure[i].size() && b < FOSStructure[j].size() )
 			{
-				if( other->sets[i][a] < sets[j][b] )
+				if( other->FOSStructure[i][a] < FOSStructure[j][b] )
 					a++;
-				else if( other->sets[i][a] > sets[j][b] )
+				else if( other->FOSStructure[i][a] > FOSStructure[j][b] )
 					b++;
 				else
 				{
@@ -782,7 +787,7 @@ int *linkage_model_rv_t::matchFOSElements( linkage_model_rv_t *other )
 					matches++;
 				}
 			}
-			FOS_element_similarity_matrix[i-number_of_variables][j-number_of_variables] = (int) 10000*(2.0*matches/(other->sets[i].size()+sets[j].size()));
+			FOS_element_similarity_matrix[i-number_of_variables][j-number_of_variables] = (int) 10000*(2.0*matches/(other->FOSStructure[i].size()+FOSStructure[j].size()));
 		}
 	}
 
@@ -963,10 +968,10 @@ void linkage_model_rv_t::print()
 	for(int i = 0; i < size(); i++ )
 	{
 		printf("[");
-		for(int j = 0; j < (int) sets[i].size(); j++ )
+		for(int j = 0; j < (int) FOSStructure[i].size(); j++ )
 		{
-			printf("%d", sets[i][j]);
-			if( j != ((int)sets[i].size())-1)
+			printf("%d", FOSStructure[i][j]);
+			if( j != ((int)FOSStructure[i].size())-1)
 				printf(",");
 		}
 		printf("]");

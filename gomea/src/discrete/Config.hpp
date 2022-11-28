@@ -60,6 +60,7 @@ public:
     string problemInstancePath = "";
 
     //long long timelimitMilliseconds = -1,
+    bool fix_seed = false;
     long long randomSeed;
     
     size_t alphabetSize = 2;
@@ -67,6 +68,7 @@ public:
     int maximumNumberOfGOMEAs  = 100,
         IMSsubgenerationFactor = 4,
         basePopulationSize     = 2;
+    linkage_config_t *linkage_config;
 
     private:
         int problemIndex = 0, numberOfVariables = 10;

@@ -15,11 +15,14 @@ namespace gomea{
 	bool isPowerOfK(int n, int k);
 
 	vec_t<int> randomPermutation( int size );
+	double randomRealUniform01();
+	int randomInt( int max );
 
 	void initializeRandomNumberGenerator();
 	void initializeRandomNumberGenerator( long long seed );
 
 	static std::mt19937 rng;
+	extern long long random_seed;
 
 	}
 }

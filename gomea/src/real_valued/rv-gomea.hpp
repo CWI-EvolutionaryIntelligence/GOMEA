@@ -40,7 +40,7 @@
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-= Section Includes -=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 #include "gomea/src/real_valued/population.hpp"
 #include "gomea/src/real_valued/tools.hpp"
-#include "gomea/src/real_valued/fos.hpp"
+#include "gomea/src/real_valued/linkage_model.hpp"
 #include "gomea/src/real_valued/Config.hpp"
 #include "gomea/src/utils/embed.hpp"
 #include "gomea/real_valued.h"
@@ -96,6 +96,7 @@ class rvg_t {
 		std::vector<population_t*> populations;
 		fitness_t *fitness;
 		int total_number_of_writes = 0;                              /* Total number of times a statistics file has been written. */
+		time_t start_time;
 		
 		/*-=-=-=-=-=-=-=-=-=-=-=- Options -=-=-=-=-=-=-=-=-=-=-=-=-*/
 		Config *config;

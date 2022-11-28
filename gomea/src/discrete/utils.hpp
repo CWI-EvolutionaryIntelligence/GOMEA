@@ -69,7 +69,4 @@ void initElitistFile(string &folder);
 void writeStatisticsToFile(string &folder, long long numberOfEvaluations, long long time, solution_t<char> *solution);
 void writeElitistSolutionToFile(string &folder, long long numberOfEvaluations, long long time, solution_t<char> *solution);
 
-void startTimer();
-double getElapsedTime();
-
 }}

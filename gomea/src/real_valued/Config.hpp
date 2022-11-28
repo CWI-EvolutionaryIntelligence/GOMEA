@@ -36,6 +36,7 @@
  */
 
 #pragma once
+#include "gomea/src/common/linkage_model.hpp"
 #include "gomea/src/fitness/fitness.hpp"
 #include "gomea/src/fitness/benchmarks-rv.hpp"
 
@@ -78,6 +79,8 @@ class Config {
 			   lower_user_range,                              /* The initial lower range-bound indicated by the user (same for all dimensions). */
 			   upper_user_range;                              /* The initial upper range-bound indicated by the user (same for all dimensions). */
 		fitness_t *fitness;
+        linkage_config_t *linkage_config;
+		long long random_seed;
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 };
 

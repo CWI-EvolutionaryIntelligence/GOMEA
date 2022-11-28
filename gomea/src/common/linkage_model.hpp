@@ -17,13 +17,35 @@ using namespace std;
 
 namespace gomea{
 
+namespace linkage
+{
 typedef enum{
 	UNIVARIATE,
     FULL,
     MPM,
 	LINKAGE_TREE,
+    CONDITIONAL,
+    FROM_FILE,
     CUSTOM_LM
 } linkage_model_type;
+}
+
+class linkage_config_t{
+    public:
+        linkage_config_t();
+        linkage_config_t( size_t block_size ); 
+        linkage_config_t( int similarityMeasure, bool filtered, int maximumSetSize );
+        linkage_config_t( const vec_t<vec_t<int>> &FOS );
+        linkage_config_t( std::string filename );
+    
+        linkage::linkage_model_type type;
+        size_t mpm_block_size = -1;
+        int lt_similarity_measure = 0;
+        bool lt_filtered = false;
+        int lt_maximum_set_size = -1;
+        std::string filename = "";
+        vec_t<vec_t<int>> FOS;
+};
 
 class linkage_model_t
 {   
@@ -36,17 +58,19 @@ public:
     vec_t<int> improvementCounters;
     vec_t<int> usageCounters;
 
-    linkage_model_type type = CUSTOM_LM;
+    linkage::linkage_model_type type = linkage::CUSTOM_LM;
 
-    static std::shared_ptr<linkage_model_t> univariate(size_t numberOfvariables_);
-    static std::shared_ptr<linkage_model_t> linkage_tree(size_t numberOfVariables_, int similarityMeasure_ = 0, bool filtered_ = false, int maximumSetSize_ = -1);
-    static std::shared_ptr<linkage_model_t> conditional(size_t numberOfvariables_);
-    static std::shared_ptr<linkage_model_t> marginal_product_model(size_t numberOfvariables_, size_t block_size);
-    static std::shared_ptr<linkage_model_t> custom_fos(size_t numberOfvariables_, const vec_t<vec_t<int>> &FOS);
-    static std::shared_ptr<linkage_model_t> from_file( FILE *file );
-
-    linkage_model_t( linkage_model_type type, size_t numberOfVariables_ ); 
     virtual ~linkage_model_t(){};
+
+    static std::shared_ptr<linkage_model_t> createFOSInstance( const linkage_config_t &config, size_t numberOfVariables = 0 );
+    static std::shared_ptr<linkage_model_t> createLinkageTreeFOSInstance(size_t FOSIndex, size_t numberOfVariables, int similarityMeasure, int maximumFOSSetSize );
+    static bool FOSNameByIndex(size_t FOSIndex, string &FOSName);
+    
+    static std::shared_ptr<linkage_model_t> univariate(size_t numberOfVariables_);
+    static std::shared_ptr<linkage_model_t> linkage_tree(size_t numberOfVariables_, int similarityMeasure_, bool filtered_,  int maximumSetSize_);
+    static std::shared_ptr<linkage_model_t> marginal_product_model(size_t numberOfVariables_, size_t block_size);
+    static std::shared_ptr<linkage_model_t> custom_fos(size_t numberOfVariables_, const vec_t<vec_t<int>> &FOS);
+    static std::shared_ptr<linkage_model_t> from_file( std::string filename );
 
     size_t size()
     {
@@ -56,6 +80,11 @@ public:
     size_t elementSize(int i)
     {
         return FOSStructure[i].size();
+    }
+	
+    vec_t<int> getSet( int element_index )
+    {
+        return FOSStructure[element_index];
     }
 
     void addGroup(int var_index);
@@ -85,8 +114,8 @@ protected:
     linkage_model_t(size_t numberOfVariables_): numberOfVariables(numberOfVariables_){}
     linkage_model_t( size_t numberOfVariables_, size_t block_size ); 
     linkage_model_t( size_t numberOfVariables_, const vec_t<vec_t<int>> &FOS );
-    linkage_model_t(size_t numberOfVariables_, int similarityMeasure, bool filtered=false, int maximumSetSize = -1);
-    linkage_model_t( FILE *file );
+    linkage_model_t(size_t numberOfVariables_, int similarityMeasure, bool filtered, int maximumSetSize );
+    linkage_model_t( std::string filename );
 	
     int determineNearestNeighbour(size_t index, vec_t< vec_t< int > > &mpm ); 
     vec_t<vec_t<double>> computeMIMatrix(vec_t<solution_t<char>*> &population, size_t alphabetSize);
@@ -95,8 +124,5 @@ protected:
 };
 
 typedef std::shared_ptr<linkage_model_t> linkage_model_pt;
-bool FOSNameByIndex(size_t FOSIndex, string &FOSName);
-
-linkage_model_pt createFOSInstance(size_t FOSIndex, size_t numberOfVariables, int similarityMeasure, int maximumFOSSetSize = -1);
 
 }

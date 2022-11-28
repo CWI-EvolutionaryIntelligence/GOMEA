@@ -2,6 +2,8 @@
 
 namespace gomea{
 	namespace utils{
+
+long long random_seed = 0;
     
 vec_t<int> getSortedOrder( vec_t<int> &data ){
     vec_t<int> order(data.size());
@@ -58,19 +60,32 @@ vec_t<int> randomPermutation( int size )
 {
     vec_t<int> perm(size);
     iota(perm.begin(), perm.end(), 0);
-    std::random_shuffle( perm.begin(), perm.end() );
+    std::shuffle( perm.begin(), perm.end(), rng );
     return( perm );
+}
+
+double randomRealUniform01()
+{
+    static std::uniform_real_distribution<double> distribution(0.0,1.0);
+	return distribution(rng);
+}
+
+int randomInt( int max )
+{
+    std::uniform_int_distribution<int> distribution(0,max);
+	return distribution(rng);
 }
 
 void initializeRandomNumberGenerator()
 {
-	long long seed = std::chrono::system_clock::now().time_since_epoch().count() % 1000000;
-	rng.seed(seed);
+	utils::random_seed = static_cast<long long>(std::chrono::system_clock::now().time_since_epoch().count());
+	rng.seed(utils::random_seed);
 }
 
 void initializeRandomNumberGenerator( long long seed )
 {
-	rng.seed(seed);
+    utils::random_seed = seed;
+	rng.seed(utils::random_seed);
 }
 
 }}

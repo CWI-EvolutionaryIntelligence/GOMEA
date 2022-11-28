@@ -61,7 +61,6 @@ rvg_t::rvg_t( Config *config )
     learn_linkage_tree = 0;
     static_linkage_tree = 0;
     random_linkage_tree = 0;
-    haveNextNextGaussian = 0;
 
     if( use_guidelines )
     {
@@ -97,7 +96,6 @@ rvg_t::rvg_t( int argc, char **argv )
     static_linkage_tree = 0;
     random_linkage_tree = 0;
     config->FOS_element_size = -1;
-    haveNextNextGaussian = 0;
 
     parseCommandLine( argc, argv );
 
@@ -354,7 +352,7 @@ void rvg_t::printVerboseOverview( void )
     printf("# Value to reach (vtr)    = %e\n", config->vtr);
     printf("# Max. no improv. stretch = %d\n", config->maximum_no_improvement_stretch);
     printf("# Fitness var. tolerance  = %e\n", config->fitness_variance_tolerance);
-    printf("# Random seed             = %ld\n", random_seed);
+    printf("# Random seed             = %ld\n", utils::random_seed);
     printf("#\n");
     printf("###################################################\n");
 }
@@ -417,8 +415,15 @@ void rvg_t::initialize( void )
     total_number_of_writes = 0;
     config->number_of_subgenerations_per_population_factor = 8;
 
-    if( config->fix_seed ) random_seed = 14627;
-    initializeRandomNumberGenerator();
+    if( config->fix_seed )
+    {
+        utils::initializeRandomNumberGenerator(config->random_seed);
+    }
+    else
+    {
+        utils::initializeRandomNumberGenerator();
+    }
+    arma_rng::set_seed(utils::random_seed);
 
 	initializeProblem();
 }
@@ -435,6 +440,7 @@ void rvg_t::restartLargestPopulation()
 	new_pop->selection_during_gom = config->selection_during_gom;
 	new_pop->update_elitist_during_gom = config->update_elitist_during_gom;
 	new_pop->FOS_element_size = config->FOS_element_size;
+    new_pop->linkage_config = config->linkage_config;
 	new_pop->initialize();
 	delete( populations[populations.size()-1] );
 	populations[populations.size()-1] = new_pop;
@@ -454,6 +460,7 @@ void rvg_t::initializeNewPopulation()
 	new_pop->selection_during_gom = config->selection_during_gom;
 	new_pop->update_elitist_during_gom = config->update_elitist_during_gom;
 	new_pop->FOS_element_size = config->FOS_element_size;
+    new_pop->linkage_config = config->linkage_config;
 	new_pop->initialize();
 	populations.push_back(new_pop);
 }
@@ -538,7 +545,7 @@ void rvg_t::writeGenerationalStatisticsForOnePopulation( int population_index )
     else
         file = fopen( "statistics.dat", "a" );
 
-    sprintf( string, "%10d %11lf %11.3lf %20.15e %13e  ", (int) populations.size(), fitness->number_of_evaluations, getTimer(), fitness->elitist_objective_value, fitness->elitist_constraint_value );
+    sprintf( string, "%10d %11lf %11.3lf %20.15e %13e  ", (int) populations.size(), fitness->number_of_evaluations, utils::getElapsedTimeSeconds(start_time), fitness->elitist_objective_value, fitness->elitist_constraint_value );
     fputs( string, file );
 
     //sprintf( string, "[ %4d %6d %10d %13e %13e %13e %13e %13e %13e %13e %13e %13e ]", population_index, number_of_generations[population_index], population_sizes[population_index], distribution_multipliers[population_index][0], population_objective_best, population_objective_avg, population_objective_var, population_objective_worst, population_constraint_best, population_constraint_avg, population_constraint_var, population_constraint_worst );
@@ -792,7 +799,7 @@ short rvg_t::checkSubgenerationTerminationConditions()
 
 short rvg_t::checkTimeLimitTerminationCondition( void )
 {
-    return( config->maximum_number_of_seconds > 0 && getTimer() > config->maximum_number_of_seconds );
+    return( config->maximum_number_of_seconds > 0 && utils::getElapsedTimeSeconds(start_time) > config->maximum_number_of_seconds );
 }
 
 /**
@@ -1000,7 +1007,7 @@ void rvg_t::run( void )
     int out = gomea::utils::initializePythonEmbedding("gomea", PyInit_real_valued);
     assert(out == 0);
 
-    startTimer();
+    start_time = utils::getTimestamp();
 	initialize();
 
 	if( config->print_verbose_overview )
@@ -1012,7 +1019,7 @@ void rvg_t::run( void )
 
 	printf("obj_val %6.2e ", fitness->elitist_objective_value);
 
-	printf("time %lf ", getTimer());
+	printf("time %lf ", utils::getElapsedTimeSeconds(start_time));
 	printf("generations ");
 	if( populations.size() > 1 )
 	{
@@ -1023,7 +1030,7 @@ void rvg_t::run( void )
 	}
 	else    
 		printf("%d", populations[0]->number_of_generations );
-	printf(" random_seed %ld",random_seed);
+	printf(" random_seed %ld",utils::random_seed);
 	printf("\n");
 }
 

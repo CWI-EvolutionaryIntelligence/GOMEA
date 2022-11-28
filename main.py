@@ -18,9 +18,11 @@ class YourPythonFitnessFunction(gomea.fitness.PythonFitnessFunctionRealValued):
 #frv = gomea.fitness.SphereFunction(10000,value_to_reach=1e-10)
 #frv = gomea.fitness.RosenbrockFunction(20,value_to_reach=1e-10)
 frv = YourPythonFitnessFunction(20,value_to_reach=1e-10)
-rvgom = gomea.RealValuedGOMEA(fitness=frv,lower_init_range=-115,upper_init_range=-100) #, maximum_number_of_populations=1, base_population_size=20)
+lm = gomea.linkage.Univariate()
+#lm = gomea.linkage.MarginalProductModel(1)
+rvgom = gomea.RealValuedGOMEA(fitness=frv,linkage_model=lm,lower_init_range=-115,upper_init_range=-100,random_seed=100) #, maximum_number_of_populations=1, base_population_size=20)
 result = rvgom.run()
 
 fd = gomea.fitness.OneMaxFunction(1000)
-dgom = gomea.DiscreteGOMEA(fitness=fd) 
+dgom = gomea.DiscreteGOMEA(fitness=fd,linkage_model=lm) 
 result = dgom.run()

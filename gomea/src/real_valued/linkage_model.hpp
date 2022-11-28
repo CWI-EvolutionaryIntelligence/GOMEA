@@ -55,18 +55,18 @@ class linkage_model_rv_t : public linkage_model_t {
 			linkage_model_rv_t( const linkage_model_rv_t &f );
 			~linkage_model_rv_t();
 
+			static std::shared_ptr<linkage_model_rv_t> createFOSInstance( const linkage_config_t &config, size_t numberOfVariables );
+
 			static std::shared_ptr<linkage_model_rv_t> univariate(size_t numberOfvariables_);
 			static std::shared_ptr<linkage_model_rv_t> full(size_t numberOfvariables_);
 			static std::shared_ptr<linkage_model_rv_t> linkage_tree(size_t numberOfVariables_, int similarityMeasure_ = 0, bool filtered_ = false, int maximumSetSize_ = -1);
 			static std::shared_ptr<linkage_model_rv_t> marginal_product_model(size_t numberOfvariables_, size_t block_size);
 			static std::shared_ptr<linkage_model_rv_t> conditional( size_t number_of_variables, const std::map<int,std::set<int>> &variable_interaction_graph, int max_clique_size = 1, bool include_cliques_as_fos_elements = true, bool include_full_fos_element = true );
 			static std::shared_ptr<linkage_model_rv_t> custom_fos(size_t numberOfvariables_, const vec_t<vec_t<int>> &FOS);
-			static std::shared_ptr<linkage_model_rv_t> from_file(FILE *file);
+			static std::shared_ptr<linkage_model_rv_t> from_file(std::string filename);
 
 			void initializeDistributions();
 
-			vec_t<int> getSet( int element_index );
-			size_t elementSize( int element_index );
 			double getAcceptanceRate(); 
 			int getDistributionMultiplier( int element_index );
 			
@@ -100,7 +100,6 @@ class linkage_model_rv_t : public linkage_model_t {
 			int maximum_no_improvement_stretch = 100;
 			
 			double p_accept = 0.05;
-			vec_t<vec_t<int>> sets;
 			vec_t<uvec> variables_conditioned_on; 
 
 			bool is_conditional = false;
@@ -121,7 +120,7 @@ class linkage_model_rv_t : public linkage_model_t {
 		    linkage_model_rv_t(size_t numberOfVariables_, const vec_t<vec_t<int>> &FOS ) : linkage_model_t(numberOfVariables_, FOS){initializeDistributions();};
 			linkage_model_rv_t(size_t numberOfVariables_, int similarityMeasure, bool filtered, int maximumSetSize) : linkage_model_t(numberOfVariables_,similarityMeasure,filtered,maximumSetSize){initializeDistributions();};
 			linkage_model_rv_t(size_t number_of_variables, const std::map<int,std::set<int>> &variable_interaction_graph, int max_clique_size, bool include_cliques_as_fos_elements, bool include_full_fos_element );
-			linkage_model_rv_t(FILE *file) : linkage_model_t(file){initializeDistributions();};
+			linkage_model_rv_t(std::string filename) : linkage_model_t(filename){initializeDistributions();};
 	};
 
 typedef std::shared_ptr<linkage_model_rv_t> linkage_model_rv_pt;
