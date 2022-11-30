@@ -70,11 +70,17 @@ int fitness_t<T>::getNumberOfSubfunctions()
 {
 	return number_of_variables;
 }
+		
+template<class T>
+int fitness_t<T>::getNumberOfFitnessBuffers()
+{
+	return 1;
+}
 
 template<class T>
 void fitness_t<T>::evaluate( solution_t<T> *solution )
 {
-	solution->initMemory(number_of_objectives, number_of_fitness_buffers);
+	solution->initMemory(number_of_objectives, getNumberOfFitnessBuffers());
 
 	evaluationFunction( solution );
 	
@@ -95,7 +101,7 @@ void fitness_t<T>::evaluate( solution_t<T> *solution )
 template<class T>
 void fitness_t<T>::evaluatePartialSolutionBlackBox( solution_t<T> *parent, partial_solution_t<T> *solution )
 {
-	solution->initMemory(number_of_objectives, number_of_fitness_buffers);
+	solution->initMemory(number_of_objectives, getNumberOfFitnessBuffers());
 	
 	// Make backup of parent
 	double *var_backup = new double[solution->getNumberOfTouchedVariables()];
@@ -124,7 +130,7 @@ void fitness_t<T>::evaluatePartialSolutionBlackBox( solution_t<T> *parent, parti
 template<class T>
 void fitness_t<T>::evaluatePartialSolution( solution_t<T> *parent, partial_solution_t<T> *solution )
 {
-	solution->initMemory(number_of_objectives,number_of_fitness_buffers);
+	solution->initMemory(number_of_objectives,getNumberOfFitnessBuffers());
 	if( black_box_optimization || solution->getNumberOfTouchedVariables() == number_of_variables )
 	{
 		evaluatePartialSolutionBlackBox( parent, solution );
@@ -242,12 +248,31 @@ void fitness_t<T>::printVariableInteractionGraph()
 	}
 }
 
+template<class T>
+vec_t<vec_t<double>> fitness_t<T>::getSimilarityMatrix()
+{
+	if( similarity_matrix.size() == 0 )
+	{
+		similarity_matrix.resize(number_of_variables);
+		for (size_t i = 0; i < number_of_variables; i++)
+		{
+			similarity_matrix[i].resize(number_of_variables);
+			similarity_matrix[i][i] = 1e100;
+			for (size_t j = 0; j < i; j++)
+			{
+				double sim = getSimilarityMetric(i, j);
+				similarity_matrix[i][j] = sim;
+				similarity_matrix[j][i] = sim;
+			}
+		}
+	}
+	return similarity_matrix;
+}
 
 template<class T>
-vec_t<vec_t<double>> fitness_t<T>::getMIMatrix()
+double fitness_t<T>::getSimilarityMetric( size_t var_a, size_t var_b )
 {
-	assert(0);
-	return( vec_t<vec_t<double>>() );
+	throw std::runtime_error("Fitness function does not implement getSimilarityMetric(int,int).");
 }
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-= Section Problems -=-=-=-=-=-=-=-=-=-=-=-=-=-=*/

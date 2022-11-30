@@ -18,6 +18,7 @@ class customFitnessFunction_t : public fitness_t<T>
 		customFitnessFunction_t( int number_of_parameters, double vtr );
 		
 		void initializeVariableInteractionGraph(); 
+		virtual double getSimilarityMetric( size_t var_a, size_t var_b );
 
 	private:
 		void evaluationFunction( solution_t<T> *solution );

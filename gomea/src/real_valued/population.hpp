@@ -84,6 +84,7 @@ class population_t {
 		void initializeDefaultParameters();
 		void initializeNewPopulationMemory();
 		void initializeFOS();
+		void initializeFOSFromIndex( int FOSIndex );
 		void initializeFOS( linkage_config_t *linkage_config );
 		void initializeParameterRangeBounds( double lower_user_range, double upper_user_range );
 		void initializeProblem( int problem_index );

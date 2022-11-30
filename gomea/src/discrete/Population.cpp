@@ -104,7 +104,7 @@ void Population::makeOffspring()
         if (config->similarityMeasure == 2)
         {
             if (FOSInstance->size() == 0)
-                FOSInstance->learnLinkageTreeFOS(problemInstance->getMIMatrix() );
+                FOSInstance->learnLinkageTreeFOS(problemInstance->getSimilarityMatrix() );
         }
         else
             FOSInstance->learnLinkageTreeFOS(population, config->alphabetSize );

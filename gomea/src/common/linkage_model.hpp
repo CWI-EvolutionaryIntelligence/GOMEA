@@ -74,7 +74,7 @@ public:
     void writeMIMatrixToFile(vec_t<vec_t<double>> MI_Matrix, std::string folder, int populationIndex, int generation);
     
     void learnLinkageTreeFOS( vec_t<solution_t<char>*> &population, size_t alphabetSize  );
-	void learnLinkageTreeFOS( vec_t<vec_t<double>> MI_matrix );
+	void learnLinkageTreeFOS( vec_t<vec_t<double>> similarity_matrix );
 
 protected:
     vec_t<int> colors;

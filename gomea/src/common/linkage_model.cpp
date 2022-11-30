@@ -419,7 +419,7 @@ void linkage_model_t::learnLinkageTreeFOS(vec_t<solution_t<char>*> &population, 
 	learnLinkageTreeFOS(MI_matrix);
 }
 
-void linkage_model_t::learnLinkageTreeFOS( vec_t<vec_t<double>> MI_Matrix )
+void linkage_model_t::learnLinkageTreeFOS( vec_t<vec_t<double>> similarity_matrix )
 {
 	assert( type == linkage::LINKAGE_TREE );
 
@@ -456,7 +456,7 @@ void linkage_model_t::learnLinkageTreeFOS( vec_t<vec_t<double>> MI_Matrix )
     for (size_t i = 0; i < numberOfVariables; ++i)
     {
         for(size_t j = 0; j < numberOfVariables; j++ )
-            S_Matrix[i][j] = MI_Matrix[mpm[i][0]][mpm[j][0]];
+            S_Matrix[i][j] = similarity_matrix[mpm[i][0]][mpm[j][0]];
 
         S_Matrix[i][i] = 0;
     }

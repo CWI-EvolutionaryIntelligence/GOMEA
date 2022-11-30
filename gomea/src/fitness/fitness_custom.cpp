@@ -123,6 +123,22 @@ void customFitnessFunction_t<T>::initializeVariableInteractionGraph()
 }
 
 template<class T>
+double customFitnessFunction_t<T>::getSimilarityMetric( size_t var_a, size_t var_b )
+{
+	if( this->variable_interaction_graph.size() == 0 )
+		initializeVariableInteractionGraph();
+	std::set<int> dependencies = this->variable_interaction_graph[var_a];
+	if( dependencies.size() == this->number_of_variables )
+		return 1.0;
+	for( int v : dependencies )
+	{
+		if( (int) var_b == v )
+			return 1.0;
+	}
+	return 0.0;
+}
+
+template<class T>
 double customFitnessFunction_t<T>::mappingFunction( int objective_index, solution_t<T> *solution )
 {
 	return mappingFunction(objective_index,solution->fitness_buffers);

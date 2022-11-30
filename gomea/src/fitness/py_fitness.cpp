@@ -70,6 +70,34 @@ double pyFitnessFunction_t<T>::mappingFunctionConstraintValue( int objective_ind
 }
 
 template<class T>
+int pyFitnessFunction_t<T>::getNumberOfFitnessBuffers()
+{
+	int result = gomea_pyfitness_number_of_fitness_buffers(py_class);
+	return result;
+}
+		
+template<class T>
+int pyFitnessFunction_t<T>::getIndexOfFitnessBuffer( int subfunction_index )
+{
+	int result = gomea_pyfitness_index_of_fitness_buffer(py_class,subfunction_index);
+	return result;
+}
+
+template<class T>
+double pyFitnessFunction_t<T>::getSimilarityMetric( size_t var_a, size_t var_b )
+{
+	double result = gomea_pyfitness_similarity_metric(py_class,var_a,var_b);
+	if( result < 0.0 )
+	{
+		return customFitnessFunction_t<T>::getSimilarityMetric(var_a,var_b);
+	}
+	else
+	{
+		return result;
+	}
+}
+
+template<class T>
 double pyFitnessFunction_t<T>::getLowerRangeBound( int dimension )
 {
 	assert(0);

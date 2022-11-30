@@ -59,12 +59,22 @@ cdef public vector[int] gomea_pyfitness_inputsToSubfunction(obj, int subfunction
         vec.push_back(i)
     return vec
 
+cdef public int gomea_pyfitness_index_of_fitness_buffer(obj, int subfunction_index):
+    fitness_obj = <PythonFitnessFunction?>obj
+    cdef int result = fitness_obj.fitness_buffer_index_for_subfunction(subfunction_index)
+    return result
+
+cdef public int gomea_pyfitness_number_of_fitness_buffers(obj):
+    fitness_obj = <PythonFitnessFunction?>obj
+    cdef int n = fitness_obj.number_of_fitness_buffers()
+    return n
+
 cdef public int gomea_pyfitness_numberOfSubfunctions(obj):
     fitness_obj = <PythonFitnessFunction?>obj
     cdef int n = fitness_obj.number_of_subfunctions()
     return n
 
-cdef public int gomea_pyfitness_(obj):
+cdef public double gomea_pyfitness_similarity_metric(obj, size_t var_a, size_t var_b):
     fitness_obj = <PythonFitnessFunction?>obj
-    cdef int n = fitness_obj.number_of_subfunctions()
-    return n
+    cdef double result = fitness_obj.similarity_metric(var_a,var_b)
+    return result
