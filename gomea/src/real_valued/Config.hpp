@@ -66,8 +66,7 @@ class Config {
 			   maximum_number_of_populations,                       /* The maximum number of populations in the multi-start scheme. */
 			   number_of_subgenerations_per_population_factor,      /* The subgeneration factor in the multi-start scheme. */
 			   maximum_no_improvement_stretch,                      /* The maximum number of subsequent generations without an improvement while the distribution multiplier is <= 1.0. */
-			   use_conditional_sampling,
-			   FOS_element_size;
+			   use_conditional_sampling;
 		double maximum_number_of_evaluations,                       /* The maximum number of evaluations. */
 			   maximum_number_of_seconds,                           /* The maximum number of seconds. */
 			   tau,                                                 /* The selection truncation percentile (in [1/population_size,1]). */

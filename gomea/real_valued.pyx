@@ -29,7 +29,6 @@ cdef class RealValuedGOMEA:
         st_dev_ratio_threshold: double=1.0,
         fitness_variance_tolerance: double=0.0,
         maximum_no_improvement_stretch: int=100,
-        linkage_model_index: int=1,
         use_conditional_sampling: short=0,
         selection_during_gom: short=1,
         update_elitist_during_gom: short=1,
@@ -67,7 +66,6 @@ cdef class RealValuedGOMEA:
         self.c_config.st_dev_ratio_threshold = st_dev_ratio_threshold
         self.c_config.fitness_variance_tolerance = fitness_variance_tolerance
         self.c_config.maximum_no_improvement_stretch = maximum_no_improvement_stretch
-        self.c_config.FOS_element_size = linkage_model_index
         self.c_config.use_conditional_sampling = use_conditional_sampling
         self.c_config.selection_during_gom = selection_during_gom 
         self.c_config.update_elitist_during_gom = update_elitist_during_gom 

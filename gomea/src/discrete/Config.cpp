@@ -222,11 +222,6 @@ void Config::printOverview()
 
 void Config::checkOptions()
 {
-    if (!linkage_model_t::FOSNameByIndex(FOSIndex, FOSName))
-    {
-        cerr << "No FOS with index " << FOSIndex << " installed!\n";
-        exit(0);
-    }
 }
 
 }}

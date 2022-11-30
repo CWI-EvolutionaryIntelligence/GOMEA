@@ -16,6 +16,8 @@ class customFitnessFunction_t : public fitness_t<T>
 	public:
 		customFitnessFunction_t( int number_of_parameters );
 		customFitnessFunction_t( int number_of_parameters, double vtr );
+		
+		void initializeVariableInteractionGraph(); 
 
 	private:
 		void evaluationFunction( solution_t<T> *solution );

@@ -67,9 +67,12 @@ population_t::~population_t()
 	free( lower_init_ranges );
 	free( upper_init_ranges );
 	
-	for(int j = 0; j < linkage_model->size(); j++ )
-		free( sampled_solutions[j] );
-	free( sampled_solutions );
+	if( linkage_model->is_static )
+	{
+		for(int j = 0; j < linkage_model->size(); j++ )
+			free( sampled_solutions[j] );
+		free( sampled_solutions );
+	}
 }
 
 void population_t::initialize()
@@ -224,12 +227,14 @@ void population_t::computeRanks()
 
 void population_t::estimateDistribution()
 {
-	if( !linkage_model->is_conditional )
+	if( linkage_model->type == linkage::LINKAGE_TREE && !linkage_model->is_static )
 	{
-		/*if( fitness->hasVariableInteractionGraph() )
-			linkage_model->randomizeOrder(fitness->variable_interaction_graph);
-		else*/
+		mat full_covariance_matrix = distribution_t::estimateFullCovarianceMatrixML(selection, selection_size);
+		linkage_model->learnLinkageTreeFOS( full_covariance_matrix );
 		linkage_model->shuffleFOS();
+		sampled_solutions = (partial_solution_t<double> ***)Malloc(linkage_model->size() * sizeof(partial_solution_t<double> **));
+		for (int j = 0; j < linkage_model->size(); j++)
+			sampled_solutions[j] = (partial_solution_t<double> **)Malloc(population_size * sizeof(partial_solution_t<double> *));
 	}
 	for( int i = 0; i < linkage_model->size(); i++ )
 		estimateDistribution(i);
@@ -287,7 +292,7 @@ void population_t::getBestInPopulation( int *individual_index )
 void population_t::evaluateCompletePopulation()
 {
 	for(int j = 0; j < population_size; j++ )
-		fitness->evaluate( individuals[j] );        
+		fitness->evaluate( individuals[j] );
 }
 
 void population_t::generateAndEvaluateNewSolutions()
@@ -301,11 +306,6 @@ void population_t::generateAndEvaluateNewSolutions()
 
 	double alpha_AMS = 0.5*tau*(((double) population_size)/((double) (population_size-1)));
 	int number_of_AMS_solutions = (int) (alpha_AMS*(population_size-1));
-	/*for(int j = 0; j < linkage_model->size(); j++ )
-	{
-		samples_drawn_from_normal[j] = 0;
-		out_of_bounds_draws[j]       = 0;
-	}*/ // BLA - resets every generation in distribution class?
 
 	linkage_model->shuffleFOS();
 	for(int g = 0; g < linkage_model->size(); g++ )
@@ -608,7 +608,6 @@ void population_t::initializeNewPopulationMemory()
 	individual_NIS = (int*) Malloc( population_size*sizeof(int));
 
 	initializeFOS(linkage_config);
-	//initializeFOS();
 
 	population_terminated = 0;
 
@@ -617,13 +616,20 @@ void population_t::initializeNewPopulationMemory()
 
 void population_t::initializeFOS( linkage_config_t *linkage_config )
 {
-	linkage_model = linkage_model_rv_t::createFOSInstance(*linkage_config, fitness->number_of_variables);
+	if( linkage_config->type == linkage::CONDITIONAL )
+	{
+		if( fitness->variable_interaction_graph.size() == 0 )
+			fitness->initializeVariableInteractionGraph();
+		linkage_model = linkage_model_rv_t::createFOSInstance(*linkage_config, fitness->number_of_variables, fitness->variable_interaction_graph);
+	}
+	else
+	{
+		linkage_model = linkage_model_rv_t::createFOSInstance(*linkage_config, fitness->number_of_variables );
+	}
 }
 
-/**
- * Initializes the linkage tree
- */
-void population_t::initializeFOS()
+// DEPRECATED
+/*void population_t::initializeFOS()
 {
 	linkage_model_rv_pt new_FOS = NULL;
 
@@ -675,7 +681,7 @@ void population_t::initializeFOS()
 
 	//new_FOS->print();
 	linkage_model = new_FOS;
-}
+}*/
 
 /**
  * Initializes the parameter range bounds.
@@ -722,9 +728,12 @@ void population_t::initializePopulationAndFitnessValues()
 		fitness->evaluate( individuals[j] );
 	}
 
-	sampled_solutions = (partial_solution_t<double>***) Malloc( linkage_model->size() * sizeof(partial_solution_t<double>**) );
-	for(int j = 0; j < linkage_model->size(); j++ )
-		sampled_solutions[j] = (partial_solution_t<double>**) Malloc( population_size * sizeof(partial_solution_t<double>*) );
+	if( linkage_model->is_static )
+	{
+		sampled_solutions = (partial_solution_t<double> ***)Malloc(linkage_model->size() * sizeof(partial_solution_t<double> **));
+		for (int j = 0; j < linkage_model->size(); j++)
+			sampled_solutions[j] = (partial_solution_t<double> **)Malloc(population_size * sizeof(partial_solution_t<double> *));
+	}
 }
 
 }}

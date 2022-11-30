@@ -101,6 +101,28 @@ void customFitnessFunction_t<T>::partialEvaluationFunction( solution_t<T> *paren
 }
 
 template<class T>
+void customFitnessFunction_t<T>::initializeVariableInteractionGraph() 
+{
+	for( int i = 0; i < this->number_of_variables; i++ )
+	{
+		this->variable_interaction_graph[i] = std::set<int>();
+	}
+	for( int i = 0; i < this->getNumberOfSubfunctions(); i++ )
+	{
+		vec_t<int> dependent_variables = this->inputsToSubfunction(i);
+		for( int vi : dependent_variables )
+		{
+			for (int vj : dependent_variables)
+			{
+				if( vi != vj )
+					this->variable_interaction_graph[vi].insert(vj);
+			}
+		}
+	}
+	//this->printVariableInteractionGraph();
+}
+
+template<class T>
 double customFitnessFunction_t<T>::mappingFunction( int objective_index, solution_t<T> *solution )
 {
 	return mappingFunction(objective_index,solution->fitness_buffers);

@@ -34,9 +34,14 @@ Population::Population(Config *config_, fitness_t *problemInstance_, sharedInfor
             *offspringPopulation[i] = *population[i];
         }
 			
-		if( FOSInstance_ == NULL )
+		if( config->linkage_config != NULL )
 		{
-			FOSInstance = gomea::linkage_model_t::createLinkageTreeFOSInstance(config->FOSIndex, problemInstance->number_of_variables, config->similarityMeasure, config->maximumFOSSetSize);
+            printf("%s\n",linkage_model_t::getTypeName(config->linkage_config->type).c_str());
+			FOSInstance = linkage_model_t::createFOSInstance( *config->linkage_config, problemInstance->number_of_variables );
+		}
+		else if( FOSInstance_ == NULL )
+		{
+			FOSInstance = linkage_model_t::createLinkageTreeFOSInstance(config->FOSIndex, problemInstance->number_of_variables, config->linkage_config->lt_similarity_measure, config->linkage_config->lt_maximum_set_size);
 		}
 		else FOSInstance = FOSInstance_;
         
@@ -99,10 +104,10 @@ void Population::makeOffspring()
         if (config->similarityMeasure == 2)
         {
             if (FOSInstance->size() == 0)
-                FOSInstance->learnLinkageTreeFOS(problemInstance->getMIMatrix(), &gomea::utils::rng);
+                FOSInstance->learnLinkageTreeFOS(problemInstance->getMIMatrix() );
         }
         else
-            FOSInstance->learnLinkageTreeFOS(population, config->alphabetSize, &gomea::utils::rng);
+            FOSInstance->learnLinkageTreeFOS(population, config->alphabetSize );
     }
 
     FOSInstance->setCountersToZero();
@@ -128,7 +133,7 @@ void Population::generateOffspring()
 	else if( config->useParallelFOSOrder )
     {
         assert( problemInstance->hasVariableInteractionGraph() );
-		FOSInstance->determineParallelFOSOrder(problemInstance->variable_interaction_graph, &gomea::utils::rng);
+		FOSInstance->determineParallelFOSOrder(problemInstance->variable_interaction_graph );
     }
 
     for(size_t i = 0; i < populationSize; i++)

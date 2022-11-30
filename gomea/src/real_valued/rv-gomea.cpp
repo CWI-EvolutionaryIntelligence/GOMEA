@@ -57,10 +57,6 @@ rvg_t::rvg_t( Config *config )
 {
 	this->config = config;
     this->fitness = config->fitness;
-    use_univariate_FOS = 0;
-    learn_linkage_tree = 0;
-    static_linkage_tree = 0;
-    random_linkage_tree = 0;
 
     if( use_guidelines )
     {
@@ -76,13 +72,6 @@ rvg_t::rvg_t( Config *config )
         config->st_dev_ratio_threshold           = 1.0;
         config->maximum_no_improvement_stretch   = 25 + fitness->number_of_variables;
     }
-    FOS_element_ub = fitness->number_of_variables;
-    if( config->FOS_element_size == -1 ) config->FOS_element_size = fitness->number_of_variables;
-    if( config->FOS_element_size == -2 ) learn_linkage_tree = 1;
-    if( config->FOS_element_size == -3 ) static_linkage_tree = 1;
-    if( config->FOS_element_size == -4 ) {static_linkage_tree = 1; FOS_element_ub = 100;}
-    if( config->FOS_element_size == -5 ) {random_linkage_tree = 1; static_linkage_tree = 1; FOS_element_ub = 100;}
-    if( config->FOS_element_size == 1 ) use_univariate_FOS = 1;
 
     checkOptions();
 }
@@ -90,12 +79,6 @@ rvg_t::rvg_t( Config *config )
 rvg_t::rvg_t( int argc, char **argv )
 {
 	this->config = new Config();
-
-    use_univariate_FOS = 0;
-    learn_linkage_tree = 0;
-    static_linkage_tree = 0;
-    random_linkage_tree = 0;
-    config->FOS_element_size = -1;
 
     parseCommandLine( argc, argv );
 
@@ -113,13 +96,6 @@ rvg_t::rvg_t( int argc, char **argv )
         config->st_dev_ratio_threshold           = 1.0;
         config->maximum_no_improvement_stretch   = 25 + fitness->number_of_variables;
     }
-    FOS_element_ub = fitness->number_of_variables;
-    if( config->FOS_element_size == -1 ) config->FOS_element_size = fitness->number_of_variables;
-    if( config->FOS_element_size == -2 ) learn_linkage_tree = 1;
-    if( config->FOS_element_size == -3 ) static_linkage_tree = 1;
-    if( config->FOS_element_size == -4 ) {static_linkage_tree = 1; FOS_element_ub = 100;}
-    if( config->FOS_element_size == -5 ) {random_linkage_tree = 1; static_linkage_tree = 1; FOS_element_ub = 100;}
-    if( config->FOS_element_size == 1 ) use_univariate_FOS = 1;
 
     checkOptions();
 }
@@ -178,7 +154,7 @@ void rvg_t::parseOptions( int argc, char **argv, int *index )
                 case 'r': config->use_vtr                       = true; break;
                 case 'g': use_guidelines                = 1; break;
                 case 'b': config->black_box_evaluations         = 1; break;
-                case 'f': parseFOSElementSize( index, argc, argv ); break;
+                case 'f': parseFOSIndex( index, argc, argv ); break;
                 case 'S': config->fix_seed                      = 1; break;
                 default : optionError( argv, *index );
                 }
@@ -189,12 +165,13 @@ void rvg_t::parseOptions( int argc, char **argv, int *index )
     }
 }
 
-void rvg_t::parseFOSElementSize( int *index, int argc, char** argv )
+void rvg_t::parseFOSIndex( int *index, int argc, char** argv )
 {
     short noError = 1;
+    int FOSIndex;
 
     (*index)++;
-    noError = noError && sscanf( argv[*index], "%d", &config->FOS_element_size );
+    noError = noError && sscanf( argv[*index], "%d", &FOSIndex );
 
     if( !noError )
     {
@@ -244,15 +221,6 @@ void rvg_t::checkOptions( void )
 
         exit( 0 );
     }
-
-    /*if( rotation_angle > 0 && ( !learn_linkage_tree && config->FOS_element_size > 1 && config->FOS_element_size != block_size && config->FOS_element_size != fitness->number_of_variables) )
-    {
-        printf("\n");
-        printf("Error: invalid FOS element size (read %d). Must be %d, %d or %d.", config->FOS_element_size, 1, block_size, fitness->number_of_variables );
-        printf("\n\n");
-
-        exit( 0 );
-    }*/
 }
 
 
@@ -344,7 +312,6 @@ void rvg_t::printVerboseOverview( void )
     printf("# Rotation angle          = %e\n", rotation_angle);
     printf("# Tau                     = %e\n", config->tau);
     printf("# Population size/normal  = %d\n", config->base_population_size);
-    printf("# FOS element size        = %d\n", config->FOS_element_size);
     printf("# Max num of populations  = %d\n", config->maximum_number_of_populations);
     printf("# Dis. mult. decreaser    = %e\n", config->distribution_multiplier_decrease);
     printf("# St. dev. rat. threshold = %e\n", config->st_dev_ratio_threshold);
@@ -439,7 +406,6 @@ void rvg_t::restartLargestPopulation()
 	new_pop->tau = config->tau;
 	new_pop->selection_during_gom = config->selection_during_gom;
 	new_pop->update_elitist_during_gom = config->update_elitist_during_gom;
-	new_pop->FOS_element_size = config->FOS_element_size;
     new_pop->linkage_config = config->linkage_config;
 	new_pop->initialize();
 	delete( populations[populations.size()-1] );
@@ -459,7 +425,6 @@ void rvg_t::initializeNewPopulation()
 	new_pop->tau = config->tau;
 	new_pop->selection_during_gom = config->selection_during_gom;
 	new_pop->update_elitist_during_gom = config->update_elitist_during_gom;
-	new_pop->FOS_element_size = config->FOS_element_size;
     new_pop->linkage_config = config->linkage_config;
 	new_pop->initialize();
 	populations.push_back(new_pop);

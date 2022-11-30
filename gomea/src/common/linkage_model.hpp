@@ -9,7 +9,6 @@
 #include <deque>
 #include <random>
 #include <memory>
-using namespace std;
 
 #include "gomea/src/common/solution.hpp"
 #include "gomea/src/utils/time.hpp"
@@ -34,16 +33,25 @@ class linkage_config_t{
     public:
         linkage_config_t();
         linkage_config_t( size_t block_size ); 
-        linkage_config_t( int similarityMeasure, bool filtered, int maximumSetSize );
+        linkage_config_t( int similarityMeasure, bool filtered, int maximumSetSize, int dummy );
+        linkage_config_t( int max_clique_size_, bool include_cliques_as_fos_elements_, bool include_full_fos_element_);
         linkage_config_t( const vec_t<vec_t<int>> &FOS );
         linkage_config_t( std::string filename );
     
         linkage::linkage_model_type type;
+
         size_t mpm_block_size = -1;
+        
         int lt_similarity_measure = 0;
         bool lt_filtered = false;
         int lt_maximum_set_size = -1;
+
+		int cond_max_clique_size = 1;
+        bool cond_include_cliques_as_fos_elements = true,
+             cond_include_full_fos_element = true;
+
         std::string filename = "";
+        
         vec_t<vec_t<int>> FOS;
 };
 
@@ -59,12 +67,14 @@ public:
     vec_t<int> usageCounters;
 
     linkage::linkage_model_type type = linkage::CUSTOM_LM;
+    bool is_static = true;
+	int maximumSetSize;
 
     virtual ~linkage_model_t(){};
 
     static std::shared_ptr<linkage_model_t> createFOSInstance( const linkage_config_t &config, size_t numberOfVariables = 0 );
     static std::shared_ptr<linkage_model_t> createLinkageTreeFOSInstance(size_t FOSIndex, size_t numberOfVariables, int similarityMeasure, int maximumFOSSetSize );
-    static bool FOSNameByIndex(size_t FOSIndex, string &FOSName);
+    static std::string getTypeName( linkage::linkage_model_type type );
     
     static std::shared_ptr<linkage_model_t> univariate(size_t numberOfVariables_);
     static std::shared_ptr<linkage_model_t> linkage_tree(size_t numberOfVariables_, int similarityMeasure_, bool filtered_,  int maximumSetSize_);
@@ -91,30 +101,29 @@ public:
     void addGroup(const std::set<int> &group);
     virtual void addGroup( vec_t<int> group ); 
 
-    void writeToFileFOS(string folder, int populationIndex, int generation);
-    void writeFOSStatistics(string folder, int populationIndex, int generation);
+    void writeToFileFOS(std::string folder, int populationIndex, int generation);
+    void writeFOSStatistics(std::string folder, int populationIndex, int generation);
     void setCountersToZero();
     void shuffleFOS();
-	void determineParallelFOSOrder(vec_t<vec_t<int>> VIG, mt19937 *rng);
-    void determineParallelFOSOrder(std::map<int, std::set<int>> VIG, mt19937 *rng);
+	void determineParallelFOSOrder(vec_t<vec_t<int>> VIG );
+    void determineParallelFOSOrder(std::map<int, std::set<int>> VIG );
     vec_t<int> graphColoring(std::map<int, std::set<int>> &VIG);
 
-    void writeMIMatrixToFile(vec_t<vec_t<double>> MI_Matrix, string folder, int populationIndex, int generation);
+    void writeMIMatrixToFile(vec_t<vec_t<double>> MI_Matrix, std::string folder, int populationIndex, int generation);
     
-    void learnLinkageTreeFOS( vec_t<solution_t<char>*> &population, size_t alphabetSize, mt19937 *rng = NULL );
-	void learnLinkageTreeFOS( vec_t<vec_t<double>> MI_matrix, mt19937 *rng = NULL);
+    void learnLinkageTreeFOS( vec_t<solution_t<char>*> &population, size_t alphabetSize  );
+	void learnLinkageTreeFOS( vec_t<vec_t<double>> MI_matrix );
 
 protected:
     vec_t<int> colors;
     vec_t<vec_t<double>> S_Matrix;
     bool filtered;
-	int maximumSetSize;
     int similarityMeasure;
     
-    linkage_model_t(size_t numberOfVariables_): numberOfVariables(numberOfVariables_){}
+    linkage_model_t( size_t numberOfVariables_ ): numberOfVariables(numberOfVariables_), maximumSetSize(numberOfVariables_) {}
     linkage_model_t( size_t numberOfVariables_, size_t block_size ); 
     linkage_model_t( size_t numberOfVariables_, const vec_t<vec_t<int>> &FOS );
-    linkage_model_t(size_t numberOfVariables_, int similarityMeasure, bool filtered, int maximumSetSize );
+    linkage_model_t( size_t numberOfVariables_, int similarityMeasure, bool filtered, int maximumSetSize );
     linkage_model_t( std::string filename );
 	
     int determineNearestNeighbour(size_t index, vec_t< vec_t< int > > &mpm ); 

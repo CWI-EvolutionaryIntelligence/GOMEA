@@ -2,7 +2,7 @@
 # cython: c_string_type=unicode, c_string_encoding=utf8
 
 from gomea.discrete cimport gomeaIMS, Config
-from gomea.linkage cimport LinkageModel
+from gomea.linkage cimport LinkageModel, cLinkageTree
 from libcpp.string cimport string
 from libcpp cimport bool
 from cpython.exc cimport PyErr_CheckSignals
@@ -45,6 +45,7 @@ cdef class DiscreteGOMEA:
 
         self.c_config = Config()
         self.c_config.fitness = (<FitnessFunction?>fitness).c_inst_discrete
+        self.c_config.linkage_config = linkage_model.c_inst
         self.c_config.folder = folder
         self.c_config.maximumNumberOfGOMEAs = maximum_number_of_GOMEAs
         self.c_config.IMSsubgenerationFactor = IMS_subgeneration_factor
@@ -54,7 +55,6 @@ cdef class DiscreteGOMEA:
         self.c_config.maximumNumberOfEvaluations = max_evals
         self.c_config.maximumNumberOfGenerations = max_gens
         self.c_config.maximumNumberOfSeconds = max_time
-        self.c_config.linkage_config = linkage_model.c_inst
         #self.c_config.verbose = verbose
         self.c_config.fix_seed = False
         if random_seed != -1:

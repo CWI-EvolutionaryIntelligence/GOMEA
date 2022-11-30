@@ -4,21 +4,27 @@ namespace gomea{
         
 linkage_config_t::linkage_config_t(){type = linkage::UNIVARIATE;}
 linkage_config_t::linkage_config_t( size_t block_size_ ) : mpm_block_size(block_size_){type = linkage::MPM;}
-linkage_config_t::linkage_config_t(int similarityMeasure_, bool filtered_, int maximumSetSize_ ) 
-	: lt_similarity_measure(similarityMeasure_), lt_filtered(filtered_), lt_maximum_set_size(maximumSetSize_) {type = linkage::LINKAGE_TREE;}
+linkage_config_t::linkage_config_t(int similarityMeasure_, bool filtered_, int maximumSetSize_, int dummy ) 
+	: lt_similarity_measure(similarityMeasure_), lt_filtered(filtered_), lt_maximum_set_size(maximumSetSize_)
+	{type = linkage::LINKAGE_TREE;}
 linkage_config_t::linkage_config_t( const vec_t<vec_t<int>> &FOS_ ) : FOS(FOS_){type = linkage::CUSTOM_LM;}
 linkage_config_t::linkage_config_t( std::string filename_ ) : filename(filename_){type = linkage::FROM_FILE;}
+linkage_config_t::linkage_config_t( int max_clique_size_, bool include_cliques_as_fos_elements_, bool include_full_fos_element_)
+	: cond_max_clique_size(max_clique_size_), cond_include_cliques_as_fos_elements(include_cliques_as_fos_elements_), cond_include_full_fos_element(include_full_fos_element_)
+	{type = linkage::CONDITIONAL;}
 
-bool linkage_model_t::FOSNameByIndex(size_t FOSIndex, string &FOSName)
+std::string linkage_model_t::getTypeName( linkage::linkage_model_type type )
 {
-    switch (FOSIndex)
+    switch (type)
     {
-        case 0: FOSName = "Linkage Tree"; break;
-        case 1: FOSName = "Filtered Linkage Tree"; break;
-            
-        default: return false; break;
+        case linkage::UNIVARIATE: return "Univariate";
+        case linkage::MPM: return "Marginal Product Model";
+		case linkage::LINKAGE_TREE: return "Linkage Tree";
+		case linkage::CUSTOM_LM: return "Custom Linkage Model";
+		case linkage::FROM_FILE: return "Linkage Model read from file";
+		case linkage::CONDITIONAL: return "Conditional";
     }
-    return true;
+    return "Unknown type";
 }
 
 linkage_model_pt linkage_model_t::createLinkageTreeFOSInstance(size_t FOSIndex, size_t numberOfVariables, int similarityMeasure, int maximumFOSSetSize )
@@ -36,6 +42,8 @@ linkage_model_pt linkage_model_t::createFOSInstance( const linkage_config_t &con
 {
 	if( config.type != linkage::FROM_FILE )
 		assert( numberOfVariables > 0 );
+	if( config.type == linkage::MPM )
+		assert( config.mpm_block_size < numberOfVariables );
 	switch( config.type )
 	{
 		case linkage::UNIVARIATE: return univariate(numberOfVariables);
@@ -44,11 +52,13 @@ linkage_model_pt linkage_model_t::createFOSInstance( const linkage_config_t &con
 		case linkage::CUSTOM_LM: return custom_fos(numberOfVariables,config.FOS);
 		case linkage::FROM_FILE: return from_file(config.filename);
 	}
+	throw std::runtime_error("Unknown or unsuitable linkage model.\n");
 }
 
 linkage_model_t::linkage_model_t( size_t numberOfVariables_, size_t block_size ) : linkage_model_t(numberOfVariables_)
 {
-	assert( block_size > 0 );
+	if( block_size == 0 )
+		block_size = numberOfVariables_;
 	if( block_size == 1 )
 	{
 		for (size_t i = 0; i < numberOfVariables_; i++)
@@ -70,6 +80,7 @@ linkage_model_t::linkage_model_t( size_t numberOfVariables_, size_t block_size )
 		else
 			type = linkage::MPM;
 	}
+	is_static = true;
 	shuffleFOS();
 }
 
@@ -82,6 +93,7 @@ linkage_model_t::linkage_model_t( size_t numberOfVariables_, const vec_t<vec_t<i
 		tot_size += group.size();
 	}
 	type = linkage::CUSTOM_LM;
+	is_static = true;
 	shuffleFOS();
 }
 
@@ -97,6 +109,7 @@ linkage_model_t::linkage_model_t(size_t numberOfVariables_, int similarityMeasur
 	S_Matrix.resize(numberOfVariables);
 	for (size_t i = 0; i < numberOfVariables; ++i)
 		S_Matrix[i].resize(numberOfVariables);
+	is_static = false;
 	type = linkage::LINKAGE_TREE;
 }
 
@@ -158,35 +171,36 @@ linkage_model_t::linkage_model_t( std::string filename )
 		sprintf( string, "Error reading file %s.\n", filename.c_str() );
 		throw std::runtime_error(string);
 	}
+	is_static = true;
 }
     
 linkage_model_pt linkage_model_t::univariate(size_t numberOfVariables_)
 {
-	linkage_model_pt new_fos = shared_ptr<linkage_model_t>(new linkage_model_t(numberOfVariables_,0));
+	linkage_model_pt new_fos = std::shared_ptr<linkage_model_t>(new linkage_model_t(numberOfVariables_,0));
 	return( new_fos );
 }
 
 linkage_model_pt linkage_model_t::marginal_product_model( size_t numberOfVariables_, size_t block_size )
 {
-	linkage_model_pt new_fos = shared_ptr<linkage_model_t>(new linkage_model_t(numberOfVariables_,block_size));
+	linkage_model_pt new_fos = std::shared_ptr<linkage_model_t>(new linkage_model_t(numberOfVariables_,block_size));
 	return( new_fos );
 }
         
 linkage_model_pt linkage_model_t::linkage_tree(size_t numberOfVariables_, int similarityMeasure_, bool filtered_, int maximumSetSize_ )
 {
-	linkage_model_pt new_fos = shared_ptr<linkage_model_t>(new linkage_model_t(numberOfVariables_, similarityMeasure_, filtered_, maximumSetSize_));
+	linkage_model_pt new_fos = std::shared_ptr<linkage_model_t>(new linkage_model_t(numberOfVariables_, similarityMeasure_, filtered_, maximumSetSize_));
 	return( new_fos );
 }
     
 linkage_model_pt linkage_model_t::from_file( std::string filename )
 {
-	linkage_model_pt new_fos = shared_ptr<linkage_model_t>(new linkage_model_t(filename));
+	linkage_model_pt new_fos = std::shared_ptr<linkage_model_t>(new linkage_model_t(filename));
 	return( new_fos );
 }
 
 linkage_model_pt linkage_model_t::custom_fos( size_t numberOfVariables_, const vec_t<vec_t<int>> &FOS )
 {
-	linkage_model_pt new_fos = shared_ptr<linkage_model_t>(new linkage_model_t(numberOfVariables_,FOS));
+	linkage_model_pt new_fos = std::shared_ptr<linkage_model_t>(new linkage_model_t(numberOfVariables_,FOS));
 	return( new_fos );
 }
 
@@ -211,18 +225,18 @@ void linkage_model_t::addGroup( vec_t<int> group )
 	FOSStructure.push_back(group);
 }
 
-void linkage_model_t::writeToFileFOS(string folder, int populationIndex, int generation)
+void linkage_model_t::writeToFileFOS(std::string folder, int populationIndex, int generation)
 {
-    ofstream outFile;
-    outFile.open(folder + "/fos/" + to_string(populationIndex) + "_" + to_string(generation) + ".txt");
-    outFile << "FOS size = " << FOSStructure.size() << endl;
+    std::ofstream outFile;
+    outFile.open(folder + "/fos/" + std::to_string(populationIndex) + "_" + std::to_string(generation) + ".txt");
+    outFile << "FOS size = " << FOSStructure.size() << std::endl;
 	for (size_t i = 0; i < FOSStructure.size(); ++i)
     {
     	outFile << "[" << i << " : " << FOSStructure[i].size() << "]";
         outFile << "[ ";
         for (size_t j = 0; j < FOSStructure[i].size(); ++j)
             outFile << FOSStructure[i][j] << " "; 
-        outFile << "]" << endl;
+        outFile << "]" << std::endl;
     }
     outFile.close();
 }
@@ -238,16 +252,16 @@ void linkage_model_t::setCountersToZero()
     }
 }
 
-void linkage_model_t::writeFOSStatistics(string folder, int populationIndex, int generation)
+void linkage_model_t::writeFOSStatistics(std::string folder, int populationIndex, int generation)
 {
-    ofstream outFile;
-    outFile.open(folder + "/fos/statistics_" + to_string(populationIndex) + "_" + to_string(generation) + ".txt");
-    outFile << "FOS_element improvement_counter usage_counter" << endl;
+    std::ofstream outFile;
+    outFile.open(folder + "/fos/statistics_" + std::to_string(populationIndex) + "_" + std::to_string(generation) + ".txt");
+    outFile << "FOS_element improvement_counter usage_counter" << std::endl;
     for (size_t i = 0; i < FOSStructure.size(); ++i)
     {
         for (size_t j = 0; j < FOSStructure[i].size(); ++j)
             outFile << FOSStructure[i][j] << "_"; 
-        outFile << " " << improvementCounters[i] << " " << usageCounters[i] << endl;
+        outFile << " " << improvementCounters[i] << " " << usageCounters[i] << std::endl;
     }
     outFile.close();
 }
@@ -255,11 +269,11 @@ void linkage_model_t::writeFOSStatistics(string folder, int populationIndex, int
 void linkage_model_t::shuffleFOS()
 {
     FOSorder.resize(size());
-    iota(FOSorder.begin(), FOSorder.end(), 0);   
-    shuffle(FOSorder.begin(), FOSorder.end(), gomea::utils::rng);
+    std::iota(FOSorder.begin(), FOSorder.end(), 0);   
+    std::shuffle(FOSorder.begin(), FOSorder.end(), utils::rng);
 }
 
-void linkage_model_t::determineParallelFOSOrder(std::map<int,std::set<int>> VIG, mt19937 *rng)
+void linkage_model_t::determineParallelFOSOrder(std::map<int,std::set<int>> VIG )
 {
     FOSorder.clear();
 	
@@ -269,7 +283,7 @@ void linkage_model_t::determineParallelFOSOrder(std::map<int,std::set<int>> VIG,
 
 	int numColors = 0;
 	for( size_t i = 0; i < colors.size(); i++ )
-		numColors = max(numColors,colors[i]+1);
+		numColors = std::max(numColors,colors[i]+1);
 	
 	vec_t<vec_t<int>> parallelFOSGroups;
 	parallelFOSGroups.resize(numColors);
@@ -282,8 +296,8 @@ void linkage_model_t::determineParallelFOSOrder(std::map<int,std::set<int>> VIG,
 	}
 	
 	vec_t<int> groupIndices(numColors);
-    iota(groupIndices.begin(), groupIndices.end(), 0);   
-    shuffle(groupIndices.begin(), groupIndices.end(), *rng);
+    std::iota(groupIndices.begin(), groupIndices.end(), 0);   
+    std::shuffle(groupIndices.begin(), groupIndices.end(), utils::rng);
 
 	for( size_t i = 0; i < groupIndices.size(); i++ )
 	{
@@ -306,7 +320,7 @@ vec_t<int> linkage_model_t::graphColoring( std::map<int,std::set<int>> &VIG )
 			FOSReverseMap[v].push_back(i);
 
 	// FOSVIG is a VIG of the dependencies between FOS elements
-    vec_t<set<int>> FOSVIG;
+    vec_t<std::set<int>> FOSVIG;
 	FOSVIG.resize(FOSStructure.size());
 	for( size_t i = 0; i < FOSStructure.size(); i++ )
 	{
@@ -323,12 +337,12 @@ vec_t<int> linkage_model_t::graphColoring( std::map<int,std::set<int>> &VIG )
 	// Welsh-Powell algorithm for graph coloring
 	vec_t<int> colors;
 	colors.resize(FOSVIG.size());
-	fill(colors.begin(), colors.end(), -1);
+	std::fill(colors.begin(), colors.end(), -1);
 
 	// Sort vertices from high to low degree
     vec_t<int> order(FOSVIG.size());
-    iota(order.begin(), order.end(), 0);
-	sort(order.begin(), order.end(), [&FOSVIG](int i, int j){return FOSVIG[i].size() > FOSVIG[j].size();});
+    std::iota(order.begin(), order.end(), 0);
+	std::sort(order.begin(), order.end(), [&FOSVIG](int i, int j){return FOSVIG[i].size() > FOSVIG[j].size();});
 	/*for( size_t i = 0; i < order.size(); i++ )
 		printf("%d ",FOSVIG[order[i]].size());
 	printf("\n");*/
@@ -399,7 +413,7 @@ vec_t<int> linkage_model_t::graphColoring( std::map<int,std::set<int>> &VIG )
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
     
-void linkage_model_t::learnLinkageTreeFOS(vec_t<solution_t<char>*> &population, size_t alphabetSize, mt19937 *rng )
+void linkage_model_t::learnLinkageTreeFOS(vec_t<solution_t<char>*> &population, size_t alphabetSize )
 {
 	vec_t<vec_t<double>> MI_matrix;
 
@@ -413,10 +427,10 @@ void linkage_model_t::learnLinkageTreeFOS(vec_t<solution_t<char>*> &population, 
 		MI_matrix = computeNMIMatrix(population, alphabetSize);
 	}
     
-	learnLinkageTreeFOS(MI_matrix, rng);
+	learnLinkageTreeFOS(MI_matrix);
 }
 
-void linkage_model_t::learnLinkageTreeFOS( vec_t<vec_t<double>> MI_Matrix, mt19937 *rng )
+void linkage_model_t::learnLinkageTreeFOS( vec_t<vec_t<double>> MI_Matrix )
 {
 	assert( type == linkage::LINKAGE_TREE );
 
@@ -426,8 +440,8 @@ void linkage_model_t::learnLinkageTreeFOS( vec_t<vec_t<double>> MI_Matrix, mt199
     
     /* Initialize MPM to the univariate factorization */
     vec_t <int> order(numberOfVariables);
-    iota(order.begin(), order.end(), 0);
-    shuffle(order.begin(), order.end(), *rng);
+    std::iota(order.begin(), order.end(), 0);
+    std::shuffle(order.begin(), order.end(), utils::rng );
 
     vec_t< vec_t<int> > mpm(numberOfVariables);
     vec_t< vec_t<int> > mpmNew(numberOfVariables);
@@ -438,7 +452,6 @@ void linkage_model_t::learnLinkageTreeFOS( vec_t<vec_t<double>> MI_Matrix, mt199
     }
 
     /* Initialize LT to the initial MPM */
-    //int FOSLength = 2 * numberOfVariables - 2;
     FOSStructure.resize(numberOfVariables);
 
     //vec_t<int> useFOSElement(FOSStructure.size(), true);
@@ -468,8 +481,7 @@ void linkage_model_t::learnLinkageTreeFOS( vec_t<vec_t<double>> MI_Matrix, mt199
 	{
 		if (NN_chain_length == 0)
 		{
-			NN_chain[NN_chain_length] = (*rng)() % mpm.size();
-			//std::cout << NN_chain[NN_chain_length] << " | " << mpm.size() << std::endl;
+			NN_chain[NN_chain_length] = utils::rng() % mpm.size();
 
 			NN_chain_length++;
 		}
@@ -496,6 +508,23 @@ void linkage_model_t::learnLinkageTreeFOS( vec_t<vec_t<double>> MI_Matrix, mt199
 		bool skipFOSElement = false;
 		if (filtered && S_Matrix[NN_chain[NN_chain_length-1]][NN_chain[NN_chain_length-2]] >= 1-(1e-6))
 			skipFOSElement = true;
+		
+		if( r1 >= mpm.size() || r0 >= mpm.size() || mpm[r0].size()+mpm[r1].size() > maximumSetSize )
+		{
+			NN_chain_length = 1;
+			NN_chain[0] = 0;
+			if( maximumSetSize < numberOfVariables )
+			{
+				done = 1;
+				for(int i = 1; i < mpm.size(); i++ )
+				{
+					if( mpm[i].size() + mpm[NN_chain[0]].size() <= maximumSetSize ) done = 0;
+					if( mpm[i].size() < mpm[NN_chain[0]].size() ) NN_chain[0] = i;
+				}
+				if( done ) break;
+			}
+			continue;
+		}
 
 		if (r0 > r1)
 		{
@@ -530,9 +559,6 @@ void linkage_model_t::learnLinkageTreeFOS( vec_t<vec_t<double>> MI_Matrix, mt199
 			if( !skipFOSElement )
 			{
 				FOSStructure.push_back(indices);
-				//printf("Added FOS element [%d][",FOSsIndex);
-				//for(int j : indices) printf("%d ",j);
-				//printf("]\n");
 				FOSsIndex++;
 				assert(FOSStructure.size() == FOSsIndex);
 			}
@@ -607,7 +633,7 @@ void linkage_model_t::learnLinkageTreeFOS( vec_t<vec_t<double>> MI_Matrix, mt199
             // cout << "filtered out:\n";
             // for (int j = 0 ; j < FOSStructure[i].size(); ++j)
             //     cout << FOSStructure[i][j] << " ";
-            // cout << endl;
+            // cout << std::endl;
             FOSStructure[i].clear();
         }
     }
@@ -739,7 +765,7 @@ vec_t<vec_t<double>> linkage_model_t::computeNMIMatrix( vec_t<solution_t<char>*>
             for(size_t k = 0; k < factorSize_joint; k++)
             {
                 p = factorProbabilities_joint[k];
-                //cout << i << " " << j << " " << p << endl;
+                //cout << i << " " << j << " " << p << std::endl;
                 if (p > 0)
                     joint += (-p * log2(p));
             }
@@ -770,17 +796,17 @@ vec_t<vec_t<double>> linkage_model_t::computeNMIMatrix( vec_t<solution_t<char>*>
 	return( MI_Matrix );
 }
 
-void linkage_model_t::writeMIMatrixToFile(vec_t<vec_t<double>> MI_Matrix, string folder, int populationIndex, int generation)
+void linkage_model_t::writeMIMatrixToFile(vec_t<vec_t<double>> MI_Matrix, std::string folder, int populationIndex, int generation)
 {
-    ofstream outFile;
-    outFile.open(folder + "/fos/MI_" + to_string(populationIndex) + "_" + to_string(generation) + ".txt");
+    std::ofstream outFile;
+    outFile.open(folder + "/fos/MI_" + std::to_string(populationIndex) + "_" + std::to_string(generation) + ".txt");
     for (size_t i = 0; i < numberOfVariables; ++i)
     {
         for (size_t j = 0; j < numberOfVariables; ++j)
         {       
             outFile << MI_Matrix[i][j] << " "; 
         }
-        outFile << endl;
+        outFile << std::endl;
     }
     outFile.close();
 }

@@ -66,8 +66,10 @@ class distribution_t {
 		void adaptDistributionMultiplierMaximumStretch( partial_solution_t<double>** partial_solutions, int num_solutions );
 		virtual short generationalImprovementForOnePopulationForFOSElement( partial_solution_t<double>** partial_solutions, int num_solutions, double *st_dev_ratio ) = 0;
 
-		double estimateMean( int var, solution_t<double> **selection, int selection_size );
-		double estimateCovariance( int vara, int varb, solution_t<double> **selection, int selection_size );
+		static mat estimateFullCovarianceMatrixML( solution_t<double> **selection, int selection_size );
+		static double estimateCovariance( int vara, int varb, solution_t<double> **selection, int selection_size );
+		static double estimateMean( int var, solution_t<double> **selection, int selection_size );
+		
 		vec_t<double> estimateMeanVectorML( vec_t<int> &variables, solution_t<double> **selection, int selection_size );
 		mat estimateRegularCovarianceMatrixML( vec_t<int> &variables, vec_t<double> &mean_vector, solution_t<double> **selection, int selection_size );
 		mat estimateCovarianceMatrixML( vec_t<int> &variables, solution_t<double> **selection, int selection_size );

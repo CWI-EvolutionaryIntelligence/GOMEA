@@ -63,6 +63,7 @@ class fitness_t
 
 		bool hasVariableInteractionGraph();
 		virtual void initializeVariableInteractionGraph();
+		void printVariableInteractionGraph();
 
 		virtual vec_t<vec_t<double>> getMIMatrix();
 		

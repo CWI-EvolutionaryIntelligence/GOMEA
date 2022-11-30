@@ -64,7 +64,7 @@ class rvg_t {
 		void generationalStepAllPopulationsRecursiveFold( int population_index_smallest, int population_index_biggest );
 		void parseCommandLine( int argc, char **argv );
 		void parseOptions( int argc, char **argv, int *index );
-		void parseFOSElementSize( int *index, int argc, char** argv );
+		void parseFOSIndex( int *index, int argc, char** argv );
 		void optionError( char **argv, int index );
 		void parseParameters( int argc, char **argv, int *index );
 		void printUsage( void );

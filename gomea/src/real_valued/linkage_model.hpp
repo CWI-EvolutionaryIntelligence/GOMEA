@@ -51,17 +51,17 @@ namespace realvalued{
 class linkage_model_rv_t : public linkage_model_t {
 		public:
 			linkage_model_rv_t( int problem_index, double **covariance_matrix, int n );
-			linkage_model_rv_t( int number_of_variables, const std::map<int,std::set<int>> &variable_interaction_graph, int max_clique_size, bool include_cliques_as_fos_elements, bool include_full_fos_element );
+			linkage_model_rv_t( int number_of_variables, const graph_t &variable_interaction_graph, int max_clique_size, bool include_cliques_as_fos_elements, bool include_full_fos_element );
 			linkage_model_rv_t( const linkage_model_rv_t &f );
 			~linkage_model_rv_t();
 
-			static std::shared_ptr<linkage_model_rv_t> createFOSInstance( const linkage_config_t &config, size_t numberOfVariables );
+			static std::shared_ptr<linkage_model_rv_t> createFOSInstance( const linkage_config_t &config, size_t numberOfVariables, const graph_t &VIG = graph_t() );
 
 			static std::shared_ptr<linkage_model_rv_t> univariate(size_t numberOfvariables_);
 			static std::shared_ptr<linkage_model_rv_t> full(size_t numberOfvariables_);
-			static std::shared_ptr<linkage_model_rv_t> linkage_tree(size_t numberOfVariables_, int similarityMeasure_ = 0, bool filtered_ = false, int maximumSetSize_ = -1);
+			static std::shared_ptr<linkage_model_rv_t> linkage_tree(size_t numberOfVariables_, int similarityMeasure_, bool filtered_, int maximumSetSize_ );
 			static std::shared_ptr<linkage_model_rv_t> marginal_product_model(size_t numberOfvariables_, size_t block_size);
-			static std::shared_ptr<linkage_model_rv_t> conditional( size_t number_of_variables, const std::map<int,std::set<int>> &variable_interaction_graph, int max_clique_size = 1, bool include_cliques_as_fos_elements = true, bool include_full_fos_element = true );
+			static std::shared_ptr<linkage_model_rv_t> conditional( size_t number_of_variables, const graph_t &variable_interaction_graph, int max_clique_size, bool include_cliques_as_fos_elements, bool include_full_fos_element );
 			static std::shared_ptr<linkage_model_rv_t> custom_fos(size_t numberOfvariables_, const vec_t<vec_t<int>> &FOS);
 			static std::shared_ptr<linkage_model_rv_t> from_file(std::string filename);
 
@@ -74,11 +74,11 @@ class linkage_model_rv_t : public linkage_model_t {
 			void addGroup( distribution_t *dist );
 			void addConditionedGroup( vec_t<int> variables );
 			void addConditionedGroup( vec_t<int> variables, std::set<int> conditioned_variables );
-			void randomizeOrder( const std::map<int,std::set<int>> &variable_interaction_graph ); 
-			vec_t<int> getVIGOrderBreadthFirst( const std::map<int,std::set<int>> &variable_interaction_graph );
+			void randomizeOrder( const graph_t &variable_interaction_graph ); 
+			vec_t<int> getVIGOrderBreadthFirst( const graph_t &variable_interaction_graph );
 
-			double getSimilarity( int a, int b, int *mpm_num_ind );
-			double **computeMIMatrix( double **covariance_matrix, int n );
+			void learnLinkageTreeFOS(mat covariance_matrix);
+			vec_t<vec_t<double>> computeMIMatrix( mat covariance_matrix, int n );
 			void inheritDistributionMultipliers( linkage_model_rv_t *other, double *multipliers );
 			int *matchFOSElements( linkage_model_rv_t *other );
 			int *hungarianAlgorithm( int** similarity_matrix, int dim );
@@ -119,21 +119,13 @@ class linkage_model_rv_t : public linkage_model_t {
  	  	   	linkage_model_rv_t(size_t numberOfVariables_, size_t block_size ) : linkage_model_t(numberOfVariables_,block_size){initializeDistributions();};
 		    linkage_model_rv_t(size_t numberOfVariables_, const vec_t<vec_t<int>> &FOS ) : linkage_model_t(numberOfVariables_, FOS){initializeDistributions();};
 			linkage_model_rv_t(size_t numberOfVariables_, int similarityMeasure, bool filtered, int maximumSetSize) : linkage_model_t(numberOfVariables_,similarityMeasure,filtered,maximumSetSize){initializeDistributions();};
-			linkage_model_rv_t(size_t number_of_variables, const std::map<int,std::set<int>> &variable_interaction_graph, int max_clique_size, bool include_cliques_as_fos_elements, bool include_full_fos_element );
+			linkage_model_rv_t(size_t number_of_variables, const graph_t &variable_interaction_graph, int max_clique_size, bool include_cliques_as_fos_elements, bool include_full_fos_element );
 			linkage_model_rv_t(std::string filename) : linkage_model_t(filename){initializeDistributions();};
 	};
 
 typedef std::shared_ptr<linkage_model_rv_t> linkage_model_rv_pt;
 
 /*-=-=-=-=-=-=-=-=-=-=-=-= Section Header Functions -=-=-=-=-=-=-=-=-=-=-=-=*/
-/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
-
-/*-=-=-=-=-=-=-=-=-=-=-=- Section Global Variables -=-=-=-=-=-=-=-=-=-=-=-=-*/
-extern int FOS_element_ub,                       /* Cut-off value for bounded fixed linkage tree (BFLT). */
-          use_univariate_FOS,                   /* Whether a univariate FOS is used. */
-          learn_linkage_tree,                   /* Whether the FOS is learned at the start of each generation. */
-          static_linkage_tree,                  /* Whether the FOS is fixed throughout optimization. */
-          random_linkage_tree;                  /* Whether the fixed linkage tree is learned based on a random distance measure. */
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
 }}

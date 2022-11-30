@@ -65,6 +65,8 @@ using vec_t = std::vector<T>;
 template<class T>
 using vec_pt = std::shared_ptr<vec_t<T>>;
 
+typedef std::map<int,std::set<int>> graph_t;
+
 void *Malloc( long size );
 double **matrixNew( int n, int m );
 double vectorDotProduct( double *vector0, double *vector1, int n0 );

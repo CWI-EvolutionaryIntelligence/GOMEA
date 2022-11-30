@@ -183,6 +183,27 @@ mat distribution_t::estimateCovarianceMatrixML( vec_t<int> &variables, solution_
 	return( covariance_matrix );
 }
 
+mat distribution_t::estimateFullCovarianceMatrixML( solution_t<double> **selection, int selection_size )
+{
+	/* First do the maximum-likelihood estimate from data */
+	//mat covariance_matrix(variables.size(),variables.size(),fill::none);
+	int num_variables = selection[0]->getNumberOfVariables();
+	mat covariance_matrix = mat(num_variables,num_variables);
+	for( size_t j = 0; j < num_variables; j++ )
+	{
+		int vara = j;
+		for( size_t k = j; k < num_variables; k++ )
+		{
+			int varb = k;
+			double cov = estimateCovariance(vara,varb,selection,selection_size);
+			//covariance_matrix(j,k) = (1-eta_cov)*covariance_matrix(j,k)+ eta_cov*cov;
+			covariance_matrix(j,k) = cov;
+			covariance_matrix(k,j) = covariance_matrix(j,k);
+		}
+	}
+	return( covariance_matrix );
+}
+
 bool distribution_t::regularizeCovarianceMatrix( mat &cov_mat, vec_t<double> &mean_vector, solution_t<double> **selection, int selection_size )
 {
 	// regularization for small populations
@@ -562,6 +583,9 @@ normal_distribution_t::normal_distribution_t( vec_t<int> variables )
 
 void normal_distribution_t::estimateDistribution( solution_t<double> **selection, int selection_size )
 {
+	samples_drawn = 0;
+	out_of_bounds_draws = 0;
+	
 	mean_vector = estimateMeanVectorML(variables,selection,selection_size);
 	
 	/* Change the focus of the search to the best solution */
@@ -707,6 +731,8 @@ void conditional_distribution_t::initializeMemory()
 	covariance_matrices.resize(variable_groups.size());
 	rho_matrices.resize(variable_groups.size());
 	cholesky_decompositions.resize(variable_groups.size());
+	samples_drawn = 0;
+	out_of_bounds_draws = 0;
 }
 
 void conditional_distribution_t::addGroupOfVariables( vec_t<int> indices, vec_t<int> indices_cond )
@@ -831,6 +857,8 @@ void conditional_distribution_t::updateConditionals( const std::map<int,std::set
 
 void conditional_distribution_t::estimateDistribution( solution_t<double> **selection, int selection_size )
 {
+	samples_drawn = 0;
+	out_of_bounds_draws = 0;
 	initializeMemory();
 	for( size_t i = 0; i < variable_groups.size(); i++ )
 		estimateConditionalGaussianML(i,selection,selection_size);

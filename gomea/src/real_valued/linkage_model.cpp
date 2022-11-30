@@ -44,14 +44,11 @@ namespace gomea{
 namespace realvalued{
 
 /*-=-=-=-=-=-=-=-=-=-=-=- Section Global Variables -=-=-=-=-=-=-=-=-=-=-=-=-*/
-int       FOS_element_ub = 0,                       /* Cut-off value for bounded fixed linkage tree (BFLT). */
-		  use_univariate_FOS = 0,                   /* Whether a univariate FOS is used. */
-		  learn_linkage_tree = 0,                   /* Whether the FOS is learned at the start of each generation. */
-		  static_linkage_tree = 0,                  /* Whether the FOS is fixed throughout optimization. */
+int		  static_linkage_tree = 0,                  /* Whether the FOS is fixed throughout optimization. */
 		  random_linkage_tree = 0;                  /* Whether the fixed linkage tree is learned based on a random distance measure. */
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
-linkage_model_rv_pt linkage_model_rv_t::createFOSInstance( const linkage_config_t &config, size_t numberOfVariables )
+linkage_model_rv_pt linkage_model_rv_t::createFOSInstance( const linkage_config_t &config, size_t numberOfVariables, const graph_t &VIG )
 {
 	if( config.type != linkage::FROM_FILE )
 		assert( numberOfVariables > 0 );
@@ -59,10 +56,13 @@ linkage_model_rv_pt linkage_model_rv_t::createFOSInstance( const linkage_config_
 	{
 		case linkage::UNIVARIATE: return univariate(numberOfVariables);
 		case linkage::MPM: return marginal_product_model(numberOfVariables, config.mpm_block_size);
+		case linkage::FULL: return full(numberOfVariables);
 		case linkage::LINKAGE_TREE: return linkage_tree(numberOfVariables, config.lt_similarity_measure, config.lt_filtered, config.lt_maximum_set_size );
+		case linkage::CONDITIONAL: return conditional(numberOfVariables,VIG,config.cond_max_clique_size,config.cond_include_cliques_as_fos_elements,config.cond_include_full_fos_element);
 		case linkage::CUSTOM_LM: return custom_fos(numberOfVariables,config.FOS);
 		case linkage::FROM_FILE: return from_file(config.filename);
 	}
+	throw std::runtime_error("Unknown linkage model.\n");
 }
 
 
@@ -77,340 +77,15 @@ linkage_model_rv_t::linkage_model_rv_t( const linkage_model_rv_t &other ) : link
 		addGroup(vec);
 	}
 	p_accept = other.p_accept;
+	is_static = other.is_static;
 }
 
-// Learn a linkage tree
-linkage_model_rv_t::linkage_model_rv_t( int problem_index, double **covariance_matrix, int n ) : linkage_model_t(n)
-{
-	/* Compute Mutual Information matrix */
-	double **MI_matrix = NULL;
-	if( learn_linkage_tree )
-		MI_matrix = computeMIMatrix( covariance_matrix, number_of_variables );
-
-	/* Initialize MPM to the univariate factorization */
-	int **mpm             = (int **) Malloc( number_of_variables*sizeof( int * ) );
-	int *mpm_num_ind 			= (int *) Malloc( number_of_variables*sizeof( int ) );
-	int mpm_length        = number_of_variables;
-	int **mpm_new         = NULL;
-	for(int i = 0; i < number_of_variables; i++ )
-	{
-		int *indices             = (int *) Malloc( 1*sizeof( int ) );
-		indices[0]               = i;
-		mpm[i]                   = indices;
-		mpm_num_ind[i] = 1;
-	}
-
-	/* Initialize LT to the initial MPM */
-	if( problem_index != 14 )
-	{
-		for(int i = 0; i < mpm_length; i++ )
-		{
-			std::vector<int> vec;
-			vec.push_back(mpm[i][0]);
-			addGroup(vec);
-		}
-	}
-
-	/* Initialize similarity matrix */
-	S_matrix = NULL;
-	if( !random_linkage_tree ){
-		S_matrix = (double **) Malloc( number_of_variables*sizeof( double * ) );
-		for(int i = 0; i < number_of_variables; i++ )
-			S_matrix[i] = (double *) Malloc( number_of_variables*sizeof( double ) );
-	}
-
-	if( learn_linkage_tree )
-	{
-		for(int i = 0; i < mpm_length; i++ )
-			for(int j = 0; j < mpm_length; j++ )
-				S_matrix[i][j] = MI_matrix[mpm[i][0]][mpm[j][0]];
-		for(int i = 0; i < mpm_length; i++ )
-			S_matrix[i][i] = 0;
-
-		for(int i = 0; i < number_of_variables; i++ )
-			free( MI_matrix[i] );
-		free( MI_matrix );
-	}
-	else if( random_linkage_tree )
-	{
-		S_vector = (double *) Malloc( number_of_variables*sizeof(double));
-		for(int i = 0; i < number_of_variables; i++ )
-			S_vector[i] = randu<double>();
-	}
-	else if( static_linkage_tree )
-	{
-		if( problem_index == 0 )
-		{
-			random_linkage_tree = 1;
-			S_vector = (double *) Malloc( number_of_variables*sizeof(double));
-			for(int i = 0; i < number_of_variables; i++ )
-				S_vector[i] = randu<double>();
-		}
-		else if( problem_index == 7 )
-		{
-			S_matrix[0][0] = 0.0;
-			for(int i = 1; i < number_of_variables; i++ )
-			{
-				S_matrix[i][i] = 0.0;
-				S_matrix[i-1][i] = 1e8 + randu<double>();
-				S_matrix[i][i-1] = S_matrix[i-1][i];
-				for(int j = i+1; j < number_of_variables; j++ )
-				{
-					S_matrix[j][i] = randu<double>();
-					S_matrix[i][j] = S_matrix[j][i];
-				}
-			}
-		}
-		else if( problem_index == 105 || problem_index == 106 )
-		{
-			for(int i = 0; i < number_of_variables-1; i++ )
-			{
-				for(int j = i+1; j < number_of_variables; j++ )
-				{
-					S_matrix[i][j] = 1.0 / covariance_matrix[mpm[i][0]][mpm[j][0]];
-					S_matrix[j][i] = S_matrix[i][j];
-				}
-				S_matrix[i][i] = 0.0;
-			}
-		}
-		else if( problem_index == 14 )
-		{
-			for(int i = 0; i < number_of_variables-2; i+=2 )
-			{
-				S_matrix[i][i] = 0.0;
-				S_matrix[i+1][i+1] = 0.0;
-				S_matrix[i][i+1] = 100*number_of_variables;
-				S_matrix[i+1][i] = 100*number_of_variables;
-				for(int j = i+2; j < number_of_variables; j++ )
-				{
-					S_matrix[i][j] = 0.0;
-					S_matrix[i+1][j] = 0.0;
-					S_matrix[j][i] = S_matrix[i][j];
-					S_matrix[j][i+1] = S_matrix[i+1][j];
-				}
-			}
-		}
-		else if( problem_index == 13 || problem_index > 1000 )
-		{
-			int id = problem_index;
-			double rotation_angle = (id%10)*5;
-			id/=10;
-			double conditioning_number = id%10;
-			id/=10;
-			int overlap_size = id%10;
-			id/=10;
-			int block_size = id;
-			if( problem_index == 13 )
-			{
-				block_size = 5;
-				overlap_size = 0;
-				conditioning_number = 6;
-				rotation_angle = 45;
-			}
-			for(int i = 0; i+block_size <= number_of_variables; i+=(block_size-overlap_size) )
-			{
-				for( int j = 0; j < block_size; j++ )
-				{
-					for( int k = 0; k < j; k++ )
-					{
-						S_matrix[i+j][i+k] = 1e8 + randu<double>();
-						S_matrix[i+k][i+j] = S_matrix[i+j][i+k];
-					}
-					for( int k = j; i+k < number_of_variables; k++ )
-					{
-						S_matrix[i+j][i+k] = randu<double>();
-						S_matrix[i+k][i+j] = S_matrix[i+j][i+k];
-					}
-					S_matrix[i+j][i+j] = 0.0;
-				}
-			}
-		}
-		else
-		{
-			printf("Implement this.\n");
-			exit( 0 );
-		}
-	}
-
-	int *NN_chain       = (int *) Malloc( (number_of_variables+2)*sizeof( int ) );
-	int NN_chain_length = 0;
-	short done          = 0;
-	while( !done )
-	{
-		if( NN_chain_length == 0 )
-		{
-			NN_chain[NN_chain_length] = utils::randomInt( mpm_length );
-			NN_chain_length++;
-		}
-
-		if( NN_chain[NN_chain_length-1] >= mpm_length ) NN_chain[NN_chain_length-1] = mpm_length-1;
-
-		while( NN_chain_length < 3 )
-		{
-			NN_chain[NN_chain_length] = determineNearestNeighbour( NN_chain[NN_chain_length-1], S_matrix, mpm_num_ind, mpm_length );
-			NN_chain_length++;
-		}
-
-		while( NN_chain[NN_chain_length-3] != NN_chain[NN_chain_length-1] )
-		{
-			NN_chain[NN_chain_length] = determineNearestNeighbour( NN_chain[NN_chain_length-1], S_matrix, mpm_num_ind, mpm_length );
-			if( ((getSimilarity(NN_chain[NN_chain_length-1],NN_chain[NN_chain_length],mpm_num_ind) == getSimilarity(NN_chain[NN_chain_length-1],NN_chain[NN_chain_length-2],mpm_num_ind)))
-					&& (NN_chain[NN_chain_length] != NN_chain[NN_chain_length-2]) )
-				NN_chain[NN_chain_length] = NN_chain[NN_chain_length-2];
-			NN_chain_length++;
-			if( NN_chain_length > number_of_variables )
-				break;
-		}
-		int r0 = NN_chain[NN_chain_length-2];
-		int r1 = NN_chain[NN_chain_length-1];
-
-		if( r1 >= mpm_length || r0 >= mpm_length || mpm_num_ind[r0]+mpm_num_ind[r1] > FOS_element_ub )
-		{
-			NN_chain_length = 1;
-			NN_chain[0] = 0;
-			if( FOS_element_ub < number_of_variables )
-			{
-				done = 1;
-				for(int i = 1; i < mpm_length; i++ )
-				{
-					if( mpm_num_ind[i] + mpm_num_ind[NN_chain[0]] <= FOS_element_ub ) done = 0;
-					if( mpm_num_ind[i] < mpm_num_ind[NN_chain[0]] ) NN_chain[0] = i;
-				}
-				if( done ) break;
-			}
-			continue;
-		}
-
-		if( r0 > r1 )
-		{
-			int rswap = r0;
-			r0    = r1;
-			r1    = rswap;
-		}
-		NN_chain_length -= 3;
-
-		if( r1 < mpm_length && r1 != r0 ) /* This test is required for exceptional cases in which the nearest-neighbor ordering has changed within the chain while merging within that chain */
-		{
-			int *indices = (int *) Malloc( (mpm_num_ind[r0]+mpm_num_ind[r1])*sizeof( int ) );
-
-			int k = 0;
-			for(int j = 0; j < mpm_num_ind[r0]; j++ )
-			{
-				indices[k] = mpm[r0][j];
-				k++;
-			}
-			for(int j = 0; j < mpm_num_ind[r1]; j++ )
-			{
-				indices[k] = mpm[r1][j];
-				k++;
-			}
-
-			std::vector<int> vec;
-			int *sorted = mergeSortInt(indices, mpm_num_ind[r0]+mpm_num_ind[r1]);
-			for(int j = 0; j < mpm_num_ind[r0]+mpm_num_ind[r1]; j++ )
-				vec.push_back(indices[sorted[j]]);
-			addGroup(vec);
-
-			free( sorted );
-			free( indices );
-
-			double mul0 = ((double) mpm_num_ind[r0])/((double) mpm_num_ind[r0]+mpm_num_ind[r1]);
-			double mul1 = ((double) mpm_num_ind[r1])/((double) mpm_num_ind[r0]+mpm_num_ind[r1]);
-			if( random_linkage_tree )
-			{
-				S_vector[r0] = mul0*S_vector[r0]+mul1*S_vector[r1];
-			}
-			else
-			{
-				for(int i = 0; i < mpm_length; i++ )
-				{
-					if( (i != r0) && (i != r1) )
-					{
-						S_matrix[i][r0] = mul0*S_matrix[i][r0] + mul1*S_matrix[i][r1];
-						S_matrix[r0][i] = S_matrix[i][r0];
-					}
-				}
-			}
-
-			int **mpm_new                   = (int **) Malloc( (mpm_length-1)*sizeof( int * ) );
-			int *mpm_new_number_of_indices = (int *) Malloc( (mpm_length-1)*sizeof( int ) );
-			int mpm_new_length            = mpm_length-1;
-			for(int i = 0; i < mpm_new_length; i++ )
-			{
-				mpm_new[i]                   = mpm[i];
-				mpm_new_number_of_indices[i] = mpm_num_ind[i];
-			}
-
-			mpm_new[r0] = (int*) Malloc( vec.size() * sizeof(int) );
-			for(size_t i = 0; i < vec.size(); i++ )
-				mpm_new[r0][i] = vec[i];
-			mpm_new_number_of_indices[r0] = mpm_num_ind[r0]+mpm_num_ind[r1];
-			if( r1 < mpm_length-1 )
-			{
-				mpm_new[r1]                   = mpm[mpm_length-1];
-				mpm_new_number_of_indices[r1] = mpm_num_ind[mpm_length-1];
-
-				if( random_linkage_tree )
-				{
-					S_vector[r1] = S_vector[mpm_length-1];
-				}
-				else
-				{
-					for(int i = 0; i < r1; i++ )
-					{
-						S_matrix[i][r1] = S_matrix[i][mpm_length-1];
-						S_matrix[r1][i] = S_matrix[i][r1];
-					}
-
-					for(int j = r1+1; j < mpm_new_length; j++ )
-					{
-						S_matrix[r1][j] = S_matrix[j][mpm_length-1];
-						S_matrix[j][r1] = S_matrix[r1][j];
-					}
-				}
-			}
-
-			for(int i = 0; i < NN_chain_length; i++ )
-			{
-				if( NN_chain[i] == mpm_length-1 )
-				{
-					NN_chain[i] = r1;
-					break;
-				}
-			}
-
-			free( mpm[r0] );
-			free( mpm );
-			free( mpm_num_ind );
-			mpm         = mpm_new;
-			mpm_num_ind = mpm_new_number_of_indices;
-			mpm_length  = mpm_new_length;
-
-			if( mpm_length == 1 )
-				done = 1;
-		}
-	}
-	free( NN_chain );
-
-	free( mpm_new );
-	free( mpm_num_ind );
-
-	if( random_linkage_tree )
-		free( S_vector );
-	else
-	{
-		for(int i = 0; i < number_of_variables; i++ )
-			free( S_matrix[i] );
-		free( S_matrix );
-	}
-	shuffleFOS();	
-}
-
-linkage_model_rv_t::linkage_model_rv_t( size_t number_of_variables, const std::map<int,std::set<int>> &variable_interaction_graph, int max_clique_size, bool include_cliques_as_fos_elements, bool include_full_fos_element ) : linkage_model_t(number_of_variables)
+linkage_model_rv_t::linkage_model_rv_t( size_t number_of_variables, const graph_t &variable_interaction_graph, int max_clique_size, bool include_cliques_as_fos_elements, bool include_full_fos_element ) : linkage_model_t(number_of_variables)
 {
 	this->include_cliques_as_fos_elements = include_cliques_as_fos_elements;
 	this->include_full_fos_element = include_full_fos_element;
 	this->is_conditional = true;
+	this->is_static = true; 
 	this->max_clique_size = max_clique_size;
 	assert( include_cliques_as_fos_elements || include_full_fos_element );
 	
@@ -420,6 +95,10 @@ linkage_model_rv_t::linkage_model_rv_t( size_t number_of_variables, const std::m
 	const int IN_QUEUE = 3;
 	int visited[number_of_variables]{};
 	vec_t<int> var_order = gomea::utils::randomPermutation( number_of_variables );
+
+	assert( variable_interaction_graph.size() == number_of_variables );
+	if( variable_interaction_graph.size() != number_of_variables )
+		throw std::runtime_error("Incorrectly initialized Variable Interaction Graph\n");
 
 	std::vector<int> VIG_order;
 	conditional_distribution_t *full_cond = NULL;
@@ -526,43 +205,43 @@ linkage_model_rv_t::~linkage_model_rv_t()
 
 linkage_model_rv_pt linkage_model_rv_t::univariate(size_t numberOfVariables_)
 {
-	linkage_model_rv_pt new_fos = shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(numberOfVariables_,1));
+	linkage_model_rv_pt new_fos = std::shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(numberOfVariables_,1));
 	return( new_fos );
 }
 			
 linkage_model_rv_pt linkage_model_rv_t::full(size_t numberOfVariables_)
 {
-	linkage_model_rv_pt new_fos = shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(numberOfVariables_,numberOfVariables_));
+	linkage_model_rv_pt new_fos = std::shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(numberOfVariables_,numberOfVariables_));
 	return( new_fos );
 }
 
 linkage_model_rv_pt linkage_model_rv_t::marginal_product_model( size_t numberOfVariables_, size_t block_size )
 {
-	linkage_model_rv_pt new_fos = shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(numberOfVariables_,block_size));
+	linkage_model_rv_pt new_fos = std::shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(numberOfVariables_,block_size));
 	return( new_fos );
 }
 			
-linkage_model_rv_pt linkage_model_rv_t::conditional( size_t numberOfVariables_, const std::map<int,std::set<int>> &variable_interaction_graph, int max_clique_size, bool include_cliques_as_fos_elements, bool include_full_fos_element )
+linkage_model_rv_pt linkage_model_rv_t::conditional( size_t numberOfVariables_, const graph_t &variable_interaction_graph, int max_clique_size, bool include_cliques_as_fos_elements, bool include_full_fos_element )
 {
-	linkage_model_rv_pt new_fos = shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(numberOfVariables_,variable_interaction_graph,max_clique_size,include_cliques_as_fos_elements,include_full_fos_element));
+	linkage_model_rv_pt new_fos = std::shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(numberOfVariables_,variable_interaction_graph,max_clique_size,include_cliques_as_fos_elements,include_full_fos_element));
 	return( new_fos );
 }
     
 linkage_model_rv_pt linkage_model_rv_t::custom_fos( size_t numberOfVariables_, const vec_t<vec_t<int>> &FOS )
 {
-	linkage_model_rv_pt new_fos = shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(numberOfVariables_,FOS));
+	linkage_model_rv_pt new_fos = std::shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(numberOfVariables_,FOS));
 	return( new_fos );
 }
     
 linkage_model_rv_pt linkage_model_rv_t::linkage_tree(size_t numberOfVariables_, int similarityMeasure_, bool filtered_, int maximumSetSize_ )
 {
-	linkage_model_rv_pt new_fos = shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(numberOfVariables_, similarityMeasure_, filtered_, maximumSetSize_));
+	linkage_model_rv_pt new_fos = std::shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(numberOfVariables_, similarityMeasure_, filtered_, maximumSetSize_));
 	return( new_fos );
 }
     
 linkage_model_rv_pt linkage_model_rv_t::from_file( std::string filename )
 {
-	linkage_model_rv_pt new_fos = shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(filename));
+	linkage_model_rv_pt new_fos = std::shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(filename));
 	return( new_fos );
 }
 
@@ -611,28 +290,19 @@ void linkage_model_rv_t::addConditionedGroup( std::vector<int> variables, std::s
 	distributions.push_back(dist);
 }
 
-double linkage_model_rv_t::getSimilarity( int a, int b, int *mpm_num_ind )
+// Learn a linkage tree
+void linkage_model_rv_t::learnLinkageTreeFOS( mat covariance_matrix )
 {
-	if( FOS_element_ub < number_of_variables && mpm_num_ind[a] + mpm_num_ind[b] > FOS_element_ub ) return( 0 );
-	if( random_linkage_tree ) return( 1.0-fabs(S_vector[a]-S_vector[b]) );
-	return( S_matrix[a][b] );
+	assert( type == linkage::LINKAGE_TREE );
+	assert( !is_static );
+
+	/* Compute Mutual Information matrix */
+	vec_t<vec_t<double>> MI_matrix = computeMIMatrix( covariance_matrix, number_of_variables );
+	linkage_model_t::learnLinkageTreeFOS(MI_matrix);
+	initializeDistributions();
 }
 
-int linkage_model_rv_t::determineNearestNeighbour( int index, double **S_matrix, int *mpm_num_ind, int mpm_length )
-{
-	int result = 0;
-	if( result == index )
-		result++;
-	for(int i = 1; i < mpm_length; i++ )
-	{
-		if( ((getSimilarity(index,i,mpm_num_ind) > getSimilarity(index,result,mpm_num_ind)) || ((getSimilarity(index,i,mpm_num_ind) == getSimilarity(index,result,mpm_num_ind)) && (mpm_num_ind[i] < mpm_num_ind[result]))) && (i != index) )
-			result = i;
-	}
-
-	return( result );
-}
-
-void linkage_model_rv_t::randomizeOrder( const std::map<int,std::set<int>> &variable_interaction_graph ) 
+void linkage_model_rv_t::randomizeOrder( const graph_t &variable_interaction_graph ) 
 {
 	int visited[number_of_variables]{};
 	std::vector<int> VIG_order = getVIGOrderBreadthFirst(variable_interaction_graph);
@@ -665,7 +335,7 @@ void linkage_model_rv_t::randomizeOrder( const std::map<int,std::set<int>> &vari
 	}
 }
 
-std::vector<int> linkage_model_rv_t::getVIGOrderBreadthFirst( const std::map<int,std::set<int>> &variable_interaction_graph ) 
+std::vector<int> linkage_model_rv_t::getVIGOrderBreadthFirst( const graph_t &variable_interaction_graph ) 
 {
 	const int UNVISITED = 0;
 	const int IS_VISITED = 1;
@@ -710,19 +380,20 @@ std::vector<int> linkage_model_rv_t::getVIGOrderBreadthFirst( const std::map<int
 	return( VIG_order );
 }
 
-double **linkage_model_rv_t::computeMIMatrix( double **covariance_matrix, int n )
+vec_t<vec_t<double>> linkage_model_rv_t::computeMIMatrix( mat covariance_matrix, int n )
 {
-	double **MI_matrix = (double **) Malloc( n*sizeof( double * ) );
-	for(int j = 0; j < n; j++ )
-		MI_matrix[j] = (double *) Malloc( n*sizeof( double ) );
+    vec_t<vec_t<double>> MI_matrix;
+	MI_matrix.resize(numberOfVariables);        
+    for (size_t i = 0; i < numberOfVariables; ++i)
+        MI_matrix[i].resize(numberOfVariables);         
 	for(int i = 0; i < n; i++ )
 	{
 		MI_matrix[i][i] = 1e20;
 		for(int j = 0; j < i; j++ )
 		{
-			double si = sqrt(covariance_matrix[i][i]);
-			double sj = sqrt(covariance_matrix[j][j]);
-			double r = covariance_matrix[i][j]/(si*sj);
+			double si = sqrt(covariance_matrix(i,i));
+			double sj = sqrt(covariance_matrix(j,j));
+			double r = covariance_matrix(i,j)/(si*sj);
 			MI_matrix[i][j] = log(sqrt(1/(1-r*r)));
 			MI_matrix[j][i] = MI_matrix[i][j];
 		}

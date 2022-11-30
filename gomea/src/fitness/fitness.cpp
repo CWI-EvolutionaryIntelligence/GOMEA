@@ -224,6 +224,26 @@ void fitness_t<T>::initializeVariableInteractionGraph()
 }
 
 template<class T>
+void fitness_t<T>::printVariableInteractionGraph() 
+{
+	for( int i = 0; i < this->number_of_variables; i++ )
+	{
+		std::set<int> deps = variable_interaction_graph[i];
+		printf("[%d]->[",i);
+		int c = 0;
+		for( int v : deps )
+		{
+			c++;
+			printf("%d",v);
+			if( c < deps.size() )
+				printf(",");
+		}
+		printf("]\n");
+	}
+}
+
+
+template<class T>
 vec_t<vec_t<double>> fitness_t<T>::getMIMatrix()
 {
 	assert(0);
