@@ -94,19 +94,13 @@ size_t solution_t<char>::getAlphabetSize()
 }
 
 template<class T>
-double solution_t<T>::getObjectiveValue() const
-{
-	return objective_values[0];
-}
-
-template<class T>
 double solution_t<T>::getObjectiveValue( int objective_value_index ) const
 {
 	return objective_values[objective_value_index];
 }
 
 template<class T>
-vec_t<double> solution_t<T>::getObjectiveValues() const
+const vec_t<double> solution_t<T>::getObjectiveValues() const
 {
 	return objective_values;
 }
@@ -142,7 +136,7 @@ void solution_t<T>::setObjectiveValue( int objective_value_index, double v )
 }
 		
 template<class T>
-void solution_t<T>::setObjectiveValues( vec_t<double> v )
+void solution_t<T>::setObjectiveValues( const vec_t<double> &v )
 {
 	for( size_t i = 0; i < objective_values.size(); i++ )
 		setObjectiveValue(i, v[i]);
@@ -167,9 +161,15 @@ void solution_t<T>::setPartialConstraintValue( int subfunction_index, double v )
 }
 
 template<class T>
-double solution_t<T>::getFitnessBuffer( int buffer_index ) 
+double solution_t<T>::getFitnessBuffer( int buffer_index ) const
 {
 	return( fitness_buffers[buffer_index] );
+}
+
+template<class T>		
+const vec_t<double> solution_t<T>::getFitnessBuffers() const
+{
+	return( fitness_buffers );
 }
 
 template<class T>
@@ -185,7 +185,7 @@ void solution_t<T>::subtractFromFitnessBuffer( int buffer_index, double partial_
 }
 
 template<class T>		
-void solution_t<T>::setFitnessBuffers( vec_t<double> buffers )
+void solution_t<T>::setFitnessBuffers( const vec_t<double> &buffers )
 {
 	assert( this->fitness_buffers.size() == buffers.size() );
 	for( size_t i = 0; i < this->fitness_buffers.size(); i++ )
@@ -204,15 +204,48 @@ void solution_t<T>::clearFitnessBuffers()
 }
 
 template<class T>
-vec_t<T> solution_t<T>::createPartialBackup( vec_t<int> variable_indices )
+partial_solution_t<T> solution_t<T>::getPartialCopy( const vec_t<int> &variable_indices ) const
 {
-	vec_t<T> backup = vec_t<T>(variable_indices.size());
-	for( size_t i = 0; i < variable_indices.size(); i++ )
+	vec_t<T> backup_vars = getCopyOfVariables(variable_indices);
+	partial_solution_t<T> backup_solution = partial_solution_t<T>(backup_vars, variable_indices);
+	backup_solution.setObjectiveValues(getObjectiveValues());
+	backup_solution.setConstraintValue(getConstraintValue());
+	backup_solution.setFitnessBuffers(getFitnessBuffers());
+	return( backup_solution );
+}
+
+template<class T>
+const vec_t<T> solution_t<T>::getCopyOfVariables( const vec_t<int> &variable_indices ) const
+{
+	if( variable_indices.size() == 0 )
 	{
-		int ind = variable_indices[i];
-		backup[i] = variables[ind];
+		vec_t<T> backup = vec_t<T>(getNumberOfVariables());
+		for (size_t i = 0; i < getNumberOfVariables(); i++)
+		{
+			backup[i] = variables[i];
+		}
+		return backup;
 	}
-	return backup;
+	else
+	{
+		vec_t<T> backup = vec_t<T>(variable_indices.size());
+		for (size_t i = 0; i < variable_indices.size(); i++)
+		{
+			int ind = variable_indices[i];
+			backup[i] = variables[ind];
+		}
+		return backup;
+	}
+}
+
+template<class T>
+void solution_t<T>::insertVariables( const vec_t<T> &vars_to_insert )
+{
+	assert( vars_to_insert.size() == variables.size() );
+	for( size_t i = 0; i < variables.size(); i++ )
+	{
+		variables[i] = vars_to_insert[i];
+	}
 }
 
 template<class T>
@@ -223,6 +256,15 @@ void solution_t<T>::insertVariables( vec_t<T> vars_to_insert, vec_t<int> indices
 		int ind = indices_to_insert[i];
 		variables[ind] = vars_to_insert[i];
 	}
+}
+
+template<class T>
+void solution_t<T>::insertSolution( solution_t<T> *solution )
+{
+	insertVariables(solution->variables);
+	setObjectiveValues( solution->getObjectiveValues() );
+	setConstraintValue( solution->getConstraintValue() );
+	setFitnessBuffers( solution->fitness_buffers );
 }
 
 template<class T>

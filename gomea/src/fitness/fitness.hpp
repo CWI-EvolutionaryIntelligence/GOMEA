@@ -68,7 +68,7 @@ class fitness_t
 		void printVariableInteractionGraph();
 
 		vec_t<vec_t<double>> getSimilarityMatrix();
-		virtual double getSimilarityMetric( size_t var_a, size_t var_b );
+		virtual double getSimilarityMeasure( size_t var_a, size_t var_b );
 		
 		short isParameterInRangeBounds( double parameter, int dimension );
 		virtual double getLowerRangeBound( int dimension );

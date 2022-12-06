@@ -31,28 +31,31 @@ class solution_t
 
 		int getNumberOfVariables() const;
 		int getNumberOfObjectives() const;
-		double getObjectiveValue() const;
-		double getObjectiveValue( int objective_value_index ) const;
-		vec_t<double> getObjectiveValues() const;
+		double getObjectiveValue( int objective_value_index = 0 ) const;
+		const vec_t<double> getObjectiveValues() const;
 		double getPartialObjectiveValue( int subfunction_index ) const;
 		double getConstraintValue() const;
 		double getPartialConstraintValue( int subfunction_index ) const;
 
 		void setObjectiveValue( double v );
 		void setObjectiveValue( int objective_value_index, double v );
-		void setObjectiveValues( vec_t<double> v );
+		void setObjectiveValues( const vec_t<double> &v );
 		void setConstraintValue( double v );
 		void setPartialObjectiveValue( int subfunction_index, double v );
 		void setPartialConstraintValue( int subfunction_index, double v );
 
-		double getFitnessBuffer( int buffer_index );
+		double getFitnessBuffer( int buffer_index ) const;
+		const vec_t<double> getFitnessBuffers() const;
 		void addToFitnessBuffer( int buffer_index, double partial_fitness );
 		void subtractFromFitnessBuffer( int buffer_index, double partial_fitness );
-		void setFitnessBuffers( vec_t<double> buffers );
+		void setFitnessBuffers( const vec_t<double> &buffers );
 		void clearFitnessBuffers();
 
-		vec_t<T> createPartialBackup(vec_t<int> variable_indices);
+		partial_solution_t<T> getPartialCopy( const vec_t<int> &variable_indices ) const;
+		const vec_t<T> getCopyOfVariables( const vec_t<int> &variable_indices = vec_t<int>()) const;
+		void insertVariables( const vec_t<T> &vars_to_insert );
 		void insertVariables(vec_t<T> vars_to_insert, vec_t<int> indices_to_insert);
+		void insertSolution( solution_t<T> *solution );
 		void insertPartialSolution( partial_solution_t<T> *solution );
 
 		void print();

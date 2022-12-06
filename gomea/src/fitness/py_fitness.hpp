@@ -15,7 +15,7 @@ class pyFitnessFunction_t : public customFitnessFunction_t<T>
 		pyFitnessFunction_t( int number_of_parameters, double vtr, PyObject *obj );
 		int getNumberOfSubfunctions();
 		vec_t<int> inputsToSubfunction( int subfunction_index );
-		double getSimilarityMetric( size_t var_a, size_t var_b );
+		double getSimilarityMeasure( size_t var_a, size_t var_b );
 
 		double mappingFunction( int objective_index, vec_t<double> &fitness_buffers );
 		double mappingFunctionConstraintValue( int objective_index, vec_t<double> &fitness_buffers );

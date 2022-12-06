@@ -1,4 +1,5 @@
 #include "gomea/src/common/partial_solution.hpp"
+#include "gomea/src/common/solution.hpp"
 
 namespace gomea{
 
@@ -9,7 +10,7 @@ partial_solution_t<T>::partial_solution_t( int num_touched_variables )
 }
 
 template<class T>
-partial_solution_t<T>::partial_solution_t( vec_t<T> &touched_variables, vec_t<int> &touched_indices )
+partial_solution_t<T>::partial_solution_t( const vec_t<T> &touched_variables, const vec_t<int> &touched_indices )
 {
 	this->touched_indices = touched_indices;
 	this->touched_variables = touched_variables;
@@ -47,25 +48,19 @@ int partial_solution_t<T>::getNumberOfTouchedVariables()
 }
 
 template<class T>
-double partial_solution_t<T>::getObjectiveValue()
-{
-	return objective_values[0];
-}
-
-template<class T>
-double partial_solution_t<T>::getObjectiveValue( int objective_value_index )
+double partial_solution_t<T>::getObjectiveValue( int objective_value_index ) const
 {
 	return objective_values[objective_value_index];
 }
 
 template<class T>
-vec_t<double> partial_solution_t<T>::getObjectiveValues()
+const vec_t<double> partial_solution_t<T>::getObjectiveValues() const
 {
 	return objective_values;
 }
 
 template<class T>
-double partial_solution_t<T>::getConstraintValue()
+double partial_solution_t<T>::getConstraintValue() const
 {
 	return constraint_value;
 }
@@ -83,20 +78,37 @@ void partial_solution_t<T>::setObjectiveValue( int objective_value_index, double
 }
 
 template<class T>
+void partial_solution_t<T>::setObjectiveValues( vec_t<double> objective_values )
+{
+	assert( objective_values.size() == this->objective_values.size() );
+	for( size_t i = 0; i < objective_values.size(); i++ )
+	{
+		this->objective_values[i] = objective_values[i];
+	}
+}
+
+template<class T>
 void partial_solution_t<T>::setConstraintValue( double v )
 {
 	constraint_value = v;
 }
 
 template<class T>
-double partial_solution_t<T>::getFitnessBuffer( int buffer_index ) 
+double partial_solution_t<T>::getFitnessBuffer( int buffer_index ) const 
 {
 	return( fitness_buffers[buffer_index] );
+}
+
+template<class T>
+const vec_t<double> partial_solution_t<T>::getFitnessBuffers() const
+{
+	return( fitness_buffers );
 }
 		
 template<class T>
 void partial_solution_t<T>::setFitnessBuffers( vec_t<double> buffers )
 {
+	assert( this->fitness_buffers.size() == buffers.size() );
 	for( size_t i = 0; i < fitness_buffers.size(); i++ )
 		fitness_buffers[i] = buffers[i];
 }
@@ -118,6 +130,19 @@ template<class T>
 void partial_solution_t<T>::subtractFromFitnessBuffer( int buffer_index, double partial_fitness )
 {
 	fitness_buffers[buffer_index] -= partial_fitness;
+}
+
+template<class T>
+void partial_solution_t<T>::insertSolution( solution_t<T> *solution )
+{
+	for (int i = 0; i < touched_indices.size(); i++)
+	{
+		int ind = touched_indices[i];
+		touched_variables[i] = solution->variables[ind];
+	}
+	setObjectiveValues( solution->getObjectiveValues() );
+	setConstraintValue( solution->getConstraintValue() );
+	setFitnessBuffers( solution->getFitnessBuffers() );
 }
 
 template<class T>

@@ -91,7 +91,7 @@ void population_t::runGeneration()
 
 	updateElitist();
 
-	estimateDistribution();
+	estimateDistributions();
 
 	copyBestSolutionsToPopulation();
 
@@ -225,17 +225,24 @@ void population_t::computeRanks()
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
-void population_t::estimateDistribution()
+void population_t::estimateDistributions()
 {
-	if( linkage_model->type == linkage::LINKAGE_TREE && !linkage_model->is_static )
+	if( !linkage_model->is_static )
 	{
-		mat full_covariance_matrix = distribution_t::estimateFullCovarianceMatrixML(selection, selection_size);
-		linkage_model->learnLinkageTreeFOS( full_covariance_matrix );
-		linkage_model->shuffleFOS();
-		sampled_solutions = (partial_solution_t<double> ***)Malloc(linkage_model->size() * sizeof(partial_solution_t<double> **));
-		for (int j = 0; j < linkage_model->size(); j++)
-			sampled_solutions[j] = (partial_solution_t<double> **)Malloc(population_size * sizeof(partial_solution_t<double> *));
+		assert( linkage_model->type == linkage::LINKAGE_TREE );
+		if (linkage_model->type == linkage::LINKAGE_TREE)
+		{
+			mat full_covariance_matrix = distribution_t::estimateFullCovarianceMatrixML(selection, selection_size);
+			linkage_model->learnLinkageTreeFOS(full_covariance_matrix);
+			linkage_model->shuffleFOS();
+			sampled_solutions = (partial_solution_t<double> ***)Malloc(linkage_model->size() * sizeof(partial_solution_t<double> **));
+			for (int j = 0; j < linkage_model->size(); j++)
+				sampled_solutions[j] = (partial_solution_t<double> **)Malloc(population_size * sizeof(partial_solution_t<double> *));
+		}
+		linkage_model->initializeDistributions();
 	}
+
+	assert( linkage_model->distributions.size() == linkage_model->size() );
 	for( int i = 0; i < linkage_model->size(); i++ )
 		estimateDistribution(i);
 	updateAMSMeans();
@@ -272,12 +279,7 @@ void population_t::copyBestSolutionsToPopulation()
 	assert( num_elitists_to_copy == 1 ); // elitists to be copied should first be copied to avoid overwriting them beforehand
 	for( int i = 0; i < num_elitists_to_copy; i++ )
 	{
-		for(int k = 0; k < fitness->number_of_variables; k++ )
-			individuals[i]->variables[k] = selection[i]->variables[k];
-
-		individuals[i]->setObjectiveValue(selection[i]->getObjectiveValue());
-		individuals[i]->setConstraintValue(selection[i]->getConstraintValue());
-		individuals[i]->setFitnessBuffers(selection[i]->fitness_buffers);
+		individuals[i]->insertSolution(selection[i]);
 	}
 }
 
@@ -346,18 +348,11 @@ void population_t::generateAndEvaluateNewSolutions()
 			if( accept_improvement[k] || utils::randomRealUniform01() < linkage_model->getAcceptanceRate() )
 			{
 				sampled_solutions[FOS_index][k]->is_accepted = 1;
-				insertImprovement( individuals[k], sampled_solutions[FOS_index][k] );
+				individuals[k]->insertPartialSolution(sampled_solutions[FOS_index][k] );
 			}
 			else
 			{
-				for(int i = 0; i < sampled_solutions[FOS_index][k]->getNumberOfTouchedVariables(); i++ )
-				{
-					int ind = sampled_solutions[FOS_index][k]->touched_indices[i];
-					sampled_solutions[FOS_index][k]->touched_variables[i] = individuals[k]->variables[ind];
-				}
-				sampled_solutions[FOS_index][k]->setObjectiveValue(individuals[k]->getObjectiveValue());
-				sampled_solutions[FOS_index][k]->setConstraintValue(individuals[k]->getConstraintValue());
-				sampled_solutions[FOS_index][k]->setFitnessBuffers(individuals[k]->fitness_buffers);
+				sampled_solutions[FOS_index][k]->insertSolution(individuals[k]);
 			}	
 
 			if( fitness->betterFitness( sampled_solutions[FOS_index][k]->getObjectiveValue(), sampled_solutions[FOS_index][k]->getConstraintValue(), objective_value_elitist, constraint_value_elitist ) )
@@ -450,19 +445,6 @@ short population_t::checkForImprovement( solution_t<double> *solution, partial_s
 	return( fitness->betterFitness( part->getObjectiveValue(), part->getConstraintValue(), solution->getObjectiveValue(), solution->getConstraintValue() ) );
 }
 
-void population_t::insertImprovement( solution_t<double> *solution, partial_solution_t<double> *part )
-{
-	for(int j = 0; j < part->getNumberOfTouchedVariables(); j++ )
-	{
-		int ind = part->touched_indices[j];
-		solution->variables[ind] = part->touched_variables[j];
-	}
-	//solution->buffer += part->buffer;
-	solution->setObjectiveValue(part->getObjectiveValue());
-	solution->setConstraintValue(part->getConstraintValue());
-	solution->setFitnessBuffers(part->fitness_buffers);
-}
-
 short population_t::applyAMS( int individual_index )
 {
 	short out_of_range  = 1;
@@ -489,14 +471,9 @@ short population_t::applyAMS( int individual_index )
 		short improvement;
 		fitness->evaluate( solution_AMS );
 		improvement = fitness->betterFitness(solution_AMS->getObjectiveValue(), solution_AMS->getConstraintValue(), individuals[individual_index]->getObjectiveValue(), individuals[individual_index]->getConstraintValue()); 
-		//if( improvement )
-		if( utils::randomRealUniform01() < linkage_model->getAcceptanceRate() || improvement ) // BLA
+		if( utils::randomRealUniform01() < linkage_model->getAcceptanceRate() || improvement )
 		{
-			individuals[individual_index]->setObjectiveValue(solution_AMS->getObjectiveValue());
-			individuals[individual_index]->setConstraintValue(solution_AMS->getConstraintValue());
-			individuals[individual_index]->setFitnessBuffers(solution_AMS->fitness_buffers);
-			for(int m = 0; m < fitness->number_of_variables; m++ )
-				individuals[individual_index]->variables[m] = solution_AMS->variables[m];
+			individuals[individual_index]->insertSolution(solution_AMS);
 			improvement = 1;
 		}
 	}
@@ -530,12 +507,7 @@ void population_t::applyForcedImprovements( int individual_index, int donor_inde
 
 			if( improvement )
 			{
-				for(int j = 0; j < num_touched_indices; j++ )
-					individuals[individual_index]->variables[touched_indices[j]] = FI_solution->touched_variables[j];
-				//individuals[individual_index]->buffer += FI_solution->buffer;
-				individuals[individual_index]->setObjectiveValue(FI_solution->getObjectiveValue());
-				individuals[individual_index]->setConstraintValue(FI_solution->getConstraintValue());
-				individuals[individual_index]->setFitnessBuffers(FI_solution->fitness_buffers);
+				individuals[individual_index]->insertPartialSolution(FI_solution);
 			}
 			delete FI_solution;
 
@@ -548,11 +520,7 @@ void population_t::applyForcedImprovements( int individual_index, int donor_inde
 
 	if( !improvement )
 	{
-		for(int i = 0; i < fitness->number_of_variables; i++ )
-			individuals[individual_index]->variables[i] = individuals[donor_index]->variables[i];
-		individuals[individual_index]->setObjectiveValue(individuals[donor_index]->getObjectiveValue());
-		individuals[individual_index]->setConstraintValue(individuals[donor_index]->getConstraintValue());
-		individuals[individual_index]->setFitnessBuffers(individuals[donor_index]->fitness_buffers);
+		individuals[individual_index]->insertSolution(individuals[donor_index]);
 	}
 }
 
@@ -626,6 +594,19 @@ void population_t::initializeFOS( linkage_config_t *linkage_config )
 	{
 		linkage_model = linkage_model_rv_t::createFOSInstance(*linkage_config, fitness->number_of_variables );
 	}
+	
+	if( linkage_model->is_static )
+	{
+		if ( linkage_model->type == linkage::LINKAGE_TREE )
+		{
+			linkage_model->linkage_model_t::learnLinkageTreeFOS(fitness->getSimilarityMatrix(),true);
+		}
+		sampled_solutions = (partial_solution_t<double> ***)Malloc(linkage_model->size() * sizeof(partial_solution_t<double> **));
+		for (int j = 0; j < linkage_model->size(); j++)
+			sampled_solutions[j] = (partial_solution_t<double> **)Malloc(population_size * sizeof(partial_solution_t<double> *));
+		linkage_model->initializeDistributions();
+	}
+	//linkage_model->printFOS();
 }
 
 void population_t::initializeFOSFromIndex( int FOSIndex )
@@ -645,7 +626,7 @@ void population_t::initializeFOSFromIndex( int FOSIndex )
 	}
 	else if( FOSIndex == -2 )
 	{
-		new_FOS = linkage_model_rv_t::linkage_tree( fitness->number_of_variables, 0, false, -1 );
+		new_FOS = linkage_model_rv_t::linkage_tree( fitness->number_of_variables, 0, false, -1, false );
 	}
 	else if( FOSIndex == -3 )
 	{
@@ -724,13 +705,6 @@ void population_t::initializePopulationAndFitnessValues()
 			individuals[j]->variables[k] = lower_init_ranges[k] + (upper_init_ranges[k] - lower_init_ranges[k])*utils::randomRealUniform01();
 
 		fitness->evaluate( individuals[j] );
-	}
-
-	if( linkage_model->is_static )
-	{
-		sampled_solutions = (partial_solution_t<double> ***)Malloc(linkage_model->size() * sizeof(partial_solution_t<double> **));
-		for (int j = 0; j < linkage_model->size(); j++)
-			sampled_solutions[j] = (partial_solution_t<double> **)Malloc(population_size * sizeof(partial_solution_t<double> *));
 	}
 }
 

@@ -84,12 +84,12 @@ int pyFitnessFunction_t<T>::getIndexOfFitnessBuffer( int subfunction_index )
 }
 
 template<class T>
-double pyFitnessFunction_t<T>::getSimilarityMetric( size_t var_a, size_t var_b )
+double pyFitnessFunction_t<T>::getSimilarityMeasure( size_t var_a, size_t var_b )
 {
-	double result = gomea_pyfitness_similarity_metric(py_class,var_a,var_b);
+	double result = gomea_pyfitness_similarity_measure(py_class,var_a,var_b);
 	if( result < 0.0 )
 	{
-		return customFitnessFunction_t<T>::getSimilarityMetric(var_a,var_b);
+		return this->customFitnessFunction_t<T>::getSimilarityMeasure(var_a,var_b);
 	}
 	else
 	{

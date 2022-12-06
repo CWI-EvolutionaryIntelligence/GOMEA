@@ -74,7 +74,7 @@ cdef public int gomea_pyfitness_numberOfSubfunctions(obj):
     cdef int n = fitness_obj.number_of_subfunctions()
     return n
 
-cdef public double gomea_pyfitness_similarity_metric(obj, size_t var_a, size_t var_b):
+cdef public double gomea_pyfitness_similarity_measure(obj, size_t var_a, size_t var_b):
     fitness_obj = <PythonFitnessFunction?>obj
-    cdef double result = fitness_obj.similarity_metric(var_a,var_b)
+    cdef double result = fitness_obj.similarity_measure(var_a,var_b)
     return result

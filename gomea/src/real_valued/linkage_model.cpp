@@ -48,7 +48,7 @@ int		  static_linkage_tree = 0,                  /* Whether the FOS is fixed thr
 		  random_linkage_tree = 0;                  /* Whether the fixed linkage tree is learned based on a random distance measure. */
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
-linkage_model_rv_pt linkage_model_rv_t::createFOSInstance( const linkage_config_t &config, size_t numberOfVariables, const graph_t &VIG )
+linkage_model_rv_pt linkage_model_rv_t::createFOSInstance( const linkage_config_t &config, size_t numberOfVariables, const graph_t &VIG ) 
 {
 	if( config.type != linkage::FROM_FILE )
 		assert( numberOfVariables > 0 );
@@ -57,14 +57,13 @@ linkage_model_rv_pt linkage_model_rv_t::createFOSInstance( const linkage_config_
 		case linkage::UNIVARIATE: return univariate(numberOfVariables);
 		case linkage::MPM: return marginal_product_model(numberOfVariables, config.mpm_block_size);
 		case linkage::FULL: return full(numberOfVariables);
-		case linkage::LINKAGE_TREE: return linkage_tree(numberOfVariables, config.lt_similarity_measure, config.lt_filtered, config.lt_maximum_set_size );
+		case linkage::LINKAGE_TREE: return linkage_tree(numberOfVariables, config.lt_similarity_measure, config.lt_filtered, config.lt_maximum_set_size, config.lt_is_static );
 		case linkage::CONDITIONAL: return conditional(numberOfVariables,VIG,config.cond_max_clique_size,config.cond_include_cliques_as_fos_elements,config.cond_include_full_fos_element);
 		case linkage::CUSTOM_LM: return custom_fos(numberOfVariables,config.FOS);
 		case linkage::FROM_FILE: return from_file(config.filename);
 	}
 	throw std::runtime_error("Unknown linkage model.\n");
 }
-
 
 // Copy a FOS
 linkage_model_rv_t::linkage_model_rv_t( const linkage_model_rv_t &other ) : linkage_model_t(other.number_of_variables)
@@ -233,9 +232,9 @@ linkage_model_rv_pt linkage_model_rv_t::custom_fos( size_t numberOfVariables_, c
 	return( new_fos );
 }
     
-linkage_model_rv_pt linkage_model_rv_t::linkage_tree(size_t numberOfVariables_, int similarityMeasure_, bool filtered_, int maximumSetSize_ )
+linkage_model_rv_pt linkage_model_rv_t::linkage_tree(size_t numberOfVariables_, int similarityMeasure_, bool filtered_, int maximumSetSize_, bool is_static_ ) 
 {
-	linkage_model_rv_pt new_fos = std::shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(numberOfVariables_, similarityMeasure_, filtered_, maximumSetSize_));
+	linkage_model_rv_pt new_fos = std::shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(numberOfVariables_, similarityMeasure_, filtered_, maximumSetSize_, is_static_));
 	return( new_fos );
 }
     
@@ -298,7 +297,7 @@ void linkage_model_rv_t::learnLinkageTreeFOS( mat covariance_matrix )
 
 	/* Compute Mutual Information matrix */
 	vec_t<vec_t<double>> MI_matrix = computeMIMatrix( covariance_matrix, number_of_variables );
-	linkage_model_t::learnLinkageTreeFOS(MI_matrix);
+	linkage_model_t::learnLinkageTreeFOS(MI_matrix,true);
 	initializeDistributions();
 }
 

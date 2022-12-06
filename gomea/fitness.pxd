@@ -50,6 +50,8 @@ cdef class PythonFitnessFunction(FitnessFunction):
 
     cpdef number_of_fitness_buffers( self )
     cpdef fitness_buffer_index_for_subfunction( self, int ) 
+    
+    cpdef similarity_measure( self, size_t, size_t )
 
 cdef class PythonFitnessFunctionDiscrete(PythonFitnessFunction):
     pass

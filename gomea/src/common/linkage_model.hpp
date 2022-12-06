@@ -35,11 +35,11 @@ public:
     virtual ~linkage_model_t(){};
 
     static std::shared_ptr<linkage_model_t> createFOSInstance( const linkage_config_t &config, size_t numberOfVariables = 0 );
-    static std::shared_ptr<linkage_model_t> createLinkageTreeFOSInstance(size_t FOSIndex, size_t numberOfVariables, int similarityMeasure, int maximumFOSSetSize );
+    static std::shared_ptr<linkage_model_t> createLinkageTreeFOSInstance(size_t FOSIndex, size_t numberOfVariables, int similarityMeasure, int maximumFOSSetSize, bool is_static = false );
     static std::string getTypeName( linkage::linkage_model_type type );
     
     static std::shared_ptr<linkage_model_t> univariate(size_t numberOfVariables_);
-    static std::shared_ptr<linkage_model_t> linkage_tree(size_t numberOfVariables_, int similarityMeasure_, bool filtered_,  int maximumSetSize_);
+    static std::shared_ptr<linkage_model_t> linkage_tree(size_t numberOfVariables_, int similarityMeasure_, bool filtered_,  int maximumSetSize_, bool is_static_ );
     static std::shared_ptr<linkage_model_t> marginal_product_model(size_t numberOfVariables_, size_t block_size);
     static std::shared_ptr<linkage_model_t> custom_fos(size_t numberOfVariables_, const vec_t<vec_t<int>> &FOS);
     static std::shared_ptr<linkage_model_t> from_file( std::string filename );
@@ -74,7 +74,9 @@ public:
     void writeMIMatrixToFile(vec_t<vec_t<double>> MI_Matrix, std::string folder, int populationIndex, int generation);
     
     void learnLinkageTreeFOS( vec_t<solution_t<char>*> &population, size_t alphabetSize  );
-	void learnLinkageTreeFOS( vec_t<vec_t<double>> similarity_matrix );
+	void learnLinkageTreeFOS( vec_t<vec_t<double>> similarity_matrix, bool include_full_fos_element );
+
+    void printFOS();
 
 protected:
     vec_t<int> colors;
@@ -85,7 +87,7 @@ protected:
     linkage_model_t( size_t numberOfVariables_ ): numberOfVariables(numberOfVariables_), maximumSetSize(numberOfVariables_) {}
     linkage_model_t( size_t numberOfVariables_, size_t block_size ); 
     linkage_model_t( size_t numberOfVariables_, const vec_t<vec_t<int>> &FOS );
-    linkage_model_t( size_t numberOfVariables_, int similarityMeasure, bool filtered, int maximumSetSize );
+    linkage_model_t( size_t numberOfVariables_, int similarityMeasure, bool filtered, int maximumSetSize, bool is_static );
     linkage_model_t( std::string filename );
 	
     int determineNearestNeighbour(size_t index, vec_t< vec_t< int > > &mpm ); 

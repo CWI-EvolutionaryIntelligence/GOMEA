@@ -12,10 +12,11 @@ linkage_config_t::linkage_config_t( size_t block_size_ ) : mpm_block_size(block_
 	type = linkage::MPM;
 }
 
-linkage_config_t::linkage_config_t(int similarityMeasure_, bool filtered_, int maximumSetSize_, int dummy ) 
-	: lt_similarity_measure(similarityMeasure_), lt_filtered(filtered_), lt_maximum_set_size(maximumSetSize_)
+linkage_config_t::linkage_config_t(int similarityMeasure_, bool filtered_, int maximumSetSize_, bool is_static_ ) 
+	: lt_similarity_measure(similarityMeasure_), lt_filtered(filtered_), lt_maximum_set_size(maximumSetSize_), lt_is_static(is_static_)
 {
 	type = linkage::LINKAGE_TREE;
+	printf("CONFIG: %d static\n",this->lt_is_static?1:0);
 }
 
 linkage_config_t::linkage_config_t( const vec_t<vec_t<int>> &FOS_ ) : FOS(FOS_)

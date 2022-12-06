@@ -62,7 +62,7 @@ void customFitnessFunction_t<T>::partialEvaluationFunction( solution_t<T> *paren
 	}
 	
 	// Create backup of parent variables before modification
-	vec_t<T> partial_backup = parent->createPartialBackup( solution->touched_indices );
+	vec_t<T> partial_backup = parent->getCopyOfVariables( solution->touched_indices );
 
 	// Insert variables of partial solution and then calculate sum of touched subfunctions for offspring
 	parent->insertVariables( solution->touched_variables, solution->touched_indices );
@@ -75,7 +75,7 @@ void customFitnessFunction_t<T>::partialEvaluationFunction( solution_t<T> *paren
 		solution->addToFitnessBuffer( buffer_index, subf_result );
 	}
 
-	// Return parent to original state
+	// Return parent variables to original state
 	parent->insertVariables(partial_backup, solution->touched_indices);
 
 	// Update fitness of partial solution
@@ -123,7 +123,7 @@ void customFitnessFunction_t<T>::initializeVariableInteractionGraph()
 }
 
 template<class T>
-double customFitnessFunction_t<T>::getSimilarityMetric( size_t var_a, size_t var_b )
+double customFitnessFunction_t<T>::getSimilarityMeasure( size_t var_a, size_t var_b )
 {
 	if( this->variable_interaction_graph.size() == 0 )
 		initializeVariableInteractionGraph();
