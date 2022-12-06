@@ -5,6 +5,9 @@
 namespace gomea{
 
 template<class T>
+class solution_t;
+
+template<class T>
 class partial_solution_t
 {
 	public:
@@ -15,25 +18,28 @@ class partial_solution_t
 		vec_t<double> fitness_buffers;
 
 		partial_solution_t( int num_touched_variables );
-		partial_solution_t( vec_t<T> &touched_variables, vec_t<int> &touched_indices );
+		partial_solution_t( const vec_t<T> &touched_variables, const vec_t<int> &touched_indices );
 
 		void initMemory( int number_of_fitness_buffers, int number_of_objectives );
 		int getNumberOfTouchedVariables();
 		
-		double getObjectiveValue();
-		double getObjectiveValue( int objective_value_index );
-		vec_t<double> getObjectiveValues();
-		double getConstraintValue();
+		double getObjectiveValue( int objective_value_index = 0 ) const;
+		const vec_t<double> getObjectiveValues() const;
+		double getConstraintValue() const;
 
 		void setObjectiveValue( double v );
 		void setObjectiveValue( int objective_value_index, double v );
+		void setObjectiveValues( vec_t<double> objective_values ); 
 		void setConstraintValue( double v );
 
-		double getFitnessBuffer(int buffer_index);
+		double getFitnessBuffer(int buffer_index) const;
+		const vec_t<double> getFitnessBuffers() const;
 		void setFitnessBuffers( vec_t<double> buffers ); 
 		void resetFitnessBuffers();
 		void addToFitnessBuffer( int buffer_index, double partial_fitness );
 		void subtractFromFitnessBuffer( int buffer_index, double partial_fitness );
+
+		void insertSolution( solution_t<T> *solution );
 		
 		int getTouchedIndex( int ind );
 

@@ -38,6 +38,9 @@ cdef class PythonFitnessFunction(FitnessFunction):
     cpdef fitness_buffer_index_for_subfunction( self, int subfunction_index ): 
         return 0
 
+    cpdef similarity_measure( self, size_t var_a, size_t var_b ):
+        return -1
+
 cdef class PythonFitnessFunctionDiscrete(PythonFitnessFunction):
     def __cinit__(self, 
         number_of_variables : int

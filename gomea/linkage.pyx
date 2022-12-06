@@ -1,4 +1,5 @@
 from libcpp.vector cimport vector
+from libcpp cimport bool
 
 cdef class cUnivariate(LinkageModel):
     def __cinit__(self):
@@ -14,14 +15,26 @@ cdef class cFull(LinkageModel):
     def __cinit__(self):
         self.c_inst = new linkage_config_t(0)
 
+cdef class cStaticLinkageTree(LinkageModel):
+    def __cinit__(self,
+        filtered : bool = True,
+        maximum_set_size : int = -1
+    ):
+        cdef int similarity_measure = 2
+        cdef bool is_static = True 
+        self.c_inst = new linkage_config_t(similarity_measure, filtered, maximum_set_size, is_static)
+        #print("cStaticLinkageTree: ",self.c_inst.lt_is_static)
+
 cdef class cLinkageTree(LinkageModel):
     def __cinit__(self,
         similarity_measure : int = 0,
         filtered : bool = False,
         maximum_set_size : int = -1
     ):
-        print(similarity_measure,filtered,maximum_set_size)
-        self.c_inst = new linkage_config_t(similarity_measure, filtered, maximum_set_size, 0)
+        cdef bool is_static = False
+        print("is_static: ",is_static)
+        self.c_inst = new linkage_config_t(similarity_measure, filtered, maximum_set_size, is_static)
+        #print("cLinkageTree: ",self.c_inst.lt_is_static)
 
 cdef class cConditional(LinkageModel):
     def __cinit__(self,
@@ -58,10 +71,19 @@ def Full():
     return cFull()
 
 def LinkageTree(*args,**kwargs):
-    if len(args) == 3:
+    if len(args) == 4:
         return cLinkageTree(*args)
     elif len(args) == 0:
+        print(kwargs)
         return cLinkageTree(**kwargs)
+    else:
+        raise RuntimeError("Invalid arguments.")
+
+def StaticLinkageTree(*args,**kwargs):
+    if len(args) == 4:
+        return cStaticLinkageTree(*args)
+    elif len(args) == 0:
+        return cStaticLinkageTree(**kwargs)
     else:
         raise RuntimeError("Invalid arguments.")
 

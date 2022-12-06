@@ -62,14 +62,13 @@ class population_t {
 		void computeRanks();
 		void makeSelectionUsingDiversityOnRank0();
 		void estimateDistribution( int FOS_index );
-		void estimateDistribution();
+		void estimateDistributions();
 		double estimateMean( int var );
 		void updateAMSMeans();
 		void copyBestSolutionsToPopulation();
 		void getBestInPopulation( int *individual_index );
 		void evaluateCompletePopulation();
 		void generateAndEvaluateNewSolutions();
-		void insertImprovement( solution_t<double> *solution, partial_solution_t<double> *part );
 		short checkForImprovement( solution_t<double> *solution, partial_solution_t<double> *part );
 		partial_solution_t<double> *generatePartialSolution( int FOS_index );
 		void applyPartialAMS( partial_solution_t<double> *solution, double cmul );
@@ -84,6 +83,7 @@ class population_t {
 		void initializeDefaultParameters();
 		void initializeNewPopulationMemory();
 		void initializeFOS();
+		void initializeFOSFromIndex( int FOSIndex );
 		void initializeFOS( linkage_config_t *linkage_config );
 		void initializeParameterRangeBounds( double lower_user_range, double upper_user_range );
 		void initializeProblem( int problem_index );

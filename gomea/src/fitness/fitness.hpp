@@ -15,16 +15,17 @@ typedef enum{
 template<class T>
 class fitness_t
 {
-	public:
+	protected:
 		fitness_t( int number_of_variables ); 
 		fitness_t( int number_of_variables, double vtr );
+
+	public:
 		virtual ~fitness_t();
 		
 		// Properties
 		std::string name;
 		int number_of_variables;
 		int number_of_objectives = 1;
-		int number_of_fitness_buffers = 1;
 		opt_mode optimization_mode;
 
 		// Gray-box specific
@@ -46,6 +47,7 @@ class fitness_t
 		double elitist_constraint_value = 1e308;
 
 		virtual int getNumberOfSubfunctions();
+		virtual int getNumberOfFitnessBuffers();
 
 		void evaluate( solution_t<T> *solution );
 		void evaluatePartialSolution( solution_t<T> *parent, partial_solution_t<T> *solution );
@@ -65,7 +67,8 @@ class fitness_t
 		virtual void initializeVariableInteractionGraph();
 		void printVariableInteractionGraph();
 
-		virtual vec_t<vec_t<double>> getMIMatrix();
+		vec_t<vec_t<double>> getSimilarityMatrix();
+		virtual double getSimilarityMeasure( size_t var_a, size_t var_b );
 		
 		short isParameterInRangeBounds( double parameter, int dimension );
 		virtual double getLowerRangeBound( int dimension );
@@ -76,11 +79,13 @@ class fitness_t
 		double *rotateVariables( double *variables, int num_variables, double **rotation_matrix );
 		double *rotateVariablesInBlocks( double *variables, int len, int from, int to, double **rotation_matrix );
 		void ezilaitiniObjectiveRotationMatrix( double **rotation_matrix, double rotation_angle, int rotation_block_size );
-
+		
 	private:
 		fitness_t( int number_of_variables, double vtr, bool use_vtr, opt_mode optimization_mode );
 		virtual void evaluationFunction( solution_t<T> *solution ) = 0;
 		virtual void partialEvaluationFunction( solution_t<T> *parent, partial_solution_t<T> *solution );
+
+		vec_t<vec_t<double>> similarity_matrix;
 };
 
 template class fitness_t<char>;
