@@ -1,42 +1,39 @@
 from libcpp.vector cimport vector
 from libcpp cimport bool
 
-cdef class cUnivariate(LinkageModel):
+cdef class Univariate(LinkageModel):
     def __cinit__(self):
         self.c_inst = new linkage_config_t()
 
-cdef class cMarginalProductModel(LinkageModel):
+cdef class MarginalProductModel(LinkageModel):
     def __cinit__(self,
         block_size : size_t
     ):
         self.c_inst = new linkage_config_t(block_size)
 
-cdef class cFull(LinkageModel):
+cdef class Full(LinkageModel):
     def __cinit__(self):
         self.c_inst = new linkage_config_t(0)
 
-cdef class cStaticLinkageTree(LinkageModel):
+cdef class StaticLinkageTree(LinkageModel):
     def __cinit__(self,
+        similarity_measure : int = 2,
         filtered : bool = True,
         maximum_set_size : int = -1
     ):
-        cdef int similarity_measure = 2
         cdef bool is_static = True 
         self.c_inst = new linkage_config_t(similarity_measure, filtered, maximum_set_size, is_static)
-        #print("cStaticLinkageTree: ",self.c_inst.lt_is_static)
 
-cdef class cLinkageTree(LinkageModel):
+cdef class LinkageTree(LinkageModel):
     def __cinit__(self,
         similarity_measure : int = 0,
         filtered : bool = False,
         maximum_set_size : int = -1
     ):
         cdef bool is_static = False
-        print("is_static: ",is_static)
         self.c_inst = new linkage_config_t(similarity_measure, filtered, maximum_set_size, is_static)
-        #print("cLinkageTree: ",self.c_inst.lt_is_static)
 
-cdef class cConditional(LinkageModel):
+cdef class Conditional(LinkageModel):
     def __cinit__(self,
         max_clique_size : int = 1,
         cliques_as_fos_elements : bool = True,
@@ -44,88 +41,34 @@ cdef class cConditional(LinkageModel):
     ):
         self.c_inst = new linkage_config_t(max_clique_size,cliques_as_fos_elements,include_full_fos_element)
 
-cdef class cCustom(LinkageModel):
+cdef class Custom(LinkageModel):
     def __cinit__(self,
         vector[vector[int]] FOS
     ):
         self.c_inst = new linkage_config_t(FOS)
         
-cdef class cFromFile(LinkageModel):
+cdef class FromFile(LinkageModel):
     def __cinit__(self,
         filename: string
     ):
-        self.c_inst = new linkage_config_t(filename)
-
-def Univariate():
-    return cUnivariate()
-
-def MarginalProductModel(*args, **kwargs):
-    if len(args) == 1:
-        return cMarginalProductModel(*args)
-    elif "block_size" in kwargs:
-        return cMarginalProductModel(**kwargs) 
-    else:
-        raise RuntimeError("Invalid arguments.")
-
-def Full():
-    return cFull()
-
-def LinkageTree(*args,**kwargs):
-    if len(args) == 4:
-        return cLinkageTree(*args)
-    elif len(args) == 0:
-        print(kwargs)
-        return cLinkageTree(**kwargs)
-    else:
-        raise RuntimeError("Invalid arguments.")
-
-def StaticLinkageTree(*args,**kwargs):
-    if len(args) == 4:
-        return cStaticLinkageTree(*args)
-    elif len(args) == 0:
-        return cStaticLinkageTree(**kwargs)
-    else:
-        raise RuntimeError("Invalid arguments.")
+        #f = str.encode(filename)
+        cdef string f = filename.decode()
+        self.c_inst = new linkage_config_t(f)
 
 def UCondGG():
-    return cConditional(1,False,True)
+    return Conditional(1,False,True)
 
 def UCondFG():
-    return cConditional(1,True,False)
+    return Conditional(1,True,False)
 
 def UCondHG():
-    return cConditional(1,True,True)
+    return Conditional(1,True,True)
 
 def MCondHG(*args,**kwargs):
     if len(args) == 1:
-        return cConditional(args[0],True,True)
+        return Conditional(args[0],True,True)
     elif "max_clique_size" in kwargs:
-        return cConditional(kwargs["max_clique_size"],True,True)
-    else:
-        raise RuntimeError("Invalid arguments.")
-
-def Conditional(*args,**kwargs):
-    if len(args) == 3:
-        return cConditional(args)
-    elif len(args) == 0:
-        return cConditional(**kwargs)
-    else:
-        raise RuntimeError("Invalid arguments.")
-
-def Custom(*args,**kwargs):
-    if len(args) == 1:
-        return cConditional(args)
-    elif "FOS" in kwargs:
-        return cCustom(**kwargs)
-    else:
-        raise RuntimeError("Invalid arguments.")
-
-def FromFile(*args,**kwargs):
-    if len(args) == 1:
-        return cFromFile(str.encode(args[0]))
-    elif "filename" in kwargs:
-        kwargs["filename"] = str.encode(kwargs["filename"])
-        return cFromFile(**kwargs)
+        return Conditional(kwargs["max_clique_size"],True,True)
     else:
         raise RuntimeError("Invalid arguments.")
 

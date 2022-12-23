@@ -47,7 +47,7 @@ distribution_t::~distribution_t()
 
 void distribution_t::adaptDistributionMultiplier( partial_solution_t<double>** partial_solutions, int num_solutions )
 {
-	short improvementForFOSElement = 0;
+	bool improvementForFOSElement = false;
 	if( (((double) out_of_bounds_draws)/((double) samples_drawn)) > 0.9 )
 		distribution_multiplier *= 0.5;
 
@@ -74,7 +74,7 @@ void distribution_t::adaptDistributionMultiplier( partial_solution_t<double>** p
 
 void distribution_t::adaptDistributionMultiplierMaximumStretch( partial_solution_t<double>** partial_solutions, int num_solutions )
 {
-	short improvementForFOSElement = 0;
+	bool improvementForFOSElement = false;
 	if( (((double) out_of_bounds_draws)/((double) samples_drawn)) > 0.9 )
 		distribution_multiplier *= 0.5;
 
@@ -606,7 +606,7 @@ partial_solution_t<double> *normal_distribution_t::generatePartialSolution( solu
 	int times_not_in_bounds = -1;
 	out_of_bounds_draws--;
 
-	short ready = 0;
+	bool ready = false;
 	do
 	{
 		times_not_in_bounds++;
@@ -635,15 +635,7 @@ partial_solution_t<double> *normal_distribution_t::generatePartialSolution( solu
 			}
 		}
 
-		ready = 1;
-		/*for(int i = 0; i < num_indices; i++ )
-		{
-			if( !fitness->isParameterInRangeBounds( result[i], indices[i] ) )
-			{
-				ready = 0;
-				break;
-			}
-		}*/ // BLA
+		ready = true;
 	}
 	while( !ready );
 
@@ -652,9 +644,9 @@ partial_solution_t<double> *normal_distribution_t::generatePartialSolution( solu
 	return( res_sol );
 }
 
-short normal_distribution_t::generationalImprovementForOnePopulationForFOSElement( partial_solution_t<double>** partial_solutions, int num_solutions, double *st_dev_ratio )
+bool normal_distribution_t::generationalImprovementForOnePopulationForFOSElement( partial_solution_t<double>** partial_solutions, int num_solutions, double *st_dev_ratio )
 {
-	short generational_improvement = 0;
+	bool generational_improvement = false;
 	vec_t<int> indices = partial_solutions[0]->touched_indices; 
 	int num_indices = indices.size();
 
@@ -692,7 +684,7 @@ short normal_distribution_t::generationalImprovementForOnePopulationForFOSElemen
 			*st_dev_ratio = fmax( *st_dev_ratio, fabs(average_z_of_improvements[i]) );
 		}
 
-		generational_improvement = 1;
+		generational_improvement = true;
 	}
 
 	return( generational_improvement );
@@ -880,7 +872,7 @@ partial_solution_t<double> *conditional_distribution_t::generatePartialSolution(
 
 		vec sample_result;
 		vec sample_means;
-		short ready = 0;
+		bool ready = false;
 		do
 		{
 			times_not_in_bounds++;
@@ -934,15 +926,7 @@ partial_solution_t<double> *conditional_distribution_t::generatePartialSolution(
 				sample_result = sample_means + cholesky_decompositions[og] * sample_zs;
 			}
 
-			ready = 1;
-			/*for(int i = 0; i < num_indices; i++ )
-			{
-				if( !fitness->isParameterInRangeBounds( sample_result[i], indices[i] ) )
-				{
-					ready = 0;
-					break;
-				}
-			}*/ // BLA
+			ready = true;
 		}
 		while( !ready );
 		
@@ -960,10 +944,10 @@ partial_solution_t<double> *conditional_distribution_t::generatePartialSolution(
 	return(sol_res);
 }
 
-short conditional_distribution_t::generationalImprovementForOnePopulationForFOSElement( partial_solution_t<double>** partial_solutions, int num_solutions, double *st_dev_ratio )
+bool conditional_distribution_t::generationalImprovementForOnePopulationForFOSElement( partial_solution_t<double>** partial_solutions, int num_solutions, double *st_dev_ratio )
 {
 	*st_dev_ratio = 0.0;
-	short generational_improvement = 0;
+	bool generational_improvement = false;
 
 	for( size_t k = 0; k < variable_groups.size(); k++ )
 	{	
@@ -1001,7 +985,7 @@ short conditional_distribution_t::generationalImprovementForOnePopulationForFOSE
 				average_z_of_improvements[i] /= (double) number_of_improvements;
 				*st_dev_ratio = fmax( *st_dev_ratio, fabs(average_z_of_improvements[i]) );
 			}
-			generational_improvement = 1;
+			generational_improvement = true;
 		}
 	}
 	

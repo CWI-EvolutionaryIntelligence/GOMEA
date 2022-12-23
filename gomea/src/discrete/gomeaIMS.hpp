@@ -10,6 +10,7 @@ using namespace std;
 #include "gomea/src/discrete/gomea.hpp"
 #include "gomea/src/fitness/benchmarks-discrete.hpp"
 #include "gomea/src/utils/time.hpp"
+#include "gomea/src/common/output_statistics.hpp"
 
 namespace gomea{
 namespace discrete{
@@ -23,10 +24,12 @@ public:
 		numberOfGOMEAs = 0,
 		numberOfGenerationsIMS = 0,
 		minimumGOMEAIndex = 0,
-		currentGOMEAIndex = 0;
+		currentGOMEAIndex = 0,
+        numberOfStatisticsWrites = 0;
 	bool isInitialized = false,
         hasTerminated = false;
     time_t start_time;
+	output_statistics_t output;
 
     Config *config;
     vector<Population*> GOMEAs;
@@ -42,6 +45,7 @@ public:
     void initializeNewGOMEA();
 	void initializeGPU( void );
     bool checkTermination();
+    bool checkEvaluationLimitTerminationCriterion();
 	bool checkTimeLimitTerminationCriterion();
     double getProgressUntilTermination();
 	void generationalStepAllGOMEAs();
@@ -50,6 +54,8 @@ public:
     void run();
 	void runGeneration();
 	void runGeneration( int GOMEAIndex );
+    void writeStatistics( Population *population );
+    void writeStatistics( int population_index );
 };
 
 }}

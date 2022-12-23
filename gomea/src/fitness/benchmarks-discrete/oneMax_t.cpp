@@ -47,5 +47,10 @@ double oneMax_t::subfunction( char x )
 	return( x );
 }
 
+double oneMax_t::getSimilarityMeasure( size_t var_a, size_t var_b )
+{
+	return 0.0;
+}
+
 }}
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/

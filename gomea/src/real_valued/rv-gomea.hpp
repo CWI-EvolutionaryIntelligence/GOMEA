@@ -78,32 +78,31 @@ class rvg_t {
 		void restartLargestPopulation();
 		fitness_t *getFitnessClass( int problem_index );
 		void writeGenerationalStatisticsForOnePopulation( int population_index );
-		void writeGenerationalSolutions( short final );
-		void writeGenerationalSolutionsBest( short final );
-		short checkTerminationCondition( void );
-		short checkSubgenerationTerminationConditions();
-		short checkPopulationTerminationConditions( int population_index );
-		short checkTimeLimitTerminationCondition( void );
-		short checkNumberOfEvaluationsTerminationCondition( void );
-		short checkVTRTerminationCondition( void );
+		void writeGenerationalSolutions( bool final );
+		void writeGenerationalSolutionsBest( bool final );
+		bool checkTerminationCondition( void );
+		bool checkSubgenerationTerminationConditions();
+		bool checkPopulationTerminationConditions( int population_index );
+		bool checkTimeLimitTerminationCondition( void );
+		bool checkNumberOfEvaluationsTerminationCondition( void );
+		bool checkVTRTerminationCondition( void );
 		void checkAverageFitnessTerminationConditions( void );
 		void determineBestSolutionInCurrentPopulations( int *population_of_best, int *index_of_best );
-		short checkFitnessVarianceTermination( int population_index );
-		short checkDistributionMultiplierTerminationCondition( int population_index );
+		bool checkFitnessVarianceTermination( int population_index );
+		bool checkDistributionMultiplierTerminationCondition( int population_index );
 		/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
 		/*-=-=-=-=-=-=-=-=-=-=-=- Variables -=-=-=-=-=-=-=-=-=-=-=-=-*/
 		std::vector<population_t*> populations;
 		fitness_t *fitness;
 		int total_number_of_writes = 0;                              /* Total number of times a statistics file has been written. */
-		time_t start_time;
-		
+		output_statistics_t output;
 		/*-=-=-=-=-=-=-=-=-=-=-=- Options -=-=-=-=-=-=-=-=-=-=-=-=-*/
 		Config *config;
 		double eta_ams = 1.0,
 			   eta_cov = 1.0;
-		bool   is_initialized = false;
-		short use_guidelines = 0;	 /* Whether to override parameters with guidelines (for those that exist). */
+		bool   is_initialized = false,
+			   use_guidelines = false;	 /* Whether to override parameters with guidelines (for those that exist). */
 		double rotation_angle = 0.0; /* The angle of rotation to be applied to the problem. */
 		/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 };

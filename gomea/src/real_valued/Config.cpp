@@ -3,7 +3,5 @@
 namespace gomea{
 namespace realvalued{
 
-Config::Config(){}
-
 }
 }

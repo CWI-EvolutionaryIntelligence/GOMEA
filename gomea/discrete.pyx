@@ -1,8 +1,10 @@
 # distutils: language = c++
 # cython: c_string_type=unicode, c_string_encoding=utf8
 
+from gomea.output cimport OutputStatisticsWrapper
+from gomea.output import OutputStatistics
 from gomea.discrete cimport gomeaIMS, Config
-from gomea.linkage cimport LinkageModel, cLinkageTree
+from gomea.linkage cimport LinkageModel, LinkageTree
 from libcpp.string cimport string
 from libcpp cimport bool
 from cpython.exc cimport PyErr_CheckSignals
@@ -23,8 +25,8 @@ cdef class DiscreteGOMEA:
         # Optimization problem settings (required)
         fitness: FitnessFunction, 
         # GOMEA settings
-        linkage_model : LinkageModel,
-        folder: string=string(b"test"),
+        linkage_model : LinkageModel = LinkageTree(),
+        folder: string=string(b"output_discrete_gomea"),
         maximum_number_of_GOMEAs: int=25,
         IMS_subgeneration_factor: int=4,
         base_population_size: int=2,
@@ -35,7 +37,8 @@ cdef class DiscreteGOMEA:
         max_time : double=-1.0,
         random_seed : int=-1,
         # Other
-        verbose : bool=False
+        verbose : bool=False,
+        analyze_fos : bool=False
     ):
 
         # Initialize attributes 
@@ -55,6 +58,9 @@ cdef class DiscreteGOMEA:
         self.c_config.maximumNumberOfEvaluations = max_evals
         self.c_config.maximumNumberOfGenerations = max_gens
         self.c_config.maximumNumberOfSeconds = max_time
+        self.c_config.AnalyzeFOS = 0
+        if analyze_fos:
+            self.c_config.AnalyzeFOS = 1
         #self.c_config.verbose = verbose
         self.c_config.fix_seed = False
         if random_seed != -1:
@@ -69,7 +75,6 @@ cdef class DiscreteGOMEA:
 
     def check_termination(self):
         cdef bool t = self.c_inst.checkTermination()
-        #print("TERMINATION: ",t)
         return t
 
     def run_generation(self):
@@ -85,6 +90,7 @@ cdef class DiscreteGOMEA:
     
     def run(self):
         self.c_inst.run()
+        return OutputStatistics(OutputStatisticsWrapper.from_ptr(&self.c_inst.output))
 
     def run_with_progress(self):
         with self.init_progress_bar() as progress_bar:

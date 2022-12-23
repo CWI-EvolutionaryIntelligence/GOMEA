@@ -1,10 +1,24 @@
 #pragma once
 
 #include <chrono>
+#include <exception>
 #include "gomea/src/common/gomea_defs.hpp"
 
 namespace gomea{
 	namespace utils{
+
+		class customException : public std::exception
+		{
+			private:
+				std::string message;
+
+			public:
+				customException(std::string message_) : message(message_) {}
+				const char *what() const throw()
+				{
+					return message.c_str();
+				}
+		};
 
 	double **matrixMatrixMultiplication( double **matrix0, double **matrix1, int n0, int n1, int n2 );
 	double *matrixVectorMultiplication( double **matrix, double *vector, int n0, int n1 );
@@ -21,7 +35,7 @@ namespace gomea{
 	void initializeRandomNumberGenerator();
 	void initializeRandomNumberGenerator( long long seed );
 
-	static std::mt19937 rng;
+	extern std::mt19937 rng;
 	extern long long random_seed;
 
 	}

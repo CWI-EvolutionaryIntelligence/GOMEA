@@ -7,7 +7,14 @@
 	],
 	"settings": {
 		"files.associations": {
-			"chrono": "cpp"
+			"chrono": "cpp",
+			"array": "cpp",
+			"deque": "cpp",
+			"unordered_map": "cpp",
+			"vector": "cpp",
+			"initializer_list": "cpp",
+			"string_view": "cpp",
+			"sstream": "cpp"
 		},
 		"python.terminal.executeInFileDir": true
 	}

@@ -59,6 +59,8 @@ public:
         return FOSStructure[element_index];
     }
 
+    int getSimilarityMeasure();
+
     void addGroup(int var_index);
     void addGroup(const std::set<int> &group);
     virtual void addGroup( vec_t<int> group ); 
@@ -90,7 +92,7 @@ protected:
     linkage_model_t( size_t numberOfVariables_, int similarityMeasure, bool filtered, int maximumSetSize, bool is_static );
     linkage_model_t( std::string filename );
 	
-    int determineNearestNeighbour(size_t index, vec_t< vec_t< int > > &mpm ); 
+    int determineNearestNeighbour(size_t index, const vec_t< vec_t< int > > &mpm ); 
     vec_t<vec_t<double>> computeMIMatrix(vec_t<solution_t<char>*> &population, size_t alphabetSize);
     vec_t<vec_t<double>> computeNMIMatrix(vec_t<solution_t<char>*> &population, size_t alphabetSize);
     void estimateParametersForSingleBinaryMarginal(vec_t<solution_t<char>*> &population, size_t alphabetSize, vec_t<size_t> &indices, size_t &factorSize, vec_t<double> &result);

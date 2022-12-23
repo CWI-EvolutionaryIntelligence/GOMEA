@@ -1,6 +1,5 @@
 //#include "utils/embed.hpp"
 #include "gomea/src/fitness/fitness.hpp"
-#include "gomea/src/fitness/benchmarks-rv.hpp"
 
 namespace gomea{
 namespace fitness{
@@ -31,28 +30,28 @@ fitness_t<T>::~fitness_t(){}
  * - x and y are both feasible and x has a smaller objective value than y
  */
 template<class T>
-short fitness_t<T>::betterFitness( double objective_value_x, double constraint_value_x, double objective_value_y, double constraint_value_y )
+bool fitness_t<T>::betterFitness( double objective_value_x, double constraint_value_x, double objective_value_y, double constraint_value_y )
 {
-    short result = 0;
+    bool result = false;
 
     if( constraint_value_x > 0 ) /* x is infeasible */
     {
         if( constraint_value_y > 0 ) /* Both are infeasible */
         {
             if( constraint_value_x < constraint_value_y )
-                result = 1;
+                result = true;
         }
     }
     else /* x is feasible */
     {
         if( constraint_value_y > 0 ) /* x is feasible and y is not */
-            result = 1;
+            result = true;
         else /* Both are feasible */
         {
             if( optimization_mode == MIN && objective_value_x < objective_value_y )
-                result = 1;
+                result = true;
             else if( optimization_mode == MAX && objective_value_x > objective_value_y )
-                result = 1;
+                result = true;
         }
     }
 
@@ -60,7 +59,7 @@ short fitness_t<T>::betterFitness( double objective_value_x, double constraint_v
 }
 
 template<class T>
-short fitness_t<T>::betterFitness( solution_t<T> *sol_x, solution_t<T> *sol_y ) 
+bool fitness_t<T>::betterFitness( solution_t<T> *sol_x, solution_t<T> *sol_y ) 
 {
 	return( betterFitness( sol_x->getObjectiveValue(), sol_x->getConstraintValue(), sol_y->getObjectiveValue(), sol_y->getConstraintValue() ) );
 }
@@ -80,6 +79,8 @@ int fitness_t<T>::getNumberOfFitnessBuffers()
 template<class T>
 void fitness_t<T>::evaluate( solution_t<T> *solution )
 {
+	checkTermination();
+
 	solution->initMemory(number_of_objectives, getNumberOfFitnessBuffers());
 
 	evaluationFunction( solution );
@@ -101,6 +102,8 @@ void fitness_t<T>::evaluate( solution_t<T> *solution )
 template<class T>
 void fitness_t<T>::evaluatePartialSolutionBlackBox( solution_t<T> *parent, partial_solution_t<T> *solution )
 {
+	checkTermination();
+	
 	solution->initMemory(number_of_objectives, getNumberOfFitnessBuffers());
 	
 	// Make backup of parent
@@ -134,7 +137,10 @@ void fitness_t<T>::evaluatePartialSolutionBlackBox( solution_t<T> *parent, parti
 template<class T>
 void fitness_t<T>::evaluatePartialSolution( solution_t<T> *parent, partial_solution_t<T> *solution )
 {
+	checkTermination();
+	
 	solution->initMemory(number_of_objectives,getNumberOfFitnessBuffers());
+	
 	if( black_box_optimization )
 	{
 		evaluatePartialSolutionBlackBox( parent, solution );
@@ -253,7 +259,7 @@ void fitness_t<T>::printVariableInteractionGraph()
 }
 
 template<class T>
-vec_t<vec_t<double>> fitness_t<T>::getSimilarityMatrix()
+vec_t<vec_t<double>> fitness_t<T>::getSimilarityMatrix( int similarity_measure_index )
 {
 	if( similarity_matrix.size() == 0 )
 	{
@@ -264,7 +270,11 @@ vec_t<vec_t<double>> fitness_t<T>::getSimilarityMatrix()
 			similarity_matrix[i][i] = 1e100;
 			for (size_t j = 0; j < i; j++)
 			{
-				double sim = getSimilarityMeasure(i, j);
+				double sim;
+				if( similarity_measure_index == 2 )
+					sim = getSimilarityMeasure(i, j);
+				else
+					sim = utils::randomRealUniform01();
 				similarity_matrix[i][j] = sim;
 				similarity_matrix[j][i] = sim;
 			}
@@ -276,6 +286,7 @@ vec_t<vec_t<double>> fitness_t<T>::getSimilarityMatrix()
 template<class T>
 double fitness_t<T>::getSimilarityMeasure( size_t var_a, size_t var_b )
 {
+	assert(0);
 	throw std::runtime_error("Fitness function does not implement getSimilarityMeasure(size_t,size_t).");
 }
 
@@ -311,16 +322,16 @@ double fitness_t<double>::getUpperRangeBound( int dimension )
  * every problem.
  */
 template<>
-short fitness_t<double>::isParameterInRangeBounds( double parameter, int dimension )
+bool fitness_t<double>::isParameterInRangeBounds( double parameter, int dimension )
 {
     if( parameter < getLowerRangeBound( dimension ) ||
 		parameter > getUpperRangeBound( dimension ) ||
 		isnan( parameter ) )
     {
-        return( 0 );
+        return( false );
     }
 
-    return( 1 );
+    return( true );
 }
 
 /**
@@ -433,6 +444,32 @@ double *fitness_t<double>::rotateVariablesInBlocks( double *variables, int len, 
 		rotated_variables[i] = variables[i];
 
     return( rotated_variables );
+}
+
+template<class T>
+void fitness_t<T>::checkTermination() 
+{
+	checkEvaluationLimitTerminationCondition();
+
+	checkTimeLimitTerminationCondition();
+}
+
+template<class T>
+void fitness_t<T>::checkEvaluationLimitTerminationCondition() 
+{
+	if( maximum_number_of_evaluations > 0 && number_of_evaluations >= maximum_number_of_evaluations )
+	{
+        throw utils::customException("evaluations");
+	}
+}
+
+template<class T>
+void fitness_t<T>::checkTimeLimitTerminationCondition() 
+{
+	if( maximum_number_of_seconds > 0 && utils::getElapsedTimeSinceStartSeconds() >= maximum_number_of_seconds )
+	{
+        throw utils::customException("time");
+	}
 }
 
 }}

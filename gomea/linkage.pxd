@@ -16,5 +16,26 @@ cdef extern from "gomea/src/common/linkage_model.hpp" namespace "gomea":
 cdef class LinkageModel:
     cdef linkage_config_t *c_inst
 
-cdef class cLinkageTree(LinkageModel):
+cdef class Univariate(LinkageModel):
+    pass
+
+cdef class MarginalProductModel(LinkageModel):
+    pass
+
+cdef class Full(LinkageModel):
+    pass
+
+cdef class LinkageTree(LinkageModel):
+    pass
+
+cdef class StaticLinkageTree(LinkageModel):
+    pass
+
+cdef class Conditional(LinkageModel):
+    pass
+
+cdef class Custom(LinkageModel):
+    pass
+
+cdef class FromFile(LinkageModel):
     pass

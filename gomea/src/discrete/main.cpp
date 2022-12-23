@@ -18,7 +18,7 @@ int main(int argc, char **argv)
     {
         gomeaInstance->run();
     }
-    catch (customException &ex)
+    catch (utils::customException &ex)
     {}
 
     delete gomeaInstance;

@@ -1,5 +1,6 @@
 from libcpp.string cimport string
 from libcpp cimport bool
+from gomea.output cimport output_statistics_t
 from gomea.fitness cimport fitness_t
 from gomea.linkage cimport linkage_config_t 
 
@@ -7,7 +8,7 @@ cdef extern from "gomea/src/discrete/Config.hpp" namespace "gomea::discrete":
     cdef cppclass Config:
         Config() except +
 
-        int maximumNumberOfGOMEAs, IMSsubgenerationFactor, basePopulationSize, maxArchiveSize, maximumNumberOfEvaluations, maximumNumberOfGenerations
+        int maximumNumberOfGOMEAs, IMSsubgenerationFactor, basePopulationSize, maxArchiveSize, maximumNumberOfEvaluations, maximumNumberOfGenerations, AnalyzeFOS
         long long randomSeed
         bool fix_seed
         double maximumNumberOfSeconds
@@ -24,3 +25,4 @@ cdef extern from "gomea/src/discrete/gomeaIMS.hpp" namespace "gomea::discrete":
         void runGeneration() except +
         bool checkTermination() except +
         double getProgressUntilTermination() except +
+        output_statistics_t output

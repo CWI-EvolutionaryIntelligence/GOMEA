@@ -82,7 +82,7 @@ class linkage_model_rv_t : public linkage_model_t {
 			void inheritDistributionMultipliers( linkage_model_rv_t *other, double *multipliers );
 			int *matchFOSElements( linkage_model_rv_t *other );
 			int *hungarianAlgorithm( int** similarity_matrix, int dim );
-			void hungarianAlgorithmAddToTree(int x, int prevx, short *S, int *prev, int *slack, int *slackx, int* lx, int *ly, int** similarity_matrix, int dim );
+			void hungarianAlgorithmAddToTree(int x, int prevx, bool *S, int *prev, int *slack, int *slackx, int* lx, int *ly, int** similarity_matrix, int dim );
 			int determineNearestNeighbour(int index, double **S_matrix, int *mpm_num_ind, int mpm_length );
 			void ezilaitini();
 

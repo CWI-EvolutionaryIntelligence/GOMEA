@@ -23,19 +23,6 @@ namespace discrete{
 
 typedef std::chrono::time_point<std::chrono::steady_clock> chtime;
 
-class customException: public exception
-{
-private:
-    string message;
-
-public:
-    customException(string message_) : message(message_) { }
-    const char * what () const throw ()
-    {
-        return message.c_str();
-    }
-};
-
 struct archiveRecord
 {
   bool isFound = false;

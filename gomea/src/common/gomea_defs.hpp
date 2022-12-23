@@ -13,10 +13,12 @@
 #include <algorithm>
 #include <iostream> 
 #include <random>
+#include <variant>
 
 namespace gomea{
 
 template<class T>
 using vec_t = std::vector<T>;
+typedef std::variant<char, int, float, double> genotype_t;
 
 }

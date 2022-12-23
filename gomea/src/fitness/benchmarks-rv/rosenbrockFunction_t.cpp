@@ -155,5 +155,13 @@ void rosenbrockFunction_t::initializeVariableInteractionGraph()
 	}
 }
 
+double rosenbrockFunction_t::getSimilarityMeasure( size_t var_a, size_t var_b )
+{
+	if( var_a == var_b+1 || var_b == var_a+1 )
+		return 1.0;
+	else
+		return 0.0;
+}
+
 }}
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/

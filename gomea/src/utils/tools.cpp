@@ -4,6 +4,7 @@ namespace gomea{
 	namespace utils{
 
 long long random_seed = 0;
+std::mt19937 rng;
     
 vec_t<int> getSortedOrder( vec_t<int> &data ){
     vec_t<int> order(data.size());

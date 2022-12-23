@@ -57,6 +57,8 @@ rvg_t::rvg_t( Config *config )
 {
 	this->config = config;
     this->fitness = config->fitness;
+    this->fitness->maximum_number_of_evaluations = config->maximum_number_of_evaluations;
+    this->fitness->maximum_number_of_seconds = config->maximum_number_of_seconds;
 
     if( use_guidelines )
     {
@@ -98,6 +100,9 @@ rvg_t::rvg_t( int argc, char **argv )
     }
 
     checkOptions();
+
+    assert(0);
+    // TODO - initialize fitness and pass num_variables and vtr
 }
 
 /**
@@ -123,13 +128,13 @@ void rvg_t::parseOptions( int argc, char **argv, int *index )
 	config = new Config();
     double dummy;
 
-    config->write_generational_statistics = 0;
-    config->write_generational_solutions  = 0;
-    config->print_verbose_overview        = 0;
+    config->write_generational_statistics = false;
+    config->write_generational_solutions  = false;
+    config->print_verbose_overview        = false;
     config->use_vtr                       = false;
-	use_guidelines                = 0;
-	config->black_box_evaluations         = 0;
-	config->fix_seed					  = 0;
+	use_guidelines                        = false;
+	config->black_box_evaluations         = false;
+	config->fix_seed					  = false;
 
     for( ; (*index) < argc; (*index)++ )
     {
@@ -148,14 +153,14 @@ void rvg_t::parseOptions( int argc, char **argv, int *index )
                 switch( argv[*index][1] )
                 {
                 case 'h': printUsage(); break;
-                case 's': config->write_generational_statistics = 1; break;
-                case 'w': config->write_generational_solutions  = 1; break;
-                case 'v': config->print_verbose_overview        = 1; break;
+                case 's': config->write_generational_statistics = true; break;
+                case 'w': config->write_generational_solutions  = true; break;
+                case 'v': config->print_verbose_overview        = true; break;
                 case 'r': config->use_vtr                       = true; break;
-                case 'g': use_guidelines                = 1; break;
-                case 'b': config->black_box_evaluations         = 1; break;
+                case 'g': use_guidelines                        = true; break;
+                case 'b': config->black_box_evaluations         = true; break;
                 case 'f': parseFOSIndex( index, argc, argv ); break;
-                case 'S': config->fix_seed                      = 1; break;
+                case 'S': config->fix_seed                      = true; break;
                 default : optionError( argv, *index );
                 }
             }
@@ -167,7 +172,7 @@ void rvg_t::parseOptions( int argc, char **argv, int *index )
 
 void rvg_t::parseFOSIndex( int *index, int argc, char** argv )
 {
-    short noError = 1;
+    bool noError = true;
     int FOSIndex;
 
     (*index)++;
@@ -246,12 +251,12 @@ void rvg_t::parseParameters( int argc, char **argv, int *index )
         printUsage();
     }
 
-	config->selection_during_gom = 1;
-	config->update_elitist_during_gom = 1;
+	config->selection_during_gom = true;
+	config->update_elitist_during_gom = true;
 
 	int a,b;
 
-    int noError = 1;
+    bool noError = true;
     noError = noError && sscanf( argv[*index+0], "%d", &config->problem_index );
     noError = noError && sscanf( argv[*index+1], "%d", &fitness->number_of_variables );
     noError = noError && sscanf( argv[*index+2], "%lf", &config->lower_user_range );
@@ -271,8 +276,8 @@ void rvg_t::parseParameters( int argc, char **argv, int *index )
 	{
 		noError = noError && sscanf( argv[*index+15], "%d", &a );
     	noError = noError && sscanf( argv[*index+16], "%d", &b );
-		config->selection_during_gom = (short) a;
-		config->update_elitist_during_gom = (short) b;
+		config->selection_during_gom = a==1?true:false;
+		config->update_elitist_during_gom = b==1?true:false;
 	}
 
     if( !noError )
@@ -454,72 +459,27 @@ void rvg_t::initializeProblem()
  */
 void rvg_t::writeGenerationalStatisticsForOnePopulation( int population_index )
 {
-    char    string[1000];
-    FILE   *file;
-
     /* Average, best and worst */
-    double population_objective_avg    = 0.0;
-    double population_constraint_avg   = 0.0;
-    double population_objective_best   = populations[population_index]->individuals[0]->getObjectiveValue();
-    double population_constraint_best  = populations[population_index]->individuals[0]->getConstraintValue();
-    double population_objective_worst  = populations[population_index]->individuals[0]->getObjectiveValue();
-    double population_constraint_worst = populations[population_index]->individuals[0]->getConstraintValue();
-    for(int j = 0; j < populations[population_index]->population_size; j++ )
-    {
-        population_objective_avg  += populations[population_index]->individuals[j]->getObjectiveValue();
-        population_constraint_avg += populations[population_index]->individuals[j]->getConstraintValue();
-        if( fitness->betterFitness( population_objective_worst, population_constraint_worst, populations[population_index]->individuals[j]->getObjectiveValue(), populations[population_index]->individuals[j]->getConstraintValue() ) )
-        {
-            population_objective_worst = populations[population_index]->individuals[j]->getObjectiveValue();
-            population_constraint_worst = populations[population_index]->individuals[j]->getConstraintValue();
-        }
-        if( fitness->betterFitness( populations[population_index]->individuals[j]->getObjectiveValue(), populations[population_index]->individuals[j]->getConstraintValue(), population_objective_best, population_constraint_best ) )
-        {
-            population_objective_best = populations[population_index]->individuals[j]->getObjectiveValue();
-            population_constraint_best = populations[population_index]->individuals[j]->getConstraintValue();
-        }
-    }
-    population_objective_avg  = population_objective_avg / ((double) populations[population_index]->population_size);
-    population_constraint_avg = population_constraint_avg / ((double) populations[population_index]->population_size);
+    double population_objective_avg  = populations[population_index]->getFitnessMean();
+    double population_constraint_avg = populations[population_index]->getConstraintValueMean();
+    double population_objective_var  = populations[population_index]->getFitnessVariance();
+    double population_constraint_var = populations[population_index]->getConstraintValueVariance();
+    solution_t<double> *best_solution = populations[population_index]->getBestSolution();
+    solution_t<double> *worst_solution = populations[population_index]->getWorstSolution();
 
-    /* Variance */
-    double population_objective_var    = 0.0;
-    double population_constraint_var   = 0.0;
-    for(int j = 0; j < populations[population_index]->population_size; j++ )
-    {
-        population_objective_var  += (populations[population_index]->individuals[j]->getObjectiveValue() - population_objective_avg)*(populations[population_index]->individuals[j]->getObjectiveValue() - population_objective_avg);
-        population_constraint_var += (populations[population_index]->individuals[j]->getConstraintValue() - population_constraint_avg)*(populations[population_index]->individuals[j]->getConstraintValue() - population_constraint_avg);
-    }
-    population_objective_var  = population_objective_var / ((double) populations[population_index]->population_size);
-    population_constraint_var = population_constraint_var / ((double) populations[population_index]->population_size);
+    // TODO - compute best fitness and insert into output_statistics
+    assert(0);
 
-    if( population_objective_var <= 0.0 )
-        population_objective_var = 0.0;
-    if( population_constraint_var <= 0.0 )
-        population_constraint_var = 0.0;
-
-    /* Then write them */
-    file = NULL;
-    if( total_number_of_writes == 0 )
-    {
-        file = fopen( "statistics.dat", "w" );
-
-        sprintf( string, "# Generation  Evaluations  Time(s)  Best-obj. Best-cons. [Pop.index  Subgen.  Pop.size  Dis.mult.[0]  Pop.best.obj. Pop.avg.obj.  Pop.var.obj. Pop.worst.obj.  Pop.best.con. Pop.avg.con.  Pop.var.con. Pop.worst.con.]\n" );
-        fputs( string, file );
-    }
-    else
-        file = fopen( "statistics.dat", "a" );
-
-    sprintf( string, "%10d %11lf %11.3lf %20.15e %13e  ", (int) populations.size(), fitness->number_of_evaluations, utils::getElapsedTimeSeconds(start_time), fitness->elitist_objective_value, fitness->elitist_constraint_value );
-    fputs( string, file );
-
-    //sprintf( string, "[ %4d %6d %10d %13e %13e %13e %13e %13e %13e %13e %13e %13e ]", population_index, number_of_generations[population_index], population_sizes[population_index], distribution_multipliers[population_index][0], population_objective_best, population_objective_avg, population_objective_var, population_objective_worst, population_constraint_best, population_constraint_avg, population_constraint_var, population_constraint_worst );
-    //fputs( string, file );
-
-    sprintf( string, "\n");
-    fputs( string, file );
-
-    fclose( file );
+    int key = total_number_of_writes;
+    output.addMetricValue("generation",key,populations[population_index]->number_of_generations);
+    output.addMetricValue("evaluations",key,fitness->number_of_evaluations);
+    output.addMetricValue("time",key,utils::getElapsedTimeSinceStartSeconds());
+    output.addMetricValue("pop_index",key,population_index);
+    output.addMetricValue("pop_size",key,populations[population_index]->population_size);
+    output.addMetricValue("best_obj_val",key,best_solution->getObjectiveValue());
+    output.addMetricValue("best_cons_val",key,best_solution->getConstraintValue());
+    output.addMetricValue("obj_val_avg",key,population_objective_avg);
+    output.addMetricValue("obj_val_var",key,population_objective_var);
 
     total_number_of_writes++;
 }
@@ -534,7 +494,7 @@ void rvg_t::writeGenerationalStatisticsForOnePopulation( int population_index )
  * population_xxxxx_generation_xxxxx.dat: the individual populations
  * selection_xxxxx_generation_xxxxx.dat : the individual selections
  */
-void rvg_t::writeGenerationalSolutions( short final )
+void rvg_t::writeGenerationalSolutions( bool final )
 {
     char  string[1000];
     FILE *file_all, *file_population, *file_selection;
@@ -634,7 +594,7 @@ void rvg_t::writeGenerationalSolutions( short final )
  * single objective value for that solution
  * and its sum of constraint violations.
  */
-void rvg_t::writeGenerationalSolutionsBest( short final )
+void rvg_t::writeGenerationalSolutionsBest( bool final )
 {
     int   i, population_index_best, individual_index_best;
     char  string[1000];
@@ -683,106 +643,104 @@ void rvg_t::writeGenerationalSolutionsBest( short final )
 /**
  * Returns 1 if termination should be enforced, 0 otherwise.
  */
-short rvg_t::checkTerminationCondition( void )
+bool rvg_t::checkTerminationCondition( void )
 {
-	short allTrue;
-
 	if( checkNumberOfEvaluationsTerminationCondition() )
 	{
-		return( 1 );
+		return( true );
 	}
 
 	if( checkVTRTerminationCondition() )
 	{
-		return( 1 );
+		return( true );
 	}
 
 	if( checkTimeLimitTerminationCondition() )
 	{
-		return( 1 );
+		return( true );
 	}
 
 	checkAverageFitnessTerminationConditions();
 
 	if((int) populations.size() < config->maximum_number_of_populations )
     {
-		return( 0 );
+		return( false );
     }
 
-	allTrue = 1;
+	bool allTrue = true;
 	for( size_t i = 0; i < populations.size(); i++ )
 	{
 		if( !populations[i]->population_terminated )
 		{
-			allTrue = 0;
+			allTrue = false;
 			break;
 		}
 	}
 	if( allTrue )
 	{
 		restartLargestPopulation();
-		allTrue = 0;
+		allTrue = false;
 	}
 
 	return( allTrue );
 }
 
-short rvg_t::checkPopulationTerminationConditions( int population_index )
+bool rvg_t::checkPopulationTerminationConditions( int population_index )
 {
 	if( checkFitnessVarianceTermination(population_index) )
 	{
-        return( 1 );
+        return( true );
     }
     
 	if( checkDistributionMultiplierTerminationCondition(population_index) )
 	{
-        return( 1 );
+        return( true );
     }
 
-    return( 0 );
+    return( false );
 }
 
-short rvg_t::checkSubgenerationTerminationConditions()
+bool rvg_t::checkSubgenerationTerminationConditions()
 {
 	if( checkNumberOfEvaluationsTerminationCondition() )
     {
-        return (1);
+        return( true );
     }
 
     if( checkVTRTerminationCondition() )
     {
-        return( 1 );
+        return( true );
     }
 
     if( checkTimeLimitTerminationCondition() )
     {
-        return( 1 );
+        return( true );
     }
 
-	return( 0 );
+	return( false );
 }
 
-short rvg_t::checkTimeLimitTerminationCondition( void )
+bool rvg_t::checkTimeLimitTerminationCondition( void )
 {
-    return( config->maximum_number_of_seconds > 0 && utils::getElapsedTimeSeconds(start_time) > config->maximum_number_of_seconds );
+    return( config->maximum_number_of_seconds > 0 && utils::getElapsedTimeSinceStartSeconds() > config->maximum_number_of_seconds );
 }
 
 /**
  * Returns 1 if the maximum number of evaluations
  * has been reached, 0 otherwise.
  */
-short rvg_t::checkNumberOfEvaluationsTerminationCondition( void )
+bool rvg_t::checkNumberOfEvaluationsTerminationCondition( void )
 {
     if( fitness->number_of_evaluations >= config->maximum_number_of_evaluations && config->maximum_number_of_evaluations > 0 )
-        return( 1 );
+        return( true );
 
-    return( 0 );
+    return( false );
 }
 
 /**
  * Returns 1 if the value-to-reach has been reached (in any population).
  */
-short rvg_t::checkVTRTerminationCondition( void )
+bool rvg_t::checkVTRTerminationCondition( void )
 {
     return( config->use_vtr && fitness->vtr_hit_status );
 }
@@ -839,11 +797,11 @@ void rvg_t::determineBestSolutionInCurrentPopulations( int *population_of_best, 
  * Checks whether the fitness variance in any population
  * has become too small (user-defined tolerance).
  */
-short rvg_t::checkFitnessVarianceTermination( int population_index )
+bool rvg_t::checkFitnessVarianceTermination( int population_index )
 {
 	if( populations[population_index]->getFitnessVariance() < config->fitness_variance_tolerance * populations[population_index]->getFitnessMean() )
-		return( 1 );
-	return( 0 );
+		return( true );
+	return( false );
 }
 
 
@@ -851,25 +809,25 @@ short rvg_t::checkFitnessVarianceTermination( int population_index )
  * Checks whether the distribution multiplier in any population
  * has become too small (1e-10).
  */
-short rvg_t::checkDistributionMultiplierTerminationCondition( int population_index )
+bool rvg_t::checkDistributionMultiplierTerminationCondition( int population_index )
 {
 	int i = population_index;
 	if( !populations[i]->population_terminated )
 	{
-		short converged = 1;
+		bool converged = true;
 		for(int j = 0; j < populations[i]->linkage_model->size(); j++ )
 		{
 			if( populations[i]->linkage_model->getDistributionMultiplier(j) > 1e-10 )
 			{
-				converged = 0;
+				converged = false;
 				break;
 			}
 		}
 
 		if( converged )
-			return( 1 );
+			return( true );
 	}
-	return( 0 );
+	return( false );
 }
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
@@ -972,19 +930,26 @@ void rvg_t::run( void )
     int out = gomea::utils::initializePythonEmbedding("gomea", PyInit_real_valued);
     assert(out == 0);
 
-    start_time = utils::getTimestamp();
+    utils::initStartTime();
 	initialize();
 
 	if( config->print_verbose_overview )
 		printVerboseOverview();
 
-	runAllPopulations();
+	try
+    {
+        runAllPopulations();
+    }
+	catch( utils::customException const& )
+	{
+		writeGenerationalStatisticsForOnePopulation( populations.size()-1 );
+	}
 
 	printf("evals %f ", fitness->number_of_evaluations);
 
 	printf("obj_val %6.2e ", fitness->elitist_objective_value);
 
-	printf("time %lf ", utils::getElapsedTimeSeconds(start_time));
+	printf("time %lf ", utils::getElapsedTimeSinceStartSeconds());
 	printf("generations ");
 	if( populations.size() > 1 )
 	{

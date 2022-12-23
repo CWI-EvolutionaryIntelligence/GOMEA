@@ -192,6 +192,11 @@ linkage_model_pt linkage_model_t::custom_fos( size_t numberOfVariables_, const v
 	linkage_model_pt new_fos = std::shared_ptr<linkage_model_t>(new linkage_model_t(numberOfVariables_,FOS));
 	return( new_fos );
 }
+    
+int linkage_model_t::getSimilarityMeasure()
+{
+	return similarityMeasure;
+}
 
 void linkage_model_t::addGroup( int var_index )
 {
@@ -524,10 +529,14 @@ void linkage_model_t::learnLinkageTreeFOS( vec_t<vec_t<double>> similarity_matri
 			NN_chain[0] = 0;
 			if( maximumSetSize < numberOfVariables )
 			{
-				done = 1;
+				done = true;
 				for(int i = 1; i < mpm.size(); i++ )
 				{
-					if( mpm[i].size() + mpm[NN_chain[0]].size() <= maximumSetSize ) done = 0;
+					if( mpm[i].size() + mpm[NN_chain[0]].size() <= maximumSetSize )
+					{
+						done = false;
+						printf("%d %d [%d + %d]\n",i,NN_chain[0],mpm[i].size(),mpm[NN_chain[0]].size());
+					}
 					if( mpm[i].size() < mpm[NN_chain[0]].size() ) NN_chain[0] = i;
 				}
 				if( done ) break;
@@ -658,7 +667,7 @@ void linkage_model_t::learnLinkageTreeFOS( vec_t<vec_t<double>> similarity_matri
 /**
  * Determines nearest neighbour according to similarity values.
  */
-int linkage_model_t::determineNearestNeighbour(size_t index, vec_t<vec_t< int> > &mpm)
+int linkage_model_t::determineNearestNeighbour(size_t index, const vec_t<vec_t< int> > &mpm)
 {
     size_t result = 0;
 
@@ -667,22 +676,26 @@ int linkage_model_t::determineNearestNeighbour(size_t index, vec_t<vec_t< int> >
 
     for (size_t i = 1; i < mpm.size(); i++)
     {
+		if( mpm[i].size() > numberOfVariables )
+			assert(0);
         if (i != index)
         {
-			if( (int) mpm[i].size() > maximumSetSize)
+			if( mpm[index].size() + mpm[result].size() > maximumSetSize)
 			{
 				if( mpm[i].size() < mpm[result].size() )
+				{
 					result = i;
+				}
 			}
-			else
+			else if( mpm[index].size() + mpm[i].size() <= maximumSetSize)
 			{
-				if( (int) mpm[result].size() > maximumSetSize)
+				if ((S_Matrix[index][i] > S_Matrix[index][result]) || ((S_Matrix[index][i] == S_Matrix[index][result]) && (mpm[i].size() < mpm[result].size())))
+				{
 					result = i;
-				else if((S_Matrix[index][i] > S_Matrix[index][result]) || ((S_Matrix[index][i] == S_Matrix[index][result]) && (mpm[i].size() < mpm[result].size())))
-					result = i;
+				}
 			}
-        }
-    }
+		}
+	}
     return result;
 }
 

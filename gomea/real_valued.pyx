@@ -2,12 +2,14 @@
 # cython: c_string_type=unicode, c_string_encoding=utf8
 
 from gomea.real_valued cimport rvg_t, Config
+from gomea.output cimport OutputStatisticsWrapper
+from gomea.output import OutputStatistics
 from libcpp.string cimport string
 from libcpp cimport bool
 import inspect
 
 from gomea.fitness cimport FitnessFunction, PythonFitnessFunction
-from gomea.linkage cimport LinkageModel
+from gomea.linkage cimport LinkageModel, StaticLinkageTree
 include "gomea/EmbeddedFitness.pxi"
 
 # Create a Cython extension type which holds a C++ instance
@@ -21,7 +23,7 @@ cdef class RealValuedGOMEA:
         # Optimization problem settings (required)
         fitness: FitnessFunction, 
         # GOMEA parameters
-        linkage_model : LinkageModel,
+        linkage_model : LinkageModel = StaticLinkageTree(),
         lower_init_range: double=0.0,
         upper_init_range: double=1.0,
         tau: double=0.35,
@@ -29,9 +31,9 @@ cdef class RealValuedGOMEA:
         st_dev_ratio_threshold: double=1.0,
         fitness_variance_tolerance: double=0.0,
         maximum_no_improvement_stretch: int=100,
-        use_conditional_sampling: short=0,
-        selection_during_gom: short=1,
-        update_elitist_during_gom: short=1,
+        use_conditional_sampling: bool=False,
+        selection_during_gom: bool=True,
+        update_elitist_during_gom: bool=True,
         random_seed: int=-1,
         # IMS settings (optional)
         maximum_number_of_populations: int=25,
@@ -40,12 +42,11 @@ cdef class RealValuedGOMEA:
         # Termination settings (optional)
         max_evals : double=-1,
         max_time : double=-1,
-        value_to_reach : double=1e-10,
         # Logging settings (optional)
-        write_generational_statistics: short=1,
-        write_generational_solutions: short=0,
-        black_box_evaluations: short=0,
-        verbose : short=0
+        write_generational_statistics: bool=True,
+        write_generational_solutions: bool=False,
+        black_box_evaluations: bool=False,
+        verbose : bool=False
     ):
 
         # Initialize attributes 
@@ -53,12 +54,7 @@ cdef class RealValuedGOMEA:
         self.c_config.problem_index = 0 
         self.c_config.fitness = (<FitnessFunction?>fitness).c_inst_realvalued
         self.c_config.linkage_config = linkage_model.c_inst
-        self.c_config.use_vtr = 0
-        self.c_config.vtr = 0.0
-        #if value_to_reach > -1e100:
-        #    self.c_config.use_vtr = 1
-        self.c_config.use_vtr = 1 
-        self.c_config.vtr = value_to_reach
+        self.c_config.use_vtr = True 
         self.c_config.lower_user_range = lower_init_range
         self.c_config.upper_user_range = upper_init_range
         self.c_config.tau = tau
@@ -75,6 +71,8 @@ cdef class RealValuedGOMEA:
         self.c_config.maximum_number_of_evaluations = max_evals
         self.c_config.maximum_number_of_seconds = max_time
         self.c_config.black_box_evaluations = black_box_evaluations
+        self.c_config.write_generational_statistics = write_generational_statistics
+        self.c_config.write_generational_solutions = write_generational_solutions
         self.c_config.verbose = verbose
         self.c_config.print_verbose_overview = verbose
         self.c_config.fix_seed = 0
@@ -88,9 +86,6 @@ cdef class RealValuedGOMEA:
     def print_usage(self):
         self.c_inst.printUsage()
 
-    #def print_installed_problems(self):
-        #self.c_inst.printAllInstalledProblems()
-
     def run(self):
         self.c_inst.run()
-
+        return OutputStatistics(OutputStatisticsWrapper.from_ptr(&self.c_inst.output))

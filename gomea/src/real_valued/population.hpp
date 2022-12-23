@@ -43,6 +43,7 @@
 #include "gomea/src/real_valued/tools.hpp"
 #include "gomea/src/real_valued/linkage_model.hpp"
 #include "gomea/src/real_valued/solutionRV.hpp"
+#include "gomea/src/common/output_statistics.hpp"
 
 #include <deque>
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
@@ -69,15 +70,19 @@ class population_t {
 		void getBestInPopulation( int *individual_index );
 		void evaluateCompletePopulation();
 		void generateAndEvaluateNewSolutions();
-		short checkForImprovement( solution_t<double> *solution, partial_solution_t<double> *part );
+		bool checkForImprovement( solution_t<double> *solution, partial_solution_t<double> *part );
 		partial_solution_t<double> *generatePartialSolution( int FOS_index );
 		void applyPartialAMS( partial_solution_t<double> *solution, double cmul );
 		void generateAndEvaluateNewSolutionsToFillPopulation();
-		partial_solution_t<double> *generateNewSolutionFromFOSElement( int FOS_index, int individual_index, short apply_AMS );
-		short applyAMS( int individual_index );
+		partial_solution_t<double> *generateNewSolutionFromFOSElement( int FOS_index, int individual_index, bool apply_AMS );
+		bool applyAMS( int individual_index );
 		void applyForcedImprovements( int individual_index, int donor_index );
 		double getFitnessMean();
 		double getFitnessVariance();
+		double getConstraintValueMean();
+		double getConstraintValueVariance();
+		solution_t<double> *getBestSolution();
+		solution_t<double> *getWorstSolution();
 		
 		void initialize();
 		void initializeDefaultParameters();
@@ -103,7 +108,7 @@ class population_t {
 			   FOS_element_size;
 		int    problem_index;
 		double delta_AMS;
-		short update_elitist_during_gom, selection_during_gom;
+		bool update_elitist_during_gom, selection_during_gom;
 		/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 		partial_solution_t<double>*** sampled_solutions; 
 		int    number_of_generations,
@@ -118,7 +123,7 @@ class population_t {
 			   constraint_value_elitist,                        /* Sum of all constraint violations of selected solutions. */
 			   *mean_shift_vector,                                   /* The mean vectors of the previous generation, one for each population. */
 			   *prev_mean_vector;                                   /* The mean vectors of the previous generation, one for each population. */
-		short  population_terminated;
+		bool  population_terminated;
 		linkage_config_t *linkage_config;
 		linkage_model_rv_pt linkage_model;
 		/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/

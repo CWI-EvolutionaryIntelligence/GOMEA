@@ -49,12 +49,12 @@ typedef gomea::fitness::fitness_t<double> fitness_t;
 class Config {
 	public:
 		/*-=-=-=-=-=-=-=-=-=-=-=-= Section Header Functions -=-=-=-=-=-=-=-=-=-=-=-=*/
-		Config(); 
+		Config(){}; 
 
 		/*-=-=-=-=-=-=-=-=-=-=-=- Options -=-=-=-=-=-=-=-=-=-=-=-=-*/
 		int problem_index;
-		bool   use_vtr;
-		short  print_verbose_overview,                              /* Whether to print a overview of settings (0 = no). */
+		bool   use_vtr,
+			   print_verbose_overview,                              /* Whether to print a overview of settings (0 = no). */
 			   fix_seed,                                            /* Whether a fixed seed is used. */
 			   black_box_evaluations,                         /* Whether full (black-box) evaluations must always be performed. */
 			   write_generational_statistics,                 /* Whether to compute and write statistics every generation (0 = no). */

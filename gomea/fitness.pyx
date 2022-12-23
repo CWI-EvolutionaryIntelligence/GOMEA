@@ -43,10 +43,13 @@ cdef class PythonFitnessFunction(FitnessFunction):
 
 cdef class PythonFitnessFunctionDiscrete(PythonFitnessFunction):
     def __cinit__(self, 
-        number_of_variables : int
+        number_of_variables : int,
+        *args,
+        **kwargs
     ):
         self.number_of_variables = number_of_variables
         self.c_inst_discrete = new pyFitnessFunction_t[char](number_of_variables,<PyObject*>self)
+
 
 cdef class PythonFitnessFunctionRealValued(PythonFitnessFunction):
     def __cinit__(self, 

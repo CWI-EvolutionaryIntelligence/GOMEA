@@ -71,6 +71,14 @@ extensions.append( Extension("gomea.linkage",
         extra_link_args=link_args)
 )
 
+extensions.append( Extension("gomea.output",
+        ["gomea/output.pyx"] + common_src,
+        include_dirs=["."],
+        language="c++",
+        extra_compile_args=compile_args,
+        extra_link_args=link_args)
+)
+
 setup(
     name = "gomea",
     description = 'Library for the use of various variants of the Gene-pool Optimal Mixing Evolutionary Algorith (GOMEA).',

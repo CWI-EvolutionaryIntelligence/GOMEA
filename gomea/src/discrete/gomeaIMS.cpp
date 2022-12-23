@@ -19,6 +19,8 @@ gomeaIMS::gomeaIMS(Config *config_): config(config_)
     IMSsubgenerationFactor  = config->IMSsubgenerationFactor;
     basePopulationSize      = config->basePopulationSize;
 	problemInstance 		= config->fitness;
+    problemInstance->maximum_number_of_evaluations = config->maximumNumberOfEvaluations;
+    problemInstance->maximum_number_of_seconds = config->maximumNumberOfSeconds;
 	if( config->fix_seed )
 		utils::initializeRandomNumberGenerator(config->randomSeed);
 	else
@@ -40,10 +42,13 @@ gomeaIMS::~gomeaIMS()
 
 void gomeaIMS::initialize()
 {
-	start_time = utils::getTimestamp();
+	utils::initStartTime();
 
-	prepareFolder(config->folder);
-    initElitistFile(config->folder);
+	if( config->AnalyzeFOS )
+	{
+		prepareFolder(config->folder);
+	}
+    //initElitistFile(config->folder);
 
     #ifdef DEBUG
         cout << "Problem Instance created! Problem number is " << config->problemIndex << endl;
@@ -73,9 +78,10 @@ void gomeaIMS::run()
 			numberOfGenerationsIMS++;
 		}
 	}
-	catch( customException const& )
+	catch( utils::customException const& )
 	{
 		hasTerminated = true;
+		writeStatistics( numberOfGOMEAs-1 );			
 	}
 }
 
@@ -107,16 +113,15 @@ void gomeaIMS::runGeneration()
 		else
 			currentGOMEAIndex = minimumGOMEAIndex;
 	}
-	catch( customException const& )
+	catch( utils::customException const& )
 	{
 		hasTerminated = true;
+		writeStatistics( currentGOMEAIndex );			
 	}
 }
 
 void gomeaIMS::runGeneration( int GOMEAIndex )
 {
-	//printf("GOMEA[%d] - pop size %d - generation %d\n",GOMEAIndex,GOMEAs[GOMEAIndex]->populationSize,GOMEAs[GOMEAIndex]->numberOfGenerations);
-	
 	GOMEAs[GOMEAIndex]->calculateAverageFitness();
 
 	GOMEAs[GOMEAIndex]->makeOffspring();
@@ -126,11 +131,16 @@ void gomeaIMS::runGeneration( int GOMEAIndex )
 	GOMEAs[GOMEAIndex]->calculateAverageFitness();
 
 	GOMEAs[GOMEAIndex]->numberOfGenerations++;
+		
+	writeStatistics( GOMEAIndex );
 }
 
 bool gomeaIMS::checkTermination()
 {
     int i;
+	
+	if( checkEvaluationLimitTerminationCriterion() )
+		hasTerminated = true;
 
 	if( checkTimeLimitTerminationCriterion() )
 		hasTerminated = true;
@@ -149,11 +159,20 @@ bool gomeaIMS::checkTermination()
     return hasTerminated;
 }
 
+bool gomeaIMS::checkEvaluationLimitTerminationCriterion()
+{
+	if( !isInitialized )
+		return( false );
+	if( config->maximumNumberOfEvaluations > 0 && problemInstance->number_of_evaluations > config->maximumNumberOfEvaluations )
+		hasTerminated = true;
+	return hasTerminated; 
+}
+
 bool gomeaIMS::checkTimeLimitTerminationCriterion()
 {
 	if( !isInitialized )
 		return( false );
-	if( config->maximumNumberOfSeconds > 0 && utils::getElapsedTimeSeconds(start_time) > config->maximumNumberOfSeconds )
+	if( config->maximumNumberOfSeconds > 0 && utils::getElapsedTimeSinceStartSeconds() > config->maximumNumberOfSeconds )
 		hasTerminated = true;
 	return hasTerminated; 
 }
@@ -167,7 +186,7 @@ double gomeaIMS::getProgressUntilTermination()
 
 	if( config->maximumNumberOfSeconds > 0 )
 	{
-		double time_progress = 100.0*utils::getElapsedTimeSeconds(start_time)/(config->maximumNumberOfSeconds);
+		double time_progress = 100.0*utils::getElapsedTimeSinceStartSeconds()/(config->maximumNumberOfSeconds);
 		overall_progress = fmax( overall_progress, time_progress );
 	}
 
@@ -234,7 +253,9 @@ void gomeaIMS::GOMEAGenerationalStepAllGOMEAsRecursiveFold(int GOMEAIndexSmalles
                 GOMEAs[GOMEAIndex]->terminated = checkTerminationGOMEA(GOMEAIndex);
 
             if((!GOMEAs[GOMEAIndex]->terminated) && (GOMEAIndex >= minimumGOMEAIndex))
+			{
 				runGeneration( GOMEAIndex );
+			}
         }
 
         for(GOMEAIndex = GOMEAIndexSmallest; GOMEAIndex < GOMEAIndexBiggest; GOMEAIndex++)
@@ -244,6 +265,9 @@ void gomeaIMS::GOMEAGenerationalStepAllGOMEAsRecursiveFold(int GOMEAIndexSmalles
 
 bool gomeaIMS::checkTerminationGOMEA(int GOMEAIndex)
 {
+	if( checkTermination() )
+		return true;
+
 	if( config->maximumNumberOfGenerations > 0 && (int) GOMEAs[GOMEAIndex]->numberOfGenerations >= config->maximumNumberOfGenerations )
 	{
         if( GOMEAIndex == minimumGOMEAIndex )
@@ -270,5 +294,24 @@ bool gomeaIMS::checkTerminationGOMEA(int GOMEAIndex)
 		minimumGOMEAIndex = GOMEAIndex+1;
     return true;
 }
+
+void gomeaIMS::writeStatistics( int population_index )
+{
+	assert( sharedInformationInstance != NULL );
+	int key = numberOfStatisticsWrites;
+    double evals = problemInstance->number_of_evaluations;
+    //double elitist_evals = sharedInformationInstance->elitistSolutionHittingTimeEvaluations;
+    double time_s = sharedInformationInstance->elitistSolutionHittingTimeMilliseconds/1000.0;
+	double best_fitness = sharedInformationInstance->elitistFitness;
+    output.addMetricValue("evaluations",key,evals);
+    //output.addMetricValue("elitist_hitting_evaluations",key,elitist_evals);
+    output.addMetricValue("time",key,time_s);
+    output.addMetricValue("best_obj_val",key,best_fitness);
+    output.addMetricValue("population_index",key,population_index);
+    output.addMetricValue("generation",key,(int)GOMEAs[population_index]->numberOfGenerations);
+    output.addMetricValue("pop_size",key,(int)GOMEAs[population_index]->populationSize);
+	numberOfStatisticsWrites++;
+}
+
 
 }}

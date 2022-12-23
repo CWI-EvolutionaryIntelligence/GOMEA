@@ -484,8 +484,8 @@ int *linkage_model_rv_t::hungarianAlgorithm( int **similarity_matrix, int dim )
 	int *slack = (int*) Malloc(dim*sizeof(int));
 	int *slackx = (int*) Malloc(dim*sizeof(int));
 	int *prev = (int*) Malloc(dim*sizeof(int));
-	short *S = (short*) Malloc(dim*sizeof(short));
-	short *T = (short*) Malloc(dim*sizeof(short));
+	bool *S = (bool*) Malloc(dim*sizeof(bool));
+	bool *T = (bool*) Malloc(dim*sizeof(bool));
 
 	int root = -1;
 	int max_match = 0;
@@ -501,7 +501,7 @@ int *linkage_model_rv_t::hungarianAlgorithm( int **similarity_matrix, int dim )
 			if(similarity_matrix[i][j] > lx[i])
 				lx[i] = similarity_matrix[i][j];
 
-	short terminated = 0;
+	bool terminated = false;
 	while(!terminated)
 	{
 		if (max_match == dim) break;
@@ -511,8 +511,8 @@ int *linkage_model_rv_t::hungarianAlgorithm( int **similarity_matrix, int dim )
 		int *q = (int*) Malloc(dim*sizeof(int));
 		for(int i = 0; i < dim; i++ )
 		{
-			S[i] = 0;
-			T[i] = 0;
+			S[i] = false;
+			T[i] = false;
 			prev[i] = -1;
 		}
 
@@ -522,7 +522,7 @@ int *linkage_model_rv_t::hungarianAlgorithm( int **similarity_matrix, int dim )
 			{
 				q[wr++] = root = x;
 				prev[x] = -2;
-				S[x] = 1;
+				S[x] = true;
 				break;
 			}
 		}
@@ -543,7 +543,7 @@ int *linkage_model_rv_t::hungarianAlgorithm( int **similarity_matrix, int dim )
 					if (similarity_matrix[x][y] == lx[x] + ly[y] && !T[y])
 					{
 						if (yx[y] == -1) break;
-						T[y] = 1;
+						T[y] = true;
 						q[wr++] = yx[y];
 						hungarianAlgorithmAddToTree(yx[y], x, S, prev, slack, slackx, lx, ly, similarity_matrix, dim);
 					}
@@ -554,23 +554,23 @@ int *linkage_model_rv_t::hungarianAlgorithm( int **similarity_matrix, int dim )
 
 			int delta = 100000000;
 			for(y = 0; y < dim; y++)
-				if(T[y] == 0 && slack[y] < delta)
+				if(!T[y] && slack[y] < delta)
 					delta = slack[y];
 			for(x = 0; x < dim; x++)
-				if(S[x] == 1)
+				if(S[x])
 					lx[x] -= delta;
 			for(y = 0; y < dim; y++)
-				if(T[y] == 1)
+				if(T[y])
 					ly[y] += delta;
 			for(y = 0; y < dim; y++)
-				if(T[y] == 0)
+				if(!T[y])
 					slack[y] -= delta;
 
 			wr = 0;
 			rd = 0;
 			for (y = 0; y < dim; y++)
 			{
-				if (T[y] == 0 && slack[y] == 0)
+				if (!T[y] && slack[y] == 0)
 				{
 					if (yx[y] == -1)
 					{
@@ -579,8 +579,8 @@ int *linkage_model_rv_t::hungarianAlgorithm( int **similarity_matrix, int dim )
 					}
 					else
 					{
-						T[y] = 1;
-						if (S[yx[y]] == 0)
+						T[y] = true;
+						if (!S[yx[y]])
 						{
 							q[wr++] = yx[y];
 							hungarianAlgorithmAddToTree(yx[y], slackx[y], S, prev, slack, slackx, lx, ly, similarity_matrix, dim);
@@ -601,7 +601,7 @@ int *linkage_model_rv_t::hungarianAlgorithm( int **similarity_matrix, int dim )
 				xy[cx] = cy;
 			}
 		}
-		else terminated = 1;
+		else terminated = true;
 
 		free( q );
 	}
@@ -618,9 +618,9 @@ int *linkage_model_rv_t::hungarianAlgorithm( int **similarity_matrix, int dim )
 	return xy;
 }
 
-void linkage_model_rv_t::hungarianAlgorithmAddToTree(int x, int prevx, short *S, int *prev, int *slack, int *slackx, int* lx, int *ly, int** similarity_matrix, int dim) 
+void linkage_model_rv_t::hungarianAlgorithmAddToTree(int x, int prevx, bool *S, int *prev, int *slack, int *slackx, int* lx, int *ly, int** similarity_matrix, int dim) 
 {
-	S[x] = 1;
+	S[x] = true;
 	prev[x] = prevx;
 	for (int y = 0; y < dim; y++)
 	{

@@ -64,7 +64,7 @@ class distribution_t {
 
 		void adaptDistributionMultiplier( partial_solution_t<double>** partial_solutions, int num_solutions );
 		void adaptDistributionMultiplierMaximumStretch( partial_solution_t<double>** partial_solutions, int num_solutions );
-		virtual short generationalImprovementForOnePopulationForFOSElement( partial_solution_t<double>** partial_solutions, int num_solutions, double *st_dev_ratio ) = 0;
+		virtual bool generationalImprovementForOnePopulationForFOSElement( partial_solution_t<double>** partial_solutions, int num_solutions, double *st_dev_ratio ) = 0;
 
 		static mat estimateFullCovarianceMatrixML( solution_t<double> **selection, int selection_size );
 		static double estimateCovariance( int vara, int varb, solution_t<double> **selection, int selection_size );
@@ -100,7 +100,7 @@ class normal_distribution_t : public distribution_t {
 			void estimateDistribution( solution_t<double> **selection, int selection_size );
 			partial_solution_t<double> *generatePartialSolution( solution_t<double> *parent = NULL );
 			
-			short generationalImprovementForOnePopulationForFOSElement( partial_solution_t<double>** partial_solutions, int num_solutions, double *st_dev_ratio );
+			bool generationalImprovementForOnePopulationForFOSElement( partial_solution_t<double>** partial_solutions, int num_solutions, double *st_dev_ratio );
 };
 
 class conditional_distribution_t : public distribution_t {
@@ -131,7 +131,7 @@ class conditional_distribution_t : public distribution_t {
 			void updateConditionals( const std::map<int,std::set<int>> &variable_interaction_graph, int visited[] );
 
 			partial_solution_t<double> *generatePartialSolution( solution_t<double> *solution_conditioned_on = NULL ); 
-			short generationalImprovementForOnePopulationForFOSElement( partial_solution_t<double>** partial_solutions, int num_solutions, double *st_dev_ratio );
+			bool generationalImprovementForOnePopulationForFOSElement( partial_solution_t<double>** partial_solutions, int num_solutions, double *st_dev_ratio );
 		private:
 			void initializeMemory();
 			void estimateConditionalGaussianML( int variable_group_index, solution_t<double> **selection, int selection_size );

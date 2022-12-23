@@ -14,6 +14,7 @@ class sphereFunction_t : public fitness_t<double>
 {
 	public:
 		sphereFunction_t( int number_of_variables, double vtr );
+		double getSimilarityMeasure( size_t var_a, size_t var_b );
 		
 	private:
 		void evaluationFunction( solution_t<double> *solution );
@@ -27,8 +28,8 @@ class rosenbrockFunction_t : public fitness_t<double>
 		rosenbrockFunction_t( int number_of_variables, double vtr );
 
 		int getNumberOfSubfunctions();
-
 		void initializeVariableInteractionGraph();
+		double getSimilarityMeasure( size_t var_a, size_t var_b );
 		
 	private:
 		void evaluationFunction( solution_t<double> *solution );

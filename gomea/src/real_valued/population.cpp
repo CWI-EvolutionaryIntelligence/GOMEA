@@ -302,9 +302,9 @@ void population_t::generateAndEvaluateNewSolutions()
 	if( !fitness->black_box_optimization && (number_of_generations+1) % 50 == 0 )
 		evaluateCompletePopulation();
 
-	short *individual_improved = (short *) Malloc( population_size*sizeof( short ) );
+	bool *individual_improved = new bool[population_size];
 	for(int k = num_elitists_to_copy; k < population_size; k++ )
-		individual_improved[k] = 0;
+		individual_improved[k] = false;
 
 	double alpha_AMS = 0.5*tau*(((double) population_size)/((double) (population_size-1)));
 	int number_of_AMS_solutions = (int) (alpha_AMS*(population_size-1));
@@ -335,7 +335,7 @@ void population_t::generateAndEvaluateNewSolutions()
 			fitness->evaluatePartialSolution( individuals[k], sampled_solutions[FOS_index][k] );
 		
 		int num_improvements = 0;
-		short *accept_improvement = (short*) Malloc( population_size * sizeof(short) );
+		bool *accept_improvement = new bool[population_size];
 		for(int k = num_elitists_to_copy; k < population_size; k++ )
 		{
 			accept_improvement[k] = checkForImprovement( individuals[k], sampled_solutions[FOS_index][k] );
@@ -347,7 +347,7 @@ void population_t::generateAndEvaluateNewSolutions()
 		{
 			if( accept_improvement[k] || utils::randomRealUniform01() < linkage_model->getAcceptanceRate() )
 			{
-				sampled_solutions[FOS_index][k]->is_accepted = 1;
+				sampled_solutions[FOS_index][k]->is_accepted = true;
 				individuals[k]->insertPartialSolution(sampled_solutions[FOS_index][k] );
 			}
 			else
@@ -356,9 +356,9 @@ void population_t::generateAndEvaluateNewSolutions()
 			}	
 
 			if( fitness->betterFitness( sampled_solutions[FOS_index][k]->getObjectiveValue(), sampled_solutions[FOS_index][k]->getConstraintValue(), objective_value_elitist, constraint_value_elitist ) )
-				sampled_solutions[FOS_index][k]->improves_elitist = 1;
+				sampled_solutions[FOS_index][k]->improves_elitist = true;
 		}
-		free( accept_improvement );
+		delete[] accept_improvement;
 
 		linkage_model->adaptDistributionMultiplier( FOS_index, &sampled_solutions[FOS_index][num_elitists_to_copy], population_size-num_elitists_to_copy );
 	}
@@ -373,7 +373,7 @@ void population_t::generateAndEvaluateNewSolutions()
 			individual_improved[k] |= applyAMS(k);
 	}
 		
-	short generational_improvement = 0;
+	bool generational_improvement = false;
 	for(int i = num_elitists_to_copy; i < population_size; i++ )
 	{
 		if( !individual_improved[i] )
@@ -395,11 +395,11 @@ void population_t::generateAndEvaluateNewSolutions()
 		linkage_model->no_improvement_stretch = 0;
 	else
 	{
-		short all_multipliers_leq_one = 1;
+		bool all_multipliers_leq_one = true;
 		for(int j = 0; j < linkage_model->size(); j++ )
 			if( linkage_model->getDistributionMultiplier(j) > 1.0 )
 			{
-				all_multipliers_leq_one = 0;
+				all_multipliers_leq_one = false;
 				break;
 			}
 
@@ -407,12 +407,12 @@ void population_t::generateAndEvaluateNewSolutions()
 			linkage_model->no_improvement_stretch++;
 	}
 
-	free( individual_improved );
+	delete[] individual_improved;
 }
 
 void population_t::applyPartialAMS( partial_solution_t<double> *solution, double cmul )
 {
-	short out_of_range = 1;
+	bool out_of_range = true;
 	double shrink_factor = 2;
 	double *result = (double*) Malloc( solution->getNumberOfTouchedVariables() * sizeof(double) );
 	while( (out_of_range == 1) && (shrink_factor > 1e-10) )
@@ -440,41 +440,40 @@ void population_t::applyPartialAMS( partial_solution_t<double> *solution, double
 	free( result );
 }
 		
-short population_t::checkForImprovement( solution_t<double> *solution, partial_solution_t<double> *part )
+bool population_t::checkForImprovement( solution_t<double> *solution, partial_solution_t<double> *part )
 {
 	return( fitness->betterFitness( part->getObjectiveValue(), part->getConstraintValue(), solution->getObjectiveValue(), solution->getConstraintValue() ) );
 }
 
-short population_t::applyAMS( int individual_index )
+bool population_t::applyAMS( int individual_index )
 {
-	short out_of_range  = 1;
-	short improvement   = 0;
+	bool out_of_range  = true;
+	bool improvement   = false;
 	double delta_AMS     = 2;
 	double shrink_factor = 2;
 	solution_t<double> *solution_AMS = new solution_t<double>(fitness->number_of_variables);
-	while( (out_of_range == 1) && (shrink_factor > 1e-10) )
+	while( (out_of_range) && (shrink_factor > 1e-10) )
 	{
 		shrink_factor *= 0.5;
-		out_of_range   = 0;
+		out_of_range   = false;
 		for(int m = 0; m < fitness->number_of_variables; m++ )
 		{
 			solution_AMS->variables[m] = individuals[individual_index]->variables[m] + shrink_factor*delta_AMS*(mean_shift_vector[m]);
 			if( !fitness->isParameterInRangeBounds( solution_AMS->variables[m], m ) )
 			{
-				out_of_range = 1;
+				out_of_range = true;
 				break;
 			}
 		}
 	}
 	if( !out_of_range )
 	{
-		short improvement;
 		fitness->evaluate( solution_AMS );
-		improvement = fitness->betterFitness(solution_AMS->getObjectiveValue(), solution_AMS->getConstraintValue(), individuals[individual_index]->getObjectiveValue(), individuals[individual_index]->getConstraintValue()); 
-		if( utils::randomRealUniform01() < linkage_model->getAcceptanceRate() || improvement )
+		bool imp = fitness->betterFitness(solution_AMS->getObjectiveValue(), solution_AMS->getConstraintValue(), individuals[individual_index]->getObjectiveValue(), individuals[individual_index]->getConstraintValue()); 
+		if( utils::randomRealUniform01() < linkage_model->getAcceptanceRate() || imp )
 		{
 			individuals[individual_index]->insertSolution(solution_AMS);
-			improvement = 1;
+			improvement = true;
 		}
 	}
 	delete( solution_AMS );
@@ -484,7 +483,7 @@ short population_t::applyAMS( int individual_index )
 
 void population_t::applyForcedImprovements( int individual_index, int donor_index )
 {
-	short improvement = 0;
+	bool improvement = false;
 	double alpha = 1.0;
 
 	while( alpha >= 0.01 )
@@ -548,6 +547,56 @@ double population_t::getFitnessVariance()
 	return( objective_var );
 }
 
+double population_t::getConstraintValueMean()
+{
+	double constraint_avg = 0.0;
+	for(int i = 0; i < population_size; i++ )
+		constraint_avg  += individuals[i]->getConstraintValue();
+	constraint_avg = constraint_avg / ((double) population_size);
+
+	return( constraint_avg );
+}
+
+double population_t::getConstraintValueVariance()
+{
+	double constraint_avg = getConstraintValueMean();
+
+	double constraint_var = 0.0;
+	for(int i = 0; i < population_size; i++ )
+		constraint_var  += (individuals[i]->getConstraintValue()-constraint_avg)*(individuals[i]->getConstraintValue()-constraint_avg);
+	constraint_var = constraint_var / ((double) population_size);
+
+	if( constraint_var <= 0.0 )
+		constraint_var = 0.0;
+	return( constraint_var );
+}
+
+solution_t<double> *population_t::getBestSolution()
+{
+	int index_best = 0;
+	for(int j = 1; j < population_size; j++ )
+    {
+        if( fitness->betterFitness( individuals[j]->getObjectiveValue(), individuals[j]->getConstraintValue(), individuals[index_best]->getObjectiveValue(), individuals[index_best]->getConstraintValue()) )
+		{
+			index_best = j;
+        }
+    }
+	return( individuals[index_best] );
+}
+
+solution_t<double> *population_t::getWorstSolution()
+{
+	int index_worst = 0;
+	for(int j = 1; j < population_size; j++ )
+    {
+        if( fitness->betterFitness( individuals[index_worst]->getObjectiveValue(), individuals[index_worst]->getConstraintValue(), individuals[j]->getObjectiveValue(), individuals[j]->getConstraintValue()) )
+		{
+			index_worst = j;
+        }
+    }
+	return( individuals[index_worst] );
+}
+
 void population_t::initializeDefaultParameters()
 {
 	eta_cov = 1.0;
@@ -577,7 +626,7 @@ void population_t::initializeNewPopulationMemory()
 
 	initializeFOS(linkage_config);
 
-	population_terminated = 0;
+	population_terminated = false;
 
 	number_of_generations = 0;
 }
@@ -599,7 +648,7 @@ void population_t::initializeFOS( linkage_config_t *linkage_config )
 	{
 		if ( linkage_model->type == linkage::LINKAGE_TREE )
 		{
-			linkage_model->linkage_model_t::learnLinkageTreeFOS(fitness->getSimilarityMatrix(),true);
+			linkage_model->linkage_model_t::learnLinkageTreeFOS(fitness->getSimilarityMatrix(linkage_model->getSimilarityMeasure()),true);
 		}
 		sampled_solutions = (partial_solution_t<double> ***)Malloc(linkage_model->size() * sizeof(partial_solution_t<double> **));
 		for (int j = 0; j < linkage_model->size(); j++)

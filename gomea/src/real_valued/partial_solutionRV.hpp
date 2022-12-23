@@ -57,8 +57,8 @@ class partial_solution_t : public gomea::partial_solution_t<T>
 		vec_t<T> sample_zs; // Samples z~N(0,I), later transformed to N(mu,C)
 		vec_t<T> sample_means;
 
-		short is_accepted = 0;
-		short improves_elitist = 0;
+		bool is_accepted = false;
+		bool improves_elitist = false;
 
 		void setSampleMean( vec_t<T> &means );
 };

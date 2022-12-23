@@ -81,5 +81,10 @@ double sphereFunction_t::subfunction( double x )
 	return( x * x );
 }
 
+double sphereFunction_t::getSimilarityMeasure( size_t var_a, size_t var_b )
+{
+	return 0.0;
+}
+
 }}
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/

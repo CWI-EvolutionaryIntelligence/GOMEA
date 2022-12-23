@@ -142,7 +142,7 @@ bool Config::parseCommandLine(int argc, char **argv)
             problemInstancePath = string(optarg);
             break;
         case 'Z':
-            similarityMeasure = atoi(optarg);
+            linkage_config->lt_similarity_measure = atoi(optarg);
             break;
         case 'G':
             GPUIndex = atoi(optarg);
@@ -203,7 +203,7 @@ void Config::printOverview()
   cout << "# Use partial evaluations : " << (usePartialEvaluations ? "enabled" : "disabled")  << endl;
   cout << "# Write FOS to file : " << (AnalyzeFOS ? "enabled" : "disabled") << endl;
   cout << "# Save all evaluations : " << (saveEvaluations ? "enabled" : "disabled") << endl;
-  cout << "# similarity measure : " << (similarityMeasure ? "normalized MI" : "MI") << endl;
+  cout << "# similarity measure : " << (linkage_config->lt_similarity_measure ? "normalized MI" : "MI") << endl;
   
   cout << "#\n";
   cout << "###################################################\n";

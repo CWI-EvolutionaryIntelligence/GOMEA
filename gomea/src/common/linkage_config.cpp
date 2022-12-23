@@ -16,7 +16,6 @@ linkage_config_t::linkage_config_t(int similarityMeasure_, bool filtered_, int m
 	: lt_similarity_measure(similarityMeasure_), lt_filtered(filtered_), lt_maximum_set_size(maximumSetSize_), lt_is_static(is_static_)
 {
 	type = linkage::LINKAGE_TREE;
-	printf("CONFIG: %d static\n",this->lt_is_static?1:0);
 }
 
 linkage_config_t::linkage_config_t( const vec_t<vec_t<int>> &FOS_ ) : FOS(FOS_)

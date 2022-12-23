@@ -51,10 +51,9 @@ public:
     size_t k = 1, s = 1,   
         FOSIndex = 0;
 	int GPUIndex = -1;
-    int similarityMeasure = 0;
 	int maximumFOSSetSize = -1;
 
-    string folder = "test";
+    string folder = "discrete_gomea_output";
     //string problemName,
     string FOSName;
     string problemInstancePath = "";

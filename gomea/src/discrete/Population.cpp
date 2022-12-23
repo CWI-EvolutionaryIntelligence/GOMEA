@@ -36,7 +36,6 @@ Population::Population(Config *config_, fitness_t *problemInstance_, sharedInfor
 			
 		if( config->linkage_config != NULL )
 		{
-            printf("%s\n",linkage_model_t::getTypeName(config->linkage_config->type).c_str());
 			FOSInstance = linkage_model_t::createFOSInstance( *config->linkage_config, problemInstance->number_of_variables );
 		}
 		else if( FOSInstance_ == NULL )
@@ -101,10 +100,10 @@ void Population::makeOffspring()
 {
     if( FOSInstance->type == linkage::LINKAGE_TREE )
     {
-        if (config->similarityMeasure == 2)
+        if (FOSInstance->is_static)
         {
             if (FOSInstance->size() == 0)
-                FOSInstance->learnLinkageTreeFOS(problemInstance->getSimilarityMatrix(), false );
+                FOSInstance->learnLinkageTreeFOS(problemInstance->getSimilarityMatrix(FOSInstance->getSimilarityMeasure()), false );
         }
         else
             FOSInstance->learnLinkageTreeFOS(population, config->alphabetSize );
@@ -339,7 +338,7 @@ void Population::checkTimeLimit()
     if ( config->maximumNumberOfSeconds > 0 && utils::getElapsedTimeSeconds(sharedInformationPointer->startTime) > config->maximumNumberOfSeconds)
     {
         terminated = true;
-        throw customException("time");
+        throw utils::customException("time");
     }
 }
 
@@ -352,23 +351,25 @@ void Population::updateElitistAndCheckVTR(solution_t<char> *solution)
         sharedInformationPointer->elitistSolutionHittingTimeEvaluations = problemInstance->number_of_evaluations;
 
         sharedInformationPointer->elitist = *solution;
+		sharedInformationPointer->elitistFitness = solution->getObjectiveValue();
         
         /* Check the VTR */
         if (problemInstance->use_vtr && solution->getObjectiveValue() >= problemInstance->vtr)
         {
-            writeStatisticsToFile(config->folder, sharedInformationPointer->elitistSolutionHittingTimeEvaluations, sharedInformationPointer->elitistSolutionHittingTimeMilliseconds, solution);
-            writeElitistSolutionToFile(config->folder, sharedInformationPointer->elitistSolutionHittingTimeEvaluations, sharedInformationPointer->elitistSolutionHittingTimeMilliseconds, solution);
+            //writeStatisticsToFile(config->folder, sharedInformationPointer->elitistSolutionHittingTimeEvaluations, sharedInformationPointer->elitistSolutionHittingTimeMilliseconds, solution);
+            //writeElitistSolutionToFile(config->folder, sharedInformationPointer->elitistSolutionHittingTimeEvaluations, sharedInformationPointer->elitistSolutionHittingTimeMilliseconds, solution);
             //cout << "VTR HIT!\n";
             terminated = true;
-            throw customException("vtr");
+            throw utils::customException("vtr");
         }
     
-        writeStatisticsToFile(config->folder, sharedInformationPointer->elitistSolutionHittingTimeEvaluations, sharedInformationPointer->elitistSolutionHittingTimeMilliseconds, solution);
-        if( config->writeElitists )
-			writeElitistSolutionToFile(config->folder, sharedInformationPointer->elitistSolutionHittingTimeEvaluations, sharedInformationPointer->elitistSolutionHittingTimeMilliseconds, solution);
+        //writeStatisticsToFile(config->folder, sharedInformationPointer->elitistSolutionHittingTimeEvaluations, sharedInformationPointer->elitistSolutionHittingTimeMilliseconds, solution);
+        //if( config->writeElitists )
+			//writeElitistSolutionToFile(config->folder, sharedInformationPointer->elitistSolutionHittingTimeEvaluations, sharedInformationPointer->elitistSolutionHittingTimeMilliseconds, solution);
     }
 
     sharedInformationPointer->firstEvaluationEver = false;
 }
+
 
 }}

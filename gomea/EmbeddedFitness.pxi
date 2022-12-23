@@ -53,7 +53,7 @@ cdef public double gomea_pyfitness_mapping_function_constraint_value(obj, vector
 
 cdef public vector[int] gomea_pyfitness_inputsToSubfunction(obj, int subfunction_index ):
     fitness_obj = <PythonFitnessFunction?>obj
-    cdef np.ndarray indices = fitness_obj.inputs_to_subfunction(subfunction_index)
+    cdef np.ndarray indices = np.array(fitness_obj.inputs_to_subfunction(subfunction_index), np.int32)
     cdef vector[int] vec
     for i in indices:
         vec.push_back(i)

@@ -14,6 +14,7 @@ class oneMax_t: public fitness_t<char>
 {
 	public:
 		oneMax_t( int number_of_variables );
+		double getSimilarityMeasure( size_t var_a, size_t var_b );
 		
 	private:
 		void evaluationFunction( solution_t<char> *solution );
