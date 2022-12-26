@@ -943,9 +943,9 @@ void rvg_t::run( void )
 	catch( utils::customException const& )
 	{
 		writeGenerationalStatisticsForOnePopulation( populations.size()-1 );
-	}
+    }
 
-	printf("evals %f ", fitness->number_of_evaluations);
+	/*printf("evals %f ", fitness->number_of_evaluations);
 
 	printf("obj_val %6.2e ", fitness->elitist_objective_value);
 
@@ -961,7 +961,7 @@ void rvg_t::run( void )
 	else    
 		printf("%d", populations[0]->number_of_generations );
 	printf(" random_seed %ld",utils::random_seed);
-	printf("\n");
+	printf("\n");*/
 }
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/

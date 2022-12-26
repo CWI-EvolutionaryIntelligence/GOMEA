@@ -21,8 +21,8 @@ cdef extern from "gomea/src/discrete/gomeaIMS.hpp" namespace "gomea::discrete":
         gomeaIMS() except +
         gomeaIMS(Config*) except +
         
-        void run() except +
-        void runGeneration() except +
+        void run() except +*
+        void runGeneration() except +*
         bool checkTermination() except +
         double getProgressUntilTermination() except +
         output_statistics_t output
