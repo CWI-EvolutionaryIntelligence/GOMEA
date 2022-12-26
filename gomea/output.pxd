@@ -2,7 +2,7 @@ from libcpp.map cimport map
 from libcpp.string cimport string
 from libcpp.vector cimport vector
 
-cdef extern from "src/common/output_statistics.hpp" namespace "gomea":
+cdef extern from "gomea/src/common/output_statistics.hpp" namespace "gomea":
     cdef cppclass output_statistics_t:
         output_statistics_t() except +
         vector[string] getAllMetricNames() except +
