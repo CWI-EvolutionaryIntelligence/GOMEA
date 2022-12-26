@@ -1,2 +1,5 @@
-include src/gomea/cython/*pxd
-include src/fitness/cython/*pxd
+include gomea/*pxd
+include gomea/*pyx
+include gomea/*pxi
+graft gomea/src/
+global-exclude *.cpp
