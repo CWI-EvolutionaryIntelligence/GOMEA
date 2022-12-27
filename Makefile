@@ -5,7 +5,8 @@ debug:
 	python setup.py build_ext --inplace --debug -j4
 
 install:
-	python setup.py bdist_wheel
+	pip -q install build --user
+	python -m build --wheel
 	pip install dist/*.whl --user --force-reinstall
 
 clean:

@@ -93,8 +93,7 @@ setup(
         include_path = ["."] + [np.get_include()],
         gdb_debug = debug_mode,
         language_level = "3"),
-    #packages=['src/fitness'],
-    #package_data={'src/fitness': ['src/fitness/cython/Fitness.pxd']},
+    install_requires=["numpy>=1.19.0","tqdm"],
     zip_safe = False
 )
 
