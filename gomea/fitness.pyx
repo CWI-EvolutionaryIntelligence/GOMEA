@@ -26,10 +26,10 @@ cdef class PythonFitnessFunction(FitnessFunction):
     cpdef subfunction( self, int subfunction_index, np.ndarray variables ):
         return 1e308
     
-    cpdef mapping_function( self, int objective_index, np.ndarray fitness_buffers ):
+    cpdef objective_function( self, int objective_index, np.ndarray fitness_buffers ):
         return fitness_buffers[objective_index]
     
-    cpdef mapping_function_constraint_value( self, np.ndarray fitness_buffers ):
+    cpdef constraint_function( self, np.ndarray fitness_buffers ):
         return 0
     
     cpdef number_of_fitness_buffers( self ):
