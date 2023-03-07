@@ -45,13 +45,13 @@ class fitness_t
 		double vtr; // value-to-reach
 		bool black_box_optimization = false;
 		bool use_vtr;
-		bool vtr_hit_status = false;
 		
 		// Optimization progress
-		double number_of_evaluations = 0.0; // discounted in GBO
-		int full_number_of_evaluations = 0; // not discounted in GBO
-		double elitist_objective_value = 1e308;
-		double elitist_constraint_value = 1e308;
+		double number_of_evaluations; // discounted in GBO
+		int full_number_of_evaluations; // not discounted in GBO
+		double elitist_objective_value;
+		double elitist_constraint_value;
+		bool vtr_hit_status;
 
 		virtual int getNumberOfSubfunctions();
 		virtual int getNumberOfFitnessBuffers();
@@ -64,9 +64,10 @@ class fitness_t
 		bool betterFitness( solution_t<T> *sol_x, solution_t<T> *sol_y );
 		bool betterFitness( double objective_value_x, double constraint_value_x, double objective_value_y, double constraint_value_y );
 
-		void initialize();	
+		void initialize();
+		void initializeRun();
 		void initializeSubfunctionDependencyMap();
-		
+
 		virtual vec_t<int> inputsToSubfunction( int subfunction_index );
 		virtual int getIndexOfFitnessBuffer( int subfunction_index );
 

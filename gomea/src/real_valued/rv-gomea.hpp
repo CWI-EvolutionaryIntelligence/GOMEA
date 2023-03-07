@@ -90,6 +90,7 @@ class rvg_t {
 		void determineBestSolutionInCurrentPopulations( int *population_of_best, int *index_of_best );
 		bool checkFitnessVarianceTermination( int population_index );
 		bool checkDistributionMultiplierTerminationCondition( int population_index );
+		void ezilaitini();
 		/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
 		/*-=-=-=-=-=-=-=-=-=-=-=- Variables -=-=-=-=-=-=-=-=-=-=-=-=-*/
@@ -101,8 +102,7 @@ class rvg_t {
 		Config *config;
 		double eta_ams = 1.0,
 			   eta_cov = 1.0;
-		bool   is_initialized = false,
-			   use_guidelines = false;	 /* Whether to override parameters with guidelines (for those that exist). */
+		bool	use_guidelines = false;	 /* Whether to override parameters with guidelines (for those that exist). */
 		double rotation_angle = 0.0; /* The angle of rotation to be applied to the problem. */
 		/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 };
