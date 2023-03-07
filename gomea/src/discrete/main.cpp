@@ -2,17 +2,15 @@
 #include "gomea/src/discrete/gomea.hpp"
 #include "gomea/src/discrete/gomeaIMS.hpp"
 
-namespace gomea{
-namespace discrete{
-
+using namespace gomea;
 int main(int argc, char **argv)
 {
-    Config *config = new Config();
+    discrete::Config *config = new discrete::Config();
     config->parseCommandLine(argc, argv);
     config->checkOptions();
     config->printOverview();
 
-    GOMEA *gomeaInstance = new gomeaIMS(config);
+    discrete::GOMEA *gomeaInstance = new discrete::gomeaIMS(config);
 
     try
     {
@@ -26,5 +24,3 @@ int main(int argc, char **argv)
     
     return 0;
 }
-
-}}
