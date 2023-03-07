@@ -1,6 +1,10 @@
 from libcpp.vector cimport vector
 from libcpp cimport bool
 
+cdef class LinkageModel:
+    def __dealloc__(self):
+        del self.c_inst 
+
 cdef class Univariate(LinkageModel):
     def __cinit__(self):
         self.c_inst = new linkage_config_t()

@@ -2,12 +2,16 @@ from cpython cimport PyObject
 
 include "gomea/EmbeddedFitness.pxi"
 
+
 cdef class YourFitnessFunctionDiscrete(FitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
         value_to_reach : double = 0.0
     ):
         self.c_inst_discrete = new yourFitnessFunctionDiscrete(number_of_variables,value_to_reach)
+    
+    def __dealloc__(self):
+        del self.c_inst_discrete
 
 cdef class YourFitnessFunctionRealValued(FitnessFunction):
     def __cinit__(self, 
@@ -15,6 +19,9 @@ cdef class YourFitnessFunctionRealValued(FitnessFunction):
         value_to_reach : double = 0.0
     ):
         self.c_inst_realvalued = new yourFitnessFunctionRealValued(number_of_variables,value_to_reach)
+    
+    def __dealloc__(self):
+        del self.c_inst_realvalued
 
 cdef class PythonFitnessFunction(FitnessFunction):
     cpdef number_of_subfunctions( self ):
@@ -50,6 +57,8 @@ cdef class PythonFitnessFunctionDiscrete(PythonFitnessFunction):
         self.number_of_variables = number_of_variables
         self.c_inst_discrete = new pyFitnessFunction_t[char](number_of_variables,<PyObject*>self)
 
+    def __dealloc__(self):
+        del self.c_inst_discrete
 
 cdef class PythonFitnessFunctionRealValued(PythonFitnessFunction):
     def __cinit__(self, 
@@ -58,6 +67,9 @@ cdef class PythonFitnessFunctionRealValued(PythonFitnessFunction):
     ):
         self.number_of_variables = number_of_variables
         self.c_inst_realvalued = new pyFitnessFunction_t[double](number_of_variables,value_to_reach,<PyObject*>self)
+    
+    def __dealloc__(self):
+        del self.c_inst_realvalued
 
 cdef class SphereFunction(FitnessFunction):
     def __cinit__(self, 
