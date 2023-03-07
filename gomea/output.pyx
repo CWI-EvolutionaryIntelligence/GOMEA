@@ -35,7 +35,11 @@ class OutputStatistics:
         self.metrics = [s.decode() for s in self.metrics]
         #self.elitist_genotype = stats.c_ptr[0].getElitistGenotype()
         #self.elitist_fitness = stats.c_ptr[0].getElitistFitness()
-    
+
+    def __getitem__(self, metric):
+        assert( metric in self.metrics, str(metric)+" is not a valid metric." )
+        return self.metrics_map[metric][-1]
+
     def getFinalStatistics(self):
         final_stats = {}
         for metric in self.metrics:
