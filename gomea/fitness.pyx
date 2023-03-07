@@ -2,7 +2,6 @@ from cpython cimport PyObject
 
 include "gomea/EmbeddedFitness.pxi"
 
-
 cdef class YourFitnessFunctionDiscrete(FitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
