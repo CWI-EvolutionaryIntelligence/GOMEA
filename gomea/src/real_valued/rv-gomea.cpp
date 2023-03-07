@@ -380,12 +380,10 @@ void rvg_t::printUsage( void )
  */
 void rvg_t::initialize( void )
 {
-	if( is_initialized )
-		return;
-	is_initialized = true;
-
     total_number_of_writes = 0;
     config->number_of_subgenerations_per_population_factor = 8;
+    fitness->number_of_evaluations = 0;
+    output = output_statistics_t();
 
     if( config->fix_seed )
     {
@@ -396,7 +394,8 @@ void rvg_t::initialize( void )
         utils::initializeRandomNumberGenerator();
     }
     arma_rng::set_seed(utils::random_seed);
-
+    fitness->initializeRun();
+	
 	initializeProblem();
 }
 
@@ -466,9 +465,6 @@ void rvg_t::writeGenerationalStatisticsForOnePopulation( int population_index )
     double population_constraint_var = populations[population_index]->getConstraintValueVariance();
     solution_t<double> *best_solution = populations[population_index]->getBestSolution();
     solution_t<double> *worst_solution = populations[population_index]->getWorstSolution();
-
-    // TODO - compute best fitness and insert into output_statistics
-    assert(0);
 
     int key = total_number_of_writes;
     output.addMetricValue("generation",key,populations[population_index]->number_of_generations);
@@ -834,12 +830,15 @@ bool rvg_t::checkDistributionMultiplierTerminationCondition( int population_inde
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=- Section Run -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 rvg_t::~rvg_t()
 {
-	if( is_initialized )
-	{
-		for( size_t i = 0; i < populations.size(); i++ )
-			delete( populations[i] );
-		delete( fitness );
-	}
+    for (size_t i = 0; i < populations.size(); i++)
+        delete (populations[i]);
+}
+
+void rvg_t::ezilaitini()
+{
+    for (size_t i = 0; i < populations.size(); i++)
+        delete (populations[i]);
+    populations.clear();
 }
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
@@ -925,7 +924,7 @@ void rvg_t::runAllPopulations()
  */
 void rvg_t::run( void )
 {
-    printf("Running RV-GOMEA\n");
+    //printf("Running RV-GOMEA\n");
 
     int out = gomea::utils::initializePythonEmbedding("gomea", PyInit_real_valued);
     assert(out == 0);
@@ -940,15 +939,12 @@ void rvg_t::run( void )
     {
         runAllPopulations();
     }
-	catch( utils::customException const& )
-	{
-		writeGenerationalStatisticsForOnePopulation( populations.size()-1 );
-    }
+	catch( utils::customException const& ){}
+	writeGenerationalStatisticsForOnePopulation( populations.size()-1 );
+    ezilaitini();
 
 	/*printf("evals %f ", fitness->number_of_evaluations);
-
 	printf("obj_val %6.2e ", fitness->elitist_objective_value);
-
 	printf("time %lf ", utils::getElapsedTimeSinceStartSeconds());
 	printf("generations ");
 	if( populations.size() > 1 )

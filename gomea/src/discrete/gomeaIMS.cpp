@@ -29,20 +29,25 @@ gomeaIMS::gomeaIMS(Config *config_): config(config_)
 }
 
 gomeaIMS::~gomeaIMS()
-{
-	if( isInitialized )
-	{
-		for (int i = 0; i < numberOfGOMEAs; ++i)
-			delete GOMEAs[i];
+{}
 
-		//delete problemInstance;
+void gomeaIMS::ezilaitini()
+{
+	for (int i = 0; i < GOMEAs.size(); ++i)
+		delete GOMEAs[i];
+	GOMEAs.clear();
+
+	// delete problemInstance;
+	if( isInitialized )
 		delete sharedInformationInstance;
-	}
+	isInitialized = false;
 }
 
 void gomeaIMS::initialize()
 {
 	utils::initStartTime();
+    problemInstance->initializeRun();
+    output = output_statistics_t();
 
 	if( config->AnalyzeFOS )
 	{
@@ -50,22 +55,14 @@ void gomeaIMS::initialize()
 	}
     //initElitistFile(config->folder);
 
-    #ifdef DEBUG
-        cout << "Problem Instance created! Problem number is " << config->problemIndex << endl;
-    #endif
-
     sharedInformationInstance = new sharedInformation(config->maxArchiveSize);
-    #ifdef DEBUG
-        cout << "Shared Information instance created!\n";
-    #endif
-
 	isInitialized = true;
+	hasTerminated = false;
 }
 
 void gomeaIMS::run()
 {
-	if( !isInitialized )
-		initialize();
+	initialize();
 
 	try{
 		while(!checkTermination())
@@ -78,11 +75,10 @@ void gomeaIMS::run()
 			numberOfGenerationsIMS++;
 		}
 	}
-	catch( utils::customException const& )
-	{
-		hasTerminated = true;
-		writeStatistics( numberOfGOMEAs-1 );			
-	}
+	catch( utils::customException const& ){}
+	hasTerminated = true;
+	writeStatistics(numberOfGOMEAs - 1);
+	ezilaitini();
 }
 
 void gomeaIMS::runGeneration()
@@ -116,7 +112,8 @@ void gomeaIMS::runGeneration()
 	catch( utils::customException const& )
 	{
 		hasTerminated = true;
-		writeStatistics( currentGOMEAIndex );			
+		writeStatistics( currentGOMEAIndex );
+		ezilaitini();
 	}
 }
 

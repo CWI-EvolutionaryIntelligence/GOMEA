@@ -21,6 +21,6 @@ cdef extern from "src/real_valued/rv-gomea.hpp" namespace "gomea::realvalued":
         rvg_t(Config*) except +
         
         void printUsage() except +
-        void run() except +*
+        void run() except +
         
         output_statistics_t output

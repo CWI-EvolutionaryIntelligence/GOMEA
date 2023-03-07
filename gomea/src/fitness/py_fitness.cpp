@@ -56,16 +56,16 @@ double pyFitnessFunction_t<char>::subfunction( int subfunction_index, vec_t<char
 }
 
 template<class T>
-double pyFitnessFunction_t<T>::mappingFunction( int objective_index, vec_t<double> &fitness_buffers )
+double pyFitnessFunction_t<T>::objectiveFunction( int objective_index, vec_t<double> &fitness_buffers )
 {
-	double result = gomea_pyfitness_mapping_function(py_class,objective_index,fitness_buffers);
+	double result = gomea_pyfitness_objective_function(py_class,objective_index,fitness_buffers);
 	return result;
 }
 
 template<class T>
-double pyFitnessFunction_t<T>::mappingFunctionConstraintValue( int objective_index, vec_t<double> &fitness_buffers )
+double pyFitnessFunction_t<T>::constraintFunction( int objective_index, vec_t<double> &fitness_buffers )
 {
-	double result = gomea_pyfitness_mapping_function_constraint_value(py_class,fitness_buffers);
+	double result = gomea_pyfitness_constraint_function(py_class,fitness_buffers);
 	return result;
 }
 

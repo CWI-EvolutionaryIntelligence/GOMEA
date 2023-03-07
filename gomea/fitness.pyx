@@ -8,6 +8,9 @@ cdef class YourFitnessFunctionDiscrete(FitnessFunction):
         value_to_reach : double = 0.0
     ):
         self.c_inst_discrete = new yourFitnessFunctionDiscrete(number_of_variables,value_to_reach)
+    
+    def __dealloc__(self):
+        del self.c_inst_discrete
 
 cdef class YourFitnessFunctionRealValued(FitnessFunction):
     def __cinit__(self, 
@@ -15,30 +18,33 @@ cdef class YourFitnessFunctionRealValued(FitnessFunction):
         value_to_reach : double = 0.0
     ):
         self.c_inst_realvalued = new yourFitnessFunctionRealValued(number_of_variables,value_to_reach)
+    
+    def __dealloc__(self):
+        del self.c_inst_realvalued
 
 cdef class PythonFitnessFunction(FitnessFunction):
-    cpdef number_of_subfunctions( self ):
+    cpdef int number_of_subfunctions( self ) except +:
         return -1
     
-    cpdef inputs_to_subfunction( self, int subfunction_index ):
+    cpdef np.ndarray inputs_to_subfunction( self, int subfunction_index ) except +:
         return np.ndarray()
     
-    cpdef subfunction( self, int subfunction_index, np.ndarray variables ):
+    cpdef double subfunction( self, int subfunction_index, np.ndarray variables ) except +:
         return 1e308
     
-    cpdef mapping_function( self, int objective_index, np.ndarray fitness_buffers ):
+    cpdef double objective_function( self, int objective_index, np.ndarray fitness_buffers ) except +:
         return fitness_buffers[objective_index]
     
-    cpdef mapping_function_constraint_value( self, np.ndarray fitness_buffers ):
+    cpdef double constraint_function( self, np.ndarray fitness_buffers ) except +:
         return 0
     
-    cpdef number_of_fitness_buffers( self ):
+    cpdef int number_of_fitness_buffers( self ) except +:
         return 1
 
-    cpdef fitness_buffer_index_for_subfunction( self, int subfunction_index ): 
+    cpdef int fitness_buffer_index_for_subfunction( self, int subfunction_index ) except +: 
         return 0
 
-    cpdef similarity_measure( self, size_t var_a, size_t var_b ):
+    cpdef double similarity_measure( self, size_t var_a, size_t var_b ) except +:
         return -1
 
 cdef class PythonFitnessFunctionDiscrete(PythonFitnessFunction):
@@ -50,6 +56,8 @@ cdef class PythonFitnessFunctionDiscrete(PythonFitnessFunction):
         self.number_of_variables = number_of_variables
         self.c_inst_discrete = new pyFitnessFunction_t[char](number_of_variables,<PyObject*>self)
 
+    def __dealloc__(self):
+        del self.c_inst_discrete
 
 cdef class PythonFitnessFunctionRealValued(PythonFitnessFunction):
     def __cinit__(self, 
@@ -58,6 +66,9 @@ cdef class PythonFitnessFunctionRealValued(PythonFitnessFunction):
     ):
         self.number_of_variables = number_of_variables
         self.c_inst_realvalued = new pyFitnessFunction_t[double](number_of_variables,value_to_reach,<PyObject*>self)
+    
+    def __dealloc__(self):
+        del self.c_inst_realvalued
 
 cdef class SphereFunction(FitnessFunction):
     def __cinit__(self, 

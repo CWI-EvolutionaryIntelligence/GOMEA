@@ -1,0 +1,13 @@
+**.o
+**.obj
+**.so
+**.swp
+**.log
+**.egg-info/
+**/__pycache__/
+**/cython/*.cpp
+**/cython/*.h
+**/cython/*.hpp
+**/*.dat
+build/
+dist/

@@ -189,6 +189,16 @@ void fitness_t<T>::partialEvaluationFunction( solution_t<T> *parent, partial_sol
 }
 
 template<class T>
+void fitness_t<T>::initializeRun()
+{
+	number_of_evaluations = 0.0;	// discounted in GBO
+	full_number_of_evaluations = 0; // not discounted in GBO
+	elitist_objective_value = 1e308;
+	elitist_constraint_value = 1e308;
+	vtr_hit_status = false;
+}
+
+template<class T>
 void fitness_t<T>::initialize()
 {
 	initializeSubfunctionDependencyMap();

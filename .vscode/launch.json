@@ -1,0 +1,36 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python C++ Debug",
+            "type": "pythoncpp",
+            "request": "launch",
+            "pythonConfig": "custom",
+            "pythonLaunchName": "Python: main",
+            "cppConfig": "default (gdb) Attach"
+        },
+        {
+            "name": "(gdb) Attach",
+            "type": "cppdbg",
+            "program": "gdb",
+            "request": "attach",
+            "logging": {
+                "engineLogging": true
+            },
+            "sourceFileMap": {
+                "${workspaceFolder}": {
+                    "editorPath": "${workspaceFolder}",
+                    "useForBreakpoints": "true"
+                }
+            }
+        },
+        {
+            "name": "Python: main",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "cwd": ""
+        }
+    ]
+}

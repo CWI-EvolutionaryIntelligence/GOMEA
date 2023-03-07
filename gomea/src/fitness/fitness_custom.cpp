@@ -29,10 +29,10 @@ void customFitnessFunction_t<T>::evaluationFunction( solution_t<T> *solution )
 
 	for( int i = 0; i < this->number_of_objectives; i++ )
 	{
-		double ffitness = mappingFunction( i, solution );
+		double ffitness = objectiveFunction( i, solution );
 		solution->setObjectiveValue(ffitness);
 	}
-	double fcons = mappingFunctionConstraintValue(solution);
+	double fcons = constraintFunction(solution);
 	solution->setConstraintValue(fcons);
 
 	this->full_number_of_evaluations++;
@@ -87,13 +87,13 @@ void customFitnessFunction_t<T>::partialEvaluationFunction( solution_t<T> *paren
 	for( size_t i = 0; i < parent_buffers.size(); i++ )
 		solution->addToFitnessBuffer(i,parent_buffers[i]);
 
-	// Apply mapping function
+	// Apply function to calculate objective value from fitness buffers
 	for( int i = 0; i < this->number_of_objectives; i++ )
 	{
-		double ffitness = mappingFunction( i, solution );
+		double ffitness = objectiveFunction( i, solution );
 		solution->setObjectiveValue(ffitness);
 	}
-	double fcons = mappingFunctionConstraintValue(solution);
+	double fcons = constraintFunction(solution);
 	solution->setConstraintValue(fcons);
 
 	this->full_number_of_evaluations++;
@@ -139,37 +139,37 @@ double customFitnessFunction_t<T>::getSimilarityMeasure( size_t var_a, size_t va
 }
 
 template<class T>
-double customFitnessFunction_t<T>::mappingFunction( int objective_index, solution_t<T> *solution )
+double customFitnessFunction_t<T>::objectiveFunction( int objective_index, solution_t<T> *solution )
 {
-	return mappingFunction(objective_index,solution->fitness_buffers);
+	return objectiveFunction(objective_index,solution->fitness_buffers);
 }
 
 template<class T>
-double customFitnessFunction_t<T>::mappingFunction( int objective_index, partial_solution_t<T> *solution )
+double customFitnessFunction_t<T>::objectiveFunction( int objective_index, partial_solution_t<T> *solution )
 {
-	return mappingFunction(objective_index,solution->fitness_buffers);
+	return objectiveFunction(objective_index,solution->fitness_buffers);
 }
 
 template<class T>
-double customFitnessFunction_t<T>::mappingFunction( int objective_index, vec_t<double> &fitness_buffers )
+double customFitnessFunction_t<T>::objectiveFunction( int objective_index, vec_t<double> &fitness_buffers )
 {
 	return fitness_buffers[objective_index];
 }
 
 template<class T>
-double customFitnessFunction_t<T>::mappingFunctionConstraintValue( solution_t<T> *solution )
+double customFitnessFunction_t<T>::constraintFunction( solution_t<T> *solution )
 {
-	return mappingFunctionConstraintValue(solution->fitness_buffers);
+	return constraintFunction(solution->fitness_buffers);
 }
 
 template<class T>
-double customFitnessFunction_t<T>::mappingFunctionConstraintValue( partial_solution_t<T> *solution )
+double customFitnessFunction_t<T>::constraintFunction( partial_solution_t<T> *solution )
 {
-	return mappingFunctionConstraintValue(solution->fitness_buffers);
+	return constraintFunction(solution->fitness_buffers);
 }
 
 template<class T>
-double customFitnessFunction_t<T>::mappingFunctionConstraintValue( vec_t<double> &fitness_buffers )
+double customFitnessFunction_t<T>::constraintFunction( vec_t<double> &fitness_buffers )
 {
 	return 0;
 }
