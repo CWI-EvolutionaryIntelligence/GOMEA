@@ -24,28 +24,28 @@ cdef class YourFitnessFunctionRealValued(FitnessFunction):
         del self.c_inst_realvalued
 
 cdef class PythonFitnessFunction(FitnessFunction):
-    cpdef number_of_subfunctions( self ):
+    cpdef int number_of_subfunctions( self ) except +:
         return -1
     
-    cpdef inputs_to_subfunction( self, int subfunction_index ):
+    cpdef np.ndarray inputs_to_subfunction( self, int subfunction_index ) except +:
         return np.ndarray()
     
-    cpdef subfunction( self, int subfunction_index, np.ndarray variables ):
+    cpdef double subfunction( self, int subfunction_index, np.ndarray variables ) except +:
         return 1e308
     
-    cpdef objective_function( self, int objective_index, np.ndarray fitness_buffers ):
+    cpdef double objective_function( self, int objective_index, np.ndarray fitness_buffers ) except +:
         return fitness_buffers[objective_index]
     
-    cpdef constraint_function( self, np.ndarray fitness_buffers ):
+    cpdef double constraint_function( self, np.ndarray fitness_buffers ) except +:
         return 0
     
-    cpdef number_of_fitness_buffers( self ):
+    cpdef int number_of_fitness_buffers( self ) except +:
         return 1
 
-    cpdef fitness_buffer_index_for_subfunction( self, int subfunction_index ): 
+    cpdef int fitness_buffer_index_for_subfunction( self, int subfunction_index ) except +: 
         return 0
 
-    cpdef similarity_measure( self, size_t var_a, size_t var_b ):
+    cpdef double similarity_measure( self, size_t var_a, size_t var_b ) except +:
         return -1
 
 cdef class PythonFitnessFunctionDiscrete(PythonFitnessFunction):

@@ -42,16 +42,16 @@ cdef class FitnessFunction:
     cdef fitness_t[double] *c_inst_realvalued
 
 cdef class PythonFitnessFunction(FitnessFunction):
-    cpdef subfunction( self, int subfunction_index, np.ndarray variables )
-    cpdef objective_function( self, int objective_index, np.ndarray fitness_buffers )
-    cpdef constraint_function( self, np.ndarray fitness_buffers )
-    cpdef inputs_to_subfunction( self, int )
-    cpdef number_of_subfunctions( self )
+    cpdef double subfunction( self, int subfunction_index, np.ndarray variables ) except +
+    cpdef double objective_function( self, int objective_index, np.ndarray fitness_buffers ) except +
+    cpdef double constraint_function( self, np.ndarray fitness_buffers ) except +
+    cpdef np.ndarray inputs_to_subfunction( self, int ) except +
+    cpdef int number_of_subfunctions( self ) except +
 
-    cpdef number_of_fitness_buffers( self )
-    cpdef fitness_buffer_index_for_subfunction( self, int ) 
+    cpdef int number_of_fitness_buffers( self ) except +
+    cpdef int fitness_buffer_index_for_subfunction( self, int ) except +
     
-    cpdef similarity_measure( self, size_t, size_t )
+    cpdef double similarity_measure( self, size_t, size_t ) except +
 
 cdef class PythonFitnessFunctionDiscrete(PythonFitnessFunction):
     pass
