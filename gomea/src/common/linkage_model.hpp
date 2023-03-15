@@ -95,6 +95,7 @@ protected:
     int determineNearestNeighbour(size_t index, const vec_t< vec_t< int > > &mpm ); 
     vec_t<vec_t<double>> computeMIMatrix(vec_t<solution_t<char>*> &population, size_t alphabetSize);
     vec_t<vec_t<double>> computeNMIMatrix(vec_t<solution_t<char>*> &population, size_t alphabetSize);
+    vec_t<vec_t<double>> computeHammingDistanceSimilarityMatrix( vec_t<solution_t<char>*> &population );
     void estimateParametersForSingleBinaryMarginal(vec_t<solution_t<char>*> &population, size_t alphabetSize, vec_t<size_t> &indices, size_t &factorSize, vec_t<double> &result);
 };
 

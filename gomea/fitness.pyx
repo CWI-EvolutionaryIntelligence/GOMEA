@@ -22,7 +22,7 @@ cdef class YourFitnessFunctionRealValued(FitnessFunction):
     def __dealloc__(self):
         del self.c_inst_realvalued
 
-cdef class PythonFitnessFunction(FitnessFunction):
+cdef class GBOFitnessFunction(FitnessFunction):
     cpdef int number_of_subfunctions( self ) except +:
         return -1
     
@@ -47,22 +47,25 @@ cdef class PythonFitnessFunction(FitnessFunction):
     cpdef double similarity_measure( self, size_t var_a, size_t var_b ) except +:
         return -1
 
-cdef class PythonFitnessFunctionDiscrete(PythonFitnessFunction):
+cdef class GBOFitnessFunctionDiscrete(GBOFitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
+        value_to_reach : double = 1e308,
         *args,
         **kwargs
     ):
         self.number_of_variables = number_of_variables
-        self.c_inst_discrete = new pyFitnessFunction_t[char](number_of_variables,<PyObject*>self)
+        self.c_inst_discrete = new pyFitnessFunction_t[char](number_of_variables,value_to_reach,<PyObject*>self)
 
     def __dealloc__(self):
         del self.c_inst_discrete
 
-cdef class PythonFitnessFunctionRealValued(PythonFitnessFunction):
+cdef class GBOFitnessFunctionRealValued(GBOFitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
-        value_to_reach : double = 0.0
+        value_to_reach : double = 0.0,
+        *args,
+        **kwargs
     ):
         self.number_of_variables = number_of_variables
         self.c_inst_realvalued = new pyFitnessFunction_t[double](number_of_variables,value_to_reach,<PyObject*>self)

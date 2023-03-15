@@ -19,7 +19,7 @@ cdef class LinkageModel:
 cdef class Univariate(LinkageModel):
     pass
 
-cdef class MarginalProductModel(LinkageModel):
+cdef class BlockMarginalProduct(LinkageModel):
     pass
 
 cdef class Full(LinkageModel):
@@ -35,7 +35,4 @@ cdef class Conditional(LinkageModel):
     pass
 
 cdef class Custom(LinkageModel):
-    pass
-
-cdef class FromFile(LinkageModel):
     pass

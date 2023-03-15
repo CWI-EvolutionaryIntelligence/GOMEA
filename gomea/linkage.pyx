@@ -9,7 +9,7 @@ cdef class Univariate(LinkageModel):
     def __cinit__(self):
         self.c_inst = new linkage_config_t()
 
-cdef class MarginalProductModel(LinkageModel):
+cdef class BlockMarginalProduct(LinkageModel):
     def __cinit__(self,
         block_size : size_t
     ):
@@ -21,21 +21,28 @@ cdef class Full(LinkageModel):
 
 cdef class StaticLinkageTree(LinkageModel):
     def __cinit__(self,
-        similarity_measure : int = 2,
-        filtered : bool = True,
         maximum_set_size : int = -1
     ):
         cdef bool is_static = True 
-        self.c_inst = new linkage_config_t(similarity_measure, filtered, maximum_set_size, is_static)
+        cdef int similarity_index = 2
+        cdef bool filtered = True
+        self.c_inst = new linkage_config_t(similarity_index, filtered, maximum_set_size, is_static)
 
 cdef class LinkageTree(LinkageModel):
     def __cinit__(self,
-        similarity_measure : int = 0,
+        similarity_measure : string = b'MI',
         filtered : bool = False,
         maximum_set_size : int = -1
     ):
         cdef bool is_static = False
-        self.c_inst = new linkage_config_t(similarity_measure, filtered, maximum_set_size, is_static)
+        cdef int similarity_index = -1
+        if( similarity_measure == b'MI' ):
+            similarity_index = 0
+        elif( similarity_measure == b'NMI' ):
+            similarity_index = 1
+        else:
+            raise AssertionError("Unknown similarity measure "+similarity_measure)
+        self.c_inst = new linkage_config_t(similarity_index, filtered, maximum_set_size, is_static)
 
 cdef class Conditional(LinkageModel):
     def __cinit__(self,
@@ -43,21 +50,31 @@ cdef class Conditional(LinkageModel):
         cliques_as_fos_elements : bool = True,
         include_full_fos_element : bool = True
     ):
+        if not cliques_as_fos_elements and not include_full_fos_element:
+            raise AssertionError("At least one of input parameters 'cliques_as_fos_elements' or 'include_full_fos_element' must be True.")
         self.c_inst = new linkage_config_t(max_clique_size,cliques_as_fos_elements,include_full_fos_element)
 
 cdef class Custom(LinkageModel):
     def __cinit__(self,
-        vector[vector[int]] FOS
+        *args,
+        **kwargs
     ):
-        self.c_inst = new linkage_config_t(FOS)
-        
-cdef class FromFile(LinkageModel):
-    def __cinit__(self,
-        filename: string
-    ):
-        #f = str.encode(filename)
-        cdef string f = filename.decode()
-        self.c_inst = new linkage_config_t(f)
+        cdef string file = str.encode("")
+        cdef vector[vector[int]] fos = []
+        if 'file' in kwargs:
+            file = str.encode(kwargs['file'])
+        if 'fos' in kwargs:
+            fos = kwargs['fos']
+        if(len(file) is 0 and len(fos) is 0):
+            raise AssertionError("Constructor requires exactly 1 argument.")
+        if(len(file) > 0 and len(fos) > 0):
+            raise AssertionError("Constructor requires exactly 1 argument.")
+        if( len(file) > 0 ):
+            self.c_inst = new linkage_config_t(file)
+        elif( len(fos) > 0 ):
+            self.c_inst = new linkage_config_t(fos)
+        else:
+            raise AssertionError("Constructor requires exactly 1 argument.")
 
 def UCondGG():
     return Conditional(1,False,True)
