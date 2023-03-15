@@ -8,7 +8,9 @@ debug:
 	python setup.py build_ext --inplace --debug
 
 install:
-	python setup.py bdist_wheel
+	pip -q install build --user
+	pip -q install cython --user
+	python -m build --wheel
 	pip install dist/*.whl --user
 
 reinstall:
