@@ -1,8 +1,8 @@
 import cython
 import numpy as np
-from gomea.fitness import PythonFitnessFunctionRealValued
+from gomea.fitness import GBOFitnessFunctionRealValued
 
-class YourCythonFitnessFunction(PythonFitnessFunctionRealValued):
+class YourCythonFitnessFunction(GBOFitnessFunctionRealValued):
     def number_of_subfunctions( self ) -> cython.int:
         return self.number_of_variables-1
     

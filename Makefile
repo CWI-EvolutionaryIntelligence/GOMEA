@@ -8,8 +8,8 @@ debug:
 	python setup.py build_ext --inplace --debug
 
 install:
-	pip -q install build --user
-	python -m build --wheel
+	python setup.py bdist_wheel
+	pip install dist/*.whl --user
 
 reinstall:
 	python setup.py bdist_wheel
