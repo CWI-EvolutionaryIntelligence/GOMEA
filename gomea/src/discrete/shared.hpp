@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-#include <unordered_map>
 using namespace std;
 
 #include "gomea/src/discrete/utils.hpp"
@@ -27,6 +26,7 @@ class sharedInformation
         startTime = utils::getTimestamp();
         firstEvaluationEver = true;
         evaluatedSolutions = new solutionsArchive(maxArchiveSize);
+        gomea::utils::clearTimers();
     }
 
     ~sharedInformation()

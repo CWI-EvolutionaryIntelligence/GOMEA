@@ -20,7 +20,10 @@ fitness_t<T>::fitness_t( int number_of_variables, double vtr, bool use_vtr, opt_
 	{}
 
 template<class T>
-fitness_t<T>::~fitness_t(){}
+fitness_t<T>::~fitness_t(){
+	variable_interaction_graph.clear();
+	subfunction_dependency_map.clear();
+}
 
 /**
  * Returns 1 if x is better than y, 0 otherwise.
@@ -65,23 +68,11 @@ bool fitness_t<T>::betterFitness( solution_t<T> *sol_x, solution_t<T> *sol_y )
 }
 
 template<class T>
-int fitness_t<T>::getNumberOfSubfunctions()
-{
-	return number_of_variables;
-}
-		
-template<class T>
-int fitness_t<T>::getNumberOfFitnessBuffers()
-{
-	return 1;
-}
-
-template<class T>
 void fitness_t<T>::evaluate( solution_t<T> *solution )
 {
 	checkTermination();
 
-	solution->initMemory(number_of_objectives, getNumberOfFitnessBuffers());
+	solution->initObjectiveValues( number_of_objectives );
 
 	evaluationFunction( solution );
 	
@@ -104,7 +95,7 @@ void fitness_t<T>::evaluatePartialSolutionBlackBox( solution_t<T> *parent, parti
 {
 	checkTermination();
 	
-	solution->initMemory(number_of_objectives, getNumberOfFitnessBuffers());
+	solution->initObjectiveValues( number_of_objectives );
 	
 	// Make backup of parent
 	double *var_backup = new double[solution->getNumberOfTouchedVariables()];
@@ -116,30 +107,43 @@ void fitness_t<T>::evaluatePartialSolutionBlackBox( solution_t<T> *parent, parti
 	}
 	double obj_val_backup = parent->getObjectiveValue();
 	double cons_val_backup = parent->getConstraintValue();
-	std::vector<double> buffer_backup = parent->getFitnessBuffers();
+	//std::vector<double> buffer_backup = parent->getFitnessBuffers();
 
 	evaluationFunction( parent );
 
 	// Insert calculated objective and constraint values into partial solution	
 	solution->setObjectiveValue(parent->getObjectiveValue());
 	solution->setConstraintValue(parent->getConstraintValue());
-	solution->setFitnessBuffers(parent->getFitnessBuffers());
+	//solution->setFitnessBuffers(parent->getFitnessBuffers());
 
 	// Restore parent to original state
 	parent->setObjectiveValue(obj_val_backup);
 	parent->setConstraintValue(cons_val_backup);
-	parent->setFitnessBuffers(buffer_backup);
+	//parent->setFitnessBuffers(buffer_backup);
 	for( int i = 0; i < solution->getNumberOfTouchedVariables(); i++ )
 		parent->variables[solution->touched_indices[i]] = var_backup[i];
 	delete[] var_backup;
 }
 
-template<class T>
+/*template<class T>
 void fitness_t<T>::evaluatePartialSolution( solution_t<T> *parent, partial_solution_t<T> *solution )
+{
+	std::set<int> dependent_subfunctions;
+	for( int ind : solution->touched_indices )
+	{
+		assert( this->subfunction_dependency_map[ind].size() > 0 );
+		dependent_subfunctions.insert(this->subfunction_dependency_map[ind].begin(), this->subfunction_dependency_map[ind].end());
+	}
+	evaluatePartialSolution( parent, solution, dependent_subfunctions );
+}*/
+
+//void fitness_t<T>::evaluatePartialSolution( solution_t<T> *parent, partial_solution_t<T> *solution, const std::set<int> &dependent_subfunctions )
+template<class T>
+void fitness_t<T>::evaluatePartialSolution( solution_t<T> *parent, partial_solution_t<T> *solution ) 
 {
 	checkTermination();
 	
-	solution->initMemory(number_of_objectives,getNumberOfFitnessBuffers());
+	solution->initObjectiveValues( number_of_objectives );
 	
 	if( black_box_optimization )
 	{
@@ -147,6 +151,7 @@ void fitness_t<T>::evaluatePartialSolution( solution_t<T> *parent, partial_solut
 	}
 	else
 	{
+		//partialEvaluationFunction( parent, solution, dependent_subfunctions );
 		partialEvaluationFunction( parent, solution );
 #ifdef CHECK_PARTIAL_FITNESS
 		double fbefore = solution->objective_value;
@@ -181,11 +186,18 @@ void fitness_t<T>::evaluatePartialSolution( solution_t<T> *parent, partial_solut
 	}
 }
 
+//void fitness_t<T>::partialEvaluationFunction( solution_t<T> *parent, partial_solution_t<T> *solution, const std::set<int> &dependent_subfunctions )
 template<class T>
 void fitness_t<T>::partialEvaluationFunction( solution_t<T> *parent, partial_solution_t<T> *solution )
 {
 	printf("Partial evaluation function not implemented.\n");
 	exit(0);
+}
+
+template<class T>
+void fitness_t<T>::initialize()
+{
+	initializeVariableInteractionGraph();
 }
 
 template<class T>
@@ -199,54 +211,15 @@ void fitness_t<T>::initializeRun()
 }
 
 template<class T>
-void fitness_t<T>::initialize()
+void fitness_t<T>::initializeVariableInteractionGraph()
 {
-	initializeSubfunctionDependencyMap();
-	initializeVariableInteractionGraph();
-}
-
-template<class T>
-void fitness_t<T>::initializeSubfunctionDependencyMap()
-{
-	for( int i = 0; i < number_of_variables; i++ )
-	{
-		subfunction_dependency_map[i] = std::set<int>();
-	}
-	for( int i = 0; i < getNumberOfSubfunctions(); i++ )
-	{
-		vec_t<int> dependent_variables = inputsToSubfunction(i);
-		for( int j : dependent_variables )
-		{
-			subfunction_dependency_map[j].insert(i);
-		}
-	}
-}
-
-template<class T>
-vec_t<int> fitness_t<T>::inputsToSubfunction( int subfunction_index )
-{
-	vec_t<int> dependencies;
-	int parameter_index = subfunction_index;
-	dependencies.push_back(parameter_index);
-	return dependencies;
-}
-
-template<class T>
-int fitness_t<T>::getIndexOfFitnessBuffer( int subfunction_index )
-{
-	return 0;
+	return;
 }
 
 template<class T>
 bool fitness_t<T>::hasVariableInteractionGraph()
 {
-	return( variable_interaction_graph.size() > 0 );
-}
-
-template<class T>
-void fitness_t<T>::initializeVariableInteractionGraph() 
-{
-	return;
+	return( this->variable_interaction_graph.size() > 0 );
 }
 
 template<class T>
@@ -254,7 +227,7 @@ void fitness_t<T>::printVariableInteractionGraph()
 {
 	for( int i = 0; i < this->number_of_variables; i++ )
 	{
-		std::set<int> deps = variable_interaction_graph[i];
+		std::set<int> deps = this->variable_interaction_graph[i];
 		printf("[%d]->[",i);
 		int c = 0;
 		for( int v : deps )
@@ -267,6 +240,7 @@ void fitness_t<T>::printVariableInteractionGraph()
 		printf("]\n");
 	}
 }
+
 
 template<class T>
 vec_t<vec_t<double>> fitness_t<T>::getSimilarityMatrix( int similarity_measure_index )
@@ -304,25 +278,11 @@ double fitness_t<T>::getSimilarityMeasure( size_t var_a, size_t var_b )
 template<class T>
 double fitness_t<T>::getLowerRangeBound( int dimension )
 {
-	assert(0);
-	return -1;
-}
-
-template<class T>
-double fitness_t<T>::getUpperRangeBound( int dimension )
-{
-	assert(0);
-	return -1;
-}
-
-template<>
-double fitness_t<double>::getLowerRangeBound( int dimension )
-{
 	return( -INFINITY );
 }
 		
-template<>
-double fitness_t<double>::getUpperRangeBound( int dimension )
+template<class T>
+double fitness_t<T>::getUpperRangeBound( int dimension )
 {
 	return( INFINITY );
 }

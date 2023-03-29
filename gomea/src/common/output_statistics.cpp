@@ -10,7 +10,7 @@ void output_statistics_t::addMetricValueGeneric( std::string metric_name, int ke
     metric_t metric = value;
     if( metrics_map.find(metric_name) == metrics_map.end() )
     {
-        metrics_map[metric_name] = std::map<int,metric_t>();
+        metrics_map[metric_name] = std::unordered_map<int,metric_t>();
     }
     metrics_map[metric_name][key] = metric;
     all_keys.insert(key);

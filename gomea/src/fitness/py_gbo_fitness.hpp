@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gomea/src/fitness/fitness_custom.hpp"
+#include "gomea/src/fitness/gbo_fitness.hpp"
 #include "gomea/fitness.h"
 #include "numpy/arrayobject.h"
 
@@ -8,11 +8,11 @@ namespace gomea{
 namespace fitness{
 
 template<class T>
-class pyFitnessFunction_t : public customFitnessFunction_t<T>
+class pyGBOFitnessFunction_t : public GBOFitnessFunction_t<T>
 {
 	public:
-		pyFitnessFunction_t( int number_of_parameters, PyObject *obj );
-		pyFitnessFunction_t( int number_of_parameters, double vtr, PyObject *obj );
+		pyGBOFitnessFunction_t( int number_of_parameters, PyObject *obj );
+		pyGBOFitnessFunction_t( int number_of_parameters, double vtr, PyObject *obj );
 		int getNumberOfSubfunctions();
 		vec_t<int> inputsToSubfunction( int subfunction_index );
 		double getSimilarityMeasure( size_t var_a, size_t var_b );
@@ -30,7 +30,7 @@ class pyFitnessFunction_t : public customFitnessFunction_t<T>
 		double subfunction( int subfunction_index, vec_t<T> &variables );
 };
 
-template class pyFitnessFunction_t<char>;
-template class pyFitnessFunction_t<double>;
+template class pyGBOFitnessFunction_t<char>;
+template class pyGBOFitnessFunction_t<double>;
 
 }}

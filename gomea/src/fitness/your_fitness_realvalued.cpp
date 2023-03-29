@@ -3,10 +3,10 @@
 namespace gomea{
 namespace fitness{
 
-yourFitnessFunctionRealValued::yourFitnessFunctionRealValued( int number_of_variables, double vtr ) : customFitnessFunction_t(number_of_variables,vtr)
+yourFitnessFunctionRealValued::yourFitnessFunctionRealValued( int number_of_variables, double vtr ) : GBOFitnessFunction_t(number_of_variables,vtr)
 {
 	this->name = "Your own fitness function (C++)";
-	initialize();
+	this->initialize();
 }
 
 int yourFitnessFunctionRealValued::getNumberOfSubfunctions()

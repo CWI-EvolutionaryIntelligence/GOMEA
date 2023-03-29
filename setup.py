@@ -89,11 +89,16 @@ setup(
     long_description = long_description,
     long_description_content_type = 'text/markdown',
     packages=["gomea"],
+    include_dirs=["gomea"],
     ext_modules = cythonize(extensions,
         include_path = ["."] + [np.get_include()],
         gdb_debug = debug_mode,
         language_level = "3"),
     install_requires=["numpy>=1.19.0","tqdm"],
+    include_package_data=True,
+    package_data = {
+        'gomea': ['*.pxd', '*.hpp', '*.h']
+    },
     zip_safe = False
 )
 

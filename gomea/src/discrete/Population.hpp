@@ -38,8 +38,7 @@ public:
     Population(Config *config_, fitness_t *problemInstance_, sharedInformation *sharedInformationPointer_, size_t GOMEAIndex_, size_t populationSize_, linkage_model_pt FOSInstance_ = NULL );
     ~Population();
 
-
-    friend ostream & operator << (ostream &out, const solution_t<char> &solution);
+    friend ostream & operator << (ostream &out, const Population &populationInstance);
 
     void calculateAverageFitness();
     bool allSolutionsAreEqual();

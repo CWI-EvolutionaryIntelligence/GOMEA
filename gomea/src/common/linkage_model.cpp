@@ -325,6 +325,34 @@ void linkage_model_t::determineParallelFOSOrder(std::map<int,std::set<int>> VIG 
 	assert( FOSorder.size() == FOSStructure.size() ); 
 }
 
+void linkage_model_t::initializeDependentSubfunctions( std::map<int,std::set<int>> &subfunction_dependency_map )
+{
+	if( subfunction_dependency_map.size() == 0 )
+		return;
+	//auto t = utils::getTimestamp();
+    dependent_subfunctions = vec_t<std::set<int>>(FOSStructure.size());
+	//vec_t<bool> touched_subfunctions = vec_t<bool>(numberOfVariables,false);
+	for( size_t i = 0; i < FOSStructure.size(); i++ )
+	{
+    	dependent_subfunctions[i] = std::set<int>();
+		for( int ind : FOSStructure[i] )
+		{
+			//for( int fi : subfunction_dependency_map[ind] )
+			//	touched_subfunctions[fi] = true;
+			if( subfunction_dependency_map[ind].size() > 0 )
+				dependent_subfunctions[i].insert(subfunction_dependency_map[ind].begin(), subfunction_dependency_map[ind].end());
+		}
+	}
+	//utils::addToTimer("init_depf",t);
+}
+    
+std::set<int> linkage_model_t::getDependentSubfunctions( int linkage_set_index )
+{
+	if( dependent_subfunctions.size() == 0 )
+		return std::set<int>();
+	else return dependent_subfunctions[linkage_set_index];
+}
+
 // VIG_i is the list of all variables dependent on i
 vec_t<int> linkage_model_t::graphColoring( std::map<int,std::set<int>> &VIG )
 {

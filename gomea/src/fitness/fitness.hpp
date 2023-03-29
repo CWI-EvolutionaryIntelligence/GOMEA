@@ -5,6 +5,7 @@
 #include "gomea/src/common/partial_solution.hpp"
 #include "gomea/src/utils/tools.hpp"
 #include "gomea/src/utils/time.hpp"
+#include <map>
 
 namespace gomea{
 namespace fitness{
@@ -53,28 +54,21 @@ class fitness_t
 		double elitist_constraint_value;
 		bool vtr_hit_status;
 
-		virtual int getNumberOfSubfunctions();
-		virtual int getNumberOfFitnessBuffers();
-
 		void evaluate( solution_t<T> *solution );
 		void evaluatePartialSolution( solution_t<T> *parent, partial_solution_t<T> *solution );
-		void evaluatePartialSolutionBlackBox( solution_t<T> *parent, partial_solution_t<T> *solution );
+		//void evaluatePartialSolution( solution_t<T> *parent, partial_solution_t<T> *solution, const std::set<int> &dependent_subfunctions );
 		
 		static fitness_t *getFitnessClass( int problem_index, int number_of_variables, double vtr );
 		bool betterFitness( solution_t<T> *sol_x, solution_t<T> *sol_y );
 		bool betterFitness( double objective_value_x, double constraint_value_x, double objective_value_y, double constraint_value_y );
 
-		void initialize();
+		virtual void initialize();
 		void initializeRun();
-		void initializeSubfunctionDependencyMap();
 
-		virtual vec_t<int> inputsToSubfunction( int subfunction_index );
-		virtual int getIndexOfFitnessBuffer( int subfunction_index );
-
-		bool hasVariableInteractionGraph();
 		virtual void initializeVariableInteractionGraph();
+		bool hasVariableInteractionGraph();
 		void printVariableInteractionGraph();
-
+		
 		vec_t<vec_t<double>> getSimilarityMatrix( int similarity_measure_index );
 		virtual double getSimilarityMeasure( size_t var_a, size_t var_b );
 		
@@ -95,7 +89,10 @@ class fitness_t
 	private:
 		fitness_t( int number_of_variables, double vtr, bool use_vtr, opt_mode optimization_mode );
 		virtual void evaluationFunction( solution_t<T> *solution ) = 0;
+		//virtual void partialEvaluationFunction( solution_t<T> *parent, partial_solution_t<T> *solution, const std::set<int> &dependent_subfunctions );
 		virtual void partialEvaluationFunction( solution_t<T> *parent, partial_solution_t<T> *solution );
+		
+		void evaluatePartialSolutionBlackBox( solution_t<T> *parent, partial_solution_t<T> *solution );
 
 		vec_t<vec_t<double>> similarity_matrix;
 };

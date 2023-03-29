@@ -11,17 +11,28 @@ namespace gomea{
 namespace fitness{
 
 template<class T>
-class customFitnessFunction_t : public fitness_t<T> 
+class GBOFitnessFunction_t : public fitness_t<T> 
 {
 	public:
-		customFitnessFunction_t( int number_of_parameters );
-		customFitnessFunction_t( int number_of_parameters, double vtr );
+		GBOFitnessFunction_t( int number_of_parameters );
+		GBOFitnessFunction_t( int number_of_parameters, double vtr );
+
+		void initialize();
 		
-		void initializeVariableInteractionGraph(); 
+		// Subfunctions	
+		virtual vec_t<int> inputsToSubfunction( int subfunction_index ) = 0;
+		virtual int getIndexOfFitnessBuffer( int subfunction_index );
+		virtual int getNumberOfSubfunctions() = 0;
+		virtual int getNumberOfFitnessBuffers();
+
+		// Dependency structure
+		void initializeSubfunctionDependencyMap();
+		virtual void initializeVariableInteractionGraph();
 		virtual double getSimilarityMeasure( size_t var_a, size_t var_b );
 
 	private:
 		void evaluationFunction( solution_t<T> *solution );
+		//void partialEvaluationFunction( solution_t<T> *parent, partial_solution_t<T> *solution, const std::set<int> &dependent_subfunctions );
 		void partialEvaluationFunction( solution_t<T> *parent, partial_solution_t<T> *solution );
 		virtual double subfunction( int subfunction_index, vec_t<T> &variables ) = 0;
 
@@ -31,10 +42,10 @@ class customFitnessFunction_t : public fitness_t<T>
 		
 		double constraintFunction( solution_t<T> *solution );
 		double constraintFunction( partial_solution_t<T> *solution );
-		virtual double constraintFunction( vec_t<double> &fitness_buffers ); 
+		virtual double constraintFunction( vec_t<double> &fitness_buffers );
 };
 
-template class customFitnessFunction_t<char>;
-template class customFitnessFunction_t<double>;
+template class GBOFitnessFunction_t<char>;
+template class GBOFitnessFunction_t<double>;
 
 }}

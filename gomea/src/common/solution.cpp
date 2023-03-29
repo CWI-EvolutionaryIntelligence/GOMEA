@@ -15,15 +15,14 @@ solution_t<char>::solution_t(size_t numberOfVariables_, size_t alphabetSize_) : 
 	fill(variables.begin(), variables.end(), 0);
 }
 
-template<class T>
+/*template<class T>
 std::ostream & operator << (std::ostream &out, const solution_t<T> &individual)
 {
 	for (int i = 0; i < individual.getNumberOfVariables(); ++i)
 		out << +individual.variables[i];
 	out << " | " << individual.getObjectiveValue();
 	return out;
-}
-
+}*/
 
 template<class T>
 void solution_t<T>::randomInit(std::mt19937 *rng)
@@ -45,26 +44,30 @@ void solution_t<char>::randomInit(std::mt19937 *rng)
 template<class T>
 void solution_t<T>::initMemory( int number_of_objectives, int number_of_fitness_buffers )
 {
-	if( objective_values.size() == 0 )
-		initObjectiveValues( number_of_objectives );
-	if( fitness_buffers.size() == 0 )
-		initFitnessBuffers( number_of_fitness_buffers );
+	initObjectiveValues(number_of_objectives);
+	initFitnessBuffers(number_of_fitness_buffers);
 }
 
 template<class T>
 void solution_t<T>::initObjectiveValues( int number_of_objectives )
 {
- 	this->objective_values.resize(number_of_objectives);
-	for( int i = 0; i < number_of_objectives; i++ )
-		this->objective_values[i] = INFINITY;
+	if( objective_values.size() != number_of_objectives )
+	{
+		this->objective_values.resize(number_of_objectives);
+		for (int i = 0; i < number_of_objectives; i++)
+			this->objective_values[i] = INFINITY;
+	}
 }
 
 template<class T>
 void solution_t<T>::initFitnessBuffers( int number_of_fitness_buffers ) 
 {
-	this->fitness_buffers.resize(number_of_fitness_buffers);
-	for( int i = 0; i < number_of_fitness_buffers; i++ )
-		this->fitness_buffers[i] = INFINITY;
+	if( fitness_buffers.size() != number_of_fitness_buffers )
+	{
+		this->fitness_buffers.resize(number_of_fitness_buffers);
+		for( int i = 0; i < number_of_fitness_buffers; i++ )
+			this->fitness_buffers[i] = INFINITY;
+	}
 }
 
 template<class T>

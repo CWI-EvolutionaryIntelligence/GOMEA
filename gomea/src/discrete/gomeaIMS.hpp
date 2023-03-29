@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-#include <unordered_map>
 using namespace std;
 
 #include "gomea/src/discrete/Config.hpp"

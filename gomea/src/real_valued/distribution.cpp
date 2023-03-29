@@ -860,7 +860,7 @@ partial_solution_t<double> *conditional_distribution_t::generatePartialSolution(
 {
 	vec_t<double> result = vec_t<double>(variables.size());
 	vec_t<double> means = vec_t<double>(variables.size());
-	std::map<int,int> sampled_indices;
+	std::unordered_map<int,int> sampled_indices;
 	for( size_t k = 0; k < variable_groups.size(); k++ )
 	{
 		int og = order[k];

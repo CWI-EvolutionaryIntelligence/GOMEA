@@ -27,7 +27,7 @@ class output_statistics_t
 
         void writeToFile( std::string filename = "statistics.dat" );
         
-        std::map<std::string, std::map<int,metric_t>> metrics_map;
+        std::unordered_map<std::string, std::unordered_map<int,metric_t>> metrics_map;
         std::set<int> all_keys;
         solution_t<genotype_t> *elitist_solution;
 };

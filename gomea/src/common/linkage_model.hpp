@@ -72,6 +72,8 @@ public:
 	void determineParallelFOSOrder(vec_t<vec_t<int>> VIG );
     void determineParallelFOSOrder(std::map<int, std::set<int>> VIG );
     vec_t<int> graphColoring(std::map<int, std::set<int>> &VIG);
+    void initializeDependentSubfunctions( std::map<int,std::set<int>> &subfunction_dependency_map );
+    std::set<int> getDependentSubfunctions( int linkage_set_index );
 
     void writeMIMatrixToFile(vec_t<vec_t<double>> MI_Matrix, std::string folder, int populationIndex, int generation);
     
@@ -83,6 +85,7 @@ public:
 protected:
     vec_t<int> colors;
     vec_t<vec_t<double>> S_Matrix;
+    vec_t<std::set<int>> dependent_subfunctions;
     bool filtered;
     int similarityMeasure;
     

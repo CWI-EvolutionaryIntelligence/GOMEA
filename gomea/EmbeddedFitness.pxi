@@ -13,7 +13,7 @@ cdef public double gomea_pyfitness_subfunction_realvalued(obj, int subfunction_i
     cdef void *vec_ptr = &variables[0]
     cdef np.npy_intp shape[1]
     shape[0] = <np.npy_intp> variables.size()
-    npvars = np.PyArray_SimpleNewFromData(1, shape, np.NPY_FLOAT64, vec_ptr)
+    cdef np.ndarray npvars = np.PyArray_SimpleNewFromData(1, shape, np.NPY_FLOAT64, vec_ptr)
     
     cdef double subf = fitness_obj.subfunction(subfunction_index,npvars)
     return subf
@@ -24,40 +24,81 @@ cdef public double gomea_pyfitness_subfunction_discrete(obj, int subfunction_ind
     cdef void *vec_ptr = &variables[0]
     cdef np.npy_intp shape[1]
     shape[0] = <np.npy_intp> variables.size()
-    npvars = np.PyArray_SimpleNewFromData(1, shape, np.NPY_BYTE, vec_ptr)
+    cdef np.ndarray npvars = np.PyArray_SimpleNewFromData(1, shape, np.NPY_BYTE, vec_ptr)
     
     cdef double subf = fitness_obj.subfunction(subfunction_index,npvars)
     return subf
 
-cdef public double gomea_pyfitness_objective_function(obj, int objective_index, vector[double] &fitness_buffers ) except +:
+cdef public double gomea_pyfitness_objective_function_gbo(obj, int objective_index, vector[double] &fitness_buffers ) except +:
     fitness_obj = <GBOFitnessFunction?>obj
     
     cdef void *vec_ptr = &fitness_buffers[0]
     cdef np.npy_intp shape[1]
     shape[0] = <np.npy_intp> fitness_buffers.size()
-    npvars = np.PyArray_SimpleNewFromData(1, shape, np.NPY_FLOAT64, vec_ptr)
+    cdef np.ndarray npvars = np.PyArray_SimpleNewFromData(1, shape, np.NPY_FLOAT64, vec_ptr)
     
     cdef double result = fitness_obj.objective_function(objective_index,npvars)
     return result
 
-cdef public double gomea_pyfitness_constraint_function(obj, vector[double] &fitness_buffers ) except +:
+cdef public double gomea_pyfitness_constraint_function_gbo(obj, vector[double] &fitness_buffers ) except +:
     fitness_obj = <GBOFitnessFunction?>obj
     
     cdef void *vec_ptr = &fitness_buffers[0]
     cdef np.npy_intp shape[1]
     shape[0] = <np.npy_intp> fitness_buffers.size()
-    npvars = np.PyArray_SimpleNewFromData(1, shape, np.NPY_FLOAT64, vec_ptr)
+    cdef np.ndarray npvars = np.PyArray_SimpleNewFromData(1, shape, np.NPY_FLOAT64, vec_ptr)
+    
+    cdef double result = fitness_obj.constraint_function(npvars)
+    return result 
+
+cdef public double gomea_pyfitness_objective_function_bbo_discrete(obj, int objective_index, vector[char] &variables ) except +:
+    fitness_obj = <FitnessFunction?>obj
+    
+    cdef void *vec_ptr = &variables[0]
+    cdef np.npy_intp shape[1]
+    shape[0] = <np.npy_intp> variables.size()
+    cdef np.ndarray npvars = np.PyArray_SimpleNewFromData(1, shape, np.NPY_BYTE, vec_ptr)
+    
+    cdef double result = fitness_obj.objective_function(objective_index,npvars)
+    return result
+
+cdef public double gomea_pyfitness_objective_function_bbo_realvalued(obj, int objective_index, vector[double] &variables ) except +:
+    fitness_obj = <FitnessFunction?>obj
+    
+    cdef void *vec_ptr = &variables[0]
+    cdef np.npy_intp shape[1]
+    shape[0] = <np.npy_intp> variables.size()
+    cdef np.ndarray npvars = np.PyArray_SimpleNewFromData(1, shape, np.NPY_FLOAT64, vec_ptr)
+    
+    cdef double result = fitness_obj.objective_function(objective_index,npvars)
+    return result
+
+cdef public double gomea_pyfitness_constraint_function_bbo_discrete(obj, vector[char] &variables ) except +:
+    fitness_obj = <FitnessFunction?>obj
+    
+    cdef void *vec_ptr = &variables[0]
+    cdef np.npy_intp shape[1]
+    shape[0] = <np.npy_intp> variables.size()
+    cdef np.ndarray npvars = np.PyArray_SimpleNewFromData(1, shape, np.NPY_BYTE, vec_ptr)
+    
+    cdef double result = fitness_obj.constraint_function(npvars)
+    return result 
+
+cdef public double gomea_pyfitness_constraint_function_bbo_realvalued(obj, vector[double] &variables ) except +:
+    fitness_obj = <FitnessFunction?>obj
+    
+    cdef void *vec_ptr = &variables[0]
+    cdef np.npy_intp shape[1]
+    shape[0] = <np.npy_intp> variables.size()
+    cdef np.ndarray npvars = np.PyArray_SimpleNewFromData(1, shape, np.NPY_FLOAT64, vec_ptr)
     
     cdef double result = fitness_obj.constraint_function(npvars)
     return result 
 
 cdef public vector[int] gomea_pyfitness_inputsToSubfunction(obj, int subfunction_index ) except +:
     fitness_obj = <GBOFitnessFunction?>obj
-    cdef np.ndarray indices = np.array(fitness_obj.inputs_to_subfunction(subfunction_index), np.int32)
-    cdef vector[int] vec
-    for i in indices:
-        vec.push_back(i)
-    return vec
+    cdef vector[int] indices = fitness_obj.inputs_to_subfunction(subfunction_index)
+    return indices 
 
 cdef public int gomea_pyfitness_index_of_fitness_buffer(obj, int subfunction_index) except +:
     fitness_obj = <GBOFitnessFunction?>obj

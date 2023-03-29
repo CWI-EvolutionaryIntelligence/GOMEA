@@ -1,11 +1,11 @@
 #pragma once
 
-#include "gomea/src/fitness/fitness_custom.hpp"
+#include "gomea/src/fitness/gbo_fitness.hpp"
 
 namespace gomea{
 namespace fitness{
 
-class yourFitnessFunctionDiscrete : public customFitnessFunction_t<char> 
+class yourFitnessFunctionDiscrete : public GBOFitnessFunction_t<char> 
 {
 	public:
 		yourFitnessFunctionDiscrete( int number_of_variables, double vtr );

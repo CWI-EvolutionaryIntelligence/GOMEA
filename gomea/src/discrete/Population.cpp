@@ -37,6 +37,7 @@ Population::Population(Config *config_, fitness_t *problemInstance_, sharedInfor
 		if( config->linkage_config != NULL )
 		{
 			FOSInstance = linkage_model_t::createFOSInstance( *config->linkage_config, problemInstance->number_of_variables );
+            FOSInstance->initializeDependentSubfunctions( problemInstance->subfunction_dependency_map );
 		}
 		else if( FOSInstance_ == NULL )
 		{
@@ -61,8 +62,9 @@ Population::~Population()
 
 ostream & operator << (ostream &out, const Population &populationInstance)
 {
+    out << "Generation " << populationInstance.numberOfGenerations << ":" << endl;
     for (size_t i = 0; i < populationInstance.populationSize; ++i)
-        out << populationInstance.population[i] << " ";
+        out << *populationInstance.population[i] << endl;
     out << endl;
     return out;
 }
@@ -103,10 +105,16 @@ void Population::makeOffspring()
         if (FOSInstance->is_static)
         {
             if (FOSInstance->size() == 0)
-                FOSInstance->learnLinkageTreeFOS(problemInstance->getSimilarityMatrix(FOSInstance->getSimilarityMeasure()), false );
+            {
+                FOSInstance->learnLinkageTreeFOS(problemInstance->getSimilarityMatrix(FOSInstance->getSimilarityMeasure()), false);
+                FOSInstance->initializeDependentSubfunctions( problemInstance->subfunction_dependency_map );
+            }
         }
         else
+        {
             FOSInstance->learnLinkageTreeFOS(population, config->alphabetSize );
+            FOSInstance->initializeDependentSubfunctions(problemInstance->subfunction_dependency_map);
+        }
     }
 
     FOSInstance->setCountersToZero();
@@ -135,24 +143,24 @@ void Population::generateOffspring()
 		FOSInstance->determineParallelFOSOrder(problemInstance->variable_interaction_graph );
     }
 
-    for(size_t i = 0; i < populationSize; i++)
+    for (size_t i = 0; i < populationSize; i++)
     {
-			if( !config->useParallelFOSOrder && !config->fixFOSOrderForPopulation )
-				FOSInstance->shuffleFOS(); 
+        if (!config->useParallelFOSOrder && !config->fixFOSOrderForPopulation)
+            FOSInstance->shuffleFOS();
 
-            solution_t<char> backup = *population[i];
-            
-            bool solutionHasChanged;
-            solutionHasChanged = GOM(i);
-            
-            /* Phase 2 (Forced Improvement): optimal mixing with elitist solution */
-            if (config->useForcedImprovements)
-            {
-                if ((!solutionHasChanged) || (noImprovementStretches[i] > (1+(log(populationSize)/log(10)))))
-                    FI(i);
-            }
+        solution_t<char> backup = *population[i];
 
-        if(!(offspringPopulation[i]->getObjectiveValue() > population[i]->getObjectiveValue()))
+        bool solutionHasChanged;
+        solutionHasChanged = GOM(i);
+
+        /* Phase 2 (Forced Improvement): optimal mixing with elitist solution */
+        if (config->useForcedImprovements)
+        {
+            if ((!solutionHasChanged) || (noImprovementStretches[i] > (1 + (log(populationSize) / log(10)))))
+                FI(i);
+        }
+
+        if (!(offspringPopulation[i]->getObjectiveValue() > population[i]->getObjectiveValue()))
             noImprovementStretches[i]++;
         else
             noImprovementStretches[i] = 0;
@@ -204,6 +212,7 @@ bool Population::GOM(size_t offspringIndex)
             if (!donorEqualToOffspring)
             {
                 //evaluateSolution(offspringPopulation[offspringIndex], backup, touchedGenes, backup->getObjectiveValue());
+                //problemInstance->evaluatePartialSolution(offspringPopulation[offspringIndex], partial_offspring, FOSInstance->getDependentSubfunctions(ind) );
                 problemInstance->evaluatePartialSolution(offspringPopulation[offspringIndex], partial_offspring );
 
                 // accept the change if this solution is not the elitist and the fitness is at least equally good (allows random walk in neutral fitness landscape)
@@ -224,6 +233,7 @@ bool Population::GOM(size_t offspringIndex)
                 FOSInstance->usageCounters[ind]++;
 
             }
+            delete partial_offspring;
 
             break;
         }

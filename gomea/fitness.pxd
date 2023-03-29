@@ -1,4 +1,5 @@
 from cpython cimport PyObject
+from libcpp.vector cimport vector
 import numpy as np
 cimport numpy as np
 
@@ -6,38 +7,65 @@ cdef extern from "gomea/src/fitness/fitness.hpp" namespace "gomea::fitness":
     cdef cppclass fitness_t[T]:
         fitness_t() except +
 
-cdef extern from "gomea/src/fitness/py_fitness.hpp" namespace "gomea::fitness":
-    cdef cppclass pyFitnessFunction_t[T](fitness_t[T]):
-        pyFitnessFunction_t() except +
-        pyFitnessFunction_t(int,PyObject*) except +
-        pyFitnessFunction_t(int,double,PyObject*) except +
+cdef extern from "gomea/src/fitness/gbo_fitness.hpp" namespace "gomea::fitness":
+    cdef cppclass GBOFitnessFunction_t[T](fitness_t[T]):
+        GBOFitnessFunction_t() except +
+
+cdef extern from "gomea/src/fitness/bbo_fitness.hpp" namespace "gomea::fitness":
+    cdef cppclass BBOFitnessFunction_t[T](fitness_t[T]):
+        BBOFitnessFunction_t() except +
+
+cdef extern from "gomea/src/fitness/py_gbo_fitness.hpp" namespace "gomea::fitness":
+    cdef cppclass pyGBOFitnessFunction_t[T](GBOFitnessFunction_t[T]):
+        pyGBOFitnessFunction_t() except +
+        pyGBOFitnessFunction_t(int,PyObject*) except +
+        pyGBOFitnessFunction_t(int,double,PyObject*) except +
+
+cdef extern from "gomea/src/fitness/py_bbo_fitness.hpp" namespace "gomea::fitness":
+    cdef cppclass pyBBOFitnessFunction_t[T](fitness_t[T]):
+        pyBBOFitnessFunction_t() except +
+        pyBBOFitnessFunction_t(int,PyObject*) except +
+        pyBBOFitnessFunction_t(int,double,PyObject*) except +
 
 cdef extern from "gomea/src/fitness/your_fitness_discrete.hpp" namespace "gomea::fitness":
-    cdef cppclass yourFitnessFunctionDiscrete(fitness_t[char]):
+    cdef cppclass yourFitnessFunctionDiscrete(GBOFitnessFunction_t[char]):
         yourFitnessFunctionDiscrete() except +
         yourFitnessFunctionDiscrete(int,double) except +
 
 cdef extern from "gomea/src/fitness/your_fitness_realvalued.hpp" namespace "gomea::fitness":
-    cdef cppclass yourFitnessFunctionRealValued(fitness_t[double]):
+    cdef cppclass yourFitnessFunctionRealValued(GBOFitnessFunction_t[double]):
         yourFitnessFunctionRealValued() except +
         yourFitnessFunctionRealValued(int,double) except +
 
 cdef extern from "gomea/src/fitness/benchmarks-rv.hpp" namespace "gomea::fitness":
-    cdef cppclass sphereFunction_t(fitness_t[double]):
+    cdef cppclass sphereFunction_t(GBOFitnessFunction_t[double]):
         sphereFunction_t() except +
         sphereFunction_t(int,double) except +
 
 cdef extern from "gomea/src/fitness/benchmarks-rv.hpp" namespace "gomea::fitness":
-    cdef cppclass rosenbrockFunction_t(fitness_t[double]):
+    cdef cppclass rosenbrockFunction_t(GBOFitnessFunction_t[double]):
         rosenbrockFunction_t() except +
         rosenbrockFunction_t(int,double) except +
 
 cdef extern from "gomea/src/fitness/benchmarks-discrete.hpp" namespace "gomea::fitness":
-    cdef cppclass oneMax_t(fitness_t[char]):
+    cdef cppclass oneMax_t(GBOFitnessFunction_t[char]):
         oneMax_t() except +
         oneMax_t(int) except +
 
+cdef extern from "gomea/src/fitness/benchmarks-discrete.hpp" namespace "gomea::fitness":
+    cdef cppclass deceptiveTrap_t(GBOFitnessFunction_t[char]):
+        deceptiveTrap_t() except +
+        deceptiveTrap_t(int,int) except +
+
+cdef extern from "gomea/src/fitness/benchmarks-discrete.hpp" namespace "gomea::fitness":
+    cdef cppclass deceptiveTrapBBO_t(BBOFitnessFunction_t[char]):
+        deceptiveTrapBBO_t() except +
+        deceptiveTrapBBO_t(int,int) except +
+
 cdef class FitnessFunction:
+    cdef public int number_of_variables
+    cdef public double value_to_reach
+    
     cdef fitness_t[char] *c_inst_discrete
     cdef fitness_t[double] *c_inst_realvalued
 
@@ -45,7 +73,7 @@ cdef class GBOFitnessFunction(FitnessFunction):
     cpdef double subfunction( self, int subfunction_index, np.ndarray variables ) except +
     cpdef double objective_function( self, int objective_index, np.ndarray fitness_buffers ) except +
     cpdef double constraint_function( self, np.ndarray fitness_buffers ) except +
-    cpdef np.ndarray inputs_to_subfunction( self, int ) except +
+    cpdef vector[int] inputs_to_subfunction( self, int ) except +
     cpdef int number_of_subfunctions( self ) except +
 
     cpdef int number_of_fitness_buffers( self ) except +
@@ -57,5 +85,15 @@ cdef class GBOFitnessFunctionDiscrete(GBOFitnessFunction):
     pass
 
 cdef class GBOFitnessFunctionRealValued(GBOFitnessFunction):
+    pass
+
+cdef class BBOFitnessFunction(FitnessFunction):
+    cpdef double objective_function( self, int objective_index, np.ndarray variables ) except +
+    cpdef double constraint_function( self, np.ndarray variables ) except +
+
+cdef class BBOFitnessFunctionDiscrete(BBOFitnessFunction):
+    pass
+
+cdef class BBOFitnessFunctionRealValued(BBOFitnessFunction):
     pass
 

@@ -6,50 +6,29 @@ namespace fitness{
 
 using namespace gomea;
 
-oneMax_t::oneMax_t( int number_of_variables ) : fitness_t(number_of_variables)
+oneMax_t::oneMax_t( int number_of_variables ) : GBOFitnessFunction_t(number_of_variables)
 {
 	this->name = "OneMax function";
 	this->vtr = number_of_variables;
 	this->use_vtr = true;
+	this->initialize();
 }
 		
-void oneMax_t::evaluationFunction( solution_t<char> *solution )
+int oneMax_t::getNumberOfSubfunctions()
 {
-	double result = 0.0;
-	for( int i = 0; i < getNumberOfSubfunctions(); i++ )
-		result += subfunction( solution->variables[i] );
-
-	solution->setObjectiveValue(result);
-	solution->setConstraintValue(0);
-	full_number_of_evaluations++;
-	number_of_evaluations++;
+	return number_of_variables;
 }
-
-void oneMax_t::partialEvaluationFunction( solution_t<char> *parent, partial_solution_t<char> *solution )
+		
+vec_t<int> oneMax_t::inputsToSubfunction( int subfunction_index )
 {
-	double result = 0.0;
-	for( int i = 0; i < solution->getNumberOfTouchedVariables(); i++ )
-	{
-		int ind = solution->touched_indices[i];
-		result += subfunction( solution->touched_variables[i] );
-		result -= subfunction( parent->variables[ind] );
-	}
-	
-	solution->setObjectiveValue(parent->getObjectiveValue() + result);
-	solution->setConstraintValue(parent->getConstraintValue());
-	
-	full_number_of_evaluations++;
-	number_of_evaluations += solution->getNumberOfTouchedVariables() / (double) getNumberOfSubfunctions();
+	vec_t<int> vec;
+	vec.push_back(subfunction_index);
+	return vec;
 }
-
-double oneMax_t::subfunction( char x )
+		
+double oneMax_t::subfunction( int subfunction_index, vec_t<char> &variables )
 {
-	return( x );
-}
-
-double oneMax_t::getSimilarityMeasure( size_t var_a, size_t var_b )
-{
-	return 0.0;
+	return( variables[subfunction_index] );
 }
 
 }}

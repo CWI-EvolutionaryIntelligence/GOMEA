@@ -23,11 +23,19 @@ class solution_t
 			return true;
 		}
 
-		template<class U>
-		friend std::ostream &operator<<(std::ostream &out, const solution_t<U> &solution);
+		friend std::ostream &operator<<(std::ostream &out, const solution_t<T> &solution)
+		{
+			for (int i = 0; i < solution.getNumberOfVariables(); ++i)
+				out << +solution.variables[i];
+			out << " | " << solution.getObjectiveValue();
+			return out;
+		}
+		
 		void randomInit(std::mt19937 *rng);
 
 		void initMemory(int number_of_objectives, int number_of_fitness_buffers);
+		void initObjectiveValues(int number_of_objectives);
+		void initFitnessBuffers(int number_of_fitness_buffers);
 
 		int getNumberOfVariables() const;
 		int getNumberOfObjectives() const;
@@ -66,9 +74,6 @@ class solution_t
 		vec_t<double> fitness_buffers;
 
 	private:
-		void initObjectiveValues(int number_of_objectives);
-		void initFitnessBuffers(int number_of_fitness_buffers);
-
 		vec_t<double> objective_values;
 		double constraint_value;
 		
