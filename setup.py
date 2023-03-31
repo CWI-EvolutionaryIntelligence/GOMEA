@@ -38,7 +38,7 @@ extensions = []
 
 extensions.append( Extension("gomea.discrete",
         ["gomea/discrete.pyx"] + glob.glob("gomea/src/discrete/*.cpp") + common_src + fitness_src,
-        include_dirs=["."],
+        include_dirs = ["."] + [np.get_include()],
         language="c++",
         extra_compile_args=compile_args,
         extra_link_args=link_args)
@@ -46,7 +46,7 @@ extensions.append( Extension("gomea.discrete",
 
 extensions.append( Extension("gomea.real_valued",
         ["gomea/real_valued.pyx"] + glob.glob("gomea/src/real_valued/*.cpp") + common_src + fitness_src,
-        include_dirs=["."],
+        include_dirs = ["."] + [np.get_include()],
         language="c++",
         extra_compile_args=compile_args,
         extra_link_args=link_args,
@@ -57,7 +57,7 @@ extensions.append( Extension("gomea.real_valued",
 
 extensions.append( Extension("gomea.fitness",
         ["gomea/fitness.pyx"] + fitness_src + common_src,
-        include_dirs=["."],
+        include_dirs = ["."] + [np.get_include()],
         language="c++",
         extra_compile_args=compile_args,
         extra_link_args=link_args)
@@ -65,7 +65,7 @@ extensions.append( Extension("gomea.fitness",
 
 extensions.append( Extension("gomea.linkage",
         ["gomea/linkage.pyx"] + common_src,
-        include_dirs=["."],
+        include_dirs = ["."] + [np.get_include()],
         language="c++",
         extra_compile_args=compile_args,
         extra_link_args=link_args)
@@ -73,7 +73,7 @@ extensions.append( Extension("gomea.linkage",
 
 extensions.append( Extension("gomea.output",
         ["gomea/output.pyx"] + common_src,
-        include_dirs=["."],
+        include_dirs = ["."] + [np.get_include()],
         language="c++",
         extra_compile_args=compile_args,
         extra_link_args=link_args)
