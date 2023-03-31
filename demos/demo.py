@@ -1,6 +1,5 @@
 import gomea
 import numpy as np
-from functools import cache
 import gc
 
 # Custom fitness function resembling the Rosenbrock function
@@ -26,11 +25,9 @@ class CustomTrapFunction(gomea.fitness.GBOFitnessFunctionDiscrete):
         self.k = k
         return super().__new__(self,number_of_variables,value_to_reach)
 
-    @cache
     def number_of_subfunctions( self ):
         return self.number_of_variables // self.k
     
-    @cache
     def inputs_to_subfunction( self, subfunction_index ):
         return range(self.k*subfunction_index,self.k*subfunction_index+self.k)
 
