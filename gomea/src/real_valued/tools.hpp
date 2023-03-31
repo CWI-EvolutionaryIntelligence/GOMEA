@@ -51,7 +51,6 @@
 #include <map>
 #include <memory>
 #include <cassert>
-#include <armadillo>
 #include <limits>
 #include <Eigen>
 
@@ -59,8 +58,6 @@
 
 namespace gomea{
 namespace realvalued{
-
-//using namespace arma;
 
 using mat = Eigen::MatrixXd;
 using vec = Eigen::VectorXd;

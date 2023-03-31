@@ -50,7 +50,6 @@ extensions.append( Extension("gomea.real_valued",
         language="c++",
         extra_compile_args=compile_args,
         extra_link_args=link_args,
-        libraries=["armadillo"],
         library_dirs=[],
         extra_objects=[])
 )

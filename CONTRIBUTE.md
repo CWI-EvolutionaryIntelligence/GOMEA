@@ -2,9 +2,6 @@
 
 This page is now incomplete, but will include information on how to contribute to the GOMEA library.
 
-## Dependencies
-- RV-GOMEA : armadillo>=9.8
-
 ## Notes on including sub-module
 - Default constructor should be available.
 - Destructor should not free objects that are not initialized in the default constructor.
