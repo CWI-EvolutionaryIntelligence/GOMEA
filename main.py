@@ -1,30 +1,36 @@
 import gomea
 import numpy as np
+from functools import cache
+import gc
 
 # Custom fitness function resembling the Rosenbrock function
-class CustomRosenbrockFunction(gomea.fitness.PythonFitnessFunctionRealValued):
+class CustomRastriginFunction(gomea.fitness.GBOFitnessFunctionRealValued):
     def number_of_subfunctions( self ):
-        return self.number_of_variables-1
+        return self.number_of_variables
     
     def inputs_to_subfunction( self, subfunction_index ):
-        return [subfunction_index, subfunction_index+1]
+        return [subfunction_index]
+
+    def objective_function( self, objective_index, fitness_buffers ):
+        return 10.0 * self.number_of_variables + fitness_buffers[0]
 
     def subfunction(self, subfunction_index, variables):
         x = variables[subfunction_index]
-        y = variables[subfunction_index+1]
-        return 100*(y-x*x)*(y-x*x) + (1.0-x)*(1.0-x)
+        return x*x - 10.0*np.cos(2.0*np.pi*x)
 
 # Custom fitness function resembling the concatenated deceptive trap function of size k
-class CustomTrapFunction(gomea.fitness.PythonFitnessFunctionDiscrete):
+class CustomTrapFunction(gomea.fitness.GBOFitnessFunctionDiscrete):
     # Any members must be assigned in __new__ to make them accessible during instantiation of superclass
-    def __new__(self, number_of_variables, k):
+    def __new__(self, number_of_variables, k, value_to_reach):
         assert( number_of_variables % k == 0 )
         self.k = k
-        return super().__new__(self,number_of_variables)
+        return super().__new__(self,number_of_variables,value_to_reach)
 
+    @cache
     def number_of_subfunctions( self ):
         return self.number_of_variables // self.k
     
+    @cache
     def inputs_to_subfunction( self, subfunction_index ):
         return range(self.k*subfunction_index,self.k*subfunction_index+self.k)
 
@@ -36,27 +42,57 @@ class CustomTrapFunction(gomea.fitness.PythonFitnessFunctionDiscrete):
         else:
             return self.k - unitation - 1
 
-#frv = gomea.fitness.SphereFunction(10000,value_to_reach=1e-10)
-#frv = gomea.fitness.RosenbrockFunction(20,value_to_reach=1e-10)
-frv = CustomRosenbrockFunction(20,value_to_reach=1e-10)
+dim = 20
+vtr = 1e-10
+#frv = gomea.fitness.SphereFunction(10000,value_to_reach=vtr)
+#frv = gomea.fitness.RosenbrockFunction(20,value_to_reach=vtr)
+frv = CustomRastriginFunction(dim,value_to_reach=vtr)
 
-#lm = gomea.linkage.MarginalProductModel(1)
-lm = gomea.linkage.Univariate()
+#lm = gomea.linkage.Univariate(1)
+#lm = gomea.linkage.Full()
 #lm = gomea.linkage.LinkageTree(maximum_set_size=10)
 #lm = gomea.linkage.LinkageTree()
 #lm = gomea.linkage.StaticLinkageTree(maximum_set_size=10)
-#lm = gomea.linkage.UCondHG()
+lm = gomea.linkage.UCondHG()
 #lm = gomea.linkage.FromFile("FOS.in")
 #lm = gomea.linkage.Full()
 #lm = gomea.linkage.StaticLinkageTree()
-rvgom = gomea.RealValuedGOMEA(fitness=frv,linkage_model=lm,lower_init_range=-115,upper_init_range=-100,random_seed=100, maximum_number_of_populations=1, base_population_size=20,max_evals=10000)
-result = rvgom.run()
-result.printFinalStatistics()
+nsucc = 0
+nruns = 5
+rvgom = gomea.RealValuedGOMEA(fitness=frv,linkage_model=lm,lower_init_range=5,upper_init_range=10, max_number_of_populations=1, base_population_size=200, max_number_of_evaluations=100000)
+print("ObjVal\tNumEvaluations\tTime(s)")
+for i in range(nruns):
+    result = rvgom.run()
+    print(result['best_obj_val'],result['evaluations'],result['time'])
+    if result['best_obj_val'] < vtr:
+        nsucc += 1
+print(nsucc,"/",nruns," successes")
+#result.printFinalStatistics()
+#result.printAllStatistics()
 
 #fd = gomea.fitness.OneMaxFunction(1000)
-lm = gomea.linkage.StaticLinkageTree(maximum_set_size=5)
-fd = CustomTrapFunction(20,k=5)
-dgom = gomea.DiscreteGOMEA(fitness=fd,linkage_model=lm,max_evals=1000)
-result = dgom.run()
-result.printFinalStatistics()
-result.printAllStatistics()
+#lm = gomea.linkage.StaticLinkageTree(maximum_set_size=5)
+#lm = gomea.linkage.Custom(file="FOS.in")
+#lm = gomea.linkage.Custom(fos=[range(0,5),range(5,10),range(10,15),range(15,20)])
+#lm = gomea.linkage.BlockMarginalProduct(block_size=5)
+lm = gomea.linkage.LinkageTree()
+#fd = CustomTrapFunction(20,k=5,value_to_reach=20)
+dim = 320
+fd = gomea.fitness.DeceptiveTrapFunction(dim,trap_size=5)
+#fd = CustomTrapFunction(dim,k=5,value_to_reach=dim)
+nsucc = 0
+print("ObjVal\tNumEvaluations\tTime(s)")
+for i in range(nruns):
+    dgom = gomea.DiscreteGOMEA(fitness=fd,linkage_model=lm,max_number_of_evaluations=1000000)
+    result = dgom.run()
+    result.printFinalStatistics()
+    print(result['best_obj_val'],result['evaluations'],result['time'])
+    if result['best_obj_val'] == dim:
+        nsucc += 1
+    del dgom
+del fd
+del lm
+gc.collect()
+print(nsucc,"/",nruns," successes")
+#result.printFinalStatistics()
+#result.printAllStatistics()
