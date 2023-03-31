@@ -89,7 +89,9 @@ class rvg_t {
 		void checkAverageFitnessTerminationConditions( void );
 		void determineBestSolutionInCurrentPopulations( int *population_of_best, int *index_of_best );
 		bool checkFitnessVarianceTermination( int population_index );
+		bool checkNumberOfGenerationsTerminationCondition( int population_index );
 		bool checkDistributionMultiplierTerminationCondition( int population_index );
+		std::vector<double> getOverallBestFitness();
 		void ezilaitini();
 		/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 

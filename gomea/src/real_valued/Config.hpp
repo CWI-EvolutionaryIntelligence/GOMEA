@@ -64,9 +64,9 @@ class Config {
 			   verbose;
 		int    base_population_size,                                /* The size of the first population in the multi-start scheme. */
 			   maximum_number_of_populations,                       /* The maximum number of populations in the multi-start scheme. */
+			   maximum_number_of_generations,                       /* The maximum number of generations before any population in the multi-start scheme will be terminated. */
 			   number_of_subgenerations_per_population_factor,      /* The subgeneration factor in the multi-start scheme. */
-			   maximum_no_improvement_stretch,                      /* The maximum number of subsequent generations without an improvement while the distribution multiplier is <= 1.0. */
-			   use_conditional_sampling;
+			   maximum_no_improvement_stretch;                      /* The maximum number of subsequent generations without an improvement while the distribution multiplier is <= 1.0. */
 		double maximum_number_of_evaluations,                       /* The maximum number of evaluations. */
 			   maximum_number_of_seconds,                           /* The maximum number of seconds. */
 			   tau,                                                 /* The selection truncation percentile (in [1/population_size,1]). */

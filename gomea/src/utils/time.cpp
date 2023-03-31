@@ -54,12 +54,12 @@ long long getElapsedTimeMicroseconds(time_t startTimestamp)
 
 double getElapsedTimeMilliseconds(time_t startTimestamp)
 {
-	return( getElapsedTimeMicroseconds(startTimestamp) / 1e3 );
+	return( getElapsedTimeMicroseconds(startTimestamp) * 1e-3 );
 }
 
 double getElapsedTimeSeconds(time_t startTimestamp)
 {
-	return( getElapsedTimeMicroseconds(startTimestamp) / 1e6 );
+	return( getElapsedTimeMicroseconds(startTimestamp) * 1e-6 );
 }
         
 double getElapsedTimeSinceStartSeconds()
@@ -69,7 +69,7 @@ double getElapsedTimeSinceStartSeconds()
 
 double getElapsedTimeSinceStartMilliseconds()
 {
-	return getElapsedTimeMicroseconds(start_time)/1000.0;
+	return getElapsedTimeMicroseconds(start_time)*1e-3;
 }
 
 }}

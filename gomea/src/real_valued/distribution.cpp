@@ -136,7 +136,8 @@ vec_t<double> distribution_t::estimateMeanVectorML( vec_t<int> &variables, solut
 mat distribution_t::estimateUnivariateCovarianceMatrixML( vec_t<int> &variables, solution_t<double> **selection, int selection_size )
 {
 	/* First do the maximum-likelihood estimate from data */
-	mat covariance_matrix = mat(variables.size(),variables.size(),fill::zeros);
+	//mat covariance_matrix = mat(variables.size(),variables.size(),fill::zeros);
+	mat covariance_matrix = mat::Zero(variables.size(),variables.size());
 	for( size_t j = 0; j < variables.size(); j++ )
 	{
 		int vara = variables[j];
@@ -227,7 +228,7 @@ bool distribution_t::regularizeCovarianceMatrix( mat &cov_mat, vec_t<double> &me
 	// y = x.^2
 	// phiMat = y'*y/t-sample.^2
 	// phi = sum(sum(phiMat))
-	mat squared_cov = mat(n,n,fill::none);
+	mat squared_cov = mat(n,n);
 	double temp;
 	for(int i = 0; i < n; ++i)
 	{
@@ -292,8 +293,8 @@ bool distribution_t::regularizeCovarianceMatrix( mat &cov_mat, vec_t<double> &me
 
 mat distribution_t::pseudoInverse( const mat &matrix )
 {
-	mat result;
-	if( !pinv(result, matrix) )
+	mat result = pinv(matrix);
+	/*if( !pinv(result, matrix) )
 	{
 		//printf("Warning: pseudo-inverse failed.\n"); // Diag = [ ");
 		result = mat( matrix.n_cols, matrix.n_cols, fill::zeros );
@@ -302,7 +303,7 @@ mat distribution_t::pseudoInverse( const mat &matrix )
 			if( matrix(i,i) == 0 ) result(i,i) = 1e38;
 			else result(i,i) = 1.0/matrix(i,i);
 		}
-	}
+	}*/
 	return( result );
 }
 
@@ -503,7 +504,7 @@ mat distribution_t::choleskyDecomposition( const mat &matrix )
     int     i, j, k, info, *ipvt;
     double *a, *work;
 
-	int n = matrix.n_rows;
+	int n = matrix.rows();
     a    = (double *) Malloc( n*n*sizeof( double ) );
     work = (double *) Malloc( n*sizeof( double ) );
     ipvt = (int *) Malloc( n*sizeof( int ) );
@@ -521,7 +522,7 @@ mat distribution_t::choleskyDecomposition( const mat &matrix )
 
     info = linpackDCHDC( a, n, n, work, ipvt );
 
-    mat result = mat(n,n,fill::none);
+    mat result = mat(n,n);
     if( info != n ) /* Matrix is not positive definite */
     {
         k = 0;
@@ -629,7 +630,7 @@ partial_solution_t<double> *normal_distribution_t::generatePartialSolution( solu
 		else
 		{
 			vec sample = cholesky_decomposition * random1DNormalUnitVector(num_indices);
-			for( size_t i = 0; i < sample.n_elem; i++ )
+			for( size_t i = 0; i < sample.size(); i++ )
 			{
 				result[i] = mean_vector[i] + sample[i];
 			}
@@ -655,13 +656,14 @@ bool normal_distribution_t::generationalImprovementForOnePopulationForFOSElement
 		average_z_of_improvements[i] = 0.0;
 
 	int number_of_improvements  = 0;
-	mat cholinv = pinv( trimatl( cholesky_decomposition ) );
+	//mat cholinv = pinv( trimatl( cholesky_decomposition ) );
+	mat cholinv = pinv(cholesky_decomposition.triangularView<Eigen::Lower>());
 	for(int i = 0; i < num_solutions; i++ )
 	{
 		if( partial_solutions[i]->improves_elitist )
 		{
 			number_of_improvements++;
-			vec d = vec(num_indices,arma::fill::none);
+			vec d = vec(num_indices);
 			for( int j = 0; j < num_indices; j++ )
 			{
 				d[j] = (partial_solutions[i]->touched_variables[j] - partial_solutions[i]->sample_means[j]);
@@ -788,21 +790,21 @@ void conditional_distribution_t::estimateConditionalGaussianML( int variable_gro
 	{
 		mean_vectors_conditioned_on[i] = estimateMeanVectorML(vars_cond,selection,selection_size);
 		
-		mat A12( n, n_cond, fill::none );
+		mat A12( n, n_cond );
 		for(int j = 0; j < n; j++ )
 			for(int k = 0; k < n_cond; k++ )
 				A12(j,k) = estimateCovariance(vars[j],vars_cond[k],selection,selection_size) * distribution_multiplier;
 		//mat A22 = estimateCovarianceMatrixML(vars_cond,selection,selection_size);
 		mat A22 = estimateRegularCovarianceMatrixML(vars_cond,mean_vectors_conditioned_on[i],selection,selection_size);
-		mat A22inv;
-	   	if( pinv(A22inv,A22) )
+		mat A22inv = pinv(A22);
+	   	//if( pinv(A22inv,A22) )
 		{
 			rho_matrices[i] = A12*A22inv;
-			mat submat = A12*A22inv*A12.t();
+			mat submat = A12*A22inv*A12.transpose();
 			//mat zeros = A22*A22inv*A22 - A22;
 			covariance_matrices[i] -= submat;
 		}
-		else
+		//else
 		{
 			//printf("pseudo-inverse failed\n");
 		}
@@ -871,7 +873,7 @@ partial_solution_t<double> *conditional_distribution_t::generatePartialSolution(
 		out_of_bounds_draws--;
 
 		vec sample_result;
-		vec sample_means;
+		vec sample_means = vec(mean_vectors[og].size());
 		bool ready = false;
 		do
 		{
@@ -893,7 +895,8 @@ partial_solution_t<double> *conditional_distribution_t::generatePartialSolution(
 			}
 			else
 			{
-				sample_means = mean_vectors[og];
+				for( int i = 0; i < mean_vectors[og].size(); i++ )
+					sample_means(i) = mean_vectors[og][i];
 
 				vec_t<int> indices_cond = variables_conditioned_on[og];
 				int num_indices_cond = indices_cond.size();
@@ -903,7 +906,7 @@ partial_solution_t<double> *conditional_distribution_t::generatePartialSolution(
 				printf("\n");*/
 				if( num_indices_cond > 0 )
 				{
-					arma::vec cond = arma::vec(num_indices_cond, arma::fill::none);
+					vec cond = vec(num_indices_cond );
 					for(int i = 0; i < num_indices_cond; i++ )
 					{
 						auto it = sampled_indices.find(indices_cond[i]);
@@ -916,7 +919,7 @@ partial_solution_t<double> *conditional_distribution_t::generatePartialSolution(
 							cond[i] = solution_conditioned_on->variables[indices_cond[i]];
 						cond[i] = cond[i] - mean_vectors_conditioned_on[og][i];
 					}
-					arma::vec sample_mean_inc = rho_matrices[og]*cond;
+					vec sample_mean_inc = rho_matrices[og]*cond;
 					for(int i = 0; i < num_indices_cond; i++ )
 					{
 						sample_means[i] += sample_mean_inc[i];
@@ -959,8 +962,9 @@ bool conditional_distribution_t::generationalImprovementForOnePopulationForFOSEl
 		for(int i = 0; i < num_indices; i++ )
 			average_z_of_improvements[i] = 0.0;
 		
-		mat cholinv = pseudoInverse( trimatl( cholesky_decompositions[k] ) );
-		vec sample_means( num_indices, fill::none );
+		//mat cholinv = pseudoInverse( trimatl( cholesky_decompositions[k] ) );
+		mat cholinv = pinv(cholesky_decompositions[k].triangularView<Eigen::Lower>());
+		vec sample_means( num_indices );
 		for(int i = 0; i < num_solutions; i++ )
 		{
 			if( partial_solutions[i]->improves_elitist )

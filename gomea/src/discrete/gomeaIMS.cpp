@@ -46,6 +46,7 @@ void gomeaIMS::ezilaitini()
 void gomeaIMS::initialize()
 {
 	utils::initStartTime();
+	utils::clearTimers();
     problemInstance->initializeRun();
     output = output_statistics_t();
 
@@ -294,19 +295,30 @@ bool gomeaIMS::checkTerminationGOMEA(int GOMEAIndex)
 
 void gomeaIMS::writeStatistics( int population_index )
 {
+    /*double population_objective_avg  = GOMEAs[population_index]->getFitnessMean();
+    double population_constraint_avg = GOMEAs[population_index]->getConstraintValueMean();
+    double population_objective_var  = GOMEAs[population_index]->getFitnessVariance();
+    double population_constraint_var = GOMEAs[population_index]->getConstraintValueVariance();
+    solution_t<double> *best_solution = GOMEAs[population_index]->getBestSolution();
+    solution_t<double> *worst_solution = GOMEAs[population_index]->getWorstSolution();*/
+
 	assert( sharedInformationInstance != NULL );
 	int key = numberOfStatisticsWrites;
     double evals = problemInstance->number_of_evaluations;
     //double elitist_evals = sharedInformationInstance->elitistSolutionHittingTimeEvaluations;
-    double time_s = sharedInformationInstance->elitistSolutionHittingTimeMilliseconds/1000.0;
+    //double time_s = sharedInformationInstance->elitistSolutionHittingTimeMilliseconds/1000.0;
 	double best_fitness = sharedInformationInstance->elitistFitness;
+    output.addMetricValue("generation",key,(int)GOMEAs[population_index]->numberOfGenerations);
     output.addMetricValue("evaluations",key,evals);
     //output.addMetricValue("elitist_hitting_evaluations",key,elitist_evals);
-    output.addMetricValue("time",key,time_s);
-    output.addMetricValue("best_obj_val",key,best_fitness);
+    output.addMetricValue("time",key,utils::getElapsedTimeSinceStartSeconds());
+    output.addMetricValue("eval_time",key,utils::getTimer("eval_time"));
     output.addMetricValue("population_index",key,population_index);
-    output.addMetricValue("generation",key,(int)GOMEAs[population_index]->numberOfGenerations);
-    output.addMetricValue("pop_size",key,(int)GOMEAs[population_index]->populationSize);
+    output.addMetricValue("population_size",key,(int)GOMEAs[population_index]->populationSize);
+    output.addMetricValue("best_obj_val",key,sharedInformationInstance->elitistFitness);
+    output.addMetricValue("best_cons_val",key,sharedInformationInstance->elitistConstraintValue);
+    //output.addMetricValue("obj_val_avg",key,population_objective_avg);
+    //output.addMetricValue("obj_val_var",key,population_objective_var);
 	numberOfStatisticsWrites++;
 }
 

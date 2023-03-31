@@ -90,6 +90,79 @@ void Population::calculateAverageFitness()
     averageFitness /= populationSize;
 }
 
+double Population::getFitnessMean()
+{
+	double objective_avg = 0.0;
+	for(int i = 0; i < populationSize; i++ )
+		objective_avg  += population[i]->getObjectiveValue();
+	objective_avg = objective_avg / ((double) populationSize);
+	return( objective_avg );
+}
+
+double Population::getFitnessVariance()
+{
+	double objective_avg = getFitnessMean();
+	double objective_var = 0.0;
+	for(int i = 0; i < populationSize; i++ )
+		objective_var  += (population[i]->getObjectiveValue()-objective_avg)*(population[i]->getObjectiveValue()-objective_avg);
+	objective_var = objective_var / ((double) populationSize);
+
+	if( objective_var <= 0.0 )
+		objective_var = 0.0;
+	return( objective_var );
+}
+
+double Population::getConstraintValueMean()
+{
+	double constraint_avg = 0.0;
+	for(int i = 0; i < populationSize; i++ )
+		constraint_avg  += population[i]->getConstraintValue();
+	constraint_avg = constraint_avg / ((double) populationSize);
+
+	return( constraint_avg );
+}
+
+double Population::getConstraintValueVariance()
+{
+	double constraint_avg = getConstraintValueMean();
+
+	double constraint_var = 0.0;
+	for(int i = 0; i < populationSize; i++ )
+		constraint_var  += (population[i]->getConstraintValue()-constraint_avg)*(population[i]->getConstraintValue()-constraint_avg);
+	constraint_var = constraint_var / ((double) populationSize);
+
+	if( constraint_var <= 0.0 )
+		constraint_var = 0.0;
+	return( constraint_var );
+}
+
+solution_t<char> *Population::getBestSolution()
+{
+	int index_best = 0;
+	for(int j = 1; j < populationSize; j++ )
+    {
+        if( problemInstance->betterFitness( population[j]->getObjectiveValue(), population[j]->getConstraintValue(), population[index_best]->getObjectiveValue(), population[index_best]->getConstraintValue()) )
+		{
+			index_best = j;
+        }
+    }
+	return( population[index_best] );
+}
+
+solution_t<char> *Population::getWorstSolution()
+{
+	int index_worst = 0;
+	for(int j = 1; j < populationSize; j++ )
+    {
+        if( problemInstance->betterFitness( population[index_worst]->getObjectiveValue(), population[index_worst]->getConstraintValue(), population[j]->getObjectiveValue(), population[j]->getConstraintValue()) )
+		{
+			index_worst = j;
+        }
+    }
+	return( population[index_worst] );
+}
+
+
 void Population::copyOffspringToPopulation()
 {
     for(size_t i = 0; i < populationSize; i++)
@@ -355,13 +428,15 @@ void Population::checkTimeLimit()
 void Population::updateElitistAndCheckVTR(solution_t<char> *solution)
 {
     /* Update elitist solution */
-    if (sharedInformationPointer->firstEvaluationEver || (solution->getObjectiveValue() > sharedInformationPointer->elitist.getObjectiveValue()))
+    //if (sharedInformationPointer->firstEvaluationEver || (solution->getObjectiveValue() > sharedInformationPointer->elitist.getObjectiveValue()))
+    if (sharedInformationPointer->firstEvaluationEver || problemInstance->betterFitness(solution,&sharedInformationPointer->elitist) )
     {
         sharedInformationPointer->elitistSolutionHittingTimeMilliseconds = utils::getElapsedTimeMilliseconds(sharedInformationPointer->startTime);
         sharedInformationPointer->elitistSolutionHittingTimeEvaluations = problemInstance->number_of_evaluations;
 
         sharedInformationPointer->elitist = *solution;
 		sharedInformationPointer->elitistFitness = solution->getObjectiveValue();
+		sharedInformationPointer->elitistConstraintValue = solution->getConstraintValue();
         
         /* Check the VTR */
         if (problemInstance->use_vtr && solution->getObjectiveValue() >= problemInstance->vtr)

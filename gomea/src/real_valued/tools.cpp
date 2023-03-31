@@ -1008,18 +1008,12 @@ int *getRanksFromSorted( int *sorted, int array_size )
 
 vec random1DNormalUnitVector( int length )
 {
-	return randn<vec>(length);
+    vec result = vec(length);
+    std::normal_distribution<double> distribution(0.0, 1.0);
+    for( int i = 0; i < length; i++ )
+        result(i) = distribution(utils::rng);
+    return result;
 }
-
-/**
- * Returns a random compact (using integers 0,1,...,n-1) permutation
- * of length n using the Fisher-Yates shuffle.
- */
-/*uvec randomPermutation( int n )
-{
-	uvec perm = randperm(n);
-	return( perm );
-}*/
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
 double min( double x, double y )
@@ -1034,6 +1028,17 @@ double max( double x, double y )
     if( x >= y )
         return x;
     return y;
+}
+
+// method for calculating the pseudo-Inverse as recommended by Eigen developers
+// Source: https://gist.github.com/pshriwise/67c2ae78e5db3831da38390a8b2a209f
+mat pinv(const mat &a, double epsilon)
+{
+	Eigen::JacobiSVD<mat> svd(a ,Eigen::ComputeFullU | Eigen::ComputeFullV);
+        // For a non-square matrix
+        // Eigen::JacobiSVD< _Matrix_Type_ > svd(a ,Eigen::ComputeThinU | Eigen::ComputeThinV);
+	double tolerance = epsilon * std::max(a.cols(), a.rows()) *svd.singularValues().array().abs()(0);
+	return svd.matrixV() *  (svd.singularValues().array().abs() > tolerance).select(svd.singularValues().array().inverse(), 0).matrix().asDiagonal() * svd.matrixU().adjoint();
 }
 
 /**
@@ -1078,18 +1083,20 @@ double distanceEuclidean2D( double x1, double y1, double x2, double y2 )
 /*
  * Bhattacharyya distance
  */
-double normalDistributionDistance( vec mu1, vec mu2, mat cov1, mat cov2 )
+/*double normalDistributionDistance( vec mu1, vec mu2, mat cov1, mat cov2 )
 {
 	vec mudiff = mu1 - mu2;
 	mat covavg = (cov1 + cov2)/2.0;
-	double det1 = det(cov1);
-	double det2 = det(cov2);
-	double detavg = det(covavg);
+	//double det1 = det(cov1);
+	//double det2 = det(cov2);
+	double det1 = cov1.determinant();
+	double det2 = cov2.determinant();
+	double detavg = covavg.determinant();
 
-	mat a = mudiff.t() * pinv(covavg) * mudiff; 
-	double dist = a[0]/8.0 + 0.5*log(detavg/sqrt(det1*det2));
+	mat a = mudiff.transpose() * pinv(covavg) * mudiff; 
+	double dist = a(0)/8.0 + 0.5*log(detavg/sqrt(det1*det2));
 	return( dist );
-}
+}*/
 
 double normalize( double v, double min, double max )
 {

@@ -100,7 +100,7 @@ class linkage_model_rv_t : public linkage_model_t {
 			int maximum_no_improvement_stretch = 100;
 			
 			double p_accept = 0.05;
-			vec_t<uvec> variables_conditioned_on; 
+			//vec_t<uvec> variables_conditioned_on; 
 
 			bool is_conditional = false;
 			int max_clique_size;

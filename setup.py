@@ -46,7 +46,7 @@ extensions.append( Extension("gomea.discrete",
 
 extensions.append( Extension("gomea.real_valued",
         ["gomea/real_valued.pyx"] + glob.glob("gomea/src/real_valued/*.cpp") + common_src + fitness_src,
-        include_dirs = ["."] + [np.get_include()],
+        include_dirs = ["."] + ["Eigen"] + [np.get_include()],
         language="c++",
         extra_compile_args=compile_args,
         extra_link_args=link_args,

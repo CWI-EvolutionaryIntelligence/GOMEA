@@ -41,6 +41,12 @@ public:
     friend ostream & operator << (ostream &out, const Population &populationInstance);
 
     void calculateAverageFitness();
+    double getFitnessMean();
+    double getFitnessVariance();
+    double getConstraintValueMean();
+    double getConstraintValueVariance();
+    solution_t<char> *getBestSolution();
+    solution_t<char> *getWorstSolution();
     bool allSolutionsAreEqual();
     void makeOffspring();
     void copyOffspringToPopulation();

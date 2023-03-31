@@ -74,8 +74,10 @@ void fitness_t<T>::evaluate( solution_t<T> *solution )
 
 	solution->initObjectiveValues( number_of_objectives );
 
+	auto t = utils::getTimestamp();
 	evaluationFunction( solution );
-	
+	utils::addToTimer("eval_time",t);
+
 	if( use_vtr && !vtr_hit_status && solution->getConstraintValue() == 0 && solution->getObjectiveValue() <= vtr  )
 	{
 		vtr_hit_status = true;
@@ -97,6 +99,7 @@ void fitness_t<T>::evaluatePartialSolutionBlackBox( solution_t<T> *parent, parti
 	
 	solution->initObjectiveValues( number_of_objectives );
 	
+	auto t = utils::getTimestamp();
 	// Make backup of parent
 	double *var_backup = new double[solution->getNumberOfTouchedVariables()];
 	for( int i = 0; i < solution->getNumberOfTouchedVariables(); i++ )
@@ -123,6 +126,8 @@ void fitness_t<T>::evaluatePartialSolutionBlackBox( solution_t<T> *parent, parti
 	for( int i = 0; i < solution->getNumberOfTouchedVariables(); i++ )
 		parent->variables[solution->touched_indices[i]] = var_backup[i];
 	delete[] var_backup;
+	
+	utils::addToTimer("eval_time",t);
 }
 
 /*template<class T>
@@ -152,7 +157,10 @@ void fitness_t<T>::evaluatePartialSolution( solution_t<T> *parent, partial_solut
 	else
 	{
 		//partialEvaluationFunction( parent, solution, dependent_subfunctions );
+		auto t = utils::getTimestamp();
 		partialEvaluationFunction( parent, solution );
+		utils::addToTimer("eval_time",t);
+
 #ifdef CHECK_PARTIAL_FITNESS
 		double fbefore = solution->objective_value;
 		evaluatePartialSolutionBlackBox( parent, solution );	

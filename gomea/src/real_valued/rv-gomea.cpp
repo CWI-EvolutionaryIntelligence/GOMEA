@@ -393,7 +393,7 @@ void rvg_t::initialize( void )
     {
         utils::initializeRandomNumberGenerator();
     }
-    arma_rng::set_seed(utils::random_seed);
+    //arma_rng::set_seed(utils::random_seed);
     fitness->initializeRun();
 	
 	initializeProblem();
@@ -456,26 +456,49 @@ void rvg_t::initializeProblem()
  * Writes (appends) statistics about the current generation to a
  * file named "statistics.dat".
  */
+std::vector<double> rvg_t::getOverallBestFitness()
+{
+	double best_obj_val = populations[0]->objective_value_elitist;
+	double best_cons_val = populations[0]->constraint_value_elitist;
+	for( int i = 1; i < populations.size(); i++ )
+	{
+		if( fitness->betterFitness( populations[i]->objective_value_elitist, populations[i]->constraint_value_elitist, best_obj_val, best_cons_val ) )
+        {
+            best_obj_val = populations[i]->objective_value_elitist;
+            best_cons_val = populations[i]->constraint_value_elitist;
+        }
+	}
+
+    std::vector<double> result(2);
+    result[0] = best_obj_val;
+    result[1] = best_cons_val;
+    return( result );
+}
+
 void rvg_t::writeGenerationalStatisticsForOnePopulation( int population_index )
 {
     /* Average, best and worst */
-    double population_objective_avg  = populations[population_index]->getFitnessMean();
+    /*double population_objective_avg  = populations[population_index]->getFitnessMean();
     double population_constraint_avg = populations[population_index]->getConstraintValueMean();
     double population_objective_var  = populations[population_index]->getFitnessVariance();
     double population_constraint_var = populations[population_index]->getConstraintValueVariance();
     solution_t<double> *best_solution = populations[population_index]->getBestSolution();
-    solution_t<double> *worst_solution = populations[population_index]->getWorstSolution();
+    solution_t<double> *worst_solution = populations[population_index]->getWorstSolution();*/
+    std::vector<double> overall_best = getOverallBestFitness();
 
     int key = total_number_of_writes;
     output.addMetricValue("generation",key,populations[population_index]->number_of_generations);
     output.addMetricValue("evaluations",key,fitness->number_of_evaluations);
     output.addMetricValue("time",key,utils::getElapsedTimeSinceStartSeconds());
-    output.addMetricValue("pop_index",key,population_index);
-    output.addMetricValue("pop_size",key,populations[population_index]->population_size);
-    output.addMetricValue("best_obj_val",key,best_solution->getObjectiveValue());
-    output.addMetricValue("best_cons_val",key,best_solution->getConstraintValue());
-    output.addMetricValue("obj_val_avg",key,population_objective_avg);
-    output.addMetricValue("obj_val_var",key,population_objective_var);
+    output.addMetricValue("eval_time",key,utils::getTimer("eval_time"));
+    output.addMetricValue("population_index",key,population_index);
+    output.addMetricValue("population_size",key,populations[population_index]->population_size);
+    output.addMetricValue("best_obj_val",key,overall_best[0]);
+    output.addMetricValue("best_cons_val",key,overall_best[1]);
+    //output.addMetricValue("subpop_best_obj_val",key,best_solution->getObjectiveValue());
+    //output.addMetricValue("subpop_best_cons_val",key,best_solution->getConstraintValue());
+    //output.addMetricValue("subpop_obj_val_avg",key,population_objective_avg);
+    //output.addMetricValue("subpop_obj_val_var",key,population_objective_var);
 
     total_number_of_writes++;
 }
@@ -683,7 +706,12 @@ bool rvg_t::checkTerminationCondition( void )
 
 bool rvg_t::checkPopulationTerminationConditions( int population_index )
 {
-	if( checkFitnessVarianceTermination(population_index) )
+	if( checkNumberOfGenerationsTerminationCondition(population_index) )
+	{
+        return( true );
+    }
+	
+    if( checkFitnessVarianceTermination(population_index) )
 	{
         return( true );
     }
@@ -800,6 +828,12 @@ bool rvg_t::checkFitnessVarianceTermination( int population_index )
 	return( false );
 }
 
+bool rvg_t::checkNumberOfGenerationsTerminationCondition( int population_index )
+{
+    if( config->maximum_number_of_generations > 0 && populations[population_index]->number_of_generations >= config->maximum_number_of_generations )
+        return( true );
+    return( false );
+}
 
 /**
  * Checks whether the distribution multiplier in any population
@@ -930,6 +964,7 @@ void rvg_t::run( void )
     assert(out == 0);
 
     utils::initStartTime();
+	utils::clearTimers();
 	initialize();
 
 	if( config->print_verbose_overview )

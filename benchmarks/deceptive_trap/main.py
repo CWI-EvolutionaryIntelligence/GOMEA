@@ -64,7 +64,7 @@ def getLinkageModel(lm_tag):
 def runDiscreteGOMEA(prob_tag,lang_tag,lm_tag,dim,max_evals):
     ff = getFitnessFunctionTrap5(prob_tag,lang_tag,dim)
     lm = getLinkageModel(lm_tag)
-    dgom = gomea.DiscreteGOMEA(fitness=ff,linkage_model=lm,max_evals=max_evals)
+    dgom = gomea.DiscreteGOMEA(fitness=ff,linkage_model=lm,max_number_of_evaluations=max_evals)
     result = dgom.run()
     del ff
     del lm
@@ -79,6 +79,7 @@ def runExperiment(prob_tag,lang_tag,lm_tag,max_dim=1000,rerun=False,nthreads=1,n
     fev_budget = 100000000
     fev_results = {}
     time_results = {}
+    eval_time_results = {}
     bestf_results = {}
     if not rerun and 'fev' in cur_results.keys():
         fev_results = cur_results['fev']
@@ -86,11 +87,14 @@ def runExperiment(prob_tag,lang_tag,lm_tag,max_dim=1000,rerun=False,nthreads=1,n
         time_results = cur_results['t']
     if not rerun and 'bestf' in cur_results.keys():
         bestf_results = cur_results['bestf']
+    if not rerun and 'eval_t' in cur_results.keys():
+        eval_time_results = cur_results['eval_t']
     while dim < max_dim:
-        if rerun or (dim not in fev_results.keys()) or (dim not in time_results.keys()) or (dim not in bestf_results.keys()):
+        if rerun or (dim not in fev_results.keys()) or (dim not in time_results.keys()) or (dim not in eval_time_results.keys()) or (dim not in bestf_results.keys()):
             nsucc = 0
             fev_results[dim] = []
             time_results[dim] = []
+            eval_time_results[dim] = []
             bestf_results[dim] = []
             
             thr_pool = mp.Pool(nthreads)
@@ -100,11 +104,12 @@ def runExperiment(prob_tag,lang_tag,lm_tag,max_dim=1000,rerun=False,nthreads=1,n
             results = thr_pool.starmap(runDiscreteGOMEA,args)
             for res in results:
                 fev_results[dim].append(res['evaluations'])
-                time_results[dim].append(max(0.001,res['time']))
+                time_results[dim].append(res['time'])
+                eval_time_results[dim].append(res['eval_time'])
                 bestf_results[dim].append(res['best_obj_val'])
                 if res['best_obj_val'] == dim:
                     nsucc += 1
-            results = {"t" : time_results, "fev" : fev_results, "bestf" : bestf_results}
+            results = {"t" : time_results, "fev" : fev_results, "bestf" : bestf_results, "eval_t" : eval_time_results }
             writeResultsToJson(results,full_tag)
             print("Dim",dim," ",nsucc/nruns," suc ",np.median(time_results[dim]),"sec",np.median(fev_results[dim]),"fev")
         dim = 2*dim
@@ -165,6 +170,25 @@ def plotFEVScalability(results,tag='',max_dim=1000):
     ax.legend(loc='upper left')
     plt.savefig('plots/fev_'+tag+'.pdf')
 
+def plotEvalTimeScalability(results,tag='',max_dim=1000):
+    fig,ax = plt.subplots(dpi=150)
+    for label,res in results:
+        addResultToPlot(res['t'],label=label)
+    fig.patch.set_facecolor('white')
+    plt.yscale('log')
+    plt.xscale('log',base=10)
+    plt.xlabel("Dimensionality")
+    plt.ylabel("Time (s)")
+    plt.xticks([10*2**i for i in range(20)])
+    #plt.ylim(0.0005,30)
+    plt.xlim(8,max_dim)
+    plt.grid(linewidth=0.5)
+    formatter = plt.ScalarFormatter()
+    formatter.set_scientific(False)
+    ax.xaxis.set_major_formatter(formatter)
+    ax.legend(loc='upper left')
+    plt.savefig('plots/evalt_'+tag+'.pdf')
+
 def plotTimeScalability(results,tag='',max_dim=1000):
     fig,ax = plt.subplots(dpi=150)
     for label,res in results:
@@ -208,13 +232,15 @@ def runExperiments():
     rerun_experiments = False 
     nthreads = 15
     nruns = 30
-    runExperimentsTrap5LT(max_dim=10000,rerun=rerun_experiments,nthreads=nthreads,nruns=nruns)
-    runExperimentsTrap5BlockMarginal(max_dim=100000,rerun=rerun_experiments,nthreads=nthreads,nruns=nruns)
-    runExperimentsTrap5StaticLT(max_dim=10000,rerun=rerun_experiments,nthreads=nthreads,nruns=nruns)
-    #runExperiment('trap5','cpp','slt',max_dim=5000,rerun=True,nthreads=nthreads)
-    #runExperiment('trap5','cpp','lt',max_dim=1000,rerun=True,nthreads=nthreads)
-    #runExperiment('trap5','py','lt',max_dim=5000,rerun=True,nthreads=nthreads)
-    #runExperiment('trap5','cpp_bbo','lt',max_dim=5000,rerun=True,nthreads=nthreads)
+    #runExperimentsTrap5LT(max_dim=5000,rerun=rerun_experiments,nthreads=nthreads,nruns=nruns)
+    #runExperimentsTrap5BlockMarginal(max_dim=10000,rerun=rerun_experiments,nthreads=nthreads,nruns=nruns)
+    #runExperimentsTrap5StaticLT(max_dim=5000,rerun=rerun_experiments,nthreads=nthreads,nruns=nruns)
+    runExperimentsTrap5LT(max_dim=500,rerun=rerun_experiments,nthreads=nthreads,nruns=nruns)
+    runExperimentsTrap5BlockMarginal(max_dim=1000,rerun=rerun_experiments,nthreads=nthreads,nruns=nruns)
+    runExperimentsTrap5StaticLT(max_dim=500,rerun=rerun_experiments,nthreads=nthreads,nruns=nruns)
+    runExperiment('trap5','cpp','slt',max_dim=5000,rerun=False,nthreads=nthreads,nruns=nruns)
+    runExperiment('trap5','cpp','lt',max_dim=5000,rerun=False,nthreads=nthreads,nruns=nruns)
+    runExperiment('trap5','cpp_bbo','lt',max_dim=5000,rerun=False,nthreads=nthreads,nruns=nruns)
 
 def makePlots():
     res_py = readResultsFromJson('trap5_py_bm5')
@@ -225,6 +251,7 @@ def makePlots():
     res_cppbbo = readResultsFromJson('trap5_cpp_bbo_bm5')
     results = [("Python",res_py),("Cython",res_cy),("C++",res_cpp),("Python(BBO)",res_pybbo),("C++(BBO)",res_cppbbo)]
     plotTimePerFEV(results,tag='trap5_bm5',max_dim=10000)
+    plotEvalTimeScalability(results,tag='trap5_bm5',max_dim=10000)
     plotTimeScalability(results,tag='trap5_bm5',max_dim=10000)
     plotFEVScalability(results,tag='trap5_bm5',max_dim=10000)
 
@@ -237,6 +264,7 @@ def makePlots():
     results = [("Python",res_py),("Cython",res_cy),("C++",res_cpp),("Python(BBO)",res_pybbo),("C++(BBO)",res_cppbbo)]
     plotTimePerFEV(results,tag='trap5_lt',max_dim=10000)
     plotTimeScalability(results,tag='trap5_lt',max_dim=10000)
+    plotEvalTimeScalability(results,tag='trap5_lt',max_dim=10000)
     plotFEVScalability(results,tag='trap5_lt',max_dim=10000)
     
     res_py = readResultsFromJson('trap5_py_slt')
@@ -246,6 +274,7 @@ def makePlots():
     res_cppbbo = readResultsFromJson('trap5_cpp_bbo_lt')
     results = [("Python",res_py),("Cython",res_cy),("C++",res_cpp),("Python(BBO)",res_pybbo),("C++(BBO)",res_cppbbo)]
     plotTimePerFEV(results,tag='trap5_slt',max_dim=10000)
+    plotEvalTimeScalability(results,tag='trap5_slt',max_dim=10000)
     plotTimeScalability(results,tag='trap5_slt',max_dim=10000)
     plotFEVScalability(results,tag='trap5_slt',max_dim=10000)
 

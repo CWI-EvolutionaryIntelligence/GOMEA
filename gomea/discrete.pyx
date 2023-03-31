@@ -4,7 +4,7 @@
 from gomea.output cimport OutputStatisticsWrapper
 from gomea.output import OutputStatistics
 from gomea.discrete cimport gomeaIMS, Config
-from gomea.linkage cimport LinkageModel, LinkageTree
+from gomea.linkage cimport LinkageModel, StaticLinkageTree
 from libcpp.string cimport string
 from libcpp cimport bool
 from cpython.exc cimport PyErr_CheckSignals
@@ -25,20 +25,14 @@ cdef class DiscreteGOMEA:
         # Optimization problem settings (required)
         fitness: FitnessFunction, 
         # GOMEA settings
-        linkage_model : LinkageModel = LinkageTree(),
-        folder: string=string(b"output_discrete_gomea"),
-        maximum_number_of_GOMEAs: int=25,
+        linkage_model : LinkageModel = StaticLinkageTree(),
+        max_number_of_populations : int=25,
         IMS_subgeneration_factor: int=4,
         base_population_size: int=2,
-        problem_instance_path: string=string(b""),
-        max_archive_size: int=1000,
-        max_evals : int=-1,
-        max_gens : int=-1,
-        max_time : double=-1.0,
+        max_number_of_evaluations : int=-1,
+        max_number_of_generations : int=-1,
+        max_number_of_seconds : double=-1.0,
         random_seed : int=-1,
-        # Other
-        verbose : bool=False,
-        analyze_fos : bool=False
     ):
 
         # Initialize attributes 
@@ -49,19 +43,19 @@ cdef class DiscreteGOMEA:
         self.c_config = Config()
         self.c_config.fitness = (<FitnessFunction?>fitness).c_inst_discrete
         self.c_config.linkage_config = linkage_model.c_inst
-        self.c_config.folder = folder
-        self.c_config.maximumNumberOfGOMEAs = maximum_number_of_GOMEAs
+        self.c_config.folder = string(b"output_discrete_gomea")
+        self.c_config.maximumNumberOfGOMEAs = max_number_of_populations
         self.c_config.IMSsubgenerationFactor = IMS_subgeneration_factor
         self.c_config.basePopulationSize = base_population_size
-        self.c_config.problemInstancePath = problem_instance_path
-        self.c_config.maxArchiveSize = max_archive_size
-        self.c_config.maximumNumberOfEvaluations = max_evals
-        self.c_config.maximumNumberOfGenerations = max_gens
-        self.c_config.maximumNumberOfSeconds = max_time
+        self.c_config.problemInstancePath = string(b"") 
+        self.c_config.maxArchiveSize = 1000 
+        self.c_config.maximumNumberOfEvaluations = max_number_of_evaluations
+        self.c_config.maximumNumberOfGenerations = max_number_of_generations
+        self.c_config.maximumNumberOfSeconds = max_number_of_seconds
         self.c_config.AnalyzeFOS = 0
-        if analyze_fos:
-            self.c_config.AnalyzeFOS = 1
-        #self.c_config.verbose = verbose
+        #if analyze_fos:
+        #    self.c_config.AnalyzeFOS = 1
+        #self.c_config.verbose = False 
         self.c_config.fix_seed = False
         if random_seed != -1:
             self.c_config.randomSeed = random_seed

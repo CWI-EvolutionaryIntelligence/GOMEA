@@ -65,6 +65,12 @@ vec_t<int> randomPermutation( int size )
     return( perm );
 }
 
+/*vec random1DNormalUnitVector( int length )
+{
+    std::uniform_int_distribution<int> distribution(0,max);
+	return randn<vec>(length);
+}*/
+
 double randomRealUniform01()
 {
     static std::uniform_real_distribution<double> distribution(0.0,1.0);

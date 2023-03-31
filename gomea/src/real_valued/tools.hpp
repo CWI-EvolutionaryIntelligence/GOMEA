@@ -52,13 +52,18 @@
 #include <memory>
 #include <cassert>
 #include <armadillo>
+#include <limits>
+#include <Eigen>
 
 #include "gomea/src/utils/tools.hpp"
 
 namespace gomea{
 namespace realvalued{
 
-using namespace arma;
+//using namespace arma;
+
+using mat = Eigen::MatrixXd;
+using vec = Eigen::VectorXd;
 
 template<class T>
 using vec_t = std::vector<T>;
@@ -104,6 +109,7 @@ int *greedyScatteredSubsetSelection( double **points, int number_of_points, int 
 
 double max( double x, double y );
 double min( double x, double y );
+mat pinv(const mat &a, double epsilon = std::numeric_limits<double>::epsilon());
 double distanceEuclidean( double *solution_a, double *solution_b, int n );
 double distanceEuclidean( vec_t<double> &x, vec_t<double> &y );
 double distanceEuclidean2D( double x1, double y1, double x2, double y2 );
