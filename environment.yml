@@ -1,0 +1,16 @@
+name: gomea 
+channels:
+  - conda-forge
+dependencies:
+  - make
+  - c-compiler
+  - cxx-compiler
+  - python=3.8
+  - python-devtools=0.9.0
+  - pip
+  - pip:
+    - numpy==1.23.3
+    - wheel==0.37.1
+    - setuptools==65.4.0
+    - Cython==0.29.32
+    - tqdm==4.65.0

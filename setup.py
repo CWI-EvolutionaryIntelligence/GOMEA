@@ -10,12 +10,13 @@ import sys
 import glob
 import getopt
 import numpy as np
+import platform
 
 if sys.version_info[0] == 2:
-    raise Exception('Python 2.x is no longer supported')
+        raise Exception('Python 2.x is no longer supported')
 
 with open("README.md", 'r') as f:
-    long_description = f.read()
+        long_description = f.read()
 
 debug_mode = False
 if '--debug' in sys.argv:
@@ -24,15 +25,19 @@ if '--debug' in sys.argv:
 common_src = glob.glob("gomea/src/common/*.cpp") + glob.glob("gomea/src/utils/*.cpp")
 fitness_src = glob.glob("gomea/src/fitness/*.cpp") + glob.glob("gomea/src/fitness/benchmarks-rv/*.cpp") + glob.glob("gomea/src/fitness/benchmarks-discrete/*.cpp")
 
-compile_args_debug = ["-std=c++17","-UNDEBUG","-g"]
-link_args_debug = ["-std=c++17","-UNDEBUG","-g"]
-compile_args_release = ["-std=c++17","-O3"]
-link_args_release = ["-std=c++17","-O3"]
-compile_args = compile_args_release
-link_args = link_args_release
+compile_args = ["-std=c++17"]
+link_args = ["-std=c++17"]
 if debug_mode:
-        compile_args = compile_args_debug
-        link_args = link_args_debug
+        compile_args.extend(['-UNDEBUG','-g'])
+        link_args.extend(['-UNDEBUG','-g'])
+else:
+        compile_args.extend(['-O3'])
+        link_args.extend(['-O3'])
+if platform.system() == "Darwin":
+        compile_args.extend(["-stdlib=libc++","-mmacosx-version-min=10.7"])
+        link_args.extend(["-stdlib=libc++","-mmacosx-version-min=10.7"])
+        #compile_args.extend(["-stdlib=libc++"])
+        #link_args.extend(["-stdlib=libc++"])
 
 extensions = []
 
