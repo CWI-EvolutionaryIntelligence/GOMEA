@@ -168,7 +168,7 @@ void population_t::makeSelectionUsingDiversityOnRank0()
 
 	double *nn_distances = (double *) Malloc( number_of_rank0_solutions*sizeof( double ) );
 	for(int i = 0; i < number_of_rank0_solutions; i++ )
-		nn_distances[i] = distanceEuclidean( individuals[preselection_indices[i]]->variables, individuals[selection_indices[number_selected_so_far-1]]->variables ); 
+		nn_distances[i] = utils::distanceEuclidean( individuals[preselection_indices[i]]->variables, individuals[selection_indices[number_selected_so_far-1]]->variables ); 
 
 	while( number_selected_so_far < selection_size )
 	{
@@ -191,7 +191,7 @@ void population_t::makeSelectionUsingDiversityOnRank0()
 
 		for(int i = 0; i < number_of_rank0_solutions; i++ )
 		{
-			double value = distanceEuclidean( individuals[preselection_indices[i]]->variables, individuals[selection_indices[number_selected_so_far-1]]->variables );
+			double value = utils::distanceEuclidean( individuals[preselection_indices[i]]->variables, individuals[selection_indices[number_selected_so_far-1]]->variables );
 			if( value < nn_distances[i] )
 				nn_distances[i] = value;
 		}
@@ -323,7 +323,7 @@ void population_t::generateAndEvaluateNewSolutions()
 			updateElitist();
 
 		for(int k = num_elitists_to_copy; k < population_size; k++ )
-			sampled_solutions[FOS_index][k] = linkage_model->generatePartialSolution( FOS_index, individuals[k] );
+			sampled_solutions[FOS_index][k] = linkage_model->generatePartialSolution( FOS_index, individuals[k], fitness );
 		
 		if( number_of_generations > 0 )
 		{
@@ -755,6 +755,7 @@ void population_t::initializePopulationAndFitnessValues()
 
 		fitness->evaluate( individuals[j] );
 	}
+	updateElitist();
 }
 
 }}

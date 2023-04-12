@@ -283,14 +283,12 @@ double fitness_t<T>::getSimilarityMeasure( size_t var_a, size_t var_b )
 }
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-= Section Problems -=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
-template<class T>
-double fitness_t<T>::getLowerRangeBound( int dimension )
+double fitness_generic_t::getLowerRangeBound( int dimension )
 {
 	return( -INFINITY );
 }
 		
-template<class T>
-double fitness_t<T>::getUpperRangeBound( int dimension )
+double fitness_generic_t::getUpperRangeBound( int dimension )
 {
 	return( INFINITY );
 }
@@ -299,12 +297,11 @@ double fitness_t<T>::getUpperRangeBound( int dimension )
  * Returns whether a parameter is inside the range bound of
  * every problem.
  */
-template<>
-bool fitness_t<double>::isParameterInRangeBounds( double parameter, int dimension )
+bool fitness_generic_t::isParameterInRangeBounds( double parameter, int dimension )
 {
     if( parameter < getLowerRangeBound( dimension ) ||
 		parameter > getUpperRangeBound( dimension ) ||
-		isnan( parameter ) )
+		std::isnan( parameter ) )
     {
         return( false );
     }
@@ -449,5 +446,20 @@ void fitness_t<T>::checkTimeLimitTerminationCondition()
         throw utils::customException("time");
 	}
 }
+
+template<class T>
+int fitness_t<T>::getNumberOfVariables()
+{
+	return this->number_of_variables;
+}
+
+template<class T>
+double fitness_t<T>::getVTR()
+{
+	return this->vtr;
+}
+
+template class fitness_t<char>;
+template class fitness_t<double>;
 
 }}

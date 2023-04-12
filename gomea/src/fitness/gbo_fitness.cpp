@@ -217,4 +217,7 @@ double GBOFitnessFunction_t<T>::constraintFunction( vec_t<double> &fitness_buffe
 	return 0;
 }
 
+template class GBOFitnessFunction_t<char>;
+template class GBOFitnessFunction_t<double>;
+
 }}

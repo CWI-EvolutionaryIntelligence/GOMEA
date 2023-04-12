@@ -24,7 +24,4 @@ class pyBBOFitnessFunction_t : public BBOFitnessFunction_t<T>
 		PyObject *py_class;
 };
 
-template class pyBBOFitnessFunction_t<char>;
-template class pyBBOFitnessFunction_t<double>;
-
 }}

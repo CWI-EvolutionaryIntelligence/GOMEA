@@ -1,42 +1,3 @@
-/**
- *
- * RV-GOMEA
- *
- * If you use this software for any purpose, please cite the most recent publication:
- * A. Bouter, C. Witteveen, T. Alderliesten, P.A.N. Bosman. 2017.
- * Exploiting Linkage Information in Real-Valued Optimization with the Real-Valued
- * Gene-pool Optimal Mixing Evolutionary Algorithm. In Proceedings of the Genetic
- * and Evolutionary Computation Conference (GECCO 2017).
- * DOI: 10.1145/3071178.3071272
- *
- * Copyright (c) 1998-2017 Peter A.N. Bosman
- *
- * The software in this file is the proprietary information of
- * Peter A.N. Bosman.
- *
- * IN NO EVENT WILL THE AUTHOR OF THIS SOFTWARE BE LIABLE TO YOU FOR ANY
- * DAMAGES, INCLUDING BUT NOT LIMITED TO LOST PROFITS, LOST SAVINGS, OR OTHER
- * INCIDENTIAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR THE INABILITY
- * TO USE SUCH PROGRAM, EVEN IF THE AUTHOR HAS BEEN ADVISED OF THE POSSIBILITY
- * OF SUCH DAMAGES, OR FOR ANY CLAIM BY ANY OTHER PARTY. THE AUTHOR MAKES NO
- * REPRESENTATIONS OR WARRANTIES ABOUT THE SUITABILITY OF THE SOFTWARE, EITHER
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT. THE
- * AUTHOR SHALL NOT BE LIABLE FOR ANY DAMAGES SUFFERED BY ANYONE AS A RESULT OF
- * USING, MODIFYING OR DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES.
- *
- * The software in this file is the result of (ongoing) scientific research.
- * The following people have been actively involved in this research over
- * the years:
- * - Peter A.N. Bosman
- * - Dirk Thierens
- * - Jörn Grahl
- * - Anton Bouter
- *
- */
-
-/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
-
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-= Section Includes -=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 #include "gomea/src/real_valued/rv-gomea.hpp"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
@@ -484,7 +445,6 @@ void rvg_t::writeGenerationalStatisticsForOnePopulation( int population_index )
     double population_constraint_var = populations[population_index]->getConstraintValueVariance();
     solution_t<double> *best_solution = populations[population_index]->getBestSolution();
     solution_t<double> *worst_solution = populations[population_index]->getWorstSolution();*/
-    std::vector<double> overall_best = getOverallBestFitness();
 
     int key = total_number_of_writes;
     output.addMetricValue("generation",key,populations[population_index]->number_of_generations);
@@ -493,13 +453,12 @@ void rvg_t::writeGenerationalStatisticsForOnePopulation( int population_index )
     output.addMetricValue("eval_time",key,utils::getTimer("eval_time"));
     output.addMetricValue("population_index",key,population_index);
     output.addMetricValue("population_size",key,populations[population_index]->population_size);
-    output.addMetricValue("best_obj_val",key,overall_best[0]);
-    output.addMetricValue("best_cons_val",key,overall_best[1]);
+    output.addMetricValue("best_obj_val",key,fitness->elitist_objective_value);
+    output.addMetricValue("best_cons_val",key,fitness->elitist_constraint_value);
     //output.addMetricValue("subpop_best_obj_val",key,best_solution->getObjectiveValue());
     //output.addMetricValue("subpop_best_cons_val",key,best_solution->getConstraintValue());
     //output.addMetricValue("subpop_obj_val_avg",key,population_objective_avg);
     //output.addMetricValue("subpop_obj_val_var",key,population_objective_var);
-
     total_number_of_writes++;
 }
 
@@ -905,8 +864,10 @@ void rvg_t::generationalStepAllPopulationsRecursiveFold( int population_index_sm
             {
 				populations[population_index]->runGeneration();
 
-				if( populations.size() == 1 && config->write_generational_statistics )
-					writeGenerationalStatisticsForOnePopulation( 0 );
+				//if( config->write_generational_statistics )
+				//if( populations.size() == 1 && config->write_generational_statistics )
+				if( populations[population_index]->number_of_generations % 10 == 1 && config->write_generational_statistics )
+					writeGenerationalStatisticsForOnePopulation( population_index );
 
 				if( populations.size() == 1 && config->write_generational_solutions )
 					writeGenerationalSolutions( 0 );
@@ -974,7 +935,10 @@ void rvg_t::run( void )
     {
         runAllPopulations();
     }
-	catch( utils::customException const& ){}
+	catch( utils::customException const& ){
+        for( auto &p : populations )
+            p->updateElitist();
+    }
 	writeGenerationalStatisticsForOnePopulation( populations.size()-1 );
     ezilaitini();
 

@@ -45,7 +45,4 @@ class GBOFitnessFunction_t : public fitness_t<T>
 		virtual double constraintFunction( vec_t<double> &fitness_buffers );
 };
 
-template class GBOFitnessFunction_t<char>;
-template class GBOFitnessFunction_t<double>;
-
 }}

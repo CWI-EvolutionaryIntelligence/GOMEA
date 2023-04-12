@@ -123,4 +123,7 @@ double pyGBOFitnessFunction_t<double>::getUpperRangeBound( int dimension )
 	return( 1e308 );
 }
 
+template class pyGBOFitnessFunction_t<char>;
+template class pyGBOFitnessFunction_t<double>;
+
 }}

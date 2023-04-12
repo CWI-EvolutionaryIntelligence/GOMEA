@@ -406,7 +406,9 @@ vec_t<int> linkage_model_t::graphColoring( std::map<int,std::set<int>> &VIG )
 		}
 
 		int numColorsSeen = 0;
-		bool colorsSeen[numColors] = {};
+		bool colorsSeen[numColors];
+		for( int i = 0; i < numColors; i++)
+			colorsSeen[i] = false;
 		int availableColor = -1;
 		for( int v : FOSVIG[ind] )
 		{

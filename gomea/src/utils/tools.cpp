@@ -51,6 +51,45 @@ double vectorDotProduct( double *vector0, double *vector1, int n0 )
     return( result );
 }
 
+/**
+ * Computes the distance between two solutions a and b as
+ * the Euclidean distance in parameter space.
+ */
+double distanceEuclidean( double *x, double *y, int number_of_dimensions )
+{
+    int    i;
+    double value, result;
+
+    result = 0.0;
+    for( i = 0; i < number_of_dimensions; i++ )
+    {
+        value   = y[i] - x[i];
+        result += value*value;
+    }
+    result = sqrt( result );
+
+    return( result );
+}
+
+double distanceEuclidean( vec_t<double> &x, vec_t<double> &y ) 
+{
+    assert( x.size() == y.size() );
+    return( distanceEuclidean(x.data(), y.data(), x.size()) );
+}
+
+/**
+ * Computes the Euclidean distance between two points.
+ */
+double distanceEuclidean2D( double x1, double y1, double x2, double y2 )
+{
+    double result;
+
+    result = (y1 - y2)*(y1-y2) + (x1-x2)*(x1-x2);
+    result = sqrt( result );
+
+    return( result );
+}
+
 bool isPowerOfK(int n, int k)
 {
     double logNBaseK = log(n) / log(k);

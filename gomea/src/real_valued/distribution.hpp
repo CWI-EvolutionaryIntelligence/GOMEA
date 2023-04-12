@@ -1,43 +1,7 @@
-/**
- *
- * RV-GOMEA
- *
- * If you use this software for any purpose, please cite the most recent publication:
- * A. Bouter, C. Witteveen, T. Alderliesten, P.A.N. Bosman. 2017.
- * Exploiting Linkage Information in Real-Valued Optimization with the Real-Valued
- * Gene-pool Optimal Mixing Evolutionary Algorithm. In Proceedings of the Genetic
- * and Evolutionary Computation Conference (GECCO 2017).
- * DOI: 10.1145/3071178.3071272
- *
- * Copyright (c) 1998-2017 Peter A.N. Bosman
- *
- * The software in this file is the proprietary information of
- * Peter A.N. Bosman.
- *
- * IN NO EVENT WILL THE AUTHOR OF THIS SOFTWARE BE LIABLE TO YOU FOR ANY
- * DAMAGES, INCLUDING BUT NOT LIMITED TO LOST PROFITS, LOST SAVINGS, OR OTHER
- * INCIDENTIAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR THE INABILITY
- * TO USE SUCH PROGRAM, EVEN IF THE AUTHOR HAS BEEN ADVISED OF THE POSSIBILITY
- * OF SUCH DAMAGES, OR FOR ANY CLAIM BY ANY OTHER PARTY. THE AUTHOR MAKES NO
- * REPRESENTATIONS OR WARRANTIES ABOUT THE SUITABILITY OF THE SOFTWARE, EITHER
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT. THE
- * AUTHOR SHALL NOT BE LIABLE FOR ANY DAMAGES SUFFERED BY ANYONE AS A RESULT OF
- * USING, MODIFYING OR DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES.
- *
- * The software in this file is the result of (ongoing) scientific research.
- * The following people have been actively involved in this research over
- * the years:
- * - Peter A.N. Bosman
- * - Dirk Thierens
- * - Jörn Grahl
- * - Anton Bouter
- *
- */
-
 #pragma once
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-= Section Includes -=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
+#include "gomea/src/fitness/fitness.hpp"
 #include "gomea/src/real_valued/tools.hpp"
 #include "gomea/src/real_valued/partial_solutionRV.hpp"
 #include "gomea/src/real_valued/solutionRV.hpp"
@@ -85,7 +49,7 @@ class distribution_t {
 		virtual void updateConditionals( const std::map<int,std::set<int>> &variable_interaction_graph, int visited[] );
 		virtual void setOrder( const vec_t<int> &order ); 
 		virtual void estimateDistribution( solution_t<double> **selection, int selection_size ) = 0;	
-		virtual partial_solution_t<double> *generatePartialSolution( solution_t<double> *parent ) = 0;
+		virtual partial_solution_t<double> *generatePartialSolution( solution_t<double> *parent, fitness::fitness_generic_t *fitness_function = NULL ) = 0;
 		virtual void print();
 };
 
@@ -98,7 +62,7 @@ class normal_distribution_t : public distribution_t {
 			mat cholesky_decomposition; 
 			
 			void estimateDistribution( solution_t<double> **selection, int selection_size );
-			partial_solution_t<double> *generatePartialSolution( solution_t<double> *parent = NULL );
+			partial_solution_t<double> *generatePartialSolution( solution_t<double> *parent = NULL, fitness::fitness_generic_t *fitness_function = NULL );
 			
 			bool generationalImprovementForOnePopulationForFOSElement( partial_solution_t<double>** partial_solutions, int num_solutions, double *st_dev_ratio );
 };
@@ -130,7 +94,7 @@ class conditional_distribution_t : public distribution_t {
 			void setOrder( const vec_t<int> &order );
 			void updateConditionals( const std::map<int,std::set<int>> &variable_interaction_graph, int visited[] );
 
-			partial_solution_t<double> *generatePartialSolution( solution_t<double> *solution_conditioned_on = NULL ); 
+			partial_solution_t<double> *generatePartialSolution( solution_t<double> *solution_conditioned_on = NULL, fitness::fitness_generic_t *fitness_function = NULL ); 
 			bool generationalImprovementForOnePopulationForFOSElement( partial_solution_t<double>** partial_solutions, int num_solutions, double *st_dev_ratio );
 		private:
 			void initializeMemory();

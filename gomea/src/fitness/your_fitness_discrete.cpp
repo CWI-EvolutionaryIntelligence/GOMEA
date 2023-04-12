@@ -5,7 +5,6 @@ namespace fitness{
 
 yourFitnessFunctionDiscrete::yourFitnessFunctionDiscrete( int number_of_variables, double vtr ) : GBOFitnessFunction_t(number_of_variables,vtr) 
 {
-	fprintf(stderr,"yourFitnessFunctionDiscrete(int,double) constructor");
 	this->name = "Your own fitness function (C++)";
 	this->vtr = vtr;
 	assert( number_of_variables % trap_size == 0 );

@@ -39,7 +39,8 @@ cdef class RealValuedGOMEA:
         
         # Initialize attributes 
         self.c_config = Config()
-        self.c_config.problem_index = 0 
+        self.c_config.problem_index = 0
+        assert( (<FitnessFunction?>fitness).c_inst_realvalued != NULL, "FitnessFunction is not real-valued." )
         self.c_config.fitness = (<FitnessFunction?>fitness).c_inst_realvalued
         self.c_config.linkage_config = linkage_model.c_inst
         self.c_config.use_vtr = True 
@@ -59,7 +60,7 @@ cdef class RealValuedGOMEA:
         self.c_config.maximum_number_of_evaluations = max_number_of_evaluations
         self.c_config.maximum_number_of_seconds = max_number_of_seconds
         self.c_config.black_box_evaluations = False
-        self.c_config.write_generational_statistics = False
+        self.c_config.write_generational_statistics = True 
         self.c_config.write_generational_solutions = False
         self.c_config.verbose = False
         self.c_config.print_verbose_overview = False 

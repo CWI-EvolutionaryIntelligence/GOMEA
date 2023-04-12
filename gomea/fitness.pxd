@@ -1,11 +1,16 @@
 from cpython cimport PyObject
 from libcpp.vector cimport vector
+from libcpp.utility cimport pair
+from libcpp.string cimport string
+from libcpp.map cimport map
 import numpy as np
 cimport numpy as np
 
 cdef extern from "gomea/src/fitness/fitness.hpp" namespace "gomea::fitness":
     cdef cppclass fitness_t[T]:
         fitness_t() except +
+        int getNumberOfVariables() except +
+        double getVTR() except +
 
 cdef extern from "gomea/src/fitness/gbo_fitness.hpp" namespace "gomea::fitness":
     cdef cppclass GBOFitnessFunction_t[T](fitness_t[T]):
@@ -47,6 +52,16 @@ cdef extern from "gomea/src/fitness/benchmarks-rv.hpp" namespace "gomea::fitness
         rosenbrockFunction_t() except +
         rosenbrockFunction_t(int,double) except +
 
+cdef extern from "gomea/src/fitness/benchmarks-rv.hpp" namespace "gomea::fitness":
+    cdef cppclass SOREBChainStrong_t(GBOFitnessFunction_t[double]):
+        SOREBChainStrong_t() except +
+        SOREBChainStrong_t(int,double) except +
+
+cdef extern from "gomea/src/fitness/benchmarks-rv.hpp" namespace "gomea::fitness":
+    cdef cppclass circlesInASquareBBO_t(BBOFitnessFunction_t[double]):
+        circlesInASquareBBO_t() except +
+        circlesInASquareBBO_t(int,double) except +
+
 cdef extern from "gomea/src/fitness/benchmarks-discrete.hpp" namespace "gomea::fitness":
     cdef cppclass oneMax_t(GBOFitnessFunction_t[char]):
         oneMax_t() except +
@@ -62,12 +77,27 @@ cdef extern from "gomea/src/fitness/benchmarks-discrete.hpp" namespace "gomea::f
         deceptiveTrapBBO_t() except +
         deceptiveTrapBBO_t(int,int) except +
 
+cdef extern from "gomea/src/fitness/benchmarks-discrete.hpp" namespace "gomea::fitness":
+    cdef cppclass maxCut_t(GBOFitnessFunction_t[char]):
+        maxCut_t() except +
+        maxCut_t(string,string) except +
+
+cdef extern from "gomea/src/fitness/benchmarks-discrete.hpp" namespace "gomea::fitness":
+    cdef cppclass maxCutBBO_t(BBOFitnessFunction_t[char]):
+        maxCutBBO_t() except +
+        maxCutBBO_t(string,string) except +
+
 cdef class FitnessFunction:
     cdef public int number_of_variables
     cdef public double value_to_reach
-    
+    cdef map[pair[int,double],PyObject*] rotation_matrices
+    cdef np.ndarray rotation_matrix
+
     cdef fitness_t[char] *c_inst_discrete
     cdef fitness_t[double] *c_inst_realvalued
+    
+    cpdef initialize_rotation_matrix(self, int rotation_block_size, double rotation_angle)
+    cpdef rotate_variables(self, np.ndarray variables, double rotation_angle)
 
 cdef class GBOFitnessFunction(FitnessFunction):
     cpdef double subfunction( self, int subfunction_index, np.ndarray variables ) except +

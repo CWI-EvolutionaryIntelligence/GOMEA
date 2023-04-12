@@ -28,6 +28,10 @@ namespace gomea{
 
 	bool isPowerOfK(int n, int k);
 
+	double distanceEuclidean( double *solution_a, double *solution_b, int n );
+	double distanceEuclidean( vec_t<double> &x, vec_t<double> &y );
+	double distanceEuclidean2D( double x1, double y1, double x2, double y2 );
+
 	vec_t<int> randomPermutation( int size );
 	double randomRealUniform01();
 	int randomInt( int max );

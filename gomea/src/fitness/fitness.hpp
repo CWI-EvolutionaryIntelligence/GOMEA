@@ -16,8 +16,15 @@ typedef enum{
 	MAX
 } opt_mode;
 
+class fitness_generic_t{
+	public:
+		bool isParameterInRangeBounds( double parameter, int dimension );
+		virtual double getLowerRangeBound( int dimension );
+		virtual double getUpperRangeBound( int dimension );
+};
+
 template<class T>
-class fitness_t
+class fitness_t : public fitness_generic_t
 {
 	protected:
 		fitness_t( int number_of_variables ); 
@@ -41,6 +48,7 @@ class fitness_t
 		std::map<int,std::set<int>> subfunction_dependency_map; // map[i] lists all subfunctions dependent on variable x_i
 		double rotation_angle = 0.0;
 		int rotation_block_size = 0;
+		double **rotation_matrix;
 
 		// Options
 		double vtr; // value-to-reach
@@ -72,12 +80,8 @@ class fitness_t
 		vec_t<vec_t<double>> getSimilarityMatrix( int similarity_measure_index );
 		virtual double getSimilarityMeasure( size_t var_a, size_t var_b );
 		
-		bool isParameterInRangeBounds( double parameter, int dimension );
-		virtual double getLowerRangeBound( int dimension );
-		virtual double getUpperRangeBound( int dimension );
 		
 		double **initializeObjectiveRotationMatrix( double rotation_angle, int rotation_block_size );
-		void initializeObjectiveRotationMatrix( void );
 		double *rotateVariables( double *variables, int num_variables, double **rotation_matrix );
 		double *rotateVariablesInBlocks( double *variables, int len, int from, int to, double **rotation_matrix );
 		void ezilaitiniObjectiveRotationMatrix( double **rotation_matrix, double rotation_angle, int rotation_block_size );
@@ -85,6 +89,9 @@ class fitness_t
 		void checkTermination();
 		void checkEvaluationLimitTerminationCondition();
 		void checkTimeLimitTerminationCondition();
+
+		int getNumberOfVariables();
+		double getVTR();
 
 	private:
 		fitness_t( int number_of_variables, double vtr, bool use_vtr, opt_mode optimization_mode );
@@ -96,8 +103,5 @@ class fitness_t
 
 		vec_t<vec_t<double>> similarity_matrix;
 };
-
-template class fitness_t<char>;
-template class fitness_t<double>;
 
 }}

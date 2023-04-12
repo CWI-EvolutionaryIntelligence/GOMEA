@@ -28,7 +28,6 @@ Population::Population(Config *config_, fitness_t *problemInstance_, sharedInfor
             population[i] = new solution_t<char>(problemInstance->number_of_variables, config->alphabetSize);
             population[i]->randomInit(&gomea::utils::rng);
             problemInstance->evaluate(population[i]);
-            updateElitistAndCheckVTR(population[i]);
             
             offspringPopulation[i] = new solution_t<char>(problemInstance->number_of_variables, config->alphabetSize);
             *offspringPopulation[i] = *population[i];
@@ -173,6 +172,12 @@ void Population::copyOffspringToPopulation()
 
 void Population::makeOffspring()
 {
+    if( numberOfGenerations == 0 )
+    {
+        for (size_t i = 0; i < populationSize; ++i)
+            updateElitistAndCheckVTR(population[i]);
+    }
+
     if( FOSInstance->type == linkage::LINKAGE_TREE )
     {
         if (FOSInstance->is_static)

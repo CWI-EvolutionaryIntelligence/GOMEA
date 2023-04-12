@@ -92,7 +92,9 @@ linkage_model_rv_t::linkage_model_rv_t( size_t number_of_variables, const graph_
 	const int IS_VISITED = 1;
 	const int IN_CLIQUE = 2;
 	const int IN_QUEUE = 3;
-	int visited[number_of_variables]{};
+	int visited[number_of_variables];
+	for( int i = 0; i < number_of_variables; i++)
+		visited[i] = false;
 	vec_t<int> var_order = gomea::utils::randomPermutation( number_of_variables );
 
 	assert( variable_interaction_graph.size() == number_of_variables );
@@ -303,7 +305,9 @@ void linkage_model_rv_t::learnLinkageTreeFOS( mat covariance_matrix )
 
 void linkage_model_rv_t::randomizeOrder( const graph_t &variable_interaction_graph ) 
 {
-	int visited[number_of_variables]{};
+	int visited[number_of_variables];
+	for( int i = 0; i < number_of_variables; i++)
+		visited[i] = false;
 	std::vector<int> VIG_order = getVIGOrderBreadthFirst(variable_interaction_graph);
 	/*printf("VIG_ORDER: ");
 	for(int i = 0; i < VIG_order.size(); i++ )
@@ -340,7 +344,9 @@ std::vector<int> linkage_model_rv_t::getVIGOrderBreadthFirst( const graph_t &var
 	const int IS_VISITED = 1;
 	const int IN_CLIQUE = 2;
 	const int IN_QUEUE = 3;
-	int visited[number_of_variables]{};
+	int visited[number_of_variables];
+	for( int i = 0; i < number_of_variables; i++)
+		visited[i] = false;
 	vec_t<int> var_order = gomea::utils::randomPermutation( number_of_variables );
 
 	std::vector<int> VIG_order;
@@ -650,9 +656,9 @@ void linkage_model_rv_t::print()
 	printf("}\n");
 }
 
-partial_solution_t<double> *linkage_model_rv_t::generatePartialSolution( int FOS_index, solution_t<double> *solution_conditioned_on )
+partial_solution_t<double> *linkage_model_rv_t::generatePartialSolution( int FOS_index, solution_t<double> *solution_conditioned_on, fitness::fitness_generic_t *fitness_function )
 {
-	return( distributions[FOS_index]->generatePartialSolution(solution_conditioned_on) );
+	return( distributions[FOS_index]->generatePartialSolution(solution_conditioned_on, fitness_function) );
 }
 
 void linkage_model_rv_t::estimateDistributions( solution_t<double> **selection, int selection_size )

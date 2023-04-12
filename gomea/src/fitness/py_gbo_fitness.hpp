@@ -30,7 +30,4 @@ class pyGBOFitnessFunction_t : public GBOFitnessFunction_t<T>
 		double subfunction( int subfunction_index, vec_t<T> &variables );
 };
 
-template class pyGBOFitnessFunction_t<char>;
-template class pyGBOFitnessFunction_t<double>;
-
 }}

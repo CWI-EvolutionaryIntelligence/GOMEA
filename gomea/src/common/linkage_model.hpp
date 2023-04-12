@@ -12,6 +12,7 @@
 
 #include "gomea/src/common/linkage_config.hpp"
 #include "gomea/src/common/solution.hpp"
+#include "gomea/src/fitness/fitness.hpp"
 #include "gomea/src/utils/time.hpp"
 #include "gomea/src/utils/tools.hpp"
 

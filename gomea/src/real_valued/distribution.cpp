@@ -598,7 +598,7 @@ void normal_distribution_t::estimateDistribution( solution_t<double> **selection
 	cholesky_decomposition = choleskyDecomposition( covariance_matrix );
 }
 
-partial_solution_t<double> *normal_distribution_t::generatePartialSolution( solution_t<double> *parent )
+partial_solution_t<double> *normal_distribution_t::generatePartialSolution( solution_t<double> *parent, fitness::fitness_generic_t *fitness_function )
 {
 	vec_t<int> indices = variables; 
 	int num_indices = variables.size();
@@ -635,8 +635,19 @@ partial_solution_t<double> *normal_distribution_t::generatePartialSolution( solu
 				result[i] = mean_vector[i] + sample[i];
 			}
 		}
-
+			
 		ready = true;
+		if (fitness_function != NULL)
+		{
+			for (size_t i = 0; i < result.size(); i++)
+			{
+				if (!fitness_function->isParameterInRangeBounds(result[i], indices[i]))
+				{
+					ready = false;
+					break;
+				}
+			}
+		}
 	}
 	while( !ready );
 
@@ -858,7 +869,7 @@ void conditional_distribution_t::estimateDistribution( solution_t<double> **sele
 		estimateConditionalGaussianML(i,selection,selection_size);
 }
 
-partial_solution_t<double> *conditional_distribution_t::generatePartialSolution( solution_t<double> *solution_conditioned_on )
+partial_solution_t<double> *conditional_distribution_t::generatePartialSolution( solution_t<double> *solution_conditioned_on, fitness::fitness_generic_t *fitness_function )
 {
 	vec_t<double> result = vec_t<double>(variables.size());
 	vec_t<double> means = vec_t<double>(variables.size());
@@ -930,6 +941,17 @@ partial_solution_t<double> *conditional_distribution_t::generatePartialSolution(
 			}
 
 			ready = true;
+			if( fitness_function != NULL )
+			{
+				for (size_t i = 0; i < result.size(); i++)
+				{
+					if (!fitness_function->isParameterInRangeBounds(result[i], indices[i]))
+					{
+						ready = false;
+						break;
+					}
+				}
+			}
 		}
 		while( !ready );
 		

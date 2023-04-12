@@ -17,7 +17,7 @@ cdef class OutputStatisticsWrapper:
 class OutputStatistics:
     def __init__(self, stats : OutputStatisticsWrapper):
         self.metrics = stats.c_ptr[0].getAllMetricNames()
-        self.metrics_map = {}
+        self.metrics_dict = {}
 
         def getMetricValues( metric_name ):
             try:
@@ -31,19 +31,19 @@ class OutputStatistics:
 
         for metric_name in self.metrics:
             s_metric_name = metric_name.decode()
-            self.metrics_map[s_metric_name] = getMetricValues(metric_name)
+            self.metrics_dict[s_metric_name] = getMetricValues(metric_name)
         self.metrics = [s.decode() for s in self.metrics]
         #self.elitist_genotype = stats.c_ptr[0].getElitistGenotype()
         #self.elitist_fitness = stats.c_ptr[0].getElitistFitness()
 
     def __getitem__(self, metric):
         assert( metric in self.metrics, str(metric)+" is not a valid metric." )
-        return self.metrics_map[metric][-1]
+        return self.metrics_dict[metric]
 
     def getFinalStatistics(self):
         final_stats = {}
         for metric in self.metrics:
-            final_stats[metric] = self.metrics_map[metric][-1]
+            final_stats[metric] = self.metrics_dict[metric][-1]
         return final_stats
     
     def printFinalStatistics(self):
@@ -54,5 +54,5 @@ class OutputStatistics:
     
     def printAllStatistics(self):
         print("All statistics:")
-        for k,v in self.metrics_map.items():
+        for k,v in self.metrics_dict.items():
             print(k,":",v)

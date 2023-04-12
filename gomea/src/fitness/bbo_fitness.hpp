@@ -30,7 +30,4 @@ class BBOFitnessFunction_t : public fitness_t<T>
 		virtual double constraintFunction( vec_t<T> &variables );
 };
 
-template class BBOFitnessFunction_t<char>;
-template class BBOFitnessFunction_t<double>;
-
 }}

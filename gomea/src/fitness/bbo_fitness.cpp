@@ -76,4 +76,7 @@ double BBOFitnessFunction_t<T>::constraintFunction( vec_t<T> &variables )
 	return 0;
 }
 
+template class BBOFitnessFunction_t<char>;
+template class BBOFitnessFunction_t<double>;
+
 }}

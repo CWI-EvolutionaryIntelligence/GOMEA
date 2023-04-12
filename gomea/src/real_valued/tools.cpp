@@ -1,40 +1,3 @@
-/**
- *
- * RV-GOMEA
- *
- * If you use this software for any purpose, please cite the most recent publication:
- * A. Bouter, C. Witteveen, T. Alderliesten, P.A.N. Bosman. 2017.
- * Exploiting Linkage Information in Real-Valued Optimization with the Real-Valued
- * Gene-pool Optimal Mixing Evolutionary Algorithm. In Proceedings of the Genetic 
- * and Evolutionary Computation Conference (GECCO 2017).
- * DOI: 10.1145/3071178.3071272
- *
- * Copyright (c) 1998-2017 Peter A.N. Bosman
- *
- * The software in this file is the proprietary information of
- * Peter A.N. Bosman.
- *
- * IN NO EVENT WILL THE AUTHOR OF THIS SOFTWARE BE LIABLE TO YOU FOR ANY
- * DAMAGES, INCLUDING BUT NOT LIMITED TO LOST PROFITS, LOST SAVINGS, OR OTHER
- * INCIDENTIAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR THE INABILITY
- * TO USE SUCH PROGRAM, EVEN IF THE AUTHOR HAS BEEN ADVISED OF THE POSSIBILITY
- * OF SUCH DAMAGES, OR FOR ANY CLAIM BY ANY OTHER PARTY. THE AUTHOR MAKES NO
- * REPRESENTATIONS OR WARRANTIES ABOUT THE SUITABILITY OF THE SOFTWARE, EITHER
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT. THE
- * AUTHOR SHALL NOT BE LIABLE FOR ANY DAMAGES SUFFERED BY ANYONE AS A RESULT OF
- * USING, MODIFYING OR DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES.
- *
- * The software in this file is the result of (ongoing) scientific research.
- * The following people have been actively involved in this research over
- * the years:
- * - Peter A.N. Bosman
- * - Dirk Thierens
- * - Jörn Grahl
- * - Anton Bouter
- * 
- */
-
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-= Section Includes -=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 #include "gomea/src/real_valued/tools.hpp"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
@@ -1041,44 +1004,6 @@ mat pinv(const mat &a, double epsilon)
 	return svd.matrixV() *  (svd.singularValues().array().abs() > tolerance).select(svd.singularValues().array().inverse(), 0).matrix().asDiagonal() * svd.matrixU().adjoint();
 }
 
-/**
- * Computes the distance between two solutions a and b as
- * the Euclidean distance in parameter space.
- */
-double distanceEuclidean( double *x, double *y, int number_of_dimensions )
-{
-    int    i;
-    double value, result;
-
-    result = 0.0;
-    for( i = 0; i < number_of_dimensions; i++ )
-    {
-        value   = y[i] - x[i];
-        result += value*value;
-    }
-    result = sqrt( result );
-
-    return( result );
-}
-
-double distanceEuclidean( vec_t<double> &x, vec_t<double> &y ) 
-{
-    assert( x.size() == y.size() );
-    return( distanceEuclidean(x.data(), y.data(), x.size()) );
-}
-
-/**
- * Computes the Euclidean distance between two points.
- */
-double distanceEuclidean2D( double x1, double y1, double x2, double y2 )
-{
-    double result;
-
-    result = (y1 - y2)*(y1-y2) + (x1-x2)*(x1-x2);
-    result = sqrt( result );
-
-    return( result );
-}
 
 /*
  * Bhattacharyya distance
@@ -1147,7 +1072,7 @@ int *greedyScatteredSubsetSelection( double **points, int number_of_points, int 
    * (i.e. nearest-neighbour) distance to so-far selected points */
   nn_distances = (double *) Malloc( number_of_points*sizeof( double ) );
   for( i = 0; i < number_of_points-number_selected_so_far; i++ )
-    nn_distances[i] = distanceEuclidean( points[indices_left[i]], points[result[number_selected_so_far-1]], number_of_dimensions );
+    nn_distances[i] = utils::distanceEuclidean( points[indices_left[i]], points[result[number_selected_so_far-1]], number_of_dimensions );
 
   while( number_selected_so_far < number_to_select )
   {
@@ -1169,7 +1094,7 @@ int *greedyScatteredSubsetSelection( double **points, int number_of_points, int 
 
     for( i = 0; i < number_of_points-number_selected_so_far; i++ )
     {
-      value = distanceEuclidean( points[indices_left[i]], points[result[number_selected_so_far-1]], number_of_dimensions );
+      value = utils::distanceEuclidean( points[indices_left[i]], points[result[number_selected_so_far-1]], number_of_dimensions );
       if( value < nn_distances[i] )
         nn_distances[i] = value;
     }

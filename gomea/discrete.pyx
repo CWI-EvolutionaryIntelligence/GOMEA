@@ -41,6 +41,7 @@ cdef class DiscreteGOMEA:
             #setattr(self, arg, val)
 
         self.c_config = Config()
+        assert( (<FitnessFunction?>fitness).c_inst_discrete != NULL, "FitnessFunction is not discrete." )
         self.c_config.fitness = (<FitnessFunction?>fitness).c_inst_discrete
         self.c_config.linkage_config = linkage_model.c_inst
         self.c_config.folder = string(b"output_discrete_gomea")
