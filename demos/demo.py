@@ -60,8 +60,8 @@ rvgom = gomea.RealValuedGOMEA(fitness=frv,linkage_model=lm,lower_init_range=5,up
 print("ObjVal\tNumEvaluations\tTime(s)")
 for i in range(nruns):
     result = rvgom.run()
-    print(result['best_obj_val'],result['evaluations'],result['time'])
-    if result['best_obj_val'] < vtr:
+    print(result['best_obj_val'][-1],result['evaluations'][-1],result['time'][-1])
+    if result['best_obj_val'][-1] < vtr:
         nsucc += 1
 print(nsucc,"/",nruns," successes")
 #result.printFinalStatistics()
@@ -82,14 +82,10 @@ print("ObjVal\tNumEvaluations\tTime(s)")
 for i in range(nruns):
     dgom = gomea.DiscreteGOMEA(fitness=fd,linkage_model=lm,max_number_of_evaluations=1000000)
     result = dgom.run()
-    result.printFinalStatistics()
-    print(result['best_obj_val'],result['evaluations'],result['time'])
-    if result['best_obj_val'] == dim:
+    #result.printFinalStatistics()
+    print(result['best_obj_val'][-1],result['evaluations'][-1],result['time'][-1])
+    if result['best_obj_val'][-1] == dim:
         nsucc += 1
-    del dgom
-del fd
-del lm
-gc.collect()
 print(nsucc,"/",nruns," successes")
 #result.printFinalStatistics()
 #result.printAllStatistics()

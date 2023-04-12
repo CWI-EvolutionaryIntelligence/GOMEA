@@ -25,7 +25,7 @@ class CustomTrapFunction(gomea.fitness.PythonFitnessFunctionDiscrete):
 
 lm = gomea.linkage.StaticLinkageTree(maximum_set_size=5)
 fd = CustomTrapFunction(20,k=5)
-dgom = gomea.DiscreteGOMEA(fitness=fd,linkage_model=lm,max_evals=1000)
+dgom = gomea.DiscreteGOMEA(fitness=fd,linkage_model=lm,max_number_of_evaluations=1000)
 result = dgom.run()
 result.printFinalStatistics()
 result.printAllStatistics()
