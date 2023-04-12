@@ -6,6 +6,7 @@
 **.egg-info/
 **.pdf
 **.json
+**/problem_data/
 **/__pycache__/
 **/cython/*.cpp
 **/cython/*.h
