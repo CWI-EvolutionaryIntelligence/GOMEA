@@ -4,6 +4,8 @@
 **.swp
 **.log
 **.egg-info/
+**.pdf
+**.json
 **/__pycache__/
 **/cython/*.cpp
 **/cython/*.h
