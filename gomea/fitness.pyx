@@ -165,12 +165,30 @@ cdef class RosenbrockFunction(GBOFitnessFunction):
         self.number_of_variables = self.c_inst_realvalued.getNumberOfVariables()
         self.value_to_reach = self.c_inst_realvalued.getVTR()
 
+cdef class RosenbrockFunctionBBO(BBOFitnessFunction):
+    def __cinit__(self, 
+        number_of_variables : int,
+        value_to_reach : double = 0.0
+    ):
+        self.c_inst_realvalued = new rosenbrockFunctionBBO_t(number_of_variables,value_to_reach)
+        self.number_of_variables = self.c_inst_realvalued.getNumberOfVariables()
+        self.value_to_reach = self.c_inst_realvalued.getVTR()
+
 cdef class SOREBChainStrong(GBOFitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
         value_to_reach : double = 0.0
     ):
         self.c_inst_realvalued = new SOREBChainStrong_t(number_of_variables,value_to_reach)
+        self.number_of_variables = self.c_inst_realvalued.getNumberOfVariables()
+        self.value_to_reach = self.c_inst_realvalued.getVTR()
+
+cdef class SOREBChainStrongBBO(BBOFitnessFunction):
+    def __cinit__(self, 
+        number_of_variables : int,
+        value_to_reach : double = 0.0
+    ):
+        self.c_inst_realvalued = new SOREBChainStrongBBO_t(number_of_variables,value_to_reach)
         self.number_of_variables = self.c_inst_realvalued.getNumberOfVariables()
         self.value_to_reach = self.c_inst_realvalued.getVTR()
 

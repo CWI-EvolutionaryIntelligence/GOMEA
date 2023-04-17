@@ -9,7 +9,7 @@ SOREBChainStrong_t::SOREBChainStrong_t( int number_of_variables, double vtr ) : 
 {
 	this->name = "Sum of rotated ellipsoid blocks (SOREB) with strong dependencies -- 1 overlap in chain structure";
 	this->initialize();
-	this->rotation_angle = 45;
+	this->rotation_angle = -45;
 	this->rotation_block_size = 2;
 	this->rotation_matrix = initializeObjectiveRotationMatrix( this->rotation_angle, this->rotation_block_size );
 }
@@ -43,6 +43,7 @@ double SOREBChainStrong_t::subfunction( int subfunction_index, vec_t<double> &va
 	{
 		result += pow( 10.0, 6.0*(((double) (i))/((double) (rotation_block_size-1))) )*rotated_variables[i]*rotated_variables[i];
 	}
+	delete[] rotated_variables;
 	return result;
 }
 

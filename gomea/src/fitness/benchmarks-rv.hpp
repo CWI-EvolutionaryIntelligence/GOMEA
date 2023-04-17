@@ -46,6 +46,20 @@ class SOREBChainStrong_t : public GBOFitnessFunction_t<double>
 		double subfunction( int subfunction_index, vec_t<double> &variables );
 };
 
+class rosenbrockFunctionBBO_t : public BBOFitnessFunction_t<double>
+{
+	public:
+		rosenbrockFunctionBBO_t( int number_of_variables, double vtr );
+		double objectiveFunction( int objective_index, vec_t<double> &variables );
+};
+
+class SOREBChainStrongBBO_t : public BBOFitnessFunction_t<double>
+{
+	public:
+		SOREBChainStrongBBO_t( int number_of_variables, double vtr );
+		double objectiveFunction( int objective_index, vec_t<double> &variables );
+};
+
 class circlesInASquareBBO_t : public BBOFitnessFunction_t<double>
 {
 	public:

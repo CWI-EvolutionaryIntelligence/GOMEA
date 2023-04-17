@@ -10,11 +10,22 @@ from deceptive_trap.CythonTrapFunction import DeceptiveTrapFunction as CythonTra
 from deceptive_trap.CythonTrapFunctionCDEF import DeceptiveTrapFunction as CythonTrapFunctionCDEF
 from gomea.fitness import DeceptiveTrapFunction as CppTrapFunctionGBO
 from gomea.fitness import DeceptiveTrapFunctionBBO as CppTrapFunctionBBO
+
 from maxcut.PythonMaxCut import MaxCutGBO as PythonMaxCutGBO
 from maxcut.PythonMaxCut import MaxCutBBO as PythonMaxCutBBO
 from maxcut.CythonMaxCut import MaxCut as CythonMaxCut
 from gomea.fitness import MaxCut as CppMaxCutGBO
 from gomea.fitness import MaxCutBBO as CppMaxCutBBO
+
+from soreb_chain.PythonSOREBChainStrong import SOREBChainStrongGBO as PythonSOREBChainStrongGBO
+from soreb_chain.PythonSOREBChainStrong import SOREBChainStrongBBO as PythonSOREBChainStrongBBO
+from gomea.fitness import SOREBChainStrong as CppSOREBChainStrongGBO
+from gomea.fitness import SOREBChainStrongBBO as CppSOREBChainStrongBBO
+
+from rosenbrock.PythonRosenbrock import RosenbrockFunctionGBO as PythonRosenbrockFunctionGBO
+from rosenbrock.PythonRosenbrock import RosenbrockFunctionBBO as PythonRosenbrockFunctionBBO
+from gomea.fitness import RosenbrockFunction as CppRosenbrockFunctionGBO
+from gomea.fitness import RosenbrockFunctionBBO as CppRosenbrockFunctionBBO
 
 def getFitnessFunction(prob_tag,lang_tag,dim=-1,input_file="",vtr_file=""):
     if prob_tag == 'trap5':
@@ -41,6 +52,24 @@ def getFitnessFunction(prob_tag,lang_tag,dim=-1,input_file="",vtr_file=""):
             return CppMaxCutGBO(input_file,vtr_file)
         elif lang_tag == 'cpp_bbo':
             return CppMaxCutBBO(input_file,vtr_file)
+    elif prob_tag == 'rosenbrock':
+        if lang_tag == 'py':
+            return PythonRosenbrockFunctionGBO(dim,1e-10)
+        elif lang_tag == 'py_bbo':
+            return PythonRosenbrockFunctionBBO(dim,1e-10)
+        elif lang_tag == 'cpp':
+            return CppRosenbrockFunctionGBO(dim,1e-10)
+        elif lang_tag == 'cpp_bbo':
+            return CppRosenbrockFunctionBBO(dim,1e-10)
+    elif prob_tag == 'sorebchainstrong':
+        if lang_tag == 'py':
+            return PythonSOREBChainStrongGBO(dim,1e-10)
+        elif lang_tag == 'py_bbo':
+            return PythonSOREBChainStrongBBO(dim,1e-10)
+        elif lang_tag == 'cpp':
+            return CppSOREBChainStrongGBO(dim,1e-10)
+        elif lang_tag == 'cpp_bbo':
+            return CppSOREBChainStrongBBO(dim,1e-10)
     return None
 
 def getLinkageModel(lm_tag):
@@ -62,22 +91,45 @@ def getLinkageModel(lm_tag):
         return gomea.linkage.LinkageTree(maximum_set_size=100)
     elif lm_tag == 'slt':
         return gomea.linkage.StaticLinkageTree()
+    elif lm_tag == 'slt10':
+        return gomea.linkage.StaticLinkageTree(maximum_set_size=10)
+    elif lm_tag == 'slt50':
+        return gomea.linkage.StaticLinkageTree(maximum_set_size=50)
+    elif lm_tag == 'slt100':
+        return gomea.linkage.StaticLinkageTree(maximum_set_size=100)
 
-def runDiscreteGOMEA(prob_tag,lang_tag,lm_tag,dim,max_evals,max_sec,input_file,vtr_file):
+def getDomain(prob_tag):
+    if prob_tag == 'trap5':
+        return 'd'
+    elif prob_tag == 'maxcut':
+        return 'd'
+    elif prob_tag == 'rosenbrock':
+        return 'rv'
+    elif prob_tag == 'sorebchainstrong':
+        return 'rv'
+    return None
+
+def runGOMEA(prob_tag,lang_tag,lm_tag,dim,max_evals,max_sec,input_file,vtr_file):
     ff = getFitnessFunction(prob_tag,lang_tag,dim,input_file,vtr_file)
     lm = getLinkageModel(lm_tag)
-    dgom = gomea.DiscreteGOMEA(fitness=ff,linkage_model=lm,max_number_of_evaluations=max_evals,max_number_of_seconds=max_sec)
-    result = dgom.run()
+    result = None
+    if getDomain(prob_tag) == 'd':
+        dgom = gomea.DiscreteGOMEA(fitness=ff,linkage_model=lm,max_number_of_evaluations=max_evals,max_number_of_seconds=max_sec)
+        result = dgom.run()
+        del dgom
+    elif getDomain(prob_tag) == 'rv':
+        rvgom = gomea.RealValuedGOMEA(fitness=ff,linkage_model=lm,max_number_of_evaluations=max_evals,max_number_of_seconds=max_sec)
+        result = rvgom.run()
+        del rvgom
     del ff
     del lm
-    del dgom
     gc.collect()
     return result
 
 def runExperiment(prob_tag,lang_tag,lm_tag,max_dim=1000,max_sec=-1,rerun=False,nthreads=1,nruns=10,input_file="",vtr_file=""):
     dim = 10
     cur_results = readResultsFromJson(prob_tag,lang_tag,lm_tag)
-    fev_budget = 100000000
+    fev_budget = 10000000
     fev_results = {}
     time_results = {}
     eval_time_results = {}
@@ -95,7 +147,7 @@ def runExperiment(prob_tag,lang_tag,lm_tag,max_dim=1000,max_sec=-1,rerun=False,n
         succ_rate_results = cur_results['succ_rate']
     if len(input_file) > 0:
         dim = int(input_file[-14:-7])
-    while dim < max_dim or max_dim == -1:
+    while dim <= max_dim or max_dim == -1:
         if rerun or (dim not in fev_results.keys()) or (dim not in time_results.keys()) or (dim not in eval_time_results.keys()) or (dim not in bestf_results.keys()) or (dim not in succ_rate_results.keys()):
             nsucc = 0
             fev_results[dim] = []
@@ -108,15 +160,16 @@ def runExperiment(prob_tag,lang_tag,lm_tag,max_dim=1000,max_sec=-1,rerun=False,n
             tup = (prob_tag,lang_tag,lm_tag,dim,fev_budget,max_sec,input_file,vtr_file)
             args = ((tup,) * nruns )
             print(dim,prob_tag,lang_tag,lm_tag)
-            results = thr_pool.starmap(runDiscreteGOMEA,args)
+            results = thr_pool.starmap(runGOMEA,args)
             nsucc = 0
             vtr = getFitnessFunction(prob_tag,lang_tag,dim,input_file,vtr_file).value_to_reach
+            domain = getDomain(prob_tag)
             for res in results:
                 fev_results[dim].append(res['evaluations'][-1])
                 time_results[dim].append(res['time'][-1])
                 eval_time_results[dim].append(res['eval_time'][-1])
                 bestf_results[dim].append(res['best_obj_val'][-1])
-                if res['best_obj_val'][-1] == vtr:
+                if (domain == 'd' and res['best_obj_val'][-1] >= vtr) or (domain == 'rv' and res['best_obj_val'][-1] <= vtr):
                     nsucc += 1
             succ_rate_results[dim] = nsucc / nruns
             results = {"t" : time_results, "fev" : fev_results, "bestf" : bestf_results, "eval_t" : eval_time_results, "succ_rate" : succ_rate_results }

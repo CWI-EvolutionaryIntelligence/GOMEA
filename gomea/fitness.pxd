@@ -47,17 +47,22 @@ cdef extern from "gomea/src/fitness/benchmarks-rv.hpp" namespace "gomea::fitness
         sphereFunction_t() except +
         sphereFunction_t(int,double) except +
 
-cdef extern from "gomea/src/fitness/benchmarks-rv.hpp" namespace "gomea::fitness":
     cdef cppclass rosenbrockFunction_t(GBOFitnessFunction_t[double]):
         rosenbrockFunction_t() except +
         rosenbrockFunction_t(int,double) except +
 
-cdef extern from "gomea/src/fitness/benchmarks-rv.hpp" namespace "gomea::fitness":
     cdef cppclass SOREBChainStrong_t(GBOFitnessFunction_t[double]):
         SOREBChainStrong_t() except +
         SOREBChainStrong_t(int,double) except +
+    
+    cdef cppclass rosenbrockFunctionBBO_t(BBOFitnessFunction_t[double]):
+        rosenbrockFunctionBBO_t() except +
+        rosenbrockFunctionBBO_t(int,double) except +
 
-cdef extern from "gomea/src/fitness/benchmarks-rv.hpp" namespace "gomea::fitness":
+    cdef cppclass SOREBChainStrongBBO_t(BBOFitnessFunction_t[double]):
+        SOREBChainStrongBBO_t() except +
+        SOREBChainStrongBBO_t(int,double) except +
+
     cdef cppclass circlesInASquareBBO_t(BBOFitnessFunction_t[double]):
         circlesInASquareBBO_t() except +
         circlesInASquareBBO_t(int,double) except +
@@ -67,22 +72,18 @@ cdef extern from "gomea/src/fitness/benchmarks-discrete.hpp" namespace "gomea::f
         oneMax_t() except +
         oneMax_t(int) except +
 
-cdef extern from "gomea/src/fitness/benchmarks-discrete.hpp" namespace "gomea::fitness":
     cdef cppclass deceptiveTrap_t(GBOFitnessFunction_t[char]):
         deceptiveTrap_t() except +
         deceptiveTrap_t(int,int) except +
 
-cdef extern from "gomea/src/fitness/benchmarks-discrete.hpp" namespace "gomea::fitness":
     cdef cppclass deceptiveTrapBBO_t(BBOFitnessFunction_t[char]):
         deceptiveTrapBBO_t() except +
         deceptiveTrapBBO_t(int,int) except +
 
-cdef extern from "gomea/src/fitness/benchmarks-discrete.hpp" namespace "gomea::fitness":
     cdef cppclass maxCut_t(GBOFitnessFunction_t[char]):
         maxCut_t() except +
         maxCut_t(string,string) except +
 
-cdef extern from "gomea/src/fitness/benchmarks-discrete.hpp" namespace "gomea::fitness":
     cdef cppclass maxCutBBO_t(BBOFitnessFunction_t[char]):
         maxCutBBO_t() except +
         maxCutBBO_t(string,string) except +

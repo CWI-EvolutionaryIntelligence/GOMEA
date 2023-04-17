@@ -42,46 +42,46 @@ def runExperiments(input_dir):
 def makePlots(out_dir="plots/"):
     max_dim = 2500
     res_py_lt = readResultsFromJson('maxcut','py','lt')
-    res_cy_lt = readResultsFromJson('maxcut','cy','lt')
+    #res_cy_lt = readResultsFromJson('maxcut','cy','lt')
     #res_cyc = readResultsFromJson('maxcut_cyc_lt')
     res_cpp_lt = readResultsFromJson('maxcut','cpp','lt')
     res_pybbo_lt = readResultsFromJson('maxcut','py_bbo','lt')
     res_cppbbo_lt = readResultsFromJson('maxcut','cpp_bbo','lt')
-    results = [("Python",res_py_lt),("Cython",res_cy_lt),("C++",res_cpp_lt),("Python(BBO)",res_pybbo_lt),("C++(BBO)",res_cppbbo_lt)]
-    plotTimePerFEV(results,out_dir=out_dir,tag='maxcut_lt',max_dim=max_dim)
-    plotTimeScalability(results,out_dir=out_dir,tag='maxcut_lt',max_dim=max_dim)
+    results = [("GBO-Python",res_py_lt),("GBO-C++",res_cpp_lt),("BBO-Python",res_pybbo_lt),("BBO-C++",res_cppbbo_lt)]
+    #plotTimePerFEV(results,out_dir=out_dir,tag='maxcut_lt',max_dim=max_dim)
+    #plotTimeScalability(results,out_dir=out_dir,tag='maxcut_lt',max_dim=max_dim)
     plotEvalTimeScalability(results,out_dir=out_dir,tag='maxcut_lt',max_dim=max_dim)
-    plotFEVScalability(results,out_dir=out_dir,tag='maxcut_lt',max_dim=max_dim)
+    #plotFEVScalability(results,out_dir=out_dir,tag='maxcut_lt',max_dim=max_dim)
     
     res_py_slt = readResultsFromJson('maxcut','py','slt')
-    res_cy_slt = readResultsFromJson('maxcut','cy','slt')
     res_cpp_slt = readResultsFromJson('maxcut','cpp','slt')
-    results = [("Python",res_py_slt),("Cython",res_cy_slt),("C++",res_cpp_slt),("Python(BBO)",res_pybbo_lt),("C++(BBO)",res_cppbbo_lt)]
-    plotTimePerFEV(results,out_dir=out_dir,tag='maxcut_slt',max_dim=max_dim)
-    plotEvalTimeScalability(results,out_dir=out_dir,tag='maxcut_slt',max_dim=max_dim)
-    plotTimeScalability(results,out_dir=out_dir,tag='maxcut_slt',max_dim=max_dim)
-    plotFEVScalability(results,out_dir=out_dir,tag='maxcut_slt',max_dim=max_dim)
+    #results = [("GBO-Python",res_py_slt),("GBO-C++",res_cpp_slt),("BBO-Python",res_pybbo_lt),("BBO-C++",res_cppbbo_lt)]
+    #plotTimePerFEV(results,out_dir=out_dir,tag='maxcut_slt',max_dim=max_dim)
+    #plotEvalTimeScalability(results,out_dir=out_dir,tag='maxcut_slt',max_dim=max_dim)
+    #plotTimeScalability(results,out_dir=out_dir,tag='maxcut_slt',max_dim=max_dim)
+    #plotFEVScalability(results,out_dir=out_dir,tag='maxcut_slt',max_dim=max_dim)
     
-    res_py_lt50 = readResultsFromJson('maxcut','py','lt50')
-    res_py_lt100 = readResultsFromJson('maxcut','py','lt100')
+    #res_py_lt50 = readResultsFromJson('maxcut','py','lt50')
+    #res_py_lt100 = readResultsFromJson('maxcut','py','lt100')
     res_pybbo_lt = readResultsFromJson('maxcut','py_bbo','lt')
     res_pybbo_lt50 = readResultsFromJson('maxcut','py_bbo','lt50')
-    res_pybbo_lt100 = readResultsFromJson('maxcut','py_bbo','lt100')
-    results = [("BBO-LT",res_pybbo_lt),("BBO-LT(50)",res_pybbo_lt50),("BBO-LT(100)",res_pybbo_lt100),("GBO-SLT",res_py_slt),("GBO-LT",res_py_lt),("GBO-LT(50)",res_py_lt50),("GBO-LT(100)",res_py_lt100)]
-    plotEvalTimeScalability(results,out_dir=out_dir,tag='maxcut_py_lms',max_dim=max_dim)
+    #res_pybbo_lt100 = readResultsFromJson('maxcut','py_bbo','lt100')
+    results = [("GBO-LT",res_py_lt),("GBO-SLT",res_py_slt),("BBO-LT",res_pybbo_lt),("BBO-LT(50)",res_pybbo_lt50)]
+    #plotEvalTimeScalability(results,out_dir=out_dir,tag='maxcut_py_lms',max_dim=max_dim)
     plotTimeScalability(results,out_dir=out_dir,tag='maxcut_py_lms',max_dim=max_dim)
-    plotFEVScalability(results,out_dir=out_dir,tag='maxcut_py_lms',max_dim=max_dim)
+    #plotFEVScalability(results,out_dir=out_dir,tag='maxcut_py_lms',max_dim=max_dim)
     
     res_cpp_lt50 = readResultsFromJson('maxcut','cpp','lt50')
     res_cpp_lt100 = readResultsFromJson('maxcut','cpp','lt100')
     res_cppbbo_lt = readResultsFromJson('maxcut','cpp_bbo','lt')
     res_cppbbo_lt50 = readResultsFromJson('maxcut','cpp_bbo','lt50')
     res_cppbbo_lt100 = readResultsFromJson('maxcut','cpp_bbo','lt100')
-    results = [("BBO-LT",res_cppbbo_lt),("BBO-LT(50)",res_cppbbo_lt50),("BBO-LT(100)",res_cppbbo_lt100),("GBO-SLT",res_cpp_slt),("GBO-LT",res_cpp_lt),("GBO-LT(50)",res_cpp_lt50),("GBO-LT(100)",res_cpp_lt100)]
-    plotEvalTimeScalability(results,out_dir=out_dir,tag='maxcut_cpp_lms',max_dim=max_dim)
-    plotTimeScalability(results,out_dir=out_dir,tag='maxcut_cpp_lms',max_dim=max_dim)
+    #results = [("BBO-LT",res_cppbbo_lt),("BBO-LT(50)",res_cppbbo_lt50),("BBO-LT(100)",res_cppbbo_lt100),("GBO-SLT",res_cpp_slt),("GBO-LT",res_cpp_lt),("GBO-LT(50)",res_cpp_lt50),("GBO-LT(100)",res_cpp_lt100)]
+    results = [("GBO-LT",res_cpp_lt),("GBO-SLT",res_cpp_slt),("BBO-LT",res_cppbbo_lt),("BBO-LT(50)",res_cppbbo_lt50)]
+    #plotEvalTimeScalability(results,out_dir=out_dir,tag='maxcut_cpp_lms',max_dim=max_dim)
+    #plotTimeScalability(results,out_dir=out_dir,tag='maxcut_cpp_lms',max_dim=max_dim)
     plotFEVScalability(results,out_dir=out_dir,tag='maxcut_cpp_lms',max_dim=max_dim)
 
 if __name__ == '__main__':
-    runExperiments("problem_data/maxcut/set0c/")
+    #runExperiments("problem_data/maxcut/set0c/")
     makePlots("plots/set0c/")

@@ -38,11 +38,11 @@ def runExperiments():
     runExperiment('trap5','py','slt',max_dim=10000,rerun=False,nthreads=nthreads,nruns=nruns,max_sec=max_sec)
     runExperiment('trap5','py','lt',max_dim=10000,rerun=False,nthreads=nthreads,nruns=nruns,max_sec=max_sec)
     runExperiment('trap5','py','lt50',max_dim=10000,rerun=False,nthreads=nthreads,nruns=nruns,max_sec=max_sec)
-    runExperiment('trap5','py_bbo','lt',max_dim=10000,rerun=False,nthreads=nthreads,nruns=nruns,max_sec=max_sec)
+    runExperiment('trap5','py_bbo','lt',max_dim=2000,rerun=False,nthreads=nthreads,nruns=nruns,max_sec=max_sec)
     runExperiment('trap5','cpp','slt',max_dim=10000,rerun=False,nthreads=nthreads,nruns=nruns,max_sec=max_sec)
     runExperiment('trap5','cpp','lt50',max_dim=5000,rerun=False,nthreads=nthreads,nruns=nruns,max_sec=max_sec)
     runExperiment('trap5','cpp','lt',max_dim=10000,rerun=False,nthreads=nthreads,nruns=nruns,max_sec=max_sec)
-    runExperiment('trap5','cpp_bbo','lt',max_dim=10000,rerun=False,nthreads=nthreads,nruns=nruns,max_sec=max_sec)
+    runExperiment('trap5','cpp_bbo','lt',max_dim=5000,rerun=False,nthreads=nthreads,nruns=nruns,max_sec=max_sec)
 
 def makePlots(out_dir="plots/"):
     res_py_bm5 = readResultsFromJson('trap5','py','bm5')
@@ -51,13 +51,13 @@ def makePlots(out_dir="plots/"):
     res_cpp_bm5 = readResultsFromJson('trap5','cpp','bm5')
     res_pybbo_bm5 = readResultsFromJson('trap5','py_bbo','bm5')
     res_cppbbo_bm5 = readResultsFromJson('trap5','cpp_bbo','bm5')
-    results = [("Python",res_py_bm5),("Cython",res_cy_bm5),("C++",res_cpp_bm5),("Python(BBO)",res_pybbo_bm5),("C++(BBO)",res_cppbbo_bm5)]
+    #results = [("GBO-Python",res_py_bm5),("GBO-C++",res_cpp_bm5),("BBO-Python",res_pybbo_bm5),("BBO-C++",res_cppbbo_bm5)]
     #xticks = [10*2**i for i in range(20)]
     xticks = []
-    plotTimePerFEV(results,out_dir=out_dir,tag='trap5_bm5',max_dim=10000,xticks=xticks)
-    plotEvalTimeScalability(results,out_dir=out_dir,tag='trap5_bm5',max_dim=10000,xticks=xticks)
-    plotTimeScalability(results,out_dir=out_dir,tag='trap5_bm5',max_dim=10000,xticks=xticks)
-    plotFEVScalability(results,out_dir=out_dir,tag='trap5_bm5',max_dim=10000,xticks=xticks)
+    #plotTimePerFEV(results,out_dir=out_dir,tag='trap5_bm5',max_dim=10000,xticks=xticks)
+    #plotEvalTimeScalability(results,out_dir=out_dir,tag='trap5_bm5',max_dim=10000,xticks=xticks)
+    #plotTimeScalability(results,out_dir=out_dir,tag='trap5_bm5',max_dim=10000,xticks=xticks)
+    #plotFEVScalability(results,out_dir=out_dir,tag='trap5_bm5',max_dim=10000,xticks=xticks)
 
     res_py_lt = readResultsFromJson('trap5','py','lt')
     res_py_lt100 = readResultsFromJson('trap5','py','lt100')
@@ -70,35 +70,35 @@ def makePlots(out_dir="plots/"):
     res_cppbbo_lt = readResultsFromJson('trap5','cpp_bbo','lt')
     res_cppbbo_lt50 = readResultsFromJson('trap5','cpp_bbo','lt50')
     res_cppbbo_lt100 = readResultsFromJson('trap5','cpp_bbo','lt100')
-    results = [("Python",res_py_lt100),("Cython",res_cy_lt100),("C++",res_cpp_lt100),("Python(BBO)",res_pybbo_lt100),("C++(BBO)",res_cppbbo_lt100)]
-    plotTimePerFEV(results,out_dir=out_dir,tag='trap5_lt100',max_dim=10000,xticks=xticks)
-    plotTimeScalability(results,out_dir=out_dir,tag='trap5_lt100',max_dim=10000,xticks=xticks)
-    plotEvalTimeScalability(results,out_dir=out_dir,tag='trap5_lt100',max_dim=10000,xticks=xticks)
-    plotFEVScalability(results,out_dir=out_dir,tag='trap5_lt100',max_dim=10000,xticks=xticks)
+    #results = [("Python",res_py_lt100),("C++",res_cpp_lt100),("Python(BBO)",res_pybbo_lt100),("C++(BBO)",res_cppbbo_lt100)]
+    #plotTimePerFEV(results,out_dir=out_dir,tag='trap5_lt100',max_dim=10000,xticks=xticks)
+    #plotTimeScalability(results,out_dir=out_dir,tag='trap5_lt100',max_dim=10000,xticks=xticks)
+    #plotEvalTimeScalability(results,out_dir=out_dir,tag='trap5_lt100',max_dim=10000,xticks=xticks)
+    #plotFEVScalability(results,out_dir=out_dir,tag='trap5_lt100',max_dim=10000,xticks=xticks)
     
     res_py_slt = readResultsFromJson('trap5','py','slt')
     #res_cy_slt = readResultsFromJson('trap5','cy','slt')
     res_cpp_slt = readResultsFromJson('trap5','cpp','slt')
     res_pybbo_lt = readResultsFromJson('trap5','py_bbo','lt')
     res_cppbbo_lt = readResultsFromJson('trap5','cpp_bbo','lt')
-    #results = [("Python",res_py_slt),("Cython",res_cy_slt),("C++",res_cpp_slt),("Python(BBO)",res_pybbo_lt),("C++(BBO)",res_cppbbo_lt)]
+    results = [("GBO-Python",res_py_lt),("GBO-C++",res_cpp_lt),("BBO-Python",res_pybbo_lt),("BBO-C++",res_cppbbo_lt)]
     #plotTimePerFEV(results,out_dir=out_dir,tag='trap5_slt',max_dim=10000,xticks=xticks)
-    #plotEvalTimeScalability(results,out_dir=out_dir,tag='trap5_slt',max_dim=10000,xticks=xticks)
+    plotEvalTimeScalability(results,out_dir=out_dir,tag='trap5_lt',max_dim=10000,xticks=xticks)
     #plotTimeScalability(results,out_dir=out_dir,tag='trap5_slt',max_dim=10000,xticks=xticks)
     #plotFEVScalability(results,out_dir=out_dir,tag='trap5_slt',max_dim=10000,xticks=xticks)
     
-    results = [("BBO-LT",res_cppbbo_lt),("GBO-SLT",res_cpp_slt),("GBO-LT",res_cpp_lt)]
+    results = [("GBO-LT",res_cpp_lt),("GBO-SLT",res_cpp_slt),("BBO-LT",res_cppbbo_lt)]
     #results = [("BBO-LT",res_cppbbo_lt),("BBO-LT(50)",res_cppbbo_lt50),("BBO-LT(100)",res_cppbbo_lt100),("GBO-SLT",res_cpp_slt),("GBO-LT",res_cpp_lt),("GBO-LT(50)",res_cpp_lt50),("GBO-LT(100)",res_cpp_lt100)]
-    plotEvalTimeScalability(results,out_dir=out_dir,tag='trap5_cpp_lms',max_dim=10000,xticks=xticks)
-    plotTimeScalability(results,out_dir=out_dir,tag='trap5_cpp_lms',max_dim=10000,xticks=xticks)
+    #plotEvalTimeScalability(results,out_dir=out_dir,tag='trap5_cpp_lms',max_dim=10000,xticks=xticks)
+    #plotTimeScalability(results,out_dir=out_dir,tag='trap5_cpp_lms',max_dim=10000,xticks=xticks)
     plotFEVScalability(results,out_dir=out_dir,tag='trap5_cpp_lms',max_dim=10000,xticks=xticks)
     
-    results = [("BBO-LT",res_pybbo_lt),("GBO-SLT",res_py_slt),("GBO-LT",res_py_lt)]
+    results = [("GBO-LT",res_py_lt),("GBO-SLT",res_py_slt),("BBO-LT",res_pybbo_lt)]
     #results = [("BBO-LT",res_cppbbo_lt),("BBO-LT(50)",res_cppbbo_lt50),("BBO-LT(100)",res_cppbbo_lt100),("GBO-SLT",res_cpp_slt),("GBO-LT",res_cpp_lt),("GBO-LT(50)",res_cpp_lt50),("GBO-LT(100)",res_cpp_lt100)]
-    plotEvalTimeScalability(results,out_dir=out_dir,tag='trap5_py_lms',max_dim=10000,xticks=xticks)
+    #plotEvalTimeScalability(results,out_dir=out_dir,tag='trap5_py_lms',max_dim=10000,xticks=xticks)
     plotTimeScalability(results,out_dir=out_dir,tag='trap5_py_lms',max_dim=10000,xticks=xticks)
-    plotFEVScalability(results,out_dir=out_dir,tag='trap5_py_lms',max_dim=10000,xticks=xticks)
+    #plotFEVScalability(results,out_dir=out_dir,tag='trap5_py_lms',max_dim=10000,xticks=xticks)
 
 if __name__ == '__main__':
-    runExperiments()
+    #runExperiments()
     makePlots("plots/trap5/")
