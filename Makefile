@@ -19,6 +19,9 @@ reinstall:
 	python3 setup.py bdist_wheel
 	pip install dist/*.whl --user --force-reinstall
 
+doc:
+	sphinx-build -b html docs/source/ docs/build/html
+
 clean:
 	rm -f *.so
 	rm -rf gomea.egg-info/
