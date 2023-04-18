@@ -34,8 +34,8 @@ else:
         compile_args.extend(['-O3'])
         link_args.extend(['-O3'])
 if platform.system() == "Darwin":
-        compile_args.extend(["-stdlib=libc++","-mmacosx-version-min=10.7"])
-        link_args.extend(["-stdlib=libc++","-mmacosx-version-min=10.7"])
+        compile_args.extend(["-stdlib=libc++","-mmacosx-version-min=10.15"])
+        link_args.extend(["-stdlib=libc++","-mmacosx-version-min=10.15"])
         #compile_args.extend(["-stdlib=libc++"])
         #link_args.extend(["-stdlib=libc++"])
 
