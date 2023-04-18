@@ -1,3 +1,5 @@
+#ifndef CPP_STANDALONE
+
 #include "gomea/src/fitness/py_gbo_fitness.hpp"
 
 namespace gomea{
@@ -127,3 +129,5 @@ template class pyGBOFitnessFunction_t<char>;
 template class pyGBOFitnessFunction_t<double>;
 
 }}
+
+#endif

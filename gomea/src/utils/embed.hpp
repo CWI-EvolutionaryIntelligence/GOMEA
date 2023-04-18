@@ -1,3 +1,5 @@
+#ifndef CPP_STANDALONE
+
 #include "Python.h"
 
 namespace gomea{
@@ -9,3 +11,4 @@ namespace gomea{
 	}
 }
 
+#endif
