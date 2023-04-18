@@ -17,6 +17,9 @@ jobs:
 
     - name: Install dependencies
       run: make install
+      
+    - name: Print debug info
+      run: ./export_symbols.sh
 
     - name: Run check
       run: python3 demos/demo.py
