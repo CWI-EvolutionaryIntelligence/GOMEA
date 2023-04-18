@@ -19,4 +19,4 @@ jobs:
       run: make install
 
     - name: Run check
-      run: python3 main.py
+      run: python3 demos/demo.py
