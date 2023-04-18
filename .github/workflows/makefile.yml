@@ -18,8 +18,22 @@ jobs:
     - name: Install dependencies
       run: make install
       
+  debug:
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      
     - name: Print debug info
       run: ./export_symbols.sh
 
-    - name: Run check
+  demo:
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      
+    - name: Run demo
       run: python3 demos/demo.py
