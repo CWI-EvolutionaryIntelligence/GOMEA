@@ -1,4 +1,4 @@
-str=$(pip show gomea | grep "Location:")
+str=$(pip3 show gomea | grep "Location:")
 libdir="${str/Location: /}/"
 echo $libdir
 
