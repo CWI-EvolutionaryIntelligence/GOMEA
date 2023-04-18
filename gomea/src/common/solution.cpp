@@ -2,6 +2,9 @@
 
 namespace gomea{
 
+template class solution_t<char>;
+template class solution_t<double>;
+
 template<class T>
 solution_t<T>::solution_t( int number_of_variables ) : variables(vec_t<T>(number_of_variables)) {}
 

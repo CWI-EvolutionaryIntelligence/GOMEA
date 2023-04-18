@@ -3,6 +3,9 @@
 
 namespace gomea{
 
+template class partial_solution_t<char>;
+template class partial_solution_t<double>;
+
 template<class T>
 partial_solution_t<T>::partial_solution_t( int num_touched_variables )
 {
