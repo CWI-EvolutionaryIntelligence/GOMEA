@@ -189,4 +189,7 @@ void partial_solution_t<int>::print()
 	//printf("\n");
 }
 
+template class partial_solution_t<char>;
+template class partial_solution_t<double>;
+
 }

@@ -295,12 +295,7 @@ void solution_t<char>::print()
 	printf("\n");
 }
 
-template<>
-void solution_t<int>::print()
-{
-	for( size_t i = 0; i < variables.size(); i++ )
-		printf("%d ",variables[i]);
-	printf("\n");
-}
+template class solution_t<char>;
+template class solution_t<double>;
 
 }

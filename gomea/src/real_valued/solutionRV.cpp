@@ -3,4 +3,6 @@
 namespace gomea{
 namespace realvalued{
 
+template class solution_t<double>;
+
 }}

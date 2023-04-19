@@ -83,9 +83,4 @@ class solution_t
 		size_t alphabetSize = 0;
 };
 
-template class solution_t<char>;
-template class solution_t<int>;
-template class solution_t<float>;
-template class solution_t<double>;
-
 }
