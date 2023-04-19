@@ -29,52 +29,45 @@ bool Config::isNumber(const string &str)
 
 bool Config::parseCommandLine(int argc, char **argv)
 {
-  const struct option longopts[] =
-  {
-    {"help",        no_argument,         0, 'h'},    
-    {"partial",     no_argument,         0, 'g'},
-    {"analyzeFOS",  no_argument,         0, 'w'},
-    {"writeElitists",no_argument,        0, 'e'},
-    {"saveEvals",   no_argument,         0, 's'},  
-    {"parallelFOSOrder",no_argument,     0, 'X'},  
-    {"fixFOSOrderForPopulation",no_argument, 0, 'Y'},  
-    {"popUpdatesDuringGOM", no_argument, 0, 'Q'},  
-    {"useParallelGOM", required_argument,0, 'p'},
-    {"problem",     required_argument,   0, 'P'},  
-    {"L",           required_argument,   0, 'L'},  
-    {"FOS",         required_argument,   0, 'F'},
-    {"maximumFOSSetSize",required_argument, 0, 'm'},
-    {"seed",        required_argument,   0, 'S'},
-    {"instance",    required_argument,   0, 'I'},
-    {"vtr",         required_argument,   0, 'V'},
-    {"time",        required_argument,   0, 'T'},
-    {"folder",      required_argument,   0, 'O'},
-    {"basePopulationSize", required_argument,   0, 'n'}, 
-    {"similarityMeasure", required_argument,   0, 'Z'}, 
-    {"useForcedImprovements", required_argument,   0, 'f'}, 
-    {"GPUIndex", required_argument,   0, 'G'}, 
-               
-    {0,             0,                   0,  0 }
-  };
+    // Default parameters for options are listed in header file.
+    options.add_options()
+            ("h,help", "Prints out usage information")
+            ("g,partial", "Whether to use partial evaluations. Default: no")
+            ("w,analyzeFOS", "Whether to write FOS statistics to file. Default: no")
+            ("e,writeElitists", "Whether to write the genotype of the elitist solution to a file each time it is updated. Default: no")
+            ("s,saveEvals", "Whether to cache evaluations. Default: no")
+            ("X,parallelFOSOrder", "Whether to order the linkage model to maximize parallelizability. Default: no")
+            ("Y,fixFOSOrderForPopulation", "Whether to use the same FOS order for each individual in the population. Default: no")
+            //("p, useParallelGOM", "Whether to apply GOM in parallel to multiple independent linkage sets. Default: no")
+            ("P,problem", "Index of optimization problem to be solved (maximization). Default: 0 (oneMax)", cxxopts::value<int>())
+            ("L,numVariables", "Number of variables. Default: 10", cxxopts::value<int>())
+            ("F,FOS", "FOS type, 0 - Linkage Tree, 1 - Filtered Linkage Tree. Default: Linkage Tree", cxxopts::value<int>())
+            ("m,maximumFOSSetSize", "The maximum size of a linkage set. Default: no limit", cxxopts::value<int>())
+            ("S,seed", "Random seed. Default: Random timestamp", cxxopts::value<long>())
+            ("I,instance", "Path to problem instance.", cxxopts::value<string>())
+            ("V,vtr", "Value to reach. Default: inf", cxxopts::value<double>())
+            ("T,time", "Time limit for run in seconds. Default: no limit", cxxopts::value<double>())
+            ("O,folder", "Folder where GOMEA runs. Default: \"test\"", cxxopts::value<string>())
+            ("n,basePopulationSize", "Population size of initial population in IMS. Default: 2", cxxopts::value<int>())
+            ("Z,similarityMeasure", "Measure to build Linkage Tree, 0 - Mutual Information, 1 - Normalized Mutual Information, 2 - Problem specific. Default: Mutual Information", cxxopts::value<int>())
+            ("f,useForcedImprovements", "Whether to enable the Forced Improvement (FI) procedure (1: yes, 0: no). Default: 1", cxxopts::value<int>());
 
-
-  int c, index;
-  while ((c = getopt_long(argc, argv, "h::n::p::X::Y::Q::g::w::e::s::f::P::F::m::L::O::T::S::V::I::B::Z::G::", longopts, &index)) != -1)
-  {
-    switch (c)
+    auto result = options.parse(argc, argv);
+    for( auto param : result.arguments())
     {
+        string str_param = param.as<string>();
+        char c = param.as<char>();
+        switch (c)
+        {
         case 'g':
             usePartialEvaluations = 1;
             break;
-		case 'X':
-			useParallelFOSOrder = 1;
-			break;
-		case 'Y':
-			fixFOSOrderForPopulation = 1;
-			break;
-		case 'Q':
-			popUpdatesDuringGOM = 1;
-			break;
+        case 'X':
+            useParallelFOSOrder = 1;
+            break;
+        case 'Y':
+            fixFOSOrderForPopulation = 1;
+            break;
         case 'w':
             AnalyzeFOS = 1;
             break;
@@ -88,112 +81,78 @@ bool Config::parseCommandLine(int argc, char **argv)
             printHelp = 1;
             break;
         case 'f':
-            useForcedImprovements = atoi(optarg);
+            useForcedImprovements = result[str_param].as<int>();
             break;
         case 'n':
-            basePopulationSize = atoi(optarg);
+            basePopulationSize = result[str_param].as<int>();
             break;
         case 'P':
+        {
+            const string optarg_str = result[str_param].as<string>();
+            if (isNumber(optarg_str))
+                problemIndex = result[str_param].as<int>();
+            else
             {
-                const string optarg_str = string(optarg);
-                if (isNumber(optarg_str))   
-                    problemIndex = atoi(optarg);
-                else
-                {
-                    vector<string> tmp;
-                    splitString(optarg_str, tmp, '_');
-                    cout << tmp[0] << " " << tmp[1] << " " << tmp[2] << endl;   
-                
-                    problemIndex = atoi(tmp[0].c_str());
-                    k = atoi(tmp[1].c_str());
-                    s = atoi(tmp[2].c_str());
-                    cout << problemIndex << endl;
-                }
+                vector<string> tmp;
+                splitString(optarg_str, tmp, '_');
+                cout << tmp[0] << " " << tmp[1] << " " << tmp[2] << endl;
+
+                problemIndex = atoi(tmp[0].c_str());
+                k = atoi(tmp[1].c_str());
+                s = atoi(tmp[2].c_str());
+                cout << problemIndex << endl;
             }
-            break;
-        case 'p':
-            useParallelGOM = atoi(optarg);
-            break;
+        }
+        break;
         case 'F':
-            FOSIndex = atoi(optarg);
+            FOSIndex = result[str_param].as<int>();
             break;
         case 'm':
-            maximumFOSSetSize = atoi(optarg);
+            maximumFOSSetSize = result[str_param].as<int>();
             break;
         case 'L':
-            numberOfVariables = atoi(optarg);
+            numberOfVariables = result[str_param].as<int>();
             break;
         case 'O':
-            folder= string(optarg);
+            folder = result[str_param].as<string>();
             break;
         case 'T':
-            maximumNumberOfSeconds = atof(optarg);
+            maximumNumberOfSeconds = result[str_param].as<double>();
             break;
         case 'V':
-            vtr = atof(optarg);
+            vtr = result[str_param].as<double>();
             break;
         case 'S':
-			{
-                fix_seed = true;
-				randomSeed = atoll(optarg);
-			}
-            break;
+        {
+            fix_seed = true;
+            randomSeed = result[str_param].as<long long>();
+        }
+        break;
         case 'I':
-            problemInstancePath = string(optarg);
+            problemInstancePath = result[str_param].as<string>();
             break;
         case 'Z':
-            linkage_config->lt_similarity_measure = atoi(optarg);
+            linkage_config->lt_similarity_measure = result[str_param].as<int>();
             break;
-        case 'G':
-            GPUIndex = atoi(optarg);
-            break;
-        default:
-            abort();
+        }
     }
-  }
 
-  if (printHelp)
-  {
-    printUsage();
-    exit(0);
-  }
+    if (printHelp)
+    {
+        printUsage();
+        exit(0);
+    }
 
-  // TODO
-  // fitness = fitness::getFitnessClassDiscrete(problemIndex,numberOfVariables);
-  assert(0);
+    // TODO
+    // fitness = fitness::getFitnessClassDiscrete(problemIndex,numberOfVariables);
+    assert(0);
 
-  return 1;
+    return 1;
 }
 
 void Config::printUsage()
 {
-  cout << "  -h: Prints out this usage information.\n";
-  cout << "  --partial: Whether to use partial evaluations. Default: no\n";
-  cout << "  --analyzeFOS: Whether to write FOS statistics to file. Default: no\n";
-  cout << "  --writeElitists: Whether to write the genotype of the elitist solution to a file each time it is updated. Default: no\n";
-  cout << "  --saveEvals: Whether to cache evaluations. Default: no.\n";
-  cout << endl;
-  cout << "  --problem: Index of optimization problem to be solved (maximization). Default: 0 (oneMax)\n";
-
-  cout << "  List of available problems:\n";
-  cout << "    0: OneMax\n";
-  cout << "    1: Concatenated Deceptive Trap, specify k and s by writing 1_k_s\n";
-  cout << "    2: ADF, specify k and s by writing 2_k_s\n";
-  cout << "    3: MaxCut\n";
-  cout << "    4: Hierarhical If-And-Only-If\n";
-  cout << "    5: Leading Ones\n";        
-  cout << "    6: Hierarhical Deceptive Trap-3\n";
-  cout << "    7: Concatenated Bimodal Deceptive Trap, specify k and s by writing 7_k_s\n";
-  cout << endl;
-  
-  cout << "  --L: Number of variables. Default: 10\n";
-  cout << "  --FOS: FOS type, 0 - Linkage Tree, 1 - Filtered Linkage Tree. Default: Linkage Tree\n";    
-  cout << "  --similarityMeasure: Measure to build Linkage Tree, 0 - Mutual Information, 1 - Normalized Mutual Information, 2 - Problem specific. Default: Mutual Information\n";      
-  cout << "  --folder: Folder where GOMEA runs. Default: \"test\"\n";
-  cout << "  --instance: Path to problem instance. Default: \"\"\n";
-  cout << "  --vtr: Value to reach. Default: inf\n";  
-  cout << "  --time: time limit for run in seconds. Default: 1\n";
-  cout << "  --seed: Random seed. Default: Random timestamp\n";  
+  cout << options.help() << endl;
 }
 
 void Config::printOverview()
