@@ -36,14 +36,22 @@ else:
 if platform.system() == "Darwin":
         compile_args.extend(["-stdlib=libc++","-mmacosx-version-min=10.15"])
         link_args.extend(["-stdlib=libc++","-mmacosx-version-min=10.15"])
-        #compile_args.extend(["-stdlib=libc++"])
-        #link_args.extend(["-stdlib=libc++"])
+
+if platform.system() == "Windows":
+        compile_args = ["/std:c++17"]
+        link_args = ["/std:c++17"]
+        if debug_mode:
+                compile_args.extend(['/UNDEBUG','/Zi'])
+                link_args.extend(['/UNDEBUG','/Zi'])
+        else:
+                compile_args.extend(['/O2'])
+                link_args.extend(['/O2'])
 
 extensions = []
 
 extensions.append( Extension("gomea.discrete",
         ["gomea/discrete.pyx"] + glob.glob("gomea/src/discrete/*.cpp") + common_src + fitness_src,
-        include_dirs = ["."] + [np.get_include()],
+        include_dirs = [".", "lib/cxxopts-3.1.1/include/"] + [np.get_include()],
         language="c++",
         extra_compile_args=compile_args,
         extra_link_args=link_args)
@@ -51,7 +59,7 @@ extensions.append( Extension("gomea.discrete",
 
 extensions.append( Extension("gomea.real_valued",
         ["gomea/real_valued.pyx"] + glob.glob("gomea/src/real_valued/*.cpp") + common_src + fitness_src,
-        include_dirs = ["."] + ["Eigen"] + [np.get_include()],
+        include_dirs = ["."] + ["lib/Eigen"] + [np.get_include()],
         language="c++",
         extra_compile_args=compile_args,
         extra_link_args=link_args,

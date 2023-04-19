@@ -7,7 +7,7 @@
 #include <chrono>
 #include <cassert>
 #include <unistd.h>
-#include <getopt.h>
+#include <cxxopts.hpp>
 
 using namespace std;
 
@@ -70,6 +70,7 @@ public:
     linkage_config_t *linkage_config;
 
     private:
+        cxxopts::Options options = cxxopts::Options("DiscreteGOMEA", "GOMEA for discrete optimization");
         int problemIndex = 0, numberOfVariables = 10;
 };
 
