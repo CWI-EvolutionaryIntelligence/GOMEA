@@ -36,7 +36,7 @@ vec_t<int> SOREBChainStrong_t::inputsToSubfunction( int subfunction_index )
 
 double SOREBChainStrong_t::subfunction( int subfunction_index, vec_t<double> &variables )
 {
-	double vars[rotation_block_size] = {variables[subfunction_index],variables[subfunction_index+1]};
+	double vars[] = {variables[subfunction_index],variables[subfunction_index+1]};
 	double *rotated_variables = rotateVariables(&vars[0],rotation_block_size,this->rotation_matrix);
 	double result = 0.0;
 	for( int i = 0; i < rotation_block_size; i++)

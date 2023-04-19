@@ -15,7 +15,6 @@ void partial_solution_t<T>::setSampleMean( vec_t<T> &means )
 	this->sample_means = means;
 }
 
-template class partial_solution_t<float>;
 template class partial_solution_t<double>;
 
 }}
