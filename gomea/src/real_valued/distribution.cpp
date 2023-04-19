@@ -95,7 +95,7 @@ void distribution_t::adaptDistributionMultiplierMaximumStretch( partial_solution
 	}
 }
 
-void distribution_t::updateConditionals( const std::map<int,std::set<int>> &variable_interaction_graph, int visited[] )
+void distribution_t::updateConditionals( const std::map<int,std::set<int>> &variable_interaction_graph, std::vector<int> &visited )
 {}
 		
 void distribution_t::setOrder( const vec_t<int> &order )
@@ -821,7 +821,7 @@ void conditional_distribution_t::estimateConditionalGaussianML( int variable_gro
 	cholesky_decompositions[i] = choleskyDecomposition( covariance_matrices[i] );
 }
 
-void conditional_distribution_t::updateConditionals( const std::map<int,std::set<int>> &variable_interaction_graph, int visited[] ) 
+void conditional_distribution_t::updateConditionals( const std::map<int,std::set<int>> &variable_interaction_graph, std::vector<int> &visited ) 
 {
 	const int IS_VISITED = 1;
 	const int IN_CLIQUE = 2;
