@@ -17,7 +17,7 @@ install:
 	pip3 install dist/*.whl --user
 
 reinstall:
-	python3 setup.py bdist_wheel
+	python3 -m build --wheel
 	pip3 install dist/*.whl --user --force-reinstall
 
 doc:
