@@ -19,7 +19,7 @@ double SOREBChainStrongBBO_t::objectiveFunction( int objective_index, vec_t<doub
 	double result = 0.0;
 	for( int i = 0; i < number_of_variables-1; i++ )
 	{
-		double vars[2] = {variables[i],variables[i+1]};
+		double vars[] = {variables[i],variables[i+1]};
 		double *rotated_variables = rotateVariables(&vars[0],rotation_block_size,this->rotation_matrix);
 		for( int j = 0; j < rotation_block_size; j++)
 		{

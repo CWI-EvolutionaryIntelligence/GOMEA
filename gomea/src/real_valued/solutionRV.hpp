@@ -17,7 +17,4 @@ class solution_t : public gomea::solution_t<T>
 		int NIS = 0; // no improvement stretch
 };
 
-template class solution_t<float>;
-template class solution_t<double>;
-
 }}

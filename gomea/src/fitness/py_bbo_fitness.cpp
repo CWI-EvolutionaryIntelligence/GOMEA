@@ -1,3 +1,5 @@
+#ifndef CPP_STANDALONE
+
 #include "gomea/src/fitness/py_bbo_fitness.hpp"
 
 namespace gomea{
@@ -84,5 +86,6 @@ double pyBBOFitnessFunction_t<double>::getUpperRangeBound( int dimension )
 template class pyBBOFitnessFunction_t<char>;
 template class pyBBOFitnessFunction_t<double>;
 
-
 }}
+
+#endif

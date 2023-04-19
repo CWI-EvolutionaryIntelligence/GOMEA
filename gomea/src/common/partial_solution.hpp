@@ -55,9 +55,4 @@ class partial_solution_t
 		std::unordered_map<int,int> touched_index_map;
 };
 
-template class partial_solution_t<char>;
-template class partial_solution_t<int>;
-template class partial_solution_t<float>;
-template class partial_solution_t<double>;
-
 }
