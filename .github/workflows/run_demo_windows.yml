@@ -1,4 +1,4 @@
-name: Build and run demo
+name: Build and run demo - Windows
 
 on:
   workflow_dispatch:
