@@ -337,7 +337,7 @@ double **fitness_t<double>::initializeObjectiveRotationMatrix( double rotation_a
     }
 
     /* Construct all rotation matrices (quadratic number) and multiply */
-    double theta     = (rotation_angle/180.0)*M_PI;
+    double theta     = (rotation_angle/180.0)*MY_PI;
     double cos_theta = cos( theta );
     double sin_theta = sin( theta );
     for( int index0 = 0; index0 < rotation_block_size-1; index0++ )
