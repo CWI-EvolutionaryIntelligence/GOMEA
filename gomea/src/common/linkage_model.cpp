@@ -167,7 +167,7 @@ linkage_model_t::linkage_model_t( std::string filename )
 				string[k] = '\0';
 				// printf("FOS[%d][%d] = %d\n",i,j,(int) atoi( string ));
 				int e = ((int)atoi(string));
-				this->numberOfVariables = fmax(this->numberOfVariables, e+1);
+				this->numberOfVariables = std::max((int) this->numberOfVariables, e+1);
 				vec.push_back(e);
 				j++;
 			}

@@ -185,22 +185,22 @@ double gomeaIMS::getProgressUntilTermination()
 	if( config->maximumNumberOfSeconds > 0 )
 	{
 		double time_progress = 100.0*utils::getElapsedTimeSinceStartSeconds()/(config->maximumNumberOfSeconds);
-		overall_progress = fmax( overall_progress, time_progress );
+		overall_progress = std::max( overall_progress, time_progress );
 	}
 
 	if (numberOfGOMEAs == maximumNumberOfGOMEAs && config->maximumNumberOfGenerations > 0 )
 	{
 		double generational_progress = 100.0*GOMEAs[maximumNumberOfGOMEAs-1]->numberOfGenerations / config->maximumNumberOfGenerations;
-		overall_progress = fmax( overall_progress, generational_progress );
+		overall_progress = std::max( overall_progress, generational_progress );
 	}
 
 	if( config->maximumNumberOfEvaluations > 0 )
 	{
 		double evaluation_progress = 100.0*problemInstance->number_of_evaluations / config->maximumNumberOfEvaluations;
-		overall_progress = fmax( overall_progress, evaluation_progress );
+		overall_progress = std::max( overall_progress, evaluation_progress );
 	}
 
-	overall_progress = fmin( overall_progress, 100.0 );
+	overall_progress = std::min( overall_progress, 100.0 );
 
 	return overall_progress;
 }

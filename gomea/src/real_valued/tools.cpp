@@ -521,12 +521,12 @@ void eigenDecompositionQLalgo2( int n, double **V, double *d, double *e )
 
         /* Find small subdiagonal element */
 
-        if (tst1 < fabs(d[l]) + fabs(e[l]))
-            tst1 = fabs(d[l]) + fabs(e[l]);
+        if (tst1 < std::abs(d[l]) + std::abs(e[l]))
+            tst1 = std::abs(d[l]) + std::abs(e[l]);
         m = l;
         while (m < n) {
-            if (fabs(e[m]) <= eps*tst1) {
-                /* if (fabs(e[m]) + fabs(d[m]+d[m+1]) == fabs(d[m]+d[m+1])) { */
+            if (std::abs(e[m]) <= eps*tst1) {
+                /* if (std::abs(e[m]) + std::abs(d[m]+d[m+1]) == std::abs(d[m]+d[m+1])) { */
                 break;
             }
             m++;
@@ -537,7 +537,7 @@ void eigenDecompositionQLalgo2( int n, double **V, double *d, double *e )
 
         if (m > l) {
             int iter = 0;
-            do { /* while (fabs(e[l]) > eps*tst1); */
+            do { /* while (std::abs(e[l]) > eps*tst1); */
                 double dl1, h;
                 double g = d[l];
                 double p = (d[l+1] - g) / (2.0 * e[l]);
@@ -597,7 +597,7 @@ void eigenDecompositionQLalgo2( int n, double **V, double *d, double *e )
 
                 /* Check for convergence. */
 
-            } while (fabs(e[l]) > eps*tst1);
+            } while (std::abs(e[l]) > eps*tst1);
         }
         d[l] = d[l] + f;
         e[l] = 0.0;
@@ -635,15 +635,15 @@ void eigenDecompositionQLalgo2( int n, double **V, double *d, double *e )
 double myhypot( double a, double b )
 {
     double r = 0;
-    if( fabs(a) > fabs(b) )
+    if( std::abs(a) > std::abs(b) )
     {
         r = b/a;
-        r = fabs(a)*sqrt(1+r*r);
+        r = std::abs(a)*sqrt(1+r*r);
     }
     else if (b != 0)
     {
         r = a/b;
-        r = fabs(b)*sqrt(1+r*r);
+        r = std::abs(b)*sqrt(1+r*r);
     }
 
     return r;
@@ -666,7 +666,7 @@ void eigenDecompositionHouseholder2( int n, double **V, double *d, double *e )
         double scale = 0.0;
         double h = 0.0;
         for (k = 0; k < i; k++) {
-            scale = scale + fabs(d[k]);
+            scale = scale + std::abs(d[k]);
         }
         if (scale == 0.0) {
             e[i] = d[i-1];

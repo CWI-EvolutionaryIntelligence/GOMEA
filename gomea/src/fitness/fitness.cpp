@@ -165,7 +165,7 @@ void fitness_t<T>::evaluatePartialSolution( solution_t<T> *parent, partial_solut
 		double fbefore = solution->objective_value;
 		evaluatePartialSolutionBlackBox( parent, solution );	
 		double fafter = solution->objective_value;
-		if( fabs((fbefore-fafter)/fafter) > 1e-4 )
+		if( std::abs((fbefore-fafter)/fafter) > 1e-4 )
 		{
 			printf("fbefore = %10.3e; ",fbefore);
 			printf("fafter = %10.3e\n",fafter);
