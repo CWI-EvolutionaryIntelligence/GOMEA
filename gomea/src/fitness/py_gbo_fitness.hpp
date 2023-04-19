@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef CPP_STANDALONE
+
 #include "gomea/src/fitness/gbo_fitness.hpp"
 #include "gomea/fitness.h"
 #include "numpy/arrayobject.h"
@@ -31,3 +33,5 @@ class pyGBOFitnessFunction_t : public GBOFitnessFunction_t<T>
 };
 
 }}
+
+#endif

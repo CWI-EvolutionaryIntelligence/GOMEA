@@ -17,6 +17,7 @@
 #include <random>
 #include <variant>
 
+#define MY_PI 3.141592653589793238462643383279
 namespace gomea{
 
 template<class T>

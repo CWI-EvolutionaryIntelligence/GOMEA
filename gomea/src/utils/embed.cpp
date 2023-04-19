@@ -7,6 +7,7 @@
 
 namespace gomea{
 	namespace utils{
+#ifndef CPP_STANDALONE
 		namespace{
 			bool embedding_initialized = false;
 			wchar_t *embedded_program = NULL;
@@ -69,5 +70,6 @@ namespace gomea{
 
 			return 0;
 		}
+#endif
 	}
 }

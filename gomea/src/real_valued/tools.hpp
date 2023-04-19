@@ -5,8 +5,6 @@
 #include <stdlib.h>
 #include <string>
 #include <math.h>
-#include <time.h>
-#include <sys/time.h>
 #include <vector>
 #include <algorithm>
 #include <set>
@@ -71,14 +69,5 @@ mat pinv(const mat &a, double epsilon = std::numeric_limits<double>::epsilon());
 double normalize( double v, double min, double max );
 
 double *matrixVectorPartialMultiplication( double **matrix, double *vector, int n0, int n1, int number_of_elements, int *element_indices );
-
-/*-=-=-=-=-=-=-=-=-=-=-=-=-=-= Section Constants -=-=-=-=-=-=-=-=-=-=-=-=-=-*/
-#ifndef PI
-#define PI 3.14159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798
-#endif
-#define FALSE 0
-#define TRUE 1
-#define OMP_NUM_THREADS 1
-#define OPENBLAS_NUM_THREADS 1
 
 }}

@@ -46,7 +46,7 @@ class distribution_t {
 		int blasDAXPY(int n, double da, double *dx, int incx, double *dy, int incy);
 		int blasDSWAP( int n, double *dx, int incx, double *dy, int incy );
 			
-		virtual void updateConditionals( const std::map<int,std::set<int>> &variable_interaction_graph, int visited[] );
+		virtual void updateConditionals( const std::map<int,std::set<int>> &variable_interaction_graph, std::vector<int> &visited );
 		virtual void setOrder( const vec_t<int> &order ); 
 		virtual void estimateDistribution( solution_t<double> **selection, int selection_size ) = 0;	
 		virtual partial_solution_t<double> *generatePartialSolution( solution_t<double> *parent, fitness::fitness_generic_t *fitness_function = NULL ) = 0;
@@ -92,7 +92,7 @@ class conditional_distribution_t : public distribution_t {
 			void estimateDistribution( solution_t<double> **selection, int selection_size );
 
 			void setOrder( const vec_t<int> &order );
-			void updateConditionals( const std::map<int,std::set<int>> &variable_interaction_graph, int visited[] );
+			void updateConditionals( const std::map<int,std::set<int>> &variable_interaction_graph, std::vector<int> &visited );
 
 			partial_solution_t<double> *generatePartialSolution( solution_t<double> *solution_conditioned_on = NULL, fitness::fitness_generic_t *fitness_function = NULL ); 
 			bool generationalImprovementForOnePopulationForFOSElement( partial_solution_t<double>** partial_solutions, int num_solutions, double *st_dev_ratio );

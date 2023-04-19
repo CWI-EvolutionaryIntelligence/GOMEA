@@ -3,8 +3,9 @@ default: reinstall
 here: 
 	python3 setup.py build_ext --inplace
 
-cpp: install 
-	g++ -g -Wall -std=c++17 $(python-config --embed --cflags) -I./ $(python-config --embed --includes) gomea/src/discrete/main.cpp -o build/DiscreteGOMEA -L~/.local/lib/python3.10/site-packages/gomea/ $(python-config --embed --ldflags) -l:discrete.cpython-310-x86_64-linux-gnu.so
+cpp:
+	@mkdir -p build
+	g++ -g -Wall -std=c++17 -DCPP_STANDALONE -I./ -Igomea/ -IEigen/ gomea/src/discrete/*.cpp gomea/src/fitness/*.cpp gomea/src/common/*.cpp gomea/src/utils/*.cpp -o build/DiscreteGOMEA
 
 debug:
 	python3 setup.py build_ext --inplace --debug
@@ -16,7 +17,7 @@ install:
 	pip3 install dist/*.whl --user
 
 reinstall:
-	python3 setup.py bdist_wheel
+	python3 -m build --wheel
 	pip3 install dist/*.whl --user --force-reinstall
 
 doc:
