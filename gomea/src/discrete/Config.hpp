@@ -6,7 +6,6 @@
 #include <random>
 #include <chrono>
 #include <cassert>
-#include <unistd.h>
 #include <getopt.h>
 
 using namespace std;

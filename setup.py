@@ -36,8 +36,16 @@ else:
 if platform.system() == "Darwin":
         compile_args.extend(["-stdlib=libc++","-mmacosx-version-min=10.15"])
         link_args.extend(["-stdlib=libc++","-mmacosx-version-min=10.15"])
-        #compile_args.extend(["-stdlib=libc++"])
-        #link_args.extend(["-stdlib=libc++"])
+
+if platform.system() == "Windows":
+        compile_args = ["/std:c++17"]
+        link_args = ["/std:c++17"]
+        if debug_mode:
+                compile_args.extend(['/UNDEBUG','/Zi'])
+                link_args.extend(['/UNDEBUG','/Zi'])
+        else:
+                compile_args.extend(['/O2'])
+                link_args.extend(['/O2'])
 
 extensions = []
 
