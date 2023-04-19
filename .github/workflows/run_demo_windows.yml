@@ -3,9 +3,7 @@ name: Build and run demo
 on:
   workflow_dispatch:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches: [ "windows" ]
 
 jobs:
   build:
