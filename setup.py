@@ -8,7 +8,6 @@ from setuptools import Extension, setup, find_namespace_packages
 from Cython.Build import cythonize
 import sys
 import glob
-import getopt
 import numpy as np
 import platform
 
@@ -31,8 +30,8 @@ if debug_mode:
         compile_args.extend(['-UNDEBUG','-g'])
         link_args.extend(['-UNDEBUG','-g'])
 else:
-        compile_args.extend(['-O3'])
-        link_args.extend(['-O3'])
+        compile_args.extend(['-O3','-g0'])
+        link_args.extend(['-O3','-g0'])
 if platform.system() == "Darwin":
         compile_args.extend(["-stdlib=libc++","-mmacosx-version-min=10.15"])
         link_args.extend(["-stdlib=libc++","-mmacosx-version-min=10.15"])
@@ -41,8 +40,8 @@ if platform.system() == "Windows":
         compile_args = ["/std:c++17"]
         link_args = ["/std:c++17"]
         if debug_mode:
-                compile_args.extend(['/UNDEBUG','/Zi'])
-                link_args.extend(['/UNDEBUG','/Zi'])
+                compile_args.extend(['/UNDEBUG','/Zi','/g0'])
+                link_args.extend(['/UNDEBUG','/Zi','/g0'])
         else:
                 compile_args.extend(['/O2'])
                 link_args.extend(['/O2'])
@@ -96,7 +95,7 @@ setup(
     description = 'Library for the use of various variants of the Gene-pool Optimal Mixing Evolutionary Algorith (GOMEA).',
     author = 'Anton Bouter',
     author_email = 'Anton.Bouter@cwi.nl',
-    url = '',
+    url = 'https://github.com/abouter/gomea',
     version = __version__,
     long_description = long_description,
     long_description_content_type = 'text/markdown',
