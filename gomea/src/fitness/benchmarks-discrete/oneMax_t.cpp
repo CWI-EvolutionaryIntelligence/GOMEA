@@ -6,7 +6,7 @@ namespace fitness{
 
 using namespace gomea;
 
-oneMax_t::oneMax_t( int number_of_variables ) : GBOFitnessFunction_t(number_of_variables)
+oneMax_t::oneMax_t( int number_of_variables ) : GBOFitnessFunction_t<char>(number_of_variables)
 {
 	this->name = "OneMax function";
 	this->vtr = number_of_variables;
