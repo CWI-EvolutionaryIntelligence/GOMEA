@@ -3,8 +3,6 @@
 namespace gomea{
 namespace fitness{
 
-using namespace gomea;
-
 SOREBChainStrong_t::SOREBChainStrong_t( int number_of_variables, double vtr ) : GBOFitnessFunction_t(number_of_variables,vtr)
 {
 	this->name = "Sum of rotated ellipsoid blocks (SOREB) with strong dependencies -- 1 overlap in chain structure";

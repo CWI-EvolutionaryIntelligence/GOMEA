@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-using namespace std;
 
 #include "gomea/src/discrete/Config.hpp"
 #include "gomea/src/discrete/Population.hpp"
@@ -31,8 +30,8 @@ public:
 	output_statistics_t output;
 
     Config *config;
-    vector<Population*> GOMEAs;
-    fitness_t *problemInstance = NULL;
+    vec_t<Population*> GOMEAs;
+    fitness_t<char> *problemInstance = NULL;
     sharedInformation *sharedInformationInstance = NULL;
 
 	gomeaIMS();

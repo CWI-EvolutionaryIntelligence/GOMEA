@@ -3,7 +3,7 @@
 namespace gomea{
 namespace discrete{
 
-Population::Population(Config *config_, fitness_t *problemInstance_, sharedInformation *sharedInformationPointer_, size_t GOMEAIndex_, size_t populationSize_, linkage_model_pt FOSInstance_ ): 
+Population::Population(Config *config_, fitness_t<char> *problemInstance_, sharedInformation *sharedInformationPointer_, size_t GOMEAIndex_, size_t populationSize_, linkage_model_pt FOSInstance_ ): 
         config(config_), 
         problemInstance(problemInstance_),
         sharedInformationPointer(sharedInformationPointer_),
@@ -45,8 +45,8 @@ Population::Population(Config *config_, fitness_t *problemInstance_, sharedInfor
 		else FOSInstance = FOSInstance_;
         
         #ifdef DEBUG
-            cout << "New Population created! Population #" << GOMEAIndex << " PopulationSize:" << populationSize << endl;
-            cout << this;
+            std::cout << "New Population created! Population #" << GOMEAIndex << " PopulationSize:" << populationSize << endl;
+            std::cout << this;
         #endif
 }
 
@@ -59,12 +59,12 @@ Population::~Population()
     }
 }
 
-ostream & operator << (ostream &out, const Population &populationInstance)
+std::ostream & operator << (std::ostream &out, const Population &populationInstance)
 {
-    out << "Generation " << populationInstance.numberOfGenerations << ":" << endl;
+    out << "Generation " << populationInstance.numberOfGenerations << ":" << std::endl;
     for (size_t i = 0; i < populationInstance.populationSize; ++i)
-        out << *populationInstance.population[i] << endl;
-    out << endl;
+        out << *populationInstance.population[i] << std::endl;
+    out << std::endl;
     return out;
 }
 
@@ -269,7 +269,7 @@ bool Population::GOM(size_t offspringIndex)
         while (donorEqualToOffspring && indicesTried < donorIndices.size())
         {
             int j = gomea::utils::rng() % (donorIndices.size() - indicesTried);
-            swap(donorIndices[indicesTried], donorIndices[indicesTried + j]);
+            std::swap(donorIndices[indicesTried], donorIndices[indicesTried + j]);
             donorIndex = donorIndices[indicesTried];
             indicesTried++;
 
@@ -369,7 +369,7 @@ bool Population::FI(size_t offspringIndex)
 {
     checkTimeLimit();
 
-    //cout << "before eval" << solution -> fitness << endl;
+    //std::cout << "before eval" << solution -> fitness << std::endl;
     if (config->usePartialEvaluations && solution != NULL)
     {
         problemInstance->calculateFitnessPartialEvaluations(solution, solutionBefore, touchedGenes, fitnessBefore);
@@ -398,7 +398,7 @@ bool Population::FI(size_t offspringIndex)
         solution->setObjectiveValue(searchResult.value);
     else
     { 
-        //cout << "before eval" << solution -> fitness << endl;
+        //std::cout << "before eval" << solution -> fitness << std::endl;
         if (config->usePartialEvaluations && solutionBefore != NULL)
         {
             assert(0);
@@ -448,7 +448,7 @@ void Population::updateElitistAndCheckVTR(solution_t<char> *solution)
         {
             //writeStatisticsToFile(config->folder, sharedInformationPointer->elitistSolutionHittingTimeEvaluations, sharedInformationPointer->elitistSolutionHittingTimeMilliseconds, solution);
             //writeElitistSolutionToFile(config->folder, sharedInformationPointer->elitistSolutionHittingTimeEvaluations, sharedInformationPointer->elitistSolutionHittingTimeMilliseconds, solution);
-            //cout << "VTR HIT!\n";
+            //std::cout << "VTR HIT!\n";
             terminated = true;
             throw utils::customException("vtr");
         }

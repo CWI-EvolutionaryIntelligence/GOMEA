@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream>
-using namespace std;
 
 #include "gomea/src/discrete/gomeaIMS.hpp"
 #include "gomea/src/discrete/utils.hpp"

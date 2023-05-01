@@ -2,21 +2,23 @@
 #include "gomea/src/discrete/gomea.hpp"
 #include "gomea/src/discrete/gomeaIMS.hpp"
 
-using namespace gomea;
+using gomea::discrete::Config;
+using gomea::discrete::GOMEA;
+using gomea::discrete::gomeaIMS;
 int main(int argc, char **argv)
 {
-    discrete::Config *config = new discrete::Config();
+    Config *config = new Config();
     config->parseCommandLine(argc, argv);
     config->checkOptions();
     config->printOverview();
 
-    discrete::GOMEA *gomeaInstance = new discrete::gomeaIMS(config);
+    GOMEA *gomeaInstance = new gomeaIMS(config);
 
     try
     {
         gomeaInstance->run();
     }
-    catch (utils::customException &ex)
+    catch (gomea::utils::customException &ex)
     {}
 
     delete gomeaInstance;

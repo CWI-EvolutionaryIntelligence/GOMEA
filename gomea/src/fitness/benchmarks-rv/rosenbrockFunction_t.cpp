@@ -3,8 +3,6 @@
 namespace gomea{
 namespace fitness{
 
-using namespace gomea;
-
 rosenbrockFunction_t::rosenbrockFunction_t( int number_of_variables, double vtr ) : GBOFitnessFunction_t(number_of_variables,vtr)
 {
 	this->name = "Rosenbrock function";

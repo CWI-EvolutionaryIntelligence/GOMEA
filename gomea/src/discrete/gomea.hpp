@@ -2,7 +2,6 @@
 
 #include <string> 
 #include <iostream>
-using namespace std;
 
 #include "gomea/src/discrete/Config.hpp"
 

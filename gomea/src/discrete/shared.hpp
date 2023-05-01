@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-using namespace std;
 
 #include "gomea/src/discrete/utils.hpp"
 #include "gomea/src/utils/time.hpp"

@@ -9,8 +9,6 @@
 #include <unistd.h>
 #include <cxxopts.hpp>
 
-using namespace std;
-
 #include "gomea/src/common/linkage_model.hpp"
 #include "gomea/src/fitness/fitness.hpp"
 #include "gomea/src/fitness/benchmarks-discrete.hpp"
@@ -18,12 +16,12 @@ using namespace std;
 namespace gomea{
 namespace discrete{
 
-typedef gomea::fitness::fitness_t<char> fitness_t;
+using gomea::fitness::fitness_t;
 
 class Config
 {
-	void splitString(const string &str, vector<string> &splitted, char delim);
-    bool isNumber(const string &s);
+	void splitString(const std::string &str, vec_t<std::string> &splitted, char delim);
+    bool isNumber(const std::string &s);
 
 public:
 	Config();
@@ -33,7 +31,7 @@ public:
     void printUsage();
     void printOverview();
     
-	fitness_t *fitness;
+	fitness_t<char> *fitness;
 	int usePartialEvaluations              = 0,                  
 		useParallelGOM		               = 1,                  
 		useParallelFOSOrder	               = 0,
@@ -53,10 +51,10 @@ public:
 	int GPUIndex = -1;
 	int maximumFOSSetSize = -1;
 
-    string folder = "discrete_gomea_output";
-    //string problemName,
-    string FOSName;
-    string problemInstancePath = "";
+    std::string folder = "discrete_gomea_output";
+    //std::string problemName,
+    std::string FOSName;
+    std::string problemInstancePath = "";
 
     //long long timelimitMilliseconds = -1,
     bool fix_seed = false;

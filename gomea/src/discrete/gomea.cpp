@@ -5,13 +5,13 @@ namespace discrete{
 
 double GOMEA::readVTR(Config *config)
 {
-    string filename = config->folder + "/vtr.txt";
-    ifstream inFile;
+    std::string filename = config->folder + "/vtr.txt";
+    std::ifstream inFile;
     inFile.open(filename);
 
-    string vtr_str;
+    std::string vtr_str;
     inFile >> vtr_str;
-    double vtr = stod(vtr_str);
+    double vtr = std::stod(vtr_str);
 
     inFile.close();
 

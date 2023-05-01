@@ -3,8 +3,6 @@
 namespace gomea{
 namespace fitness{
 
-using namespace gomea;
-
 circlesInASquareBBO_t::circlesInASquareBBO_t( int number_of_variables, double vtr ) : BBOFitnessFunction_t(number_of_variables)
 {
 	assert( number_of_variables % 2 == 0 );

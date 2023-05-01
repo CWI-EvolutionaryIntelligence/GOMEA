@@ -4,8 +4,6 @@
 namespace gomea{
 namespace fitness{
 
-using namespace gomea;
-
 deceptiveTrapBBO_t::deceptiveTrapBBO_t( int number_of_variables, int trap_size ) : BBOFitnessFunction_t<char>(number_of_variables)
 {
 	this->name = "Deceptive trap function";

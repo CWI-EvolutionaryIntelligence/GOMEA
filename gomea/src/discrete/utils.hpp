@@ -13,8 +13,6 @@
 #include <exception>
 #include <cassert>
 
-using namespace std;
-
 #include "gomea/src/common/solution.hpp"
 #include "gomea/src/common/gomea_defs.hpp"
 
@@ -31,9 +29,9 @@ struct archiveRecord
 
 struct hashVector
 { 
-    size_t operator()(const vector<char> &vec) const
+    size_t operator()(const vec_t<char> &vec) const
     { 
-        hash <char> hashChar; 
+        std::hash <char> hashChar; 
         size_t hash_value = 0;
         for (size_t i = 0; i < vec.size(); ++i) 
             hash_value = hash_value*31 + hashChar(vec[i]); 
@@ -46,14 +44,14 @@ class solutionsArchive
     size_t maxArchiveSize;
 public:
     solutionsArchive(size_t maxArchiveSize_): maxArchiveSize(maxArchiveSize_){};
-    unordered_map<vector<char>, double, hashVector > archive;
-    void checkAlreadyEvaluated(vector<char> &genotype, archiveRecord *result);
-    void insertSolution(vector<char> &genotype, double fitness);
+    std::unordered_map<vec_t<char>, double, hashVector > archive;
+    void checkAlreadyEvaluated(vec_t<char> &genotype, archiveRecord *result);
+    void insertSolution(vec_t<char> &genotype, double fitness);
 };
 
-void prepareFolder(string &folder);
-void initElitistFile(string &folder);
-void writeStatisticsToFile(string &folder, long long numberOfEvaluations, long long time, solution_t<char> *solution);
-void writeElitistSolutionToFile(string &folder, long long numberOfEvaluations, long long time, solution_t<char> *solution);
+void prepareFolder(std::string &folder);
+void initElitistFile(std::string &folder);
+void writeStatisticsToFile(std::string &folder, long long numberOfEvaluations, long long time, solution_t<char> *solution);
+void writeElitistSolutionToFile(std::string &folder, long long numberOfEvaluations, long long time, solution_t<char> *solution);
 
 }}

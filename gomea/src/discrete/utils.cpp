@@ -3,77 +3,77 @@
 namespace gomea{
 namespace discrete{
 
-void prepareFolder(string &folder)
+void prepareFolder(std::string &folder)
 {
-    if (!filesystem::exists(folder))
+    if (!std::filesystem::exists(folder))
     {
-		filesystem::create_directories(folder);
+		std::filesystem::create_directories(folder);
     }
-	filesystem::create_directories(folder + "/fos");
-	filesystem::create_directories(folder + "/output");
+	std::filesystem::create_directories(folder + "/fos");
+	std::filesystem::create_directories(folder + "/output");
 }
 
-void initStatisticsFile(string &folder)
+void initStatisticsFile(std::string &folder)
 {
-    ofstream outFile(folder + "/statistics.txt", ofstream::out);
+    std::ofstream outFile(folder + "/statistics.txt", std::ofstream::out);
     if (outFile.fail())
     {
-        cerr << "Problems with opening file " << folder + "/elitists.txt!\n";
+        std::cerr << "Problems with opening file " << folder + "/elitists.txt!\n";
         exit(0);
     }
-    outFile << "#Evaluations " << "Time,sec. " << "Fitness " << endl;
+    outFile << "#Evaluations " << "Time,sec. " << "Fitness " << std::endl;
     outFile.close();
 }
 
-void initElitistFile(string &folder)
+void initElitistFile(std::string &folder)
 {
-    ofstream outFile(folder + "/elitists.txt", ofstream::out);
+    std::ofstream outFile(folder + "/elitists.txt", std::ofstream::out);
     if (outFile.fail())
     {
-        cerr << "Problems with opening file " << folder + "/elitists.txt!\n";
+        std::cerr << "Problems with opening file " << folder + "/elitists.txt!\n";
         exit(0);
     }
-    outFile << "#Evaluations " << "Time,sec. " << "Fitness " << "Solution" << endl;
+    outFile << "#Evaluations " << "Time,sec. " << "Fitness " << "Solution" << std::endl;
     outFile.close();
 }
 
-void writeStatisticsToFile(string &folder, long long numberOfEvaluations, long long time, solution_t<char> *solution)
+void writeStatisticsToFile(std::string &folder, long long numberOfEvaluations, long long time, solution_t<char> *solution)
 {
-    ofstream outFile(folder + "/statistics.txt", ofstream::app);
+    std::ofstream outFile(folder + "/statistics.txt", std::ofstream::app);
     if (outFile.fail())
     {
-        cerr << "Problems with opening file " << folder + "/statistics.txt!\n";
+        std::cerr << "Problems with opening file " << folder + "/statistics.txt!\n";
         exit(0);
     }
 
-    outFile << (int)numberOfEvaluations << " " << fixed << setprecision(3) << time/1000.0 << " " <<  setprecision(6) << solution->getObjectiveValue();
-    outFile << endl;
+    outFile << (int)numberOfEvaluations << " " << std::fixed << std::setprecision(3) << time/1000.0 << " " <<  std::setprecision(6) << solution->getObjectiveValue();
+    outFile << std::endl;
 
     outFile.close();
 }
 
-void writeElitistSolutionToFile(string &folder, long long numberOfEvaluations, long long time, solution_t<char> *solution)
+void writeElitistSolutionToFile(std::string &folder, long long numberOfEvaluations, long long time, solution_t<char> *solution)
 {
-    ofstream outFile(folder + "/elitists.txt", ofstream::app);
+    std::ofstream outFile(folder + "/elitists.txt", std::ofstream::app);
     if (outFile.fail())
     {
-        cerr << "Problems with opening file " << folder + "/elitists.txt!\n";
+        std::cerr << "Problems with opening file " << folder + "/elitists.txt!\n";
         exit(0);
     }
 
-    outFile << (int)numberOfEvaluations << " " << fixed << setprecision(3) << time/1000.0 << " " <<  setprecision(6) << solution->getObjectiveValue() << " ";
+    outFile << (int)numberOfEvaluations << " " << std::fixed << std::setprecision(3) << time/1000.0 << " " <<  std::setprecision(6) << solution->getObjectiveValue() << " ";
     for (int i = 0; i < solution->getNumberOfVariables(); ++i)
         outFile << +solution->variables[i];
-    outFile << endl;
+    outFile << std::endl;
 
     outFile.close();
 }
 
-void solutionsArchive::checkAlreadyEvaluated(vector<char> &genotype, archiveRecord *result)
+void solutionsArchive::checkAlreadyEvaluated(vec_t<char> &genotype, archiveRecord *result)
 {
     result->isFound = false;
 
-    unordered_map<vector<char>, double, hashVector >::iterator it = archive.find(genotype);
+    std::unordered_map<vec_t<char>, double, hashVector >::iterator it = archive.find(genotype);
     if (it != archive.end())
     {
         result->isFound = true;
@@ -81,16 +81,16 @@ void solutionsArchive::checkAlreadyEvaluated(vector<char> &genotype, archiveReco
     }
 }
 
-void solutionsArchive::insertSolution(vector<char> &genotype, double fitness)
+void solutionsArchive::insertSolution(vec_t<char> &genotype, double fitness)
 {
     // #if DEBUG
-    //  cout << "Inserting solution ";
+    //  std::cout << "Inserting solution ";
     //  for (size_t i = 0; i < solution.size(); ++i)
-    //      cout << solution[i];
+    //      std::cout << solution[i];
     // #endif
     if (archive.size() >= maxArchiveSize)
         return;
-    archive.insert(pair<vector<char>, double> (genotype, fitness));
+    archive.insert(std::pair<vec_t<char>, double> (genotype, fitness));
 }
 
 

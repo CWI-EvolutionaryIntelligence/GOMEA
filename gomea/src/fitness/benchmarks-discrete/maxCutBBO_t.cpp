@@ -6,8 +6,6 @@
 namespace gomea{
 namespace fitness{
 
-using namespace gomea;
-
 maxCutBBO_t::maxCutBBO_t( std::string input_file, std::string vtr_file ) : BBOFitnessFunction_t<char>(number_of_variables)
 {
 	this->name = "MaxCut function";

@@ -3,7 +3,6 @@
 #include <cmath>
 #include <iostream> 
 #include <vector>
-using namespace std;
 
 #include "gomea/src/discrete/Config.hpp"
 #include "gomea/src/discrete/shared.hpp"
@@ -20,7 +19,7 @@ class Population
 {
 public:
     Config *config;
-    fitness_t *problemInstance;
+    fitness_t<char> *problemInstance;
     sharedInformation *sharedInformationPointer;
     size_t GOMEAIndex;
     size_t populationSize;
@@ -35,10 +34,10 @@ public:
     
     linkage_model_pt FOSInstance = NULL;
 
-    Population(Config *config_, fitness_t *problemInstance_, sharedInformation *sharedInformationPointer_, size_t GOMEAIndex_, size_t populationSize_, linkage_model_pt FOSInstance_ = NULL );
+    Population(Config *config_, fitness_t<char> *problemInstance_, sharedInformation *sharedInformationPointer_, size_t GOMEAIndex_, size_t populationSize_, linkage_model_pt FOSInstance_ = NULL );
     ~Population();
 
-    friend ostream & operator << (ostream &out, const Population &populationInstance);
+    friend std::ostream & operator << (std::ostream &out, const Population &populationInstance);
 
     void calculateAverageFitness();
     double getFitnessMean();
