@@ -50,7 +50,7 @@ extensions = []
 
 extensions.append( Extension("gomea.discrete",
         ["gomea/discrete.pyx"] + glob.glob("gomea/src/discrete/*.cpp") + common_src + fitness_src,
-        include_dirs = [".", "lib/cxxopts-3.1.1/include/"] + [np.get_include()],
+        include_dirs = ["."] + ["lib/cxxopts-3.1.1/include/"] + [np.get_include()],
         language="c++",
         extra_compile_args=compile_args,
         extra_link_args=link_args)
