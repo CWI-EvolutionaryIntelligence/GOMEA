@@ -167,7 +167,7 @@ linkage_model_t::linkage_model_t( std::string filename )
 				string[k] = '\0';
 				// printf("FOS[%d][%d] = %d\n",i,j,(int) atoi( string ));
 				int e = ((int)atoi(string));
-				this->numberOfVariables = fmax(this->numberOfVariables, e+1);
+				this->numberOfVariables = std::max((int) this->numberOfVariables, e+1);
 				vec.push_back(e);
 				j++;
 			}
@@ -406,9 +406,7 @@ vec_t<int> linkage_model_t::graphColoring( std::map<int,std::set<int>> &VIG )
 		}
 
 		int numColorsSeen = 0;
-		bool colorsSeen[numColors];
-		for( int i = 0; i < numColors; i++)
-			colorsSeen[i] = false;
+		vec_t<bool> colorsSeen(numColors,false);
 		int availableColor = -1;
 		for( int v : FOSVIG[ind] )
 		{

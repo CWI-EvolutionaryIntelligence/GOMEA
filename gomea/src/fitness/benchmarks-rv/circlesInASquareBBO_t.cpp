@@ -61,7 +61,7 @@ double circlesInASquareBBO_t::objectiveFunction( int objective_index, vec_t<doub
 		for( int j = i+2; j < number_of_variables; j+=2 )
 		{
 			double dist = utils::distanceEuclidean2D(variables[i],variables[i+1],variables[j],variables[j+1]);
-			min_dist = fmin(min_dist,dist);
+			min_dist = std::min(min_dist,dist);
 		}
 	}
 	return -min_dist;

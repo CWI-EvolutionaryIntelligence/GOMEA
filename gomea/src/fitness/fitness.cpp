@@ -165,7 +165,7 @@ void fitness_t<T>::evaluatePartialSolution( solution_t<T> *parent, partial_solut
 		double fbefore = solution->objective_value;
 		evaluatePartialSolutionBlackBox( parent, solution );	
 		double fafter = solution->objective_value;
-		if( fabs((fbefore-fafter)/fafter) > 1e-4 )
+		if( std::abs((fbefore-fafter)/fafter) > 1e-4 )
 		{
 			printf("fbefore = %10.3e; ",fbefore);
 			printf("fafter = %10.3e\n",fafter);
@@ -337,7 +337,7 @@ double **fitness_t<double>::initializeObjectiveRotationMatrix( double rotation_a
     }
 
     /* Construct all rotation matrices (quadratic number) and multiply */
-    double theta     = (rotation_angle/180.0)*M_PI;
+    double theta     = (rotation_angle/180.0)*MY_PI;
     double cos_theta = cos( theta );
     double sin_theta = sin( theta );
     for( int index0 = 0; index0 < rotation_block_size-1; index0++ )

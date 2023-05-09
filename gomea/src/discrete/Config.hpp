@@ -6,7 +6,6 @@
 #include <random>
 #include <chrono>
 #include <cassert>
-#include <unistd.h>
 #include <cxxopts.hpp>
 
 #include "gomea/src/common/linkage_model.hpp"

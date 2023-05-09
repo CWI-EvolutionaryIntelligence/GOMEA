@@ -258,9 +258,9 @@ bool distribution_t::regularizeCovarianceMatrix( mat &cov_mat, vec_t<double> &me
 		for(int j = 0; j < n; ++j)
 		{
 			if(use_univariate_as_prior) {
-				temp = fabs(cov_mat(i,j) - (( i == j ) ? cov_mat(i,i) : 0.0));
+				temp = std::abs(cov_mat(i,j) - (( i == j ) ? cov_mat(i,i) : 0.0));
 			} else {
-				temp = fabs(cov_mat(i,j) - (( i == j ) ? meanvar : 0.0));
+				temp = std::abs(cov_mat(i,j) - (( i == j ) ? meanvar : 0.0));
 			}
 			gamma += temp*temp;
 		}
@@ -269,7 +269,7 @@ bool distribution_t::regularizeCovarianceMatrix( mat &cov_mat, vec_t<double> &me
 	double kappa = phi/gamma;
 	double shrinkage = std::max(0.0,std::min(1.0,kappa/number_of_samples));
 	//std::cout << "Shrinkage with factor " << shrinkage << std::endl;
-	//shrinkage = fmax(1e-10,shrinkage);
+	//shrinkage = std::max(1e-10,shrinkage);
 
 	if(shrinkage == 0.0) {
 		return false;
@@ -602,7 +602,7 @@ partial_solution_t<double> *normal_distribution_t::generatePartialSolution( solu
 {
 	vec_t<int> indices = variables; 
 	int num_indices = variables.size();
-	vec_t<double> result = vec_t<double>(num_indices);
+	vec_t<double> result(num_indices);
 
 	int times_not_in_bounds = -1;
 	out_of_bounds_draws--;
@@ -662,9 +662,7 @@ bool normal_distribution_t::generationalImprovementForOnePopulationForFOSElement
 	vec_t<int> indices = partial_solutions[0]->touched_indices; 
 	int num_indices = indices.size();
 
-	double average_z_of_improvements[num_indices];
-	for(int i = 0; i < num_indices; i++ )
-		average_z_of_improvements[i] = 0.0;
+	std::vector<double> average_z_of_improvements(num_indices,0.0);
 
 	int number_of_improvements  = 0;
 	//mat cholinv = pinv( trimatl( cholesky_decomposition ) );
@@ -694,7 +692,7 @@ bool normal_distribution_t::generationalImprovementForOnePopulationForFOSElement
 		for(int i = 0; i < num_indices; i++ )
 		{
 			average_z_of_improvements[i] /= (double) number_of_improvements;
-			*st_dev_ratio = fmax( *st_dev_ratio, fabs(average_z_of_improvements[i]) );
+			*st_dev_ratio = std::max( *st_dev_ratio, std::abs(average_z_of_improvements[i]) );
 		}
 
 		generational_improvement = true;
@@ -980,9 +978,7 @@ bool conditional_distribution_t::generationalImprovementForOnePopulationForFOSEl
 		int num_indices = variable_groups[k].size();
 		int number_of_improvements  = 0;
 
-		double average_z_of_improvements[num_indices];
-		for(int i = 0; i < num_indices; i++ )
-			average_z_of_improvements[i] = 0.0;
+		std::vector<double> average_z_of_improvements(num_indices,0.0);
 		
 		//mat cholinv = pseudoInverse( trimatl( cholesky_decompositions[k] ) );
 		mat cholinv = pinv(cholesky_decompositions[k].triangularView<Eigen::Lower>());
@@ -1009,7 +1005,7 @@ bool conditional_distribution_t::generationalImprovementForOnePopulationForFOSEl
 			for(int i = 0; i < num_indices; i++ )
 			{
 				average_z_of_improvements[i] /= (double) number_of_improvements;
-				*st_dev_ratio = fmax( *st_dev_ratio, fabs(average_z_of_improvements[i]) );
+				*st_dev_ratio = std::max( *st_dev_ratio, std::abs(average_z_of_improvements[i]) );
 			}
 			generational_improvement = true;
 		}
