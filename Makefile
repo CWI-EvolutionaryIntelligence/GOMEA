@@ -4,10 +4,14 @@ here:
 	python3 setup.py build_ext --inplace
 
 build:
+	pip3 -q install build --user
+	pip3 -q install cython --user
 	python3 -m build --sdist
 	python3 -m build --wheel
 
 build-install:
+	pip3 -q install build --user
+	pip3 -q install cython --user
 	python3 -m build --sdist
 	python3 -m build --wheel
 	pip3 install dist/*.whl --user
