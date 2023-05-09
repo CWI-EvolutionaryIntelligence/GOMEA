@@ -7,6 +7,11 @@ build:
 	python3 -m build --sdist
 	python3 -m build --wheel
 
+build-install:
+	python3 -m build --sdist
+	python3 -m build --wheel
+	pip3 install dist/*.whl --user
+
 cpp:
 	@mkdir -p build
 	g++ -g -Wall -std=c++17 -DCPP_STANDALONE -I./ -Igomea/ -IEigen/ gomea/src/discrete/*.cpp gomea/src/fitness/*.cpp gomea/src/common/*.cpp gomea/src/utils/*.cpp -o build/DiscreteGOMEA
