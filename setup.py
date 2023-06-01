@@ -50,7 +50,7 @@ extensions = []
 
 extensions.append( Extension("gomea.discrete",
         ["gomea/discrete.pyx"] + glob.glob("gomea/src/discrete/*.cpp") + common_src + fitness_src,
-        include_dirs = ["."] + ["lib/cxxopts-3.1.1/include/"] + [np.get_include()],
+        include_dirs = ["."] + ["gomea/lib/cxxopts-3.1.1/include/"] + [np.get_include()],
         language="c++",
         extra_compile_args=compile_args,
         extra_link_args=link_args)
@@ -58,7 +58,7 @@ extensions.append( Extension("gomea.discrete",
 
 extensions.append( Extension("gomea.real_valued",
         ["gomea/real_valued.pyx"] + glob.glob("gomea/src/real_valued/*.cpp") + common_src + fitness_src,
-        include_dirs = ["."] + ["lib/Eigen"] + [np.get_include()],
+        include_dirs = ["."] + ["gomea/lib/Eigen"] + [np.get_include()],
         language="c++",
         extra_compile_args=compile_args,
         extra_link_args=link_args,
@@ -100,16 +100,13 @@ setup(
     long_description = long_description,
     long_description_content_type = 'text/markdown',
     packages=["gomea"],
+    include_package_data=True,
     include_dirs=["gomea"],
     ext_modules = cythonize(extensions,
         include_path = ["."] + [np.get_include()],
         gdb_debug = debug_mode,
         language_level = "3"),
     install_requires=["numpy>=1.23.0","tqdm"],
-    include_package_data=True,
-    package_data = {
-        'gomea': ['*.pxd', '*.hpp', '*.h']
-    },
     zip_safe = False
 )
 
