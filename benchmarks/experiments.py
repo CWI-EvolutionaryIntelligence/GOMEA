@@ -6,14 +6,11 @@ import pathos.multiprocessing as mp
 
 from deceptive_trap.PythonTrapFunction import DeceptiveTrapFunctionGBO as PythonTrapFunctionGBO
 from deceptive_trap.PythonTrapFunction import DeceptiveTrapFunctionBBO as PythonTrapFunctionBBO
-from deceptive_trap.CythonTrapFunction import DeceptiveTrapFunction as CythonTrapFunction
-from deceptive_trap.CythonTrapFunctionCDEF import DeceptiveTrapFunction as CythonTrapFunctionCDEF
 from gomea.fitness import DeceptiveTrapFunction as CppTrapFunctionGBO
 from gomea.fitness import DeceptiveTrapFunctionBBO as CppTrapFunctionBBO
 
 from maxcut.PythonMaxCut import MaxCutGBO as PythonMaxCutGBO
 from maxcut.PythonMaxCut import MaxCutBBO as PythonMaxCutBBO
-from maxcut.CythonMaxCut import MaxCut as CythonMaxCut
 from gomea.fitness import MaxCut as CppMaxCutGBO
 from gomea.fitness import MaxCutBBO as CppMaxCutBBO
 
@@ -33,10 +30,6 @@ def getFitnessFunction(prob_tag,lang_tag,dim=-1,input_file="",vtr_file=""):
             return PythonTrapFunctionGBO(dim,5)
         elif lang_tag == 'py_bbo':
             return PythonTrapFunctionBBO(dim,5)
-        elif lang_tag == 'cy':
-            return CythonTrapFunction(dim,5)
-        elif lang_tag == 'cyc':
-            return CythonTrapFunctionCDEF(dim,5)
         elif lang_tag == 'cpp':
             return CppTrapFunctionGBO(dim,5)
         elif lang_tag == 'cpp_bbo':
@@ -46,8 +39,6 @@ def getFitnessFunction(prob_tag,lang_tag,dim=-1,input_file="",vtr_file=""):
             return PythonMaxCutGBO(input_file,vtr_file)
         elif lang_tag == 'py_bbo':
             return PythonMaxCutBBO(input_file,vtr_file)
-        elif lang_tag == 'cy':
-            return CythonMaxCut(input_file,vtr_file)
         elif lang_tag == 'cpp':
             return CppMaxCutGBO(input_file,vtr_file)
         elif lang_tag == 'cpp_bbo':

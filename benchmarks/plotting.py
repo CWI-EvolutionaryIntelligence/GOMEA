@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import ScalarFormatter
 
 matplotlib.rc('font', size=12)
+matplotlib.rcParams['pdf.fonttype'] = 42
+matplotlib.rcParams['ps.fonttype'] = 42
 
 def addResultToPlot(results,succ_rate_results,label):
     dimensions = np.sort(np.int_(list(results.keys())))

@@ -2,4 +2,5 @@ include gomea/*pxd
 include gomea/*pyx
 include gomea/*pxi
 graft gomea/src/
+graft gomea/lib/
 global-exclude *.cpp
