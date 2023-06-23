@@ -9,12 +9,11 @@ on:
 
 jobs:
   build:
-
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
 
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         config:
           - name: "Windows Latest"
@@ -37,3 +36,47 @@ jobs:
       with:
         name: wheel
         path: dist/
+        
+  src-dist:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - name: "Windows Latest"
+            os: windows-latest            
+          - name: "Ubuntu Latest"
+            os: ubuntu-latest            
+          - name: "MacOS Latest"
+            os: macos-latest
+
+    steps:
+    - name: Install from source
+      run: make src-install
+
+    - name: Run check
+      run: python3 demos/demo.py
+      
+  wheel:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - name: "Windows Latest"
+            os: windows-latest            
+          - name: "Ubuntu Latest"
+            os: ubuntu-latest            
+          - name: "MacOS Latest"
+            os: macos-latest
+
+    steps:
+    - name: Build wheel
+      run: make install
+
+    - name: Run check
+      run: python3 demos/demo.py
