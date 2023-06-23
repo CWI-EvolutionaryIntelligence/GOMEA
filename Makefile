@@ -9,6 +9,11 @@ build:
 	python3 -m build --sdist
 	python3 -m build --wheel
 
+build-sdist:
+	pip3 -q install build --user
+	pip3 -q install cython --user
+	python3 -m build --sdist
+
 src-install:
 	pip3 -q install build --user
 	pip3 -q install cython --user
