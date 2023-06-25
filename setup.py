@@ -38,13 +38,11 @@ if platform.system() == "Darwin":
 
 if platform.system() == "Windows":
         compile_args = ["/std:c++17"]
-        link_args = ["/std:c++17"]
+        link_args = []
         if debug_mode:
                 compile_args.extend(['/UNDEBUG','/Zi','/g0'])
-                link_args.extend(['/UNDEBUG','/Zi','/g0'])
         else:
                 compile_args.extend(['/O2'])
-                link_args.extend(['/O2'])
 
 extensions = []
 

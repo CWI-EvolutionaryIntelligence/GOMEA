@@ -8,6 +8,7 @@ The initial release of the GOMEA library (v1.0.0) is described in the publicatio
 The current release of the GOMEA library supports optimization in the following domains:
 - Discrete single-objective optimization
 - Real-valued single-objective optimization
+
 Support for multi-objective optimization in both of these domains is planned for a future release.
 
 Relevant most recent publications are the following:

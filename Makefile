@@ -9,12 +9,16 @@ build:
 	python3 -m build --sdist
 	python3 -m build --wheel
 
-build-install:
+build-sdist:
 	pip3 -q install build --user
 	pip3 -q install cython --user
 	python3 -m build --sdist
-	python3 -m build --wheel
-	pip3 install dist/*.whl --user
+
+src-install:
+	pip3 -q install build --user
+	pip3 -q install cython --user
+	python3 -m build --sdist
+	pip3 install dist/*.tar.gz --user
 
 cpp:
 	@mkdir -p build
