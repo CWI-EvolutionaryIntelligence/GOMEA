@@ -30,21 +30,15 @@ class distribution_t {
 		void adaptDistributionMultiplierMaximumStretch( partial_solution_t<double>** partial_solutions, int num_solutions );
 		virtual bool generationalImprovementForOnePopulationForFOSElement( partial_solution_t<double>** partial_solutions, int num_solutions, double *st_dev_ratio ) = 0;
 
-		static mat estimateFullCovarianceMatrixML( solution_t<double> **selection, int selection_size );
+		static matE estimateFullCovarianceMatrixML( solution_t<double> **selection, int selection_size );
 		static double estimateCovariance( int vara, int varb, solution_t<double> **selection, int selection_size );
 		static double estimateMean( int var, solution_t<double> **selection, int selection_size );
 		
 		vec_t<double> estimateMeanVectorML( vec_t<int> &variables, solution_t<double> **selection, int selection_size );
-		mat estimateRegularCovarianceMatrixML( vec_t<int> &variables, vec_t<double> &mean_vector, solution_t<double> **selection, int selection_size );
-		mat estimateCovarianceMatrixML( vec_t<int> &variables, solution_t<double> **selection, int selection_size );
-		mat estimateUnivariateCovarianceMatrixML( vec_t<int> &variables, solution_t<double> **selection, int selection_size );
-		bool regularizeCovarianceMatrix( mat &cov_mat, vec_t<double> &mean_vector, solution_t<double> **selection, int selection_size );
-		mat pseudoInverse( const mat &matrix );
-		mat choleskyDecomposition( const mat &matrix );
-		int linpackDCHDC( double a[], int lda, int p, double work[], int ipvt[] );
-		void blasDSCAL( int n, double sa, double x[], int incx );
-		int blasDAXPY(int n, double da, double *dx, int incx, double *dy, int incy);
-		int blasDSWAP( int n, double *dx, int incx, double *dy, int incy );
+		matE estimateRegularCovarianceMatrixML( vec_t<int> &variables, vec_t<double> &mean_vector, solution_t<double> **selection, int selection_size );
+		matE estimateCovarianceMatrixML( vec_t<int> &variables, solution_t<double> **selection, int selection_size );
+		matE estimateUnivariateCovarianceMatrixML( vec_t<int> &variables, solution_t<double> **selection, int selection_size );
+		bool regularizeCovarianceMatrix( matE &cov_mat, vec_t<double> &mean_vector, solution_t<double> **selection, int selection_size );
 			
 		virtual void updateConditionals( const std::map<int,std::set<int>> &variable_interaction_graph, std::vector<int> &visited );
 		virtual void setOrder( const vec_t<int> &order ); 
@@ -58,8 +52,8 @@ class normal_distribution_t : public distribution_t {
 			normal_distribution_t( vec_t<int> variables );
 
 			vec_t<double> mean_vector;
-			mat covariance_matrix;
-			mat cholesky_decomposition; 
+			matE covariance_matrix;
+			matE cholesky_decomposition; 
 			
 			void estimateDistribution( solution_t<double> **selection, int selection_size );
 			partial_solution_t<double> *generatePartialSolution( solution_t<double> *parent = NULL, fitness::fitness_generic_t *fitness_function = NULL );
@@ -81,9 +75,9 @@ class conditional_distribution_t : public distribution_t {
 
 			vec_t<vec_t<double>> mean_vectors;
 			vec_t<vec_t<double>> mean_vectors_conditioned_on;
-			vec_t<mat> covariance_matrices;
-			vec_t<mat> rho_matrices;
-			vec_t<mat> cholesky_decompositions;
+			vec_t<matE> covariance_matrices;
+			vec_t<matE> rho_matrices;
+			vec_t<matE> cholesky_decompositions;
 
 			void addGroupOfVariables( const vec_t<int> &indices, const std::set<int> &indices_cond );
 			void addGroupOfVariables( vec_t<int> indices, vec_t<int> indices_cond );

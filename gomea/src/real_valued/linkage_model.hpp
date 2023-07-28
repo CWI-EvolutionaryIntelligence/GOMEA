@@ -40,8 +40,8 @@ class linkage_model_rv_t : public linkage_model_t {
 			void randomizeOrder( const graph_t &variable_interaction_graph ); 
 			vec_t<int> getVIGOrderBreadthFirst( const graph_t &variable_interaction_graph );
 
-			void learnLinkageTreeFOS(mat covariance_matrix);
-			vec_t<vec_t<double>> computeMIMatrix( mat covariance_matrix, int n );
+			void learnLinkageTreeFOS(matE covariance_matrix);
+			vec_t<vec_t<double>> computeMIMatrix( matE covariance_matrix, int n );
 			void inheritDistributionMultipliers( linkage_model_rv_t *other, double *multipliers );
 			int *matchFOSElements( linkage_model_rv_t *other );
 			int *hungarianAlgorithm( int** similarity_matrix, int dim );

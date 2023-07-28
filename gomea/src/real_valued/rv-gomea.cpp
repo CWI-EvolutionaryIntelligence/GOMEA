@@ -578,7 +578,7 @@ void rvg_t::writeGenerationalSolutionsBest( bool final )
     char  string[1000];
     FILE *file;
     static int *c = NULL;
-    if( c == NULL ){c = (int *) Malloc( sizeof( int ) ); c[0]=0;}
+    if( c == NULL ){c = (int *) utils::Malloc( sizeof( int ) ); c[0]=0;}
 
     /* First find the best of all */
     determineBestSolutionInCurrentPopulations( &population_index_best, &individual_index_best );
@@ -730,8 +730,8 @@ bool rvg_t::checkVTRTerminationCondition( void )
 
 void rvg_t::checkAverageFitnessTerminationConditions( void )
 {
-    double *average_objective_values = (double*) Malloc( populations.size() * sizeof(double) );
-    double *average_constraint_values = (double*) Malloc( populations.size() * sizeof(double) );
+    double *average_objective_values = (double*) utils::Malloc( populations.size() * sizeof(double) );
+    double *average_constraint_values = (double*) utils::Malloc( populations.size() * sizeof(double) );
     for(int i = ((int)populations.size())-1; i >= 0; i-- )
     {
         average_objective_values[i] = 0;
