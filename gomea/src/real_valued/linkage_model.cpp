@@ -298,7 +298,7 @@ void linkage_model_rv_t::addConditionedGroup( std::vector<int> variables, std::s
 }
 
 // Learn a linkage tree
-void linkage_model_rv_t::learnLinkageTreeFOS( mat covariance_matrix )
+void linkage_model_rv_t::learnLinkageTreeFOS( matE covariance_matrix )
 {
 	assert( type == linkage::LINKAGE_TREE );
 	assert( !is_static );
@@ -397,7 +397,7 @@ std::vector<int> linkage_model_rv_t::getVIGOrderBreadthFirst( const graph_t &var
 	return( VIG_order );
 }
 
-vec_t<vec_t<double>> linkage_model_rv_t::computeMIMatrix( mat covariance_matrix, int n )
+vec_t<vec_t<double>> linkage_model_rv_t::computeMIMatrix( matE covariance_matrix, int n )
 {
     vec_t<vec_t<double>> MI_matrix;
 	MI_matrix.resize(numberOfVariables);        
@@ -425,7 +425,7 @@ void linkage_model_rv_t::inheritDistributionMultipliers( linkage_model_rv_t *oth
 	int      i, *permutation;
 	double   *multipliers_copy;
 
-	multipliers_copy = (double*) Malloc(size()*sizeof(double));
+	multipliers_copy = (double*) utils::Malloc(size()*sizeof(double));
 	for( i = 0; i < size(); i++ )
 		multipliers_copy[i] = multipliers[i];
 
@@ -440,10 +440,10 @@ void linkage_model_rv_t::inheritDistributionMultipliers( linkage_model_rv_t *oth
 
 int *linkage_model_rv_t::matchFOSElements( linkage_model_rv_t *other )
 {
-	int *permutation = (int *) Malloc( size()*sizeof(int));
-	int **FOS_element_similarity_matrix = (int**) Malloc((size()-number_of_variables)*sizeof(int*));
+	int *permutation = (int *) utils::Malloc( size()*sizeof(int));
+	int **FOS_element_similarity_matrix = (int**) utils::Malloc((size()-number_of_variables)*sizeof(int*));
 	for(int i = 0; i < size()-number_of_variables; i++ )
-		FOS_element_similarity_matrix[i] = (int*) Malloc((size()-number_of_variables)*sizeof(int));
+		FOS_element_similarity_matrix[i] = (int*) utils::Malloc((size()-number_of_variables)*sizeof(int));
 	for(int i = 0; i < number_of_variables; i++ )
 	{
 		for(int j = 0; j < number_of_variables; j++ )
@@ -495,15 +495,15 @@ int *linkage_model_rv_t::hungarianAlgorithm( int **similarity_matrix, int dim )
 {
 	int x,y,ty;
 
-	int *lx = (int*) Malloc(dim*sizeof(int));
-	int *ly = (int*) Malloc(dim*sizeof(int));
-	int *xy = (int*) Malloc(dim*sizeof(int));
-	int *yx = (int*) Malloc(dim*sizeof(int));
-	int *slack = (int*) Malloc(dim*sizeof(int));
-	int *slackx = (int*) Malloc(dim*sizeof(int));
-	int *prev = (int*) Malloc(dim*sizeof(int));
-	bool *S = (bool*) Malloc(dim*sizeof(bool));
-	bool *T = (bool*) Malloc(dim*sizeof(bool));
+	int *lx = (int*) utils::Malloc(dim*sizeof(int));
+	int *ly = (int*) utils::Malloc(dim*sizeof(int));
+	int *xy = (int*) utils::Malloc(dim*sizeof(int));
+	int *yx = (int*) utils::Malloc(dim*sizeof(int));
+	int *slack = (int*) utils::Malloc(dim*sizeof(int));
+	int *slackx = (int*) utils::Malloc(dim*sizeof(int));
+	int *prev = (int*) utils::Malloc(dim*sizeof(int));
+	bool *S = (bool*) utils::Malloc(dim*sizeof(bool));
+	bool *T = (bool*) utils::Malloc(dim*sizeof(bool));
 
 	int root = -1;
 	int max_match = 0;
@@ -526,7 +526,7 @@ int *linkage_model_rv_t::hungarianAlgorithm( int **similarity_matrix, int dim )
 
 		int wr = 0;
 		int rd = 0;
-		int *q = (int*) Malloc(dim*sizeof(int));
+		int *q = (int*) utils::Malloc(dim*sizeof(int));
 		for(int i = 0; i < dim; i++ )
 		{
 			S[i] = false;

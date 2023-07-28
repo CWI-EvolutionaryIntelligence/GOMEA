@@ -133,11 +133,11 @@ vec_t<double> distribution_t::estimateMeanVectorML( vec_t<int> &variables, solut
 	return( mean_vector );
 }
 
-mat distribution_t::estimateUnivariateCovarianceMatrixML( vec_t<int> &variables, solution_t<double> **selection, int selection_size )
+matE distribution_t::estimateUnivariateCovarianceMatrixML( vec_t<int> &variables, solution_t<double> **selection, int selection_size )
 {
 	/* First do the maximum-likelihood estimate from data */
-	//mat covariance_matrix = mat(variables.size(),variables.size(),fill::zeros);
-	mat covariance_matrix = mat::Zero(variables.size(),variables.size());
+	//matE covariance_matrix = matE(variables.size(),variables.size(),fill::zeros);
+	matE covariance_matrix = matE::Zero(variables.size(),variables.size());
 	for( size_t j = 0; j < variables.size(); j++ )
 	{
 		int vara = variables[j];
@@ -148,9 +148,9 @@ mat distribution_t::estimateUnivariateCovarianceMatrixML( vec_t<int> &variables,
 	return( covariance_matrix );
 }
 
-mat distribution_t::estimateRegularCovarianceMatrixML( vec_t<int> &variables, vec_t<double> &mean_vector, solution_t<double> **selection, int selection_size )
+matE distribution_t::estimateRegularCovarianceMatrixML( vec_t<int> &variables, vec_t<double> &mean_vector, solution_t<double> **selection, int selection_size )
 {
-	mat covariance_matrix;
+	matE covariance_matrix;
 	covariance_matrix = estimateCovarianceMatrixML(variables,selection,selection_size);
 	/*int n = variables.size();
 	if( selection_size < n + 1 )
@@ -164,11 +164,11 @@ mat distribution_t::estimateRegularCovarianceMatrixML( vec_t<int> &variables, ve
 	return( covariance_matrix );
 }
 
-mat distribution_t::estimateCovarianceMatrixML( vec_t<int> &variables, solution_t<double> **selection, int selection_size )
+matE distribution_t::estimateCovarianceMatrixML( vec_t<int> &variables, solution_t<double> **selection, int selection_size )
 {
 	/* First do the maximum-likelihood estimate from data */
 	//mat covariance_matrix(variables.size(),variables.size(),fill::none);
-	mat covariance_matrix = mat(variables.size(),variables.size());
+	matE covariance_matrix = matE(variables.size(),variables.size());
 	for( size_t j = 0; j < variables.size(); j++ )
 	{
 		int vara = variables[j];
@@ -184,12 +184,12 @@ mat distribution_t::estimateCovarianceMatrixML( vec_t<int> &variables, solution_
 	return( covariance_matrix );
 }
 
-mat distribution_t::estimateFullCovarianceMatrixML( solution_t<double> **selection, int selection_size )
+matE distribution_t::estimateFullCovarianceMatrixML( solution_t<double> **selection, int selection_size )
 {
 	/* First do the maximum-likelihood estimate from data */
 	//mat covariance_matrix(variables.size(),variables.size(),fill::none);
 	int num_variables = selection[0]->getNumberOfVariables();
-	mat covariance_matrix = mat(num_variables,num_variables);
+	matE covariance_matrix = matE(num_variables,num_variables);
 	for( size_t j = 0; j < num_variables; j++ )
 	{
 		int vara = j;
@@ -205,7 +205,7 @@ mat distribution_t::estimateFullCovarianceMatrixML( solution_t<double> **selecti
 	return( covariance_matrix );
 }
 
-bool distribution_t::regularizeCovarianceMatrix( mat &cov_mat, vec_t<double> &mean_vector, solution_t<double> **selection, int selection_size )
+bool distribution_t::regularizeCovarianceMatrix( matE &cov_mat, vec_t<double> &mean_vector, solution_t<double> **selection, int selection_size )
 {
 	// regularization for small populations
 	double number_of_samples = (double) selection_size;
@@ -228,7 +228,7 @@ bool distribution_t::regularizeCovarianceMatrix( mat &cov_mat, vec_t<double> &me
 	// y = x.^2
 	// phiMat = y'*y/t-sample.^2
 	// phi = sum(sum(phiMat))
-	mat squared_cov = mat(n,n);
+	matE squared_cov = matE(n,n);
 	double temp;
 	for(int i = 0; i < n; ++i)
 	{
@@ -291,292 +291,6 @@ bool distribution_t::regularizeCovarianceMatrix( mat &cov_mat, vec_t<double> &me
 	return true;
 }
 
-mat distribution_t::pseudoInverse( const mat &matrix )
-{
-	mat result = pinv(matrix);
-	/*if( !pinv(result, matrix) )
-	{
-		//printf("Warning: pseudo-inverse failed.\n"); // Diag = [ ");
-		result = mat( matrix.n_cols, matrix.n_cols, fill::zeros );
-		for( size_t i = 0; i < matrix.n_cols; i++ )
-		{
-			if( matrix(i,i) == 0 ) result(i,i) = 1e38;
-			else result(i,i) = 1.0/matrix(i,i);
-		}
-	}*/
-	return( result );
-}
-
-/**
- * BLAS subroutine.
- */
-int distribution_t::blasDSWAP( int n, double *dx, int incx, double *dy, int incy )
-{
-    double dtmp;
-
-    if (n > 0)
-    {
-        incx *= sizeof( double );
-        incy *= sizeof( double );
-
-        dtmp  = (*dx);
-        *dx   = (*dy);
-        *dy   = dtmp;
-
-        while( (--n) > 0 )
-        {
-            dx = (double *) ((char *) dx + incx);
-            dy = (double *) ((char *) dy + incy);
-            dtmp = (*dx); *dx = (*dy); *dy = dtmp;
-        }
-    }
-
-    return( 0 );
-}
-
-/**
- * BLAS subroutine.
- */
-int distribution_t::blasDAXPY(int n, double da, double *dx, int incx, double *dy, int incy)
-{
-    double dtmp0, dtmp, *dx0, *dy0;
-
-    if( n > 0 && da != 0. )
-    {
-        incx *= sizeof(double);
-        incy *= sizeof(double);
-        *dy  += da * (*dx);
-
-        if( (n & 1) == 0 )
-        {
-            dx   = (double *) ((char *) dx + incx);
-            dy   = (double *) ((char *) dy + incy);
-            *dy += da * (*dx);
-            --n;
-        }
-        n = n >> 1;
-        while( n > 0 )
-        {
-            dy0   = (double *) ((char *) dy + incy);
-            dy    = (double *) ((char *) dy0 + incy);
-            dtmp0 = (*dy0);
-            dtmp  = (*dy);
-            dx0   = (double *) ((char *) dx + incx);
-            dx    = (double *) ((char *) dx0 + incx);
-            *dy0  = dtmp0 + da * (*dx0);
-            *dy   = dtmp + da * (*dx);
-            --n;
-        }
-    }
-
-    return( 0 );
-}
-
-/**
- * BLAS subroutine.
- */
-void distribution_t::blasDSCAL( int n, double sa, double x[], int incx )
-{
-    int i, ix, m;
-
-    if( n <= 0 )
-    {
-    }
-    else if( incx == 1 )
-    {
-        m = n % 5;
-
-        for( i = 0; i < m; i++ )
-        {
-            x[i] = sa * x[i];
-        }
-
-        for( i = m; i < n; i = i + 5 )
-        {
-            x[i]   = sa * x[i];
-            x[i+1] = sa * x[i+1];
-            x[i+2] = sa * x[i+2];
-            x[i+3] = sa * x[i+3];
-            x[i+4] = sa * x[i+4];
-        }
-    }
-    else
-    {
-        if( 0 <= incx )
-        {
-            ix = 0;
-        }
-        else
-        {
-            ix = ( - n + 1 ) * incx;
-        }
-
-        for( i = 0; i < n; i++ )
-        {
-            x[ix] = sa * x[ix];
-            ix = ix + incx;
-        }
-    }
-}
-
-/**
- * LINPACK subroutine.
- */
-int distribution_t::linpackDCHDC( double a[], int lda, int p, double work[], int ipvt[] )
-{
-    int    info, j, jp, k, l, maxl, pl, pu;
-    double maxdia, temp;
-
-    pl   = 1;
-    pu   = 0;
-    info = p;
-    for( k = 1; k <= p; k++ )
-    {
-        maxdia = a[k-1+(k-1)*lda];
-        maxl   = k;
-        if( pl <= k && k < pu )
-        {
-            for( l = k+1; l <= pu; l++ )
-            {
-                if( maxdia < a[l-1+(l-1)*lda] )
-                {
-                    maxdia = a[l-1+(l-1)*lda];
-                    maxl   = l;
-                }
-            }
-        }
-
-        if( maxdia <= 0.0 )
-        {
-            info = k - 1;
-
-            return( info );
-        }
-
-        if( k != maxl )
-        {
-            blasDSWAP( k-1, a+0+(k-1)*lda, 1, a+0+(maxl-1)*lda, 1 );
-
-            a[maxl-1+(maxl-1)*lda] = a[k-1+(k-1)*lda];
-            a[k-1+(k-1)*lda]       = maxdia;
-            jp                     = ipvt[maxl-1];
-            ipvt[maxl-1]           = ipvt[k-1];
-            ipvt[k-1]              = jp;
-        }
-        work[k-1]        = sqrt( a[k-1+(k-1)*lda] );
-        a[k-1+(k-1)*lda] = work[k-1];
-
-        for( j = k+1; j <= p; j++ )
-        {
-            if( k != maxl )
-            {
-                if( j < maxl )
-                {
-                    temp                = a[k-1+(j-1)*lda];
-                    a[k-1+(j-1)*lda]    = a[j-1+(maxl-1)*lda];
-                    a[j-1+(maxl-1)*lda] = temp;
-                }
-                else if ( maxl < j )
-                {
-                    temp                = a[k-1+(j-1)*lda];
-                    a[k-1+(j-1)*lda]    = a[maxl-1+(j-1)*lda];
-                    a[maxl-1+(j-1)*lda] = temp;
-                }
-            }
-            a[k-1+(j-1)*lda] = a[k-1+(j-1)*lda] / work[k-1];
-            work[j-1]        = a[k-1+(j-1)*lda];
-            temp             = -a[k-1+(j-1)*lda];
-
-            blasDAXPY( j-k, temp, work+k, 1, a+k+(j-1)*lda, 1 );
-        }
-    }
-
-    return( info );
-}
-
-/**
- * Computes the lower-triangle Cholesky Decomposition
- * of a square, symmetric and positive-definite matrix.
- * Subroutines from LINPACK and BLAS are used.
- */
-mat distribution_t::choleskyDecomposition( const mat &matrix )
-{
-    int     i, j, k, info, *ipvt;
-    double *a, *work;
-
-	int n = matrix.rows();
-    a    = (double *) Malloc( n*n*sizeof( double ) );
-    work = (double *) Malloc( n*sizeof( double ) );
-    ipvt = (int *) Malloc( n*sizeof( int ) );
-
-    k = 0;
-    for( i = 0; i < n; i++ )
-    {
-        for( j = 0; j < n; j++ )
-        {
-            a[k] = matrix(i,j);
-            k++;
-        }
-        ipvt[i] = 0;
-    }
-
-    info = linpackDCHDC( a, n, n, work, ipvt );
-
-    mat result = mat(n,n);
-    if( info != n ) /* Matrix is not positive definite */
-    {
-        k = 0;
-        for( i = 0; i < n; i++ )
-        {
-            for( j = 0; j < n; j++ )
-            {
-                result(i,j) = i != j ? 0.0 : sqrt( matrix(i,j) );
-                k++;
-            }
-        }
-    }
-    else
-    {
-        k = 0;
-        for( i = 0; i < n; i++ )
-        {
-            for( j = 0; j < n; j++ )
-            {
-                result(i,j) = i < j ? 0.0 : a[k];
-                k++;
-            }
-        }
-    }
-
-    free( ipvt );
-    free( work );
-    free( a );
-
-    return( result );
-}
-
-/*mat distribution_t::choleskyDecomposition( const mat &matrix )
-{
-	mat result;
-	if( !chol(result, matrix, "lower") )
-	{
-		//printf("Warning: cholesky decomposition failed. Diag = [ ");
-		//printf("Warning: cholesky decomposition failed.\n");
-		//if( matrix(0,0) < 0 )
-			//printf("AAAA\n");
-		result = mat( matrix.n_cols, matrix.n_cols, fill::zeros );
-		for( int i = 0; i < matrix.n_cols; i++ )
-		{
-			//printf("%6.3e ",matrix(i,i));
-			result(i,i) = sqrt(matrix(i,i));
-			//matrix(i,i) += avg_std;
-		}
-		//bool res = chol(result, matrix, "lower");
-		//printf("]\n");
-	}
-	return( result );
-}*/
-
 normal_distribution_t::normal_distribution_t( vec_t<int> variables )
 {
 	this->variables = variables;
@@ -595,7 +309,7 @@ void normal_distribution_t::estimateDistribution( solution_t<double> **selection
 			mean_vector[j] = selection[0]->variables[variables[j]];
 
 	covariance_matrix = estimateRegularCovarianceMatrixML(variables,mean_vector,selection,selection_size);
-	cholesky_decomposition = choleskyDecomposition( covariance_matrix );
+	cholesky_decomposition = utils::choleskyDecomposition( covariance_matrix );
 }
 
 partial_solution_t<double> *normal_distribution_t::generatePartialSolution( solution_t<double> *parent, fitness::fitness_generic_t *fitness_function )
@@ -618,6 +332,7 @@ partial_solution_t<double> *normal_distribution_t::generatePartialSolution( solu
 		{
 			printf("Sampled out of bounds too many times.\n");
 			exit(1);
+			// TODO
 			/*result = vec(num_indices,fill::none);
 			sample_means = vec(num_indices,fill::none);
 			sample_zs = zeros<vec>(num_indices);
@@ -629,7 +344,7 @@ partial_solution_t<double> *normal_distribution_t::generatePartialSolution( solu
 		}
 		else
 		{
-			vec sample = cholesky_decomposition * random1DNormalUnitVector(num_indices);
+			vecE sample = cholesky_decomposition * random1DNormalUnitVector(num_indices);
 			for( size_t i = 0; i < sample.size(); i++ )
 			{
 				result[i] = mean_vector[i] + sample[i];
@@ -665,19 +380,19 @@ bool normal_distribution_t::generationalImprovementForOnePopulationForFOSElement
 	std::vector<double> average_z_of_improvements(num_indices,0.0);
 
 	int number_of_improvements  = 0;
-	//mat cholinv = pinv( trimatl( cholesky_decomposition ) );
-	mat cholinv = pinv(cholesky_decomposition.triangularView<Eigen::Lower>());
+	//matE cholinv = pinv( trimatl( cholesky_decomposition ) );
+	matE cholinv = utils::pinv(cholesky_decomposition.triangularView<Eigen::Lower>());
 	for(int i = 0; i < num_solutions; i++ )
 	{
 		if( partial_solutions[i]->improves_elitist )
 		{
 			number_of_improvements++;
-			vec d = vec(num_indices);
+			vecE d = vecE(num_indices);
 			for( int j = 0; j < num_indices; j++ )
 			{
 				d[j] = (partial_solutions[i]->touched_variables[j] - partial_solutions[i]->sample_means[j]);
 			}
-			vec z = cholinv * d;
+			vecE z = cholinv * d;
 			for(int j = 0; j < num_indices; j++ )
 			{
 				average_z_of_improvements[j] += z[j];
@@ -708,23 +423,11 @@ conditional_distribution_t::conditional_distribution_t()
 conditional_distribution_t::conditional_distribution_t( const vec_t<int> &variables, const vec_t<int> &conditioned_variables )
 {
 	addGroupOfVariables(variables,conditioned_variables);
-	/*for( int x : variables )
-	{
-		vec_t<int> vars;
-		vars.push_back(x);
-		addGroupOfVariables(vars,conditioned_variables);
-	}*/
 }
 
 conditional_distribution_t::conditional_distribution_t( const vec_t<int> &variables, const std::set<int> &conditioned_variables )
 {
 	addGroupOfVariables(variables,conditioned_variables);
-	/*for( int x : variables )
-	{
-		vec_t<int> vars;
-		vars.push_back(x);
-		addGroupOfVariables(vars,conditioned_variables);
-	}*/
 }
 
 void conditional_distribution_t::initializeMemory()
@@ -799,18 +502,18 @@ void conditional_distribution_t::estimateConditionalGaussianML( int variable_gro
 	{
 		mean_vectors_conditioned_on[i] = estimateMeanVectorML(vars_cond,selection,selection_size);
 		
-		mat A12( n, n_cond );
+		matE A12( n, n_cond );
 		for(int j = 0; j < n; j++ )
 			for(int k = 0; k < n_cond; k++ )
 				A12(j,k) = estimateCovariance(vars[j],vars_cond[k],selection,selection_size) * distribution_multiplier;
-		//mat A22 = estimateCovarianceMatrixML(vars_cond,selection,selection_size);
-		mat A22 = estimateRegularCovarianceMatrixML(vars_cond,mean_vectors_conditioned_on[i],selection,selection_size);
-		mat A22inv = pinv(A22);
+		//matE A22 = estimateCovarianceMatrixML(vars_cond,selection,selection_size);
+		matE A22 = estimateRegularCovarianceMatrixML(vars_cond,mean_vectors_conditioned_on[i],selection,selection_size);
+		matE A22inv = utils::pinv(A22);
 	   	//if( pinv(A22inv,A22) )
 		{
 			rho_matrices[i] = A12*A22inv;
-			mat submat = A12*A22inv*A12.transpose();
-			//mat zeros = A22*A22inv*A22 - A22;
+			matE submat = A12*A22inv*A12.transpose();
+			//matE zeros = A22*A22inv*A22 - A22;
 			covariance_matrices[i] -= submat;
 		}
 		//else
@@ -818,7 +521,7 @@ void conditional_distribution_t::estimateConditionalGaussianML( int variable_gro
 			//printf("pseudo-inverse failed\n");
 		}
 	}
-	cholesky_decompositions[i] = choleskyDecomposition( covariance_matrices[i] );
+	cholesky_decompositions[i] = utils::choleskyDecomposition( covariance_matrices[i] );
 }
 
 void conditional_distribution_t::updateConditionals( const std::map<int,std::set<int>> &variable_interaction_graph, std::vector<int> &visited ) 
@@ -881,8 +584,8 @@ partial_solution_t<double> *conditional_distribution_t::generatePartialSolution(
 		int times_not_in_bounds = -1;
 		out_of_bounds_draws--;
 
-		vec sample_result;
-		vec sample_means = vec(mean_vectors[og].size());
+		vecE sample_result;
+		vecE sample_means = vecE(mean_vectors[og].size());
 		bool ready = false;
 		do
 		{
@@ -894,8 +597,8 @@ partial_solution_t<double> *conditional_distribution_t::generatePartialSolution(
 			{
 				printf("Sampled out of bounds too many times.\n");
 				exit(1);
-				/*vec sample_result = vec(num_indices, fill::none);
-				vec sample_means = vec(num_indices, fill::none);
+				/*vecE sample_result = vec(num_indices, fill::none);
+				vecE sample_means = vecE(num_indices, fill::none);
 				for(int i = 0; i < num_indices; i++ )
 				{
 					sample_result[i] = lower_init_ranges[indices[i]] + (upper_init_ranges[indices[i]] - lower_init_ranges[indices[i]])*randomRealUniform01();
@@ -915,7 +618,7 @@ partial_solution_t<double> *conditional_distribution_t::generatePartialSolution(
 				printf("\n");*/
 				if( num_indices_cond > 0 )
 				{
-					vec cond = vec(num_indices_cond );
+					vecE cond = vecE(num_indices_cond );
 					for(int i = 0; i < num_indices_cond; i++ )
 					{
 						auto it = sampled_indices.find(indices_cond[i]);
@@ -928,13 +631,13 @@ partial_solution_t<double> *conditional_distribution_t::generatePartialSolution(
 							cond[i] = solution_conditioned_on->variables[indices_cond[i]];
 						cond[i] = cond[i] - mean_vectors_conditioned_on[og][i];
 					}
-					vec sample_mean_inc = rho_matrices[og]*cond;
+					vecE sample_mean_inc = rho_matrices[og]*cond;
 					for(int i = 0; i < num_indices_cond; i++ )
 					{
 						sample_means[i] += sample_mean_inc[i];
 					}
 				}
-				vec sample_zs = random1DNormalUnitVector(num_indices);
+				vecE sample_zs = random1DNormalUnitVector(num_indices);
 				sample_result = sample_means + cholesky_decompositions[og] * sample_zs;
 			}
 
@@ -980,9 +683,9 @@ bool conditional_distribution_t::generationalImprovementForOnePopulationForFOSEl
 
 		std::vector<double> average_z_of_improvements(num_indices,0.0);
 		
-		//mat cholinv = pseudoInverse( trimatl( cholesky_decompositions[k] ) );
-		mat cholinv = pinv(cholesky_decompositions[k].triangularView<Eigen::Lower>());
-		vec sample_means( num_indices );
+		//matE cholinv = pseudoInverse( trimatl( cholesky_decompositions[k] ) );
+		matE cholinv = utils::pinv(cholesky_decompositions[k].triangularView<Eigen::Lower>());
+		vecE sample_means( num_indices );
 		for(int i = 0; i < num_solutions; i++ )
 		{
 			if( partial_solutions[i]->improves_elitist )
@@ -993,7 +696,7 @@ bool conditional_distribution_t::generationalImprovementForOnePopulationForFOSEl
 					int ind = index_in_var_array[k][j];
 					sample_means[j] = partial_solutions[i]->touched_variables[ind] - partial_solutions[i]->sample_means[ind];
 				}
-				vec z = cholinv * sample_means; //(partial_solutions[i]->touched_variables - partial_solutions[i]->sample_means);
+				vecE z = cholinv * sample_means; //(partial_solutions[i]->touched_variables - partial_solutions[i]->sample_means);
 				for(int j = 0; j < num_indices; j++ )
 					average_z_of_improvements[j] += z[j];
 			}

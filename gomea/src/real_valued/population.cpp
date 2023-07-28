@@ -126,7 +126,7 @@ void population_t::updateElitist()
 void population_t::makeSelection()
 {
 	computeRanks();
-	int *sorted = mergeSort( ranks, population_size );
+	int *sorted = utils::mergeSort( ranks, population_size );
 
 	if( ranks[sorted[selection_size-1]] == 0 )
 		makeSelectionUsingDiversityOnRank0();
@@ -148,7 +148,7 @@ void population_t::makeSelectionUsingDiversityOnRank0()
 			number_of_rank0_solutions++;
 	}
 
-	int *preselection_indices = (int *) Malloc( number_of_rank0_solutions*sizeof( int ) );
+	int *preselection_indices = (int *) utils::Malloc( number_of_rank0_solutions*sizeof( int ) );
 	int k = 0;
 	for(int i = 0; i < population_size; i++ )
 	{
@@ -171,13 +171,13 @@ void population_t::makeSelectionUsingDiversityOnRank0()
 	}
 
 	int number_selected_so_far = 0;
-	int *selection_indices = (int *) Malloc( selection_size*sizeof( int ) );
+	int *selection_indices = (int *) utils::Malloc( selection_size*sizeof( int ) );
 	selection_indices[number_selected_so_far] = preselection_indices[index_of_farthest];
 	preselection_indices[index_of_farthest]   = preselection_indices[number_of_rank0_solutions-1];
 	number_of_rank0_solutions--;
 	number_selected_so_far++;
 
-	double *nn_distances = (double *) Malloc( number_of_rank0_solutions*sizeof( double ) );
+	double *nn_distances = (double *) utils::Malloc( number_of_rank0_solutions*sizeof( double ) );
 	for(int i = 0; i < number_of_rank0_solutions; i++ )
 		nn_distances[i] = utils::distanceEuclidean( individuals[preselection_indices[i]]->variables, individuals[selection_indices[number_selected_so_far-1]]->variables ); 
 
@@ -243,14 +243,14 @@ void population_t::estimateDistributions()
 		assert( linkage_model->type == linkage::LINKAGE_TREE );
 		if (linkage_model->type == linkage::LINKAGE_TREE)
 		{
-			mat full_covariance_matrix = distribution_t::estimateFullCovarianceMatrixML(selection, selection_size);
+			matE full_covariance_matrix = distribution_t::estimateFullCovarianceMatrixML(selection, selection_size);
 			linkage_model->learnLinkageTreeFOS(full_covariance_matrix);
 			linkage_model->clearDistributions();
 			linkage_model->initializeDistributions();
 			linkage_model->shuffleFOS();
-			sampled_solutions = (partial_solution_t<double> ***)Malloc(linkage_model->size() * sizeof(partial_solution_t<double> **));
+			sampled_solutions = (partial_solution_t<double> ***)utils::Malloc(linkage_model->size() * sizeof(partial_solution_t<double> **));
 			for (int j = 0; j < linkage_model->size(); j++)
-				sampled_solutions[j] = (partial_solution_t<double> **)Malloc(population_size * sizeof(partial_solution_t<double> *));
+				sampled_solutions[j] = (partial_solution_t<double> **)utils::Malloc(population_size * sizeof(partial_solution_t<double> *));
 		}
 	}
 
@@ -426,7 +426,7 @@ void population_t::applyPartialAMS( partial_solution_t<double> *solution, double
 {
 	bool out_of_range = true;
 	double shrink_factor = 2;
-	double *result = (double*) Malloc( solution->getNumberOfTouchedVariables() * sizeof(double) );
+	double *result = (double*) utils::Malloc( solution->getNumberOfTouchedVariables() * sizeof(double) );
 	while( (out_of_range == 1) && (shrink_factor > 1e-10) )
 	{
 		shrink_factor *= 0.5;
@@ -623,18 +623,18 @@ void population_t::initializeDefaultParameters()
 
 void population_t::initializeNewPopulationMemory()
 {
-	individuals = (solution_t<double>**) Malloc( population_size*sizeof( solution_t<double>* ) );
+	individuals = (solution_t<double>**) utils::Malloc( population_size*sizeof( solution_t<double>* ) );
 	for(int j = 0; j < population_size; j++ )
 		individuals[j] = new solution_t<double>(fitness->number_of_variables);
 
-	ranks = (double *) Malloc( population_size*sizeof( double ) );
+	ranks = (double *) utils::Malloc( population_size*sizeof( double ) );
 
-	selection = (solution_t<double>**) Malloc( selection_size*sizeof( solution_t<double> * ) );
+	selection = (solution_t<double>**) utils::Malloc( selection_size*sizeof( solution_t<double> * ) );
 
-	mean_shift_vector = (double *) Malloc( fitness->number_of_variables*sizeof( double ) );
-	prev_mean_vector = (double *) Malloc( fitness->number_of_variables*sizeof( double ) );
+	mean_shift_vector = (double *) utils::Malloc( fitness->number_of_variables*sizeof( double ) );
+	prev_mean_vector = (double *) utils::Malloc( fitness->number_of_variables*sizeof( double ) );
 
-	individual_NIS = (int*) Malloc( population_size*sizeof(int));
+	individual_NIS = (int*) utils::Malloc( population_size*sizeof(int));
 
 	initializeFOS(linkage_config);
 
@@ -662,14 +662,10 @@ void population_t::initializeFOS( linkage_config_t *linkage_config )
 		{
 			linkage_model->linkage_model_t::learnLinkageTreeFOS(fitness->getSimilarityMatrix(linkage_model->getSimilarityMeasure()),true);
 		}
-		sampled_solutions = (partial_solution_t<double> ***)Malloc(linkage_model->size() * sizeof(partial_solution_t<double> **));
+		sampled_solutions = (partial_solution_t<double> ***)utils::Malloc(linkage_model->size() * sizeof(partial_solution_t<double> **));
 		for (int j = 0; j < linkage_model->size(); j++)
-			sampled_solutions[j] = (partial_solution_t<double> **)Malloc(population_size * sizeof(partial_solution_t<double> *));
-
-        if( !(linkage_config->type == linkage::CONDITIONAL) )
-        {
-		    linkage_model->initializeDistributions();
-		}
+			sampled_solutions[j] = (partial_solution_t<double> **)utils::Malloc(population_size * sizeof(partial_solution_t<double> *));
+		linkage_model->initializeDistributions();
 	}
 	//linkage_model->printFOS();
 }
@@ -732,8 +728,8 @@ void population_t::initializeFOSFromIndex( int FOSIndex )
  */
 void population_t::initializeParameterRangeBounds( double lower_user_range, double upper_user_range )
 {
-	lower_init_ranges  = (double *) Malloc( fitness->number_of_variables*sizeof( double ) );
-	upper_init_ranges  = (double *) Malloc( fitness->number_of_variables*sizeof( double ) );
+	lower_init_ranges  = (double *) utils::Malloc( fitness->number_of_variables*sizeof( double ) );
+	upper_init_ranges  = (double *) utils::Malloc( fitness->number_of_variables*sizeof( double ) );
 
 	for(int i = 0; i < fitness->number_of_variables; i++ )
 	{
