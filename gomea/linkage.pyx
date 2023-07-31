@@ -85,6 +85,14 @@ def UCondFG():
 def UCondHG():
     return Conditional(1,True,True)
 
+def MCondFG(*args,**kwargs):
+    if len(args) == 1:
+        return Conditional(args[0],True,False)
+    elif "max_clique_size" in kwargs:
+        return Conditional(kwargs["max_clique_size"],True,False)
+    else:
+        raise RuntimeError("Invalid arguments.")
+
 def MCondHG(*args,**kwargs):
     if len(args) == 1:
         return Conditional(args[0],True,True)

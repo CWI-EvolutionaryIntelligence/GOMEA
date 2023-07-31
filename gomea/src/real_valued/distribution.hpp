@@ -69,9 +69,8 @@ class conditional_distribution_t : public distribution_t {
 
 			vec_t<int> order;
 			vec_t<vec_t<int>> variable_groups;
-			vec_t<vec_t<int>> neighboring_groups;
 			vec_t<vec_t<int>> variables_conditioned_on;
-			vec_t<vec_t<int>> index_in_var_array; // variables[index_in_var_array[a][b]] == variable_groups[a][b]
+			vec_t<vec_t<int>> index_in_var_array;
 
 			vec_t<vec_t<double>> mean_vectors;
 			vec_t<vec_t<double>> mean_vectors_conditioned_on;

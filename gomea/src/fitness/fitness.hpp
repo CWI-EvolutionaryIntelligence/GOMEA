@@ -64,7 +64,6 @@ class fitness_t : public fitness_generic_t
 
 		void evaluate( solution_t<T> *solution );
 		void evaluatePartialSolution( solution_t<T> *parent, partial_solution_t<T> *solution );
-		//void evaluatePartialSolution( solution_t<T> *parent, partial_solution_t<T> *solution, const std::set<int> &dependent_subfunctions );
 		
 		static fitness_t *getFitnessClass( int problem_index, int number_of_variables, double vtr );
 		bool betterFitness( solution_t<T> *sol_x, solution_t<T> *sol_y );
@@ -96,7 +95,6 @@ class fitness_t : public fitness_generic_t
 	private:
 		fitness_t( int number_of_variables, double vtr, bool use_vtr, opt_mode optimization_mode );
 		virtual void evaluationFunction( solution_t<T> *solution ) = 0;
-		//virtual void partialEvaluationFunction( solution_t<T> *parent, partial_solution_t<T> *solution, const std::set<int> &dependent_subfunctions );
 		virtual void partialEvaluationFunction( solution_t<T> *parent, partial_solution_t<T> *solution );
 		
 		void evaluatePartialSolutionBlackBox( solution_t<T> *parent, partial_solution_t<T> *solution );
