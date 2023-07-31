@@ -36,10 +36,8 @@ class linkage_model_rv_t : public linkage_model_t {
 			
 			void addGroup( vec_t<int> group );
 			void addGroup( distribution_t *dist );
-			void addConditionedGroup( vec_t<int> variables );
 			void addConditionedGroup( vec_t<int> variables, std::set<int> conditioned_variables );
 			void randomizeOrder( const graph_t &variable_interaction_graph ); 
-			vec_t<int> getVIGOrderBreadthFirst( const graph_t &variable_interaction_graph );
 
 			void learnLinkageTreeFOS(matE covariance_matrix);
 			vec_t<vec_t<double>> computeMIMatrix( matE covariance_matrix, int n );
@@ -65,11 +63,6 @@ class linkage_model_rv_t : public linkage_model_t {
 			
 			double p_accept = 0.05;
 			//vec_t<uvec> variables_conditioned_on; 
-
-			bool is_conditional = false;
-			int max_clique_size;
-			bool include_cliques_as_fos_elements;
-			bool include_full_fos_element;
 
 			void print();
 

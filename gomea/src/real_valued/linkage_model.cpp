@@ -48,18 +48,18 @@ int		  static_linkage_tree = 0,                  /* Whether the FOS is fixed thr
 		  random_linkage_tree = 0;                  /* Whether the fixed linkage tree is learned based on a random distance measure. */
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
-linkage_model_rv_pt linkage_model_rv_t::createFOSInstance( const linkage_config_t &config, size_t numberOfVariables, const graph_t &VIG ) 
+linkage_model_rv_pt linkage_model_rv_t::createFOSInstance( const linkage_config_t &config, size_t number_of_variables, const graph_t &VIG ) 
 {
 	if( config.type != linkage::FROM_FILE )
-		assert( numberOfVariables > 0 );
+		assert( number_of_variables > 0 );
 	switch( config.type )
 	{
-		case linkage::UNIVARIATE: return univariate(numberOfVariables);
-		case linkage::MPM: return marginal_product_model(numberOfVariables, config.mpm_block_size);
-		case linkage::FULL: return full(numberOfVariables);
-		case linkage::LINKAGE_TREE: return linkage_tree(numberOfVariables, config.lt_similarity_measure, config.lt_filtered, config.lt_maximum_set_size, config.lt_is_static );
-		case linkage::CONDITIONAL: return conditional(numberOfVariables,VIG,config.cond_max_clique_size,config.cond_include_cliques_as_fos_elements,config.cond_include_full_fos_element);
-		case linkage::CUSTOM_LM: return custom_fos(numberOfVariables,config.FOS);
+		case linkage::UNIVARIATE: return univariate(number_of_variables);
+		case linkage::MPM: return marginal_product_model(number_of_variables, config.mpm_block_size);
+		case linkage::FULL: return full(number_of_variables);
+		case linkage::LINKAGE_TREE: return linkage_tree(number_of_variables, config.lt_similarity_measure, config.lt_filtered, config.lt_maximum_set_size, config.lt_is_static );
+		case linkage::CONDITIONAL: return conditional(number_of_variables,VIG,config.cond_max_clique_size,config.cond_include_cliques_as_fos_elements,config.cond_include_full_fos_element);
+		case linkage::CUSTOM_LM: return custom_fos(number_of_variables,config.FOS);
 		case linkage::FROM_FILE: return from_file(config.filename);
 	}
 	throw std::runtime_error("Unknown linkage model.\n");
@@ -127,25 +127,27 @@ linkage_model_rv_t::linkage_model_rv_t( size_t number_of_variables, const graph_
 			std::vector<int> clique;
 			std::set<int> cond;
 			clique.push_back(ind);
-			for( int x : variable_interaction_graph.at(ind) ) // neighbors of ind
+			vec_t<int> neighbors = vec_t<int>(variable_interaction_graph.at(ind).begin(),variable_interaction_graph.at(ind).end());
+			std::shuffle(neighbors.begin(),neighbors.end(),utils::rng);
+			for( int x : neighbors ) // neighbors of ind
 			{
 				if( visited[x] == IS_VISITED )
 					cond.insert(x);
 			}
 
-			for( int x : variable_interaction_graph.at(ind) ) // neighbors of ind
+			for( int x : neighbors )
 			{
 				if( visited[x] != IS_VISITED )
 				{
 					bool add_to_clique = true;
-					std::set<int> neighbors = variable_interaction_graph.at(x);
+					std::set<int> next_neighbors = variable_interaction_graph.at(x);
 					if( (int) clique.size() >= max_clique_size )
 						add_to_clique = false;
 					if( add_to_clique )
 					{
 						for( int y : clique )
 						{
-							if( neighbors.find(y) == neighbors.end() ) // edge (x,y) does not exist
+							if( next_neighbors.find(y) == next_neighbors.end() ) // edge (x,y) does not exist
 							{
 								add_to_clique = false;
 								//printf("no E(%d,%d)\n",x,y);
@@ -157,7 +159,7 @@ linkage_model_rv_t::linkage_model_rv_t( size_t number_of_variables, const graph_
 					{
 						for( int y : cond )
 						{
-							if( neighbors.find(y) == neighbors.end() ) // edge (x,y) does not exist
+							if( next_neighbors.find(y) == next_neighbors.end() ) // edge (x,y) does not exist
 							{
 								add_to_clique = false;
 								//printf("no E(%d,%d)\n",x,y);
@@ -202,39 +204,39 @@ linkage_model_rv_t::~linkage_model_rv_t()
 		delete( d );
 }
 
-linkage_model_rv_pt linkage_model_rv_t::univariate(size_t numberOfVariables_)
+linkage_model_rv_pt linkage_model_rv_t::univariate(size_t number_of_variables_)
 {
-	linkage_model_rv_pt new_fos = std::shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(numberOfVariables_,1));
+	linkage_model_rv_pt new_fos = std::shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(number_of_variables_,1));
 	return( new_fos );
 }
 			
-linkage_model_rv_pt linkage_model_rv_t::full(size_t numberOfVariables_)
+linkage_model_rv_pt linkage_model_rv_t::full(size_t number_of_variables_)
 {
-	linkage_model_rv_pt new_fos = std::shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(numberOfVariables_,numberOfVariables_));
+	linkage_model_rv_pt new_fos = std::shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(number_of_variables_,number_of_variables_));
 	return( new_fos );
 }
 
-linkage_model_rv_pt linkage_model_rv_t::marginal_product_model( size_t numberOfVariables_, size_t block_size )
+linkage_model_rv_pt linkage_model_rv_t::marginal_product_model( size_t number_of_variables_, size_t block_size )
 {
-	linkage_model_rv_pt new_fos = std::shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(numberOfVariables_,block_size));
+	linkage_model_rv_pt new_fos = std::shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(number_of_variables_,block_size));
 	return( new_fos );
 }
 			
-linkage_model_rv_pt linkage_model_rv_t::conditional( size_t numberOfVariables_, const graph_t &variable_interaction_graph, int max_clique_size, bool include_cliques_as_fos_elements, bool include_full_fos_element )
+linkage_model_rv_pt linkage_model_rv_t::conditional( size_t number_of_variables_, const graph_t &variable_interaction_graph, int max_clique_size, bool include_cliques_as_fos_elements, bool include_full_fos_element )
 {
-	linkage_model_rv_pt new_fos = std::shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(numberOfVariables_,variable_interaction_graph,max_clique_size,include_cliques_as_fos_elements,include_full_fos_element));
+	linkage_model_rv_pt new_fos = std::shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(number_of_variables_,variable_interaction_graph,max_clique_size,include_cliques_as_fos_elements,include_full_fos_element));
 	return( new_fos );
 }
     
-linkage_model_rv_pt linkage_model_rv_t::custom_fos( size_t numberOfVariables_, const vec_t<vec_t<int>> &FOS )
+linkage_model_rv_pt linkage_model_rv_t::custom_fos( size_t number_of_variables_, const vec_t<vec_t<int>> &FOS )
 {
-	linkage_model_rv_pt new_fos = std::shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(numberOfVariables_,FOS));
+	linkage_model_rv_pt new_fos = std::shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(number_of_variables_,FOS));
 	return( new_fos );
 }
     
-linkage_model_rv_pt linkage_model_rv_t::linkage_tree(size_t numberOfVariables_, int similarityMeasure_, bool filtered_, int maximumSetSize_, bool is_static_ ) 
+linkage_model_rv_pt linkage_model_rv_t::linkage_tree(size_t number_of_variables_, int similarityMeasure_, bool filtered_, int maximumSetSize_, bool is_static_ ) 
 {
-	linkage_model_rv_pt new_fos = std::shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(numberOfVariables_, similarityMeasure_, filtered_, maximumSetSize_, is_static_));
+	linkage_model_rv_pt new_fos = std::shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(number_of_variables_, similarityMeasure_, filtered_, maximumSetSize_, is_static_));
 	return( new_fos );
 }
     
@@ -281,12 +283,6 @@ void linkage_model_rv_t::addGroup( distribution_t *dist )
 	//std::sort(dist->variables.begin(),dist->variables.end());
 	FOSStructure.push_back(dist->variables);
 	distributions.push_back( dist );
-}
-
-void linkage_model_rv_t::addConditionedGroup( std::vector<int> variables ) 
-{
-	std::set<int> cond;
-	addConditionedGroup(variables,cond);
 }
 
 void linkage_model_rv_t::addConditionedGroup( std::vector<int> variables, std::set<int> conditioned_variables )
@@ -352,57 +348,12 @@ void linkage_model_rv_t::randomizeOrder( const graph_t &variable_interaction_gra
 	}
 }
 
-std::vector<int> linkage_model_rv_t::getVIGOrderBreadthFirst( const graph_t &variable_interaction_graph ) 
-{
-	const int UNVISITED = 0;
-	const int IS_VISITED = 1;
-	const int IN_CLIQUE = 2;
-	const int IN_QUEUE = 3;
-	std::vector<int> visited(number_of_variables,0);
-	vec_t<int> var_order = gomea::utils::randomPermutation( number_of_variables );
-
-	std::vector<int> VIG_order;
-	for( int i = 0; i < number_of_variables; i++ )
-	{
-		int ind = var_order[i];
-		if( visited[ind] == IS_VISITED )
-			continue;
-		visited[ind] = IN_CLIQUE;
-	
-		std::queue<int> q;
-		q.push(ind);
-
-		while( !q.empty() )
-		{
-			ind = q.front();
-			q.pop();
-
-			if( visited[ind] == IS_VISITED )
-				continue;
-			visited[ind] = IS_VISITED;
-
-			VIG_order.push_back(ind);
-
-			for( int x : variable_interaction_graph.at(ind) )
-			{
-				if( visited[x] == UNVISITED )
-				{
-					q.push(x);
-					visited[x] = IN_QUEUE;
-					//printf("Q[ %d ]\n",x);
-				}
-			}
-		}
-	}
-	return( VIG_order );
-}
-
 vec_t<vec_t<double>> linkage_model_rv_t::computeMIMatrix( matE covariance_matrix, int n )
 {
     vec_t<vec_t<double>> MI_matrix;
-	MI_matrix.resize(numberOfVariables);        
-    for (size_t i = 0; i < numberOfVariables; ++i)
-        MI_matrix[i].resize(numberOfVariables);         
+	MI_matrix.resize(number_of_variables);        
+    for (size_t i = 0; i < number_of_variables; ++i)
+        MI_matrix[i].resize(number_of_variables);         
 	for(int i = 0; i < n; i++ )
 	{
 		MI_matrix[i][i] = 1e20;

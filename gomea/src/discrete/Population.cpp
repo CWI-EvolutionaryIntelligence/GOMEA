@@ -35,7 +35,16 @@ Population::Population(Config *config_, fitness_t<char> *problemInstance_, share
 			
 		if( config->linkage_config != NULL )
 		{
-			FOSInstance = linkage_model_t::createFOSInstance( *config->linkage_config, problemInstance->number_of_variables );
+            if (config->linkage_config->type == linkage::CONDITIONAL)
+            {
+                if (problemInstance->variable_interaction_graph.size() == 0)
+                    problemInstance->initializeVariableInteractionGraph();
+                FOSInstance = linkage_model_t::createFOSInstance(*config->linkage_config, problemInstance->number_of_variables, problemInstance->variable_interaction_graph);
+            }
+            else
+            {
+                FOSInstance = linkage_model_t::createFOSInstance( *config->linkage_config, problemInstance->number_of_variables );
+            }
             FOSInstance->initializeDependentSubfunctions( problemInstance->subfunction_dependency_map );
 		}
 		else if( FOSInstance_ == NULL )
@@ -43,6 +52,8 @@ Population::Population(Config *config_, fitness_t<char> *problemInstance_, share
 			FOSInstance = linkage_model_t::createLinkageTreeFOSInstance(config->FOSIndex, problemInstance->number_of_variables, config->linkage_config->lt_similarity_measure, config->linkage_config->lt_maximum_set_size);
 		}
 		else FOSInstance = FOSInstance_;
+
+        FOSInstance->printFOS();
         
         #ifdef DEBUG
             std::cout << "New Population created! Population #" << GOMEAIndex << " PopulationSize:" << populationSize << endl;
@@ -290,7 +301,6 @@ bool Population::GOM(size_t offspringIndex)
             if (!donorEqualToOffspring)
             {
                 //evaluateSolution(offspringPopulation[offspringIndex], backup, touchedGenes, backup->getObjectiveValue());
-                //problemInstance->evaluatePartialSolution(offspringPopulation[offspringIndex], partial_offspring, FOSInstance->getDependentSubfunctions(ind) );
                 problemInstance->evaluatePartialSolution(offspringPopulation[offspringIndex], partial_offspring );
 
                 // accept the change if this solution is not the elitist and the fitness is at least equally good (allows random walk in neutral fitness landscape)

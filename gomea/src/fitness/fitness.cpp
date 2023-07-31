@@ -130,19 +130,6 @@ void fitness_t<T>::evaluatePartialSolutionBlackBox( solution_t<T> *parent, parti
 	utils::addToTimer("eval_time",t);
 }
 
-/*template<class T>
-void fitness_t<T>::evaluatePartialSolution( solution_t<T> *parent, partial_solution_t<T> *solution )
-{
-	std::set<int> dependent_subfunctions;
-	for( int ind : solution->touched_indices )
-	{
-		assert( this->subfunction_dependency_map[ind].size() > 0 );
-		dependent_subfunctions.insert(this->subfunction_dependency_map[ind].begin(), this->subfunction_dependency_map[ind].end());
-	}
-	evaluatePartialSolution( parent, solution, dependent_subfunctions );
-}*/
-
-//void fitness_t<T>::evaluatePartialSolution( solution_t<T> *parent, partial_solution_t<T> *solution, const std::set<int> &dependent_subfunctions )
 template<class T>
 void fitness_t<T>::evaluatePartialSolution( solution_t<T> *parent, partial_solution_t<T> *solution ) 
 {
@@ -156,7 +143,6 @@ void fitness_t<T>::evaluatePartialSolution( solution_t<T> *parent, partial_solut
 	}
 	else
 	{
-		//partialEvaluationFunction( parent, solution, dependent_subfunctions );
 		auto t = utils::getTimestamp();
 		partialEvaluationFunction( parent, solution );
 		utils::addToTimer("eval_time",t);
@@ -194,7 +180,6 @@ void fitness_t<T>::evaluatePartialSolution( solution_t<T> *parent, partial_solut
 	}
 }
 
-//void fitness_t<T>::partialEvaluationFunction( solution_t<T> *parent, partial_solution_t<T> *solution, const std::set<int> &dependent_subfunctions )
 template<class T>
 void fitness_t<T>::partialEvaluationFunction( solution_t<T> *parent, partial_solution_t<T> *solution )
 {
