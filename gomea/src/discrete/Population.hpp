@@ -56,6 +56,8 @@ public:
     bool FI(size_t offspringIndex);
     void updateElitistAndCheckVTR(solution_t<char> *solution);
     void checkTimeLimit();
+
+    void print();
 };
 
 }}

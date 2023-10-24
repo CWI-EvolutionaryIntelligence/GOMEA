@@ -37,6 +37,10 @@ Population::Population(Config *config_, fitness_t<char> *problemInstance_, share
 		{
             if (config->linkage_config->type == linkage::CONDITIONAL)
             {
+                /*if (config->linkage_config->cond_include_full_fos_element)
+                {
+                    throw std::runtime_error("Unsuitable linkage model for discrete optimization.");
+                }*/
                 if (problemInstance->variable_interaction_graph.size() == 0)
                     problemInstance->initializeVariableInteractionGraph();
                 FOSInstance = linkage_model_t::createFOSInstance(*config->linkage_config, problemInstance->number_of_variables, problemInstance->variable_interaction_graph);
@@ -53,7 +57,8 @@ Population::Population(Config *config_, fitness_t<char> *problemInstance_, share
 		}
 		else FOSInstance = FOSInstance_;
 
-        FOSInstance->printFOS();
+        if( config->verbose )
+            FOSInstance->printFOS();
         
         #ifdef DEBUG
             std::cout << "New Population created! Population #" << GOMEAIndex << " PopulationSize:" << populationSize << endl;
@@ -224,18 +229,27 @@ void Population::generateOffspring()
     vec_t<vec_t<int> > neighbors;
    
 	assert( !config->useParallelFOSOrder || !config->fixFOSOrderForPopulation );
-   	if( config->fixFOSOrderForPopulation )
+    
+    if( FOSInstance->is_conditional )
+        FOSInstance->shuffleFOS(problemInstance->variable_interaction_graph);
+    else if( config->fixFOSOrderForPopulation )
     	FOSInstance->shuffleFOS(); 
 	else if( config->useParallelFOSOrder )
     {
         assert( problemInstance->hasVariableInteractionGraph() );
 		FOSInstance->determineParallelFOSOrder(problemInstance->variable_interaction_graph );
     }
+        
+    if (config->verbose && (FOSInstance->is_conditional || config->useParallelFOSOrder || config->fixFOSOrderForPopulation) )
+        FOSInstance->printFOS();
 
     for (size_t i = 0; i < populationSize; i++)
     {
-        if (!config->useParallelFOSOrder && !config->fixFOSOrderForPopulation)
+        if (!FOSInstance->is_conditional && !config->useParallelFOSOrder && !config->fixFOSOrderForPopulation)
+        {
             FOSInstance->shuffleFOS();
+            FOSInstance->printFOS();
+        }
 
         solution_t<char> backup = *population[i];
 
@@ -254,6 +268,9 @@ void Population::generateOffspring()
         else
             noImprovementStretches[i] = 0;
     }
+    
+    if( config->verbose )
+        print();
 }
 
 bool Population::GOM(size_t offspringIndex)
@@ -269,9 +286,11 @@ bool Population::GOM(size_t offspringIndex)
 
     for (size_t i = 0; i < FOSInstance->size(); i++)
     {
-        int ind = FOSInstance->FOSorder[i];
+        int FOS_index = FOSInstance->FOSorder[i];
 
-        if (FOSInstance->elementSize(ind) == 0 || (int) FOSInstance->elementSize(ind) == problemInstance->number_of_variables)
+        if (FOSInstance->elementSize(FOS_index) == 0 )
+            continue;
+        if ( !FOSInstance->is_conditional && (int) FOSInstance->elementSize(FOS_index) == problemInstance->number_of_variables )
             continue;
 
         bool donorEqualToOffspring = true;
@@ -279,27 +298,42 @@ bool Population::GOM(size_t offspringIndex)
 
         while (donorEqualToOffspring && indicesTried < donorIndices.size())
         {
-            int j = gomea::utils::rng() % (donorIndices.size() - indicesTried);
-            std::swap(donorIndices[indicesTried], donorIndices[indicesTried + j]);
-            donorIndex = donorIndices[indicesTried];
-            indicesTried++;
-
-            if (donorIndex == offspringIndex)
-                continue;
-
             vec_t<char> donorGenes;
-            for(size_t j = 0; j < FOSInstance->elementSize(ind); j++)
+            if( FOSInstance->is_conditional )
             {
-                int variableFromFOS = FOSInstance->FOSStructure[ind][j];
-                //offspringPopulation[offspringIndex]->variables[variableFromFOS] = population[donorIndex]->variables[variableFromFOS];
-                donorGenes.push_back(population[donorIndex]->variables[variableFromFOS]);
+                donorGenes = FOSInstance->samplePartialSolutionConditional( FOS_index, offspringPopulation[offspringIndex], population, offspringIndex ); 
+                indicesTried = donorIndices.size();
+            }
+            else
+            {
+                int j = gomea::utils::rng() % (donorIndices.size() - indicesTried);
+                std::swap(donorIndices[indicesTried], donorIndices[indicesTried + j]);
+                donorIndex = donorIndices[indicesTried];
+                indicesTried++;
+
+                if (donorIndex == offspringIndex)
+                    continue;
+
+                for(size_t j = 0; j < FOSInstance->elementSize(FOS_index); j++)
+                {
+                    int variableFromFOS = FOSInstance->FOSStructure[FOS_index][j];
+                    //offspringPopulation[offspringIndex]->variables[variableFromFOS] = population[donorIndex]->variables[variableFromFOS];
+                    donorGenes.push_back(population[donorIndex]->variables[variableFromFOS]);
+                }
+            }
+
+            for (size_t j = 0; j < FOSInstance->elementSize(FOS_index); j++)
+            {
+                int variableFromFOS = FOSInstance->FOSStructure[FOS_index][j];
                 if (donorGenes[j] != offspringPopulation[offspringIndex]->variables[variableFromFOS])
                     donorEqualToOffspring = false;
             }
-            partial_solution_t<char> *partial_offspring = new partial_solution_t<char>(donorGenes, FOSInstance->FOSStructure[ind]);
+
+            //printf("Donor equal? %d\n",donorEqualToOffspring?1:0);
 
             if (!donorEqualToOffspring)
             {
+                partial_solution_t<char> *partial_offspring = new partial_solution_t<char>(donorGenes, FOSInstance->FOSStructure[FOS_index]);
                 //evaluateSolution(offspringPopulation[offspringIndex], backup, touchedGenes, backup->getObjectiveValue());
                 problemInstance->evaluatePartialSolution(offspringPopulation[offspringIndex], partial_offspring );
 
@@ -315,15 +349,13 @@ bool Population::GOM(size_t offspringIndex)
                     solutionHasChanged = true;
                     updateElitistAndCheckVTR(offspringPopulation[offspringIndex]);
 
-                    FOSInstance->improvementCounters[ind]++;
+                    FOSInstance->improvementCounters[FOS_index]++;
                 }
 
-                FOSInstance->usageCounters[ind]++;
+                FOSInstance->usageCounters[FOS_index]++;
 
+                delete partial_offspring;
             }
-            delete partial_offspring;
-
-            break;
         }
     }
     return solutionHasChanged;
@@ -332,7 +364,7 @@ bool Population::GOM(size_t offspringIndex)
 
 bool Population::FI(size_t offspringIndex)
 {
-    if (!config->useParallelFOSOrder && !config->fixFOSOrderForPopulation)
+    if (!FOSInstance->is_conditional && !config->useParallelFOSOrder && !config->fixFOSOrderForPopulation)
         FOSInstance->shuffleFOS();
 
     bool solutionHasChanged = 0;
@@ -375,69 +407,20 @@ bool Population::FI(size_t offspringIndex)
     return solutionHasChanged;
 }
 
-/*void Population::evaluateSolution(solution_t<char> *parent, gomea::partial_solution_t<char> *solution ) 
-{
-    checkTimeLimit();
-
-    //std::cout << "before eval" << solution -> fitness << std::endl;
-    if (config->usePartialEvaluations && solution != NULL)
-    {
-        problemInstance->calculateFitnessPartialEvaluations(solution, solutionBefore, touchedGenes, fitnessBefore);
-        sharedInformationPointer->numberOfEvaluations += (double)touchedGenes.size() / problemInstance->number_of_variables;
-    }
-    else
-    {
-        problemInstance->calculateFitness(solution);
-        sharedInformationPointer->numberOfEvaluations += 1;
-    }
-
-    updateElitistAndCheckVTR(solution);
-}*/
-
-/*void Population::evaluateSolution(solution_t<char> *solution, solution_t<char> *solutionBefore, vec_t<int> &touchedGenes, double fitnessBefore)
-{
-    checkTimeLimit();
-
-    // Do the actual evaluation
-    archiveRecord searchResult;
-    
-    if (config->saveEvaluations)
-        sharedInformationPointer->evaluatedSolutions->checkAlreadyEvaluated(solution->variables, &searchResult);
-    
-    if (searchResult.isFound)
-        solution->setObjectiveValue(searchResult.value);
-    else
-    { 
-        //std::cout << "before eval" << solution -> fitness << std::endl;
-        if (config->usePartialEvaluations && solutionBefore != NULL)
-        {
-            assert(0);
-            // TODO
-            //problemInstance->evaluatePartialSolution(solution, solutionBefore, touchedGenes, fitnessBefore);
-            sharedInformationPointer->numberOfEvaluations += (double)touchedGenes.size() / problemInstance->number_of_variables;
-        }
-        else
-        {
-            assert(0);
-            // TODO
-            //problemInstance->evaluate(solution);
-            sharedInformationPointer->numberOfEvaluations += 1;
-        }
-
-        if (config->saveEvaluations)
-            sharedInformationPointer->evaluatedSolutions->insertSolution(solution->variables, solution->getObjectiveValue());
-    }
-
-    updateElitistAndCheckVTR(solution);
-}*/
-
 void Population::checkTimeLimit()
 {
     if ( config->maximumNumberOfSeconds > 0 && utils::getElapsedTimeSeconds(sharedInformationPointer->startTime) > config->maximumNumberOfSeconds)
     {
         terminated = true;
-        throw utils::customException("time");
+        throw utils::terminationException("time");
     }
+}
+
+void Population::print()
+{
+    printf("Population:\n");
+    for( auto individual : population )
+        individual->print();
 }
 
 void Population::updateElitistAndCheckVTR(solution_t<char> *solution)
@@ -460,7 +443,7 @@ void Population::updateElitistAndCheckVTR(solution_t<char> *solution)
             //writeElitistSolutionToFile(config->folder, sharedInformationPointer->elitistSolutionHittingTimeEvaluations, sharedInformationPointer->elitistSolutionHittingTimeMilliseconds, solution);
             //std::cout << "VTR HIT!\n";
             terminated = true;
-            throw utils::customException("vtr");
+            throw utils::terminationException("vtr");
         }
     
         //writeStatisticsToFile(config->folder, sharedInformationPointer->elitistSolutionHittingTimeEvaluations, sharedInformationPointer->elitistSolutionHittingTimeMilliseconds, solution);

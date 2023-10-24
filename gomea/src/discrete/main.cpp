@@ -18,7 +18,7 @@ int main(int argc, char **argv)
     {
         gomeaInstance->run();
     }
-    catch (gomea::utils::customException &ex)
+    catch (gomea::utils::terminationException &ex)
     {}
 
     delete gomeaInstance;

@@ -419,7 +419,7 @@ void fitness_t<T>::checkEvaluationLimitTerminationCondition()
 {
 	if( maximum_number_of_evaluations > 0 && number_of_evaluations >= maximum_number_of_evaluations )
 	{
-        throw utils::customException("evaluations");
+        throw utils::terminationException("evaluations");
 	}
 }
 
@@ -428,7 +428,7 @@ void fitness_t<T>::checkTimeLimitTerminationCondition()
 {
 	if( maximum_number_of_seconds > 0 && utils::getElapsedTimeSinceStartSeconds() >= maximum_number_of_seconds )
 	{
-        throw utils::customException("time");
+        throw utils::terminationException("time");
 	}
 }
 

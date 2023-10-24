@@ -33,6 +33,7 @@ public:
 
     linkage::linkage_model_type type = linkage::CUSTOM_LM;
     bool is_static = true;
+    bool is_conditional = false;
 	int maximumSetSize;
 
     virtual ~linkage_model_t(){};
@@ -71,14 +72,18 @@ public:
     virtual void addGroup( vec_t<int> group );
     void addConditionedGroup(vec_t<int> variables);
     virtual void addConditionedGroup(vec_t<int> variables, std::set<int> conditioned_variables);
-    void randomizeOrder(const graph_t &variable_interaction_graph);
-    vec_t<int> getVIGOrderBreadthFirst(const graph_t &variable_interaction_graph);
+    vec_t<int> getGraphOrderBreadthFirst(const graph_t &graph);
+
+    vec_t<char> samplePartialSolutionConditional( int FOS_index, solution_t<char> *parent, const vec_t<solution_t<char>*> &population, int parent_index = -1 );
 
     void writeToFileFOS(std::string folder, int populationIndex, int generation);
     void writeFOSStatistics(std::string folder, int populationIndex, int generation);
     void setCountersToZero();
+
     void shuffleFOS();
-	void determineParallelFOSOrder(vec_t<vec_t<int>> VIG );
+    void shuffleFOS( const graph_t &variable_interaction_graph );
+	
+    void determineParallelFOSOrder(vec_t<vec_t<int>> VIG );
     void determineParallelFOSOrder(std::map<int, std::set<int>> VIG );
     vec_t<int> graphColoring(std::map<int, std::set<int>> &VIG);
     void initializeDependentSubfunctions( std::map<int,std::set<int>> &subfunction_dependency_map );
@@ -88,6 +93,7 @@ public:
     
     void learnLinkageTreeFOS( vec_t<solution_t<char>*> &population, size_t alphabetSize  );
 	void learnLinkageTreeFOS( vec_t<vec_t<double>> similarity_matrix, bool include_full_fos_element );
+    void initializeCondFactorInteractionGraph( const graph_t &variable_interaction_graph );
 
     void printFOS();
 
@@ -98,11 +104,15 @@ protected:
     bool filtered;
     int similarityMeasure;
 
-	vec_t<factorization_t*> factorizations;
-    bool is_conditional = false;
+	vec_t<factorization_t*> cond_factors; // Correspond to FOS elements for 'FG' conditional linkage models
+    vec_t<int> condfact_order;
+    graph_t condfact_interaction_graph;
+	factorization_t* full_factorization = NULL;
+    
     int max_clique_size;
     bool include_cliques_as_fos_elements;
     bool include_full_fos_element;
+
     
     linkage_model_t( size_t number_of_variables_ ): number_of_variables(number_of_variables_), maximumSetSize(number_of_variables_) {}
     linkage_model_t( size_t number_of_variables_, size_t block_size ); 

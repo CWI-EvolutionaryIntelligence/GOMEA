@@ -75,8 +75,9 @@ void gomeaIMS::run()
 			numberOfGenerationsIMS++;
 		}
 	}
-	catch( utils::customException const& ){}
+	catch( utils::terminationException const& ){}
 	hasTerminated = true;
+	assert( numberOfGOMEAs > 0 );
 	writeStatistics(numberOfGOMEAs - 1);
 	ezilaitini();
 }
@@ -109,7 +110,7 @@ void gomeaIMS::runGeneration()
 		else
 			currentGOMEAIndex = minimumGOMEAIndex;
 	}
-	catch( utils::customException const& )
+	catch( utils::terminationException const& )
 	{
 		hasTerminated = true;
 		writeStatistics( currentGOMEAIndex );
@@ -269,6 +270,8 @@ bool gomeaIMS::checkTerminationGOMEA(int GOMEAIndex)
 	{
         if( GOMEAIndex == minimumGOMEAIndex )
 			minimumGOMEAIndex = GOMEAIndex+1;
+		if (config->verbose)
+			printf("Population [%d] terminated - maxGenerations\n", GOMEAIndex);
 		return true;
 	}
 
@@ -279,6 +282,8 @@ bool gomeaIMS::checkTerminationGOMEA(int GOMEAIndex)
 			if (GOMEAs[i]->averageFitness > GOMEAs[GOMEAIndex]->averageFitness)
 			{
 				minimumGOMEAIndex = GOMEAIndex+1;
+				if( config->verbose ) 
+					printf("Population [%d] terminated - avgFitness\n",GOMEAIndex);
 				return true;
 			}
 		}
@@ -286,6 +291,9 @@ bool gomeaIMS::checkTerminationGOMEA(int GOMEAIndex)
 
 	if (!GOMEAs[GOMEAIndex]->allSolutionsAreEqual())
 		return false;
+
+	if (config->verbose)
+		printf("Population [%d] terminated - allSolutionsEqual\n", GOMEAIndex);
 
 	if( GOMEAIndex == minimumGOMEAIndex )
 		minimumGOMEAIndex = GOMEAIndex+1;
@@ -304,11 +312,13 @@ void gomeaIMS::writeStatistics( int population_index )
 	assert( sharedInformationInstance != NULL );
 	int key = numberOfStatisticsWrites;
     double evals = problemInstance->number_of_evaluations;
+    double evals_bbo = problemInstance->full_number_of_evaluations;
     //double elitist_evals = sharedInformationInstance->elitistSolutionHittingTimeEvaluations;
     //double time_s = sharedInformationInstance->elitistSolutionHittingTimeMilliseconds/1000.0;
 	double best_fitness = sharedInformationInstance->elitistFitness;
     output.addMetricValue("generation",key,(int)GOMEAs[population_index]->numberOfGenerations);
     output.addMetricValue("evaluations",key,evals);
+    output.addMetricValue("evaluations_black_box",key,evals_bbo);
     //output.addMetricValue("elitist_hitting_evaluations",key,elitist_evals);
     output.addMetricValue("time",key,utils::getElapsedTimeSinceStartSeconds());
     output.addMetricValue("eval_time",key,utils::getTimer("eval_time"));

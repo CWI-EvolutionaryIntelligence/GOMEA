@@ -33,6 +33,7 @@ void BBOFitnessFunction_t<T>::evaluationFunction( solution_t<T> *solution )
 	solution->setConstraintValue(fcons);
 
 	this->number_of_evaluations++;
+	this->full_number_of_evaluations++;
 }
 
 template<class T>
@@ -54,8 +55,8 @@ void BBOFitnessFunction_t<T>::partialEvaluationFunction( solution_t<T> *parent, 
 	// Return parent variables to original state
 	parent->insertVariables(partial_backup, solution->touched_indices);
 
-	this->full_number_of_evaluations++;
 	this->number_of_evaluations++;
+	this->full_number_of_evaluations++;
 }
 
 template<class T>

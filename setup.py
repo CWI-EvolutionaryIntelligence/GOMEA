@@ -24,11 +24,11 @@ if '--debug' in sys.argv:
 common_src = glob.glob("gomea/src/common/*.cpp") + glob.glob("gomea/src/utils/*.cpp")
 fitness_src = glob.glob("gomea/src/fitness/*.cpp") + glob.glob("gomea/src/fitness/benchmarks-rv/*.cpp") + glob.glob("gomea/src/fitness/benchmarks-discrete/*.cpp")
 
-compile_args = ["-std=c++17"]
-link_args = ["-std=c++17"]
+compile_args = ["-UNDEBUG","-std=c++17"]
+link_args = ["-UNDEBUG","-std=c++17"]
 if debug_mode:
-        compile_args.extend(['-UNDEBUG','-g'])
-        link_args.extend(['-UNDEBUG','-g'])
+        compile_args.extend(['-g'])
+        link_args.extend(['-g'])
 else:
         compile_args.extend(['-O3','-g0'])
         link_args.extend(['-O3','-g0'])
@@ -37,10 +37,10 @@ if platform.system() == "Darwin":
         link_args.extend(["-stdlib=libc++","-mmacosx-version-min=10.15"])
 
 if platform.system() == "Windows":
-        compile_args = ["/std:c++17"]
+        compile_args = ['/UNDEBUG',"/std:c++17"]
         link_args = []
         if debug_mode:
-                compile_args.extend(['/UNDEBUG','/Zi','/g0'])
+                compile_args.extend(['/Zi','/g0'])
         else:
                 compile_args.extend(['/O2'])
 

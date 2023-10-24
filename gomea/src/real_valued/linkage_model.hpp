@@ -55,7 +55,6 @@ class linkage_model_rv_t : public linkage_model_t {
 			void estimateDistribution( int FOS_index, solution_t<double> **selection, int selection_size );
 			void adaptDistributionMultiplier( int FOS_index, partial_solution_t<double> **solutions, int num_solutions );
 
-			int number_of_variables = -1;
 			vec_t<distribution_t*> distributions;
 			int no_improvement_stretch = 0;
 			int maximum_no_improvement_stretch = 100;
