@@ -318,7 +318,7 @@ void linkage_model_rv_t::learnLinkageTreeFOS( vec_t<vec_t<double>> similarity_ma
 void linkage_model_rv_t::randomizeOrder( const graph_t &variable_interaction_graph ) 
 {
 	std::vector<int> visited(number_of_variables,0);
-	std::vector<int> VIG_order = getVIGOrderBreadthFirst(variable_interaction_graph);
+	std::vector<int> VIG_order = getGraphOrderBreadthFirst(variable_interaction_graph);
 	/*printf("VIG_ORDER: ");
 	for(int i = 0; i < VIG_order.size(); i++ )
 		printf("%d ",VIG_order[i]);

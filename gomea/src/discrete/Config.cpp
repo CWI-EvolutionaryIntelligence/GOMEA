@@ -31,7 +31,8 @@ bool Config::parseCommandLine(int argc, char **argv)
 {
     // Default parameters for options are listed in header file.
     options.add_options()
-            ("h,help", "Prints out usage information")
+            ("h,help", "Prints usage information.")
+            ("v,verbose", "Prints verbose information during optimization.")
             ("g,partial", "Whether to use partial evaluations. Default: no")
             ("w,analyzeFOS", "Whether to write FOS statistics to file. Default: no")
             ("e,writeElitists", "Whether to write the genotype of the elitist solution to a file each time it is updated. Default: no")
@@ -59,6 +60,9 @@ bool Config::parseCommandLine(int argc, char **argv)
         char c = param.as<char>();
         switch (c)
         {
+        case 'v':
+            verbose = true;
+            break;
         case 'g':
             usePartialEvaluations = 1;
             break;

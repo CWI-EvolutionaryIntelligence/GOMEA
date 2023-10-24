@@ -56,7 +56,8 @@ public:
     std::string problemInstancePath = "";
 
     //long long timelimitMilliseconds = -1,
-    bool fix_seed = false;
+    bool fix_seed = false,
+         verbose = false;
     long long randomSeed;
     
     size_t alphabetSize = 2;

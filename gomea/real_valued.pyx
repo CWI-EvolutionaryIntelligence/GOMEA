@@ -27,6 +27,7 @@ cdef class RealValuedGOMEA:
         lower_init_range: float = 0.0,
         upper_init_range: float = 1.0,
         random_seed: int=-1,
+        verbose: bool=False,
         # IMS settings (optional)
         max_number_of_populations: int = 25,
         max_number_of_generations: int = -1,
@@ -62,7 +63,7 @@ cdef class RealValuedGOMEA:
         self.c_config.black_box_evaluations = False
         self.c_config.write_generational_statistics = True 
         self.c_config.write_generational_solutions = False
-        self.c_config.verbose = False
+        self.c_config.verbose = verbose
         self.c_config.print_verbose_overview = False 
         self.c_config.fix_seed = 0
         if random_seed != -1:

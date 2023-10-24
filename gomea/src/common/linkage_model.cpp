@@ -142,10 +142,9 @@ linkage_model_t::linkage_model_t( size_t number_of_variables, const graph_t &var
 	if( variable_interaction_graph.size() != number_of_variables )
 		throw std::runtime_error("Incorrectly initialized Variable Interaction Graph\n");
 
-	std::vector<int> VIG_order;
-	factorization_t *full_cond = NULL;
+	/*factorization_t *full_cond = NULL;
 	if( include_full_fos_element )
-		full_cond = new factorization_t();
+		full_cond = new factorization_t();*/
 	for( int i = 0; i < number_of_variables; i++ )
 	{
 		int ind = var_order[i];
@@ -164,8 +163,6 @@ linkage_model_t::linkage_model_t( size_t number_of_variables, const graph_t &var
 			if( visited[ind] == IS_VISITED )
 				continue;
 			visited[ind] = IS_VISITED;
-
-			VIG_order.push_back(ind);
 
 			std::vector<int> clique;
 			std::set<int> cond;
@@ -226,20 +223,38 @@ linkage_model_t::linkage_model_t( size_t number_of_variables, const graph_t &var
 					}
 				}
 			}
-			if( include_cliques_as_fos_elements )	
-				addConditionedGroup( clique, cond );
-			if( include_full_fos_element )
-				full_cond->addGroupOfVariables( clique, cond );
+			addConditionedGroup( clique, cond );
+			condfact_order.push_back(condfact_order.size());
+			//if( include_full_fos_element )
+				//full_cond->addGroupOfVariables( clique, cond );
 		}
 	}
 	if( include_full_fos_element ) 
 	{
 		if( size() != 1 ) // if length == 1, only 1 clique was found, which must have been the full model; in that case, do not add it again	
-			addGroup( full_cond );
-		else
-			delete full_cond;
+		{
+			vec_t<int> full_fos(number_of_variables);
+			std::iota(full_fos.begin(), full_fos.end(), 0);
+			addGroup( full_fos );
+			
+			// Sort variable groups
+			//std::sort(full_cond->variable_groups.begin(), full_cond->variable_groups.end());
+			
+			/*vec_t<int> order(full_cond->variable_groups.size());
+			std::iota(order.begin(), order.end(), 0);
+			std::sort(order.begin(), order.end(),
+				[&](int a, int b){
+					return(full_cond->variable_groups[a] < full_cond->variable_groups[b]);
+				}
+			);
+
+			utils::reorder<vec_t<int>>(full_cond->variable_groups, order);
+			utils::reorder<vec_t<int>>(full_cond->variables_conditioned_on, order);
+			addGroup( full_cond );*/
+		}
 	}
-	assert( factorizations.size() == FOSStructure.size() );
+	FOSorder.resize(FOSStructure.size());
+	std::iota(FOSorder.begin(), FOSorder.end(), 0);
 }
 
 
@@ -367,14 +382,20 @@ void linkage_model_t::addGroup( vec_t<int> group )
 {
 	std::sort(group.begin(),group.end());
 	FOSStructure.push_back(group);
-	factorizations.push_back( new factorization_t(group) );
+	if( group.size() == number_of_variables )
+		full_factorization = new factorization_t(group);
+	else
+		cond_factors.push_back( new factorization_t(group) );
 }
 
 void linkage_model_t::addGroup( factorization_t *fact )
 {
 	//std::sort(dist->variables.begin(),dist->variables.end());
 	FOSStructure.push_back(fact->variables);
-	factorizations.push_back( fact );
+	if( fact->variables.size() == number_of_variables )
+		full_factorization = fact;
+	else
+		cond_factors.push_back( fact );
 }
 
 void linkage_model_t::addConditionedGroup( vec_t<int> variables ) 
@@ -386,22 +407,29 @@ void linkage_model_t::addConditionedGroup( vec_t<int> variables )
 void linkage_model_t::addConditionedGroup( std::vector<int> variables, std::set<int> conditioned_variables )
 {
 	std::sort(variables.begin(),variables.end());
-	FOSStructure.push_back(variables);
+	if( include_cliques_as_fos_elements )	
+		FOSStructure.push_back(variables);
+	
 	factorization_t *fact = new factorization_t(variables,conditioned_variables);
-	factorizations.push_back(fact);
+	if( fact->variables.size() == number_of_variables )
+		full_factorization = fact;
+	else
+		cond_factors.push_back( fact );
 }
 
-std::vector<int> linkage_model_t::getVIGOrderBreadthFirst( const graph_t &variable_interaction_graph ) 
+std::vector<int> linkage_model_t::getGraphOrderBreadthFirst( const graph_t &graph )
 {
 	const int UNVISITED = 0;
 	const int IS_VISITED = 1;
 	const int IN_CLIQUE = 2;
 	const int IN_QUEUE = 3;
-	std::vector<int> visited(number_of_variables,0);
-	vec_t<int> var_order = gomea::utils::randomPermutation( number_of_variables );
+
+	int num_cliques = cond_factors.size();
+	std::vector<int> visited(num_cliques,0);
+	vec_t<int> var_order = gomea::utils::randomPermutation( num_cliques );
 
 	std::vector<int> VIG_order;
-	for( int i = 0; i < number_of_variables; i++ )
+	for( int i = 0; i < num_cliques; i++ )
 	{
 		int ind = var_order[i];
 		if( visited[ind] == IS_VISITED )
@@ -422,7 +450,7 @@ std::vector<int> linkage_model_t::getVIGOrderBreadthFirst( const graph_t &variab
 
 			VIG_order.push_back(ind);
 
-			for( int x : variable_interaction_graph.at(ind) )
+			for( int x : graph.at(ind) ) 
 			{
 				if( visited[x] == UNVISITED )
 				{
@@ -436,7 +464,34 @@ std::vector<int> linkage_model_t::getVIGOrderBreadthFirst( const graph_t &variab
 	return( VIG_order );
 }
 
+vec_t<char> linkage_model_t::samplePartialSolutionConditional( int FOS_index, solution_t<char> *parent, const vec_t<solution_t<char>*> &population, int parent_index ) 
+{
+	assert( is_conditional );
+	if( FOSStructure[FOS_index].size() == number_of_variables )
+	{
+		vec_t<char> sample(number_of_variables);
+		for( int i = 0; i < number_of_variables; i++ )
+			sample[i] = parent->variables[i];
 
+		for( int i = 0; i < cond_factors.size(); i++ )
+		{
+			factorization_t *fact = cond_factors[condfact_order[i]];
+			vec_t<char> fact_sample = fact->samplePartialSolutionConditional(sample,population,parent_index);
+			for( int j = 0; j < fact->variables.size(); j++ )
+			{
+				int var_index = fact->variables[j];
+				sample[var_index] = fact_sample[j];
+				assert(FOSStructure[FOS_index][var_index] == var_index);
+			}
+		}
+		return sample;
+	}
+	else
+	{
+		return cond_factors[FOS_index]->samplePartialSolutionConditional(parent->variables,population,parent_index);
+	}
+}
+    
 void linkage_model_t::writeToFileFOS(std::string folder, int populationIndex, int generation)
 {
     std::ofstream outFile;
@@ -480,10 +535,112 @@ void linkage_model_t::writeFOSStatistics(std::string folder, int populationIndex
 
 void linkage_model_t::shuffleFOS()
 {
+	assert( !is_conditional );
+ 
     FOSorder.resize(size());
-    std::iota(FOSorder.begin(), FOSorder.end(), 0);   
+    std::iota(FOSorder.begin(), FOSorder.end(), 0);
     std::shuffle(FOSorder.begin(), FOSorder.end(), utils::rng);
 }
+
+void linkage_model_t::initializeCondFactorInteractionGraph( const graph_t &variable_interaction_graph )
+{
+	assert( is_conditional );
+	assert( cond_factors.size() > 0 );
+
+	vec_t<int> clique_index(cond_factors.size());
+
+	// Save clique index that each variable is in for faster lookup
+	for( int i = 0; i < cond_factors.size(); i++ )
+	{
+		for( int x : cond_factors[i]->variables )
+			clique_index[x] = i;
+	}
+
+	// Find dependent cliques
+	for( int i = 0; i < cond_factors.size(); i++ )
+	{
+		std::set<int> neighboring_cliques;
+		for( int x : cond_factors[i]->variables )
+		{
+			for( int neighbor : variable_interaction_graph.at(x) )
+			{
+				int clique_of_neighbor = clique_index[neighbor];
+				neighboring_cliques.insert(clique_of_neighbor);
+			}
+		}
+		condfact_interaction_graph.insert({i,neighboring_cliques});
+	}
+}
+
+void linkage_model_t::shuffleFOS( const graph_t &variable_interaction_graph ) 
+{
+	if( !is_conditional )
+	{
+		shuffleFOS();
+		return;
+	}
+	
+	if( condfact_interaction_graph.size() == 0 )
+		initializeCondFactorInteractionGraph(variable_interaction_graph);
+
+	//printf("SHUFFLING -- %d -- %d\n",include_cliques_as_fos_elements,include_full_fos_element);
+
+	std::vector<int> visited(number_of_variables,0);
+	condfact_order = getGraphOrderBreadthFirst(condfact_interaction_graph);
+	assert( condfact_order.size() == cond_factors.size() );
+	/*printf("condfact_ORDER [%d]: ", condfact_order.size());
+	for(int i = 0; i < condfact_order.size(); i++ )
+		printf("%d ",condfact_order[i]);
+	printf("\n");*/
+
+	FOSorder = vec_t<int>(size());
+	for(int i = 0; i < cond_factors.size(); i++ )
+	{
+		int og = condfact_order[i];
+		//assert( FOSStructure[i].size() == cond_factors[i]->variables.size() );
+		//assert( elementSize(i) == 1 );
+		// TODO
+		cond_factors[og]->updateConditionals(variable_interaction_graph,visited);
+		//assert( cond_factors[FOSorder[i]]->variable_groups.size() == 1 );
+
+		if( include_cliques_as_fos_elements )
+		{
+			FOSorder[i] = og;
+			for( int j = 0; j < cond_factors[i]->variables.size(); j++ )
+				assert( cond_factors[i]->variables[j] == FOSStructure[i][j] );
+		}
+	}
+
+	if( include_full_fos_element )
+	{
+		FOSorder.push_back(cond_factors.size());
+		//for( int j = 0; j < full_factorization->variables.size(); j++ )
+			//assert( full_factorization->variables[j] == FOSStructure[FOS_length][j] );
+	}
+	/*for( int i = 0; i < number_of_variables; i++ )
+		visited[i] = 0;
+	if( include_full_fos_element )
+	{
+		full_factorization->setOrder(VIG_order);
+		full_factorization->updateConditionals(variable_interaction_graph,visited);
+		assert( full_factorization->variable_groups.size() == number_of_variables );
+		
+		FOSStructure[FOS_length].clear();
+		for( int i = 0; i < full_factorization->variable_groups.size(); i++ )
+		{
+			int og = full_factorization->sampling_order[i];
+			for( int x : full_factorization->variable_groups[og] )
+				FOSStructure[FOS_length].push_back(x);
+		}
+	// TODO - set FOS order the same as variable groups
+
+		for( int x : FOSStructure[FOS_length] )
+			printf("%d ",x);
+		printf("\n");
+	}*/
+
+}
+
 
 void linkage_model_t::determineParallelFOSOrder(std::map<int,std::set<int>> VIG )
 {
@@ -646,11 +803,12 @@ void linkage_model_t::printFOS()
 	printf("Linkage model: (len:%d,sim:%d,static:%d,)\n",FOSStructure.size(),similarityMeasure,is_static);
 	for( size_t i = 0; i < FOSStructure.size(); i++ )
 	{
-		printf("[%d]{",i);
+		int io = FOSorder[i];
+		printf("[%d] -- [%d]{",i,io);
 		int c = 0;
-		for( int v : FOSStructure[i] )
+		for( int v : FOSStructure[io] )
 		{
-			if( c == FOSStructure[i].size()-1 )
+			if( c == FOSStructure[io].size()-1 )
 				printf("%d",v);
 			else
 				printf("%d,",v);
@@ -660,8 +818,14 @@ void linkage_model_t::printFOS()
 	}
 	if( is_conditional )
 	{
-		for( factorization_t* f : factorizations )
-			f->print();
+		for( int i = 0; i < cond_factors.size(); i++ )
+		{
+			int og = condfact_order[i];
+			printf("[%d] -- [%d]",i,og);
+			cond_factors[og]->print();
+		}
+		//if( full_factorization != NULL )
+			//full_factorization->print();
 	}
 }
 

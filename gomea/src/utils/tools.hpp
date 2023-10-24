@@ -7,16 +7,16 @@
 namespace gomea{
 namespace utils{
 
-	class customException : public std::exception
+	class terminationException : public std::exception
 	{
 		private:
-			std::string message;
+			std::string condition;
 
 		public:
-			customException(std::string message_) : message(message_) {}
+			terminationException(std::string condition_) : condition(condition_) {}
 			const char *what() const throw()
 			{
-				return message.c_str();
+				return condition.c_str();
 			}
 	};
 
@@ -47,6 +47,9 @@ namespace utils{
 	void mergeSortMerge( double *array, int *sorted, int *tosort, int p, int r, int q );
 	int *mergeSortInt( int *array, int array_size );
 	void mergeSortMergeInt( int *array, int *sorted, int *tosort, int p, int r, int q );
+
+	template<class T>
+	void reorder(vec_t<T> &vec, const vec_t<int> &order);
 
 	double normalize( double v, double min, double max );
 

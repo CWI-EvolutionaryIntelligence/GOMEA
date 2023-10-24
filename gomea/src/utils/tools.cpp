@@ -361,7 +361,29 @@ void mergeSortMergeInt( int *array, int *sorted, int *tosort, int p, int r, int 
 
     for( k = p; k <= q; k++ )
         tosort[k] = sorted[k];
+} 
+
+template<class T>
+void reorder( vec_t<T> &vec, const vec_t<int> &_order )
+{
+    assert(vec.size() == _order.size());
+    vec_t<int> order = _order;
+    for (size_t i = 0; i < order.size(); i++)
+        if (i < order[i])
+        {
+            int alt = order[i];
+            std::swap( vec[i], vec[alt] );
+            std::swap( order[i], order[alt] );
+        }
 }
+template void reorder<int>( vec_t<int> &vec, const vec_t<int> &order );
+template void reorder<char>( vec_t<char> &vec, const vec_t<int> &order );
+template void reorder<double>( vec_t<double> &vec, const vec_t<int> &order );
+template void reorder<float>( vec_t<float> &vec, const vec_t<int> &order );
+template void reorder<vec_t<int>>( vec_t<vec_t<int>> &vec, const vec_t<int> &order );
+template void reorder<vec_t<char>>( vec_t<vec_t<char>> &vec, const vec_t<int> &order );
+template void reorder<vec_t<double>>( vec_t<vec_t<double>> &vec, const vec_t<int> &order );
+template void reorder<vec_t<float>>( vec_t<vec_t<float>> &vec, const vec_t<int> &order );
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 

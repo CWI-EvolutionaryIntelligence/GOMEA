@@ -66,6 +66,9 @@ class solution_t
 		void insertSolution( solution_t<T> *solution );
 		void insertPartialSolution( partial_solution_t<T> *solution );
 
+		bool hasEqualGenotype( const vec_t<T> &genotype );
+		bool hasPartiallyEqualGenotype( const vec_t<T> &genotype, const vec_t<int> &indices );
+
 		void print();
 		std::string variablesToString();
 

@@ -449,6 +449,7 @@ void rvg_t::writeGenerationalStatisticsForOnePopulation( int population_index )
     int key = total_number_of_writes;
     output.addMetricValue("generation",key,populations[population_index]->number_of_generations);
     output.addMetricValue("evaluations",key,fitness->number_of_evaluations);
+    output.addMetricValue("evaluations_black_box",key,fitness->full_number_of_evaluations);
     output.addMetricValue("time",key,utils::getElapsedTimeSinceStartSeconds());
     output.addMetricValue("eval_time",key,utils::getTimer("eval_time"));
     output.addMetricValue("population_index",key,population_index);
@@ -949,7 +950,7 @@ void rvg_t::run( void )
     {
         runAllPopulations();
     }
-	catch( utils::customException const& ){
+	catch( utils::terminationException const& ){
         for( auto &p : populations )
             p->updateElitist();
     }

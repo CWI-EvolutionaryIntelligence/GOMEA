@@ -33,6 +33,7 @@ cdef class DiscreteGOMEA:
         max_number_of_generations : int = -1,
         max_number_of_seconds : float = -1.0,
         random_seed : int = -1,
+        verbose: bool=False
     ):
 
         # Initialize attributes 
@@ -53,6 +54,7 @@ cdef class DiscreteGOMEA:
         self.c_config.maximumNumberOfEvaluations = max_number_of_evaluations
         self.c_config.maximumNumberOfGenerations = max_number_of_generations
         self.c_config.maximumNumberOfSeconds = max_number_of_seconds
+        self.c_config.verbose = verbose
         self.c_config.AnalyzeFOS = 0
         #if analyze_fos:
         #    self.c_config.AnalyzeFOS = 1

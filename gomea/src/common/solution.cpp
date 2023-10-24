@@ -280,6 +280,28 @@ void solution_t<T>::insertPartialSolution( partial_solution_t<T> *solution )
 }
 
 template<class T>
+bool solution_t<T>::hasEqualGenotype( const vec_t<T> &genotype )
+{
+	for( int i = 0; i < variables.size(); i++ )
+	{
+		if( variables[i] != genotype[i] )
+			return false;
+	}
+	return true;
+}
+			
+template<class T>
+bool solution_t<T>::hasPartiallyEqualGenotype( const vec_t<T> &genotype, const vec_t<int> &indices )
+{
+	for( int i = 0; i < indices.size(); i++ )
+	{
+		if( variables[indices[i]] != genotype[i] )
+			return false;
+	}
+	return true;
+}
+
+template<class T>
 void solution_t<T>::print()
 {
 	for( size_t i = 0; i < variables.size(); i++ )
@@ -309,7 +331,7 @@ template<>
 void solution_t<char>::print()
 {
 	for( size_t i = 0; i < variables.size(); i++ )
-		printf("%c ",variables[i]);
+		printf("%d ",variables[i]);
 	printf("\n");
 }
 
