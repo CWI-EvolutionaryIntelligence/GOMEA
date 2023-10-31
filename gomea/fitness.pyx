@@ -156,6 +156,15 @@ cdef class SphereFunction(GBOFitnessFunction):
         self.number_of_variables = self.c_inst_realvalued.getNumberOfVariables()
         self.value_to_reach = self.c_inst_realvalued.getVTR()
 
+cdef class SphereFunctionBBO(BBOFitnessFunction):
+    def __cinit__(self,
+        number_of_variables : int,
+        value_to_reach : double = 0.0
+    ):
+        self.c_inst_realvalued = new sphereFunctionBBO_t(number_of_variables,value_to_reach)
+        self.number_of_variables = self.c_inst_realvalued.getNumberOfVariables()
+        self.value_to_reach = self.c_inst_realvalued.getVTR()
+
 cdef class RosenbrockFunction(GBOFitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
