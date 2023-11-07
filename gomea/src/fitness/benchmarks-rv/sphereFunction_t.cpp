@@ -16,7 +16,7 @@ int sphereFunction_t::getNumberOfSubfunctions()
 		
 vec_t<int> sphereFunction_t::inputsToSubfunction( int subfunction_index )
 {
-	vec_t<int> vec(1);
+	vec_t<int> vec;
 	vec.push_back(subfunction_index);
 	return vec;
 }

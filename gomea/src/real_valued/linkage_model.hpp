@@ -31,7 +31,7 @@ class linkage_model_rv_t : public linkage_model_t {
 			void initializeDistributions();
 
 			double getAcceptanceRate(); 
-			int getDistributionMultiplier( int element_index );
+			double getDistributionMultiplier( int element_index );
 			
 			void addGroup( vec_t<int> group );
 			void addGroup( distribution_t *dist );

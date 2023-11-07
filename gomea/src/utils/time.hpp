@@ -23,5 +23,6 @@ namespace gomea{
         double getElapsedTimeSeconds(time_t startTimestamp);
         double getElapsedTimeSinceStartMilliseconds();
         double getElapsedTimeSinceStartSeconds();
+        double getElapsedTimeSinceStartSeconds(time_t startTimestamp);
     }
 }
