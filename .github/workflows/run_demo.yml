@@ -13,13 +13,23 @@ jobs:
     runs-on: ${{ matrix.config.os }}
 
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.9"]
+        config:
+          - name: "Windows Latest"
+            os: windows-latest            
+          - name: "Ubuntu Latest"
+            os: ubuntu-latest            
+          - name: "MacOS Latest"
+            os: macos-latest
 
     steps:
     - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
 
     - name: Install dependencies
       run: make install
@@ -50,6 +60,11 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+    
     - name: Install from source
       run: make src-install
 
@@ -73,6 +88,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
     
     - name: Build wheel
       run: make install
