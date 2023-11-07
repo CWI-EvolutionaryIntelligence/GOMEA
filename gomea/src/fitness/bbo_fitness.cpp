@@ -32,6 +32,7 @@ void BBOFitnessFunction_t<T>::evaluationFunction( solution_t<T> *solution )
 	double fcons = constraintFunction(solution);
 	solution->setConstraintValue(fcons);
 
+	this->full_number_of_evaluations++;
 	this->number_of_evaluations++;
 	this->full_number_of_evaluations++;
 }

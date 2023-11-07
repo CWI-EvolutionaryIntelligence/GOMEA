@@ -253,7 +253,7 @@ void linkage_model_rv_t::initializeDistributions()
 		distributions.push_back( new normal_distribution_t(group) );
 }
 			
-int linkage_model_rv_t::getDistributionMultiplier( int element_index )
+double linkage_model_rv_t::getDistributionMultiplier( int element_index )
 {
 	return( distributions[element_index]->distribution_multiplier );
 }

@@ -426,7 +426,7 @@ void fitness_t<T>::checkEvaluationLimitTerminationCondition()
 template<class T>
 void fitness_t<T>::checkTimeLimitTerminationCondition() 
 {
-	if( maximum_number_of_seconds > 0 && utils::getElapsedTimeSinceStartSeconds() >= maximum_number_of_seconds )
+	if( maximum_number_of_seconds > 0 && utils::getElapsedTimeSinceStartSeconds(start_time) >= maximum_number_of_seconds )
 	{
         throw utils::terminationException("time");
 	}

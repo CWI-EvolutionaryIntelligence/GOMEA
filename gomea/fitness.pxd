@@ -47,6 +47,10 @@ cdef extern from "gomea/src/fitness/benchmarks-rv.hpp" namespace "gomea::fitness
         sphereFunction_t() except +
         sphereFunction_t(int,double) except +
 
+    cdef cppclass sphereFunctionBBO_t(BBOFitnessFunction_t[double]):
+        sphereFunctionBBO_t() except +
+        sphereFunctionBBO_t(int,double) except +
+
     cdef cppclass rosenbrockFunction_t(GBOFitnessFunction_t[double]):
         rosenbrockFunction_t() except +
         rosenbrockFunction_t(int,double) except +
