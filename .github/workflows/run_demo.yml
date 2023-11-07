@@ -16,12 +16,8 @@ jobs:
       fail-fast: true
       matrix:
         config:
-          - name: "Windows Latest"
-            os: windows-latest            
-          - name: "Ubuntu Latest"
-            os: ubuntu-latest            
-          - name: "MacOS Latest"
-            os: macos-latest
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.9"]
 
     steps:
     - uses: actions/checkout@v3
