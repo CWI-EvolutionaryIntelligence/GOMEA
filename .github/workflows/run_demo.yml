@@ -29,7 +29,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.x'
+        python-version: '3.9'
 
     - name: Install dependencies
       run: make install
@@ -63,7 +63,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.x'
+        python-version: '3.9'
     
     - name: Install from source
       run: make src-install
@@ -88,11 +88,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.x'
+        python-version: '3.9'
     
     - name: Build wheel
       run: make install
