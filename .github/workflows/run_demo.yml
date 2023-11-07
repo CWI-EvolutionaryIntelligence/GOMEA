@@ -33,9 +33,11 @@ jobs:
 
     - name: Install dependencies
       run: make install
+      shell: bash
 
     - name: Run check
       run: python3 demos/demo.py
+      shell: bash
     
     - uses: actions/upload-artifact@v3
       with:
@@ -67,9 +69,11 @@ jobs:
     
     - name: Install from source
       run: make src-install
+      shell: bash
 
     - name: Run check
       run: python3 demos/demo.py
+      shell: bash
       
   wheel:
     name: ${{ matrix.config.name }}
@@ -95,6 +99,8 @@ jobs:
     
     - name: Build wheel
       run: make install
+      shell: bash
 
     - name: Run check
       run: python3 demos/demo.py
+      shell: bash
