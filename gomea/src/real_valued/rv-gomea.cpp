@@ -939,6 +939,11 @@ void rvg_t::run( void )
 
     utils::initStartTime();
 	utils::clearTimers();
+
+    // Explicitly pass start_time to the fitness extension, to allow for correct time condition
+    // checks in that extension
+    this->fitness->start_time = utils::start_time;
+
 	initialize();
 
 	if( config->print_verbose_overview )
