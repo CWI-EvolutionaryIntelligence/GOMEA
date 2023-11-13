@@ -453,6 +453,7 @@ void rvg_t::writeGenerationalStatisticsForOnePopulation( int population_index )
     output.addMetricValue("eval_time",key,utils::getTimer("eval_time"));
     output.addMetricValue("population_index",key,population_index);
     output.addMetricValue("population_size",key,populations[population_index]->population_size);
+    output.addMetricValue("best_genotype",key,getElitist()->variablesToString());
     output.addMetricValue("best_obj_val",key,fitness->elitist_objective_value);
     output.addMetricValue("best_cons_val",key,fitness->elitist_constraint_value);
     //output.addMetricValue("subpop_best_obj_val",key,best_solution->getObjectiveValue());
@@ -912,6 +913,18 @@ void rvg_t::runAllPopulations()
         if( populations.size() > 1 && config->write_generational_solutions )
             writeGenerationalSolutions( 0 );
     }
+}
+
+solution_t<double> *rvg_t::getElitist()
+{
+    solution_t<double> *best_so_far = populations[0]->getElitist();
+    for( int i = 1; i < populations.size(); i++ )
+    {
+        solution_t<double> *pop_elitist = populations[i]->getElitist();
+        if( fitness->betterFitness( pop_elitist, best_so_far ) )
+            best_so_far = pop_elitist;
+    }
+    return best_so_far;
 }
 
 /**

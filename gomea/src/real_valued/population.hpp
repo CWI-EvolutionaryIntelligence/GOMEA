@@ -22,6 +22,7 @@ class population_t {
 		
 		void runGeneration();
 		void makeSelection();
+		solution_t<double> *getElitist();
 		void updateElitist();
 		void computeRanks();
 		void makeSelectionUsingDiversityOnRank0();

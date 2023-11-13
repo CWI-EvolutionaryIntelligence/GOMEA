@@ -2,8 +2,9 @@
 
 namespace gomea{
 
-void output_statistics_t::addMetricValue( std::string metric_name, int key, int value ){addMetricValueGeneric<int>(metric_name,key,value);}
-void output_statistics_t::addMetricValue( std::string metric_name, int key, double value ){addMetricValueGeneric<double>(metric_name,key,value);}
+void output_statistics_t::addMetricValue( std::string metric_name, int key, int value) { addMetricValueGeneric<int>(metric_name, key, value); }
+void output_statistics_t::addMetricValue( std::string metric_name, int key, double value ) { addMetricValueGeneric<double>(metric_name,key,value); }
+void output_statistics_t::addMetricValue( std::string metric_name, int key, std::string value ) { addMetricValueGeneric<std::string>(metric_name,key,value); }
 template<class T>
 void output_statistics_t::addMetricValueGeneric( std::string metric_name, int key, T value )
 {
@@ -25,6 +26,7 @@ T output_statistics_t::getMetricValue( std::string metric_name, int key )
 }
 template int output_statistics_t::getMetricValue( std::string metric_name, int key );
 template double output_statistics_t::getMetricValue( std::string metric_name, int key );
+template std::string output_statistics_t::getMetricValue( std::string metric_name, int key );
 template<>
 metric_t output_statistics_t::getMetricValue( std::string metric_name, int key )
 {
@@ -46,7 +48,8 @@ vec_t<T> output_statistics_t::getMetricValues( std::string metric_name )
     return( metric_vec );
 }
 template vec_t<int> output_statistics_t::getMetricValues( std::string metric_name ); 
-template vec_t<double> output_statistics_t::getMetricValues( std::string metric_name ); 
+template vec_t<double> output_statistics_t::getMetricValues( std::string metric_name );
+template vec_t<std::string> output_statistics_t::getMetricValues( std::string metric_name );
 
 template<class T>
 vec_t<T> output_statistics_t::getMetricValuesForKeys( std::string metric_name, vec_t<int> input_keys )
@@ -63,6 +66,7 @@ vec_t<T> output_statistics_t::getMetricValuesForKeys( std::string metric_name, v
 }
 template vec_t<int> output_statistics_t::getMetricValuesForKeys( std::string metric_name, vec_t<int> input_keys );
 template vec_t<double> output_statistics_t::getMetricValuesForKeys( std::string metric_name, vec_t<int> input_keys );
+template vec_t<std::string> output_statistics_t::getMetricValuesForKeys( std::string metric_name, vec_t<int> input_keys );
 
 vec_t<std::string> output_statistics_t::getAllMetricNames()
 {
@@ -96,7 +100,12 @@ void output_statistics_t::writeToFile(std::string filename)
             for (auto const &item : metrics_map)
             {
                 auto vals = item.second;
-                std::string strval = std::visit([](auto&& arg){return std::to_string(arg);}, vals[k]);
+                std::string strval = std::visit([](auto&& arg){
+                    if constexpr (std::is_same_v<std::decay_t<decltype(arg)>, std::string>) {
+                        return arg;
+                    } else {
+                        return std::to_string(arg);
+                    }}, vals[k]);
                 sprintf(string, "%20s ", strval.c_str());
                 fputs(string, file);
             }
