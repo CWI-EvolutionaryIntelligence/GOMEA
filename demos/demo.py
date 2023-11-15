@@ -45,15 +45,7 @@ vtr = 1e-10
 #frv = gomea.fitness.RosenbrockFunction(20,value_to_reach=vtr)
 frv = CustomRastriginFunction(dim,value_to_reach=vtr)
 
-#lm = gomea.linkage.Univariate(1)
-#lm = gomea.linkage.Full()
-#lm = gomea.linkage.LinkageTree(maximum_set_size=10)
-#lm = gomea.linkage.LinkageTree()
-#lm = gomea.linkage.StaticLinkageTree(maximum_set_size=10)
-lm = gomea.linkage.UCondHG()
-#lm = gomea.linkage.FromFile("FOS.in")
-#lm = gomea.linkage.Full()
-#lm = gomea.linkage.StaticLinkageTree()
+lm = gomea.linkage.Univariate()
 nsucc = 0
 nruns = 5
 rvgom = gomea.RealValuedGOMEA(fitness=frv,linkage_model=lm,lower_init_range=5,upper_init_range=10, max_number_of_populations=1, base_population_size=200, max_number_of_evaluations=100000)
