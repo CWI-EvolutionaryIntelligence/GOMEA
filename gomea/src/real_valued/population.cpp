@@ -234,12 +234,13 @@ void population_t::estimateDistributions()
 		{
 			mat full_covariance_matrix = distribution_t::estimateFullCovarianceMatrixML(selection, selection_size);
 			linkage_model->learnLinkageTreeFOS(full_covariance_matrix);
+			linkage_model->clearDistributions();
+			linkage_model->initializeDistributions();
 			linkage_model->shuffleFOS();
 			sampled_solutions = (partial_solution_t<double> ***)Malloc(linkage_model->size() * sizeof(partial_solution_t<double> **));
 			for (int j = 0; j < linkage_model->size(); j++)
 				sampled_solutions[j] = (partial_solution_t<double> **)Malloc(population_size * sizeof(partial_solution_t<double> *));
 		}
-		linkage_model->initializeDistributions();
 	}
 
 	assert( linkage_model->distributions.size() == linkage_model->size() );
