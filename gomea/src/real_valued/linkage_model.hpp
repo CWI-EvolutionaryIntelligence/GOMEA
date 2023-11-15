@@ -29,6 +29,7 @@ class linkage_model_rv_t : public linkage_model_t {
 			static std::shared_ptr<linkage_model_rv_t> from_file(std::string filename);
 
 			void initializeDistributions();
+			void clearDistributions();
 
 			double getAcceptanceRate(); 
 			double getDistributionMultiplier( int element_index );
@@ -38,7 +39,8 @@ class linkage_model_rv_t : public linkage_model_t {
 			void addConditionedGroup( vec_t<int> variables, std::set<int> conditioned_variables );
 			void randomizeOrder( const graph_t &variable_interaction_graph ); 
 
-			void learnLinkageTreeFOS(matE covariance_matrix);
+			void learnLinkageTreeFOS( matE covariance_matrix );
+			void learnLinkageTreeFOS( vec_t<vec_t<double>> similarity_matrix, bool include_full_fos_element );
 			vec_t<vec_t<double>> computeMIMatrix( matE covariance_matrix, int n );
 			void inheritDistributionMultipliers( linkage_model_rv_t *other, double *multipliers );
 			int *matchFOSElements( linkage_model_rv_t *other );
@@ -47,8 +49,8 @@ class linkage_model_rv_t : public linkage_model_t {
 			int determineNearestNeighbour(int index, double **S_matrix, int *mpm_num_ind, int mpm_length );
 			void ezilaitini();
 
-			void initializeNormalDistribution(int FOS_index);
-			void initializeConditionalDistribution( int FOS_index );
+			//void initializeNormalDistribution(int FOS_index);
+			//void initializeConditionalDistribution( int FOS_index );
 
 			partial_solution_t<double> *generatePartialSolution( int FOS_index, solution_t<double> *solution_conditioned_on, fitness::fitness_generic_t *fitness_function = NULL );
 			void estimateDistributions( solution_t<double> **selection, int selection_size );

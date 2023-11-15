@@ -44,15 +44,15 @@ cdef class LinkageTree(LinkageModel):
             raise AssertionError("Unknown similarity measure "+similarity_measure)
         self.c_inst = new linkage_config_t(similarity_index, filtered, maximum_set_size, is_static)
 
-cdef class Conditional(LinkageModel):
-    def __cinit__(self,
-        max_clique_size : int = 1,
-        cliques_as_fos_elements : bool = True,
-        include_full_fos_element : bool = True
-    ):
-        if not cliques_as_fos_elements and not include_full_fos_element:
-            raise AssertionError("At least one of input parameters 'cliques_as_fos_elements' or 'include_full_fos_element' must be True.")
-        self.c_inst = new linkage_config_t(max_clique_size,cliques_as_fos_elements,include_full_fos_element)
+#cdef class Conditional(LinkageModel):
+#    def __cinit__(self,
+#        max_clique_size : int = 1,
+#        cliques_as_fos_elements : bool = True,
+#        include_full_fos_element : bool = True
+#    ):
+#        if not cliques_as_fos_elements and not include_full_fos_element:
+#            raise AssertionError("At least one of input parameters 'cliques_as_fos_elements' or 'include_full_fos_element' must be True.")
+#        self.c_inst = new linkage_config_t(max_clique_size,cliques_as_fos_elements,include_full_fos_element)
 
 cdef class Custom(LinkageModel):
     def __cinit__(self,
@@ -76,14 +76,14 @@ cdef class Custom(LinkageModel):
         else:
             raise AssertionError("Constructor requires exactly 1 argument.")
 
-def UCondGG():
-    return Conditional(1,False,True)
+#def UCondGG():
+#    return Conditional(1,False,True)
 
-def UCondFG():
-    return Conditional(1,True,False)
+#def UCondFG():
+#    return Conditional(1,True,False)
 
-def UCondHG():
-    return Conditional(1,True,True)
+#def UCondHG():
+#    return Conditional(1,True,True)
 
 def MCondGG(*args,**kwargs):
     if len(args) == 1:

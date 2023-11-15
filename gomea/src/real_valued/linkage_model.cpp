@@ -246,11 +246,19 @@ linkage_model_rv_pt linkage_model_rv_t::from_file( std::string filename )
 	return( new_fos );
 }
 
-void linkage_model_rv_t::initializeDistributions()
+void linkage_model_rv_t::clearDistributions()
 {
 	distributions.clear();
-	for( vec_t<int> group : FOSStructure )
-		distributions.push_back( new normal_distribution_t(group) );
+}
+
+void linkage_model_rv_t::initializeDistributions()
+{
+	assert( distributions.size() == 0 || distributions.size() == FOSStructure.size() );
+	if( distributions.size() == 0 )
+	{
+		for( vec_t<int> group : FOSStructure )
+			distributions.push_back( new normal_distribution_t(group) );
+	}
 }
 			
 double linkage_model_rv_t::getDistributionMultiplier( int element_index )
@@ -294,6 +302,16 @@ void linkage_model_rv_t::learnLinkageTreeFOS( matE covariance_matrix )
 	/* Compute Mutual Information matrix */
 	vec_t<vec_t<double>> MI_matrix = computeMIMatrix( covariance_matrix, number_of_variables );
 	linkage_model_t::learnLinkageTreeFOS(MI_matrix,true);
+	clearDistributions();
+	initializeDistributions();
+}
+
+void linkage_model_rv_t::learnLinkageTreeFOS( vec_t<vec_t<double>> similarity_matrix, bool include_full_fos_element )
+{
+	assert( type == linkage::LINKAGE_TREE );
+	assert( !is_static );
+	linkage_model_t::learnLinkageTreeFOS(similarity_matrix,include_full_fos_element);
+	clearDistributions();
 	initializeDistributions();
 }
 
