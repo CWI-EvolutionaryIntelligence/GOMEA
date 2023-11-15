@@ -70,6 +70,7 @@ class solution_t
 		bool hasPartiallyEqualGenotype( const vec_t<T> &genotype, const vec_t<int> &indices );
 
 		void print();
+		std::string variablesToString();
 
 		size_t getAlphabetSize();
 		

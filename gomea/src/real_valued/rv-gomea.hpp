@@ -55,6 +55,7 @@ class rvg_t {
 		bool checkNumberOfGenerationsTerminationCondition( int population_index );
 		bool checkDistributionMultiplierTerminationCondition( int population_index );
 		std::vector<double> getOverallBestFitness();
+		solution_t<double> *getElitist();
 		void ezilaitini();
 		/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 

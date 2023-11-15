@@ -100,6 +100,17 @@ void population_t::runGeneration()
 	number_of_generations++;
 }
 
+solution_t<double> *population_t::getElitist()
+{
+    solution_t<double> *best_so_far = individuals[0];
+    for( int i = 1; i < population_size; i++ )
+    {
+        if( fitness->betterFitness( individuals[i], best_so_far ) )
+            best_so_far = individuals[i];
+    }
+    return best_so_far;
+}
+
 void population_t::updateElitist()
 {
 	solution_t<double> *best_so_far = individuals[0];
