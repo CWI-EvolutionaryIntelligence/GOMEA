@@ -287,6 +287,24 @@ void solution_t<T>::print()
 	printf("\n");
 }
 
+template<class T>
+std::string solution_t<T>::variablesToString()
+{
+    std::ostringstream stream;
+    stream << "[";
+    for( size_t i = 0; i < variables.size(); i++ ) {
+        stream << std::scientific << std::setprecision(16) << variables[i];
+
+        if (i < variables.size() - 1) {
+            stream << ", ";
+        } else {
+            stream << "]";
+        }
+    }
+
+    return stream.str();
+}
+
 template<>
 void solution_t<char>::print()
 {
