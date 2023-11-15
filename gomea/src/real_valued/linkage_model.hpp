@@ -39,7 +39,8 @@ class linkage_model_rv_t : public linkage_model_t {
 			void addConditionedGroup( vec_t<int> variables, std::set<int> conditioned_variables );
 			void randomizeOrder( const graph_t &variable_interaction_graph ); 
 
-			void learnLinkageTreeFOS(matE covariance_matrix);
+			void learnLinkageTreeFOS( matE covariance_matrix );
+			void learnLinkageTreeFOS( vec_t<vec_t<double>> similarity_matrix, bool include_full_fos_element );
 			vec_t<vec_t<double>> computeMIMatrix( matE covariance_matrix, int n );
 			void inheritDistributionMultipliers( linkage_model_rv_t *other, double *multipliers );
 			int *matchFOSElements( linkage_model_rv_t *other );
