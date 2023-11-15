@@ -5,7 +5,7 @@
 
 namespace gomea{
 
-typedef std::variant<int, double> metric_t;
+typedef std::variant<int, double, std::string> metric_t;
 
 class output_statistics_t
 {
@@ -14,6 +14,7 @@ class output_statistics_t
         
         void addMetricValue( std::string metric_name, int key, int value );
         void addMetricValue( std::string metric_name, int key, double value );
+        void addMetricValue( std::string metric_name, int key, std::string value );
         template<class T>
         void addMetricValueGeneric( std::string metric_name, int key, T value );
         

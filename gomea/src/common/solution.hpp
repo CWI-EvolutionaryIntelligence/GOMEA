@@ -67,6 +67,7 @@ class solution_t
 		void insertPartialSolution( partial_solution_t<T> *solution );
 
 		void print();
+		std::string variablesToString();
 
 		size_t getAlphabetSize();
 		
