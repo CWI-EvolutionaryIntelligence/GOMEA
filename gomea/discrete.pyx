@@ -11,7 +11,7 @@ from cpython.exc cimport PyErr_CheckSignals
 from tqdm import tqdm
 import inspect
 
-from gomea.fitness cimport FitnessFunction, GBOFitnessFunction
+from gomea.fitness cimport FitnessFunction, GBOFitnessFunction, BBOFitnessFunction
 include "gomea/EmbeddedFitness.pxi"
 
 # Create a Cython extension type which holds a C++ instance

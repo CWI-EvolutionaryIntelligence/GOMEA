@@ -52,7 +52,7 @@ cdef public double gomea_pyfitness_constraint_function_gbo(obj, vector[double] &
     return result 
 
 cdef public double gomea_pyfitness_objective_function_bbo_discrete(obj, int objective_index, vector[char] &variables ) except +:
-    fitness_obj = <FitnessFunction?>obj
+    fitness_obj = <BBOFitnessFunction?>obj
     
     cdef void *vec_ptr = &variables[0]
     cdef np.npy_intp shape[1]
@@ -63,7 +63,7 @@ cdef public double gomea_pyfitness_objective_function_bbo_discrete(obj, int obje
     return result
 
 cdef public double gomea_pyfitness_objective_function_bbo_realvalued(obj, int objective_index, vector[double] &variables ) except +:
-    fitness_obj = <FitnessFunction?>obj
+    fitness_obj = <BBOFitnessFunction?>obj
     
     cdef void *vec_ptr = &variables[0]
     cdef np.npy_intp shape[1]
@@ -74,7 +74,7 @@ cdef public double gomea_pyfitness_objective_function_bbo_realvalued(obj, int ob
     return result
 
 cdef public double gomea_pyfitness_constraint_function_bbo_discrete(obj, vector[char] &variables ) except +:
-    fitness_obj = <FitnessFunction?>obj
+    fitness_obj = <BBOFitnessFunction?>obj
     
     cdef void *vec_ptr = &variables[0]
     cdef np.npy_intp shape[1]
@@ -85,7 +85,7 @@ cdef public double gomea_pyfitness_constraint_function_bbo_discrete(obj, vector[
     return result 
 
 cdef public double gomea_pyfitness_constraint_function_bbo_realvalued(obj, vector[double] &variables ) except +:
-    fitness_obj = <FitnessFunction?>obj
+    fitness_obj = <BBOFitnessFunction?>obj
     
     cdef void *vec_ptr = &variables[0]
     cdef np.npy_intp shape[1]

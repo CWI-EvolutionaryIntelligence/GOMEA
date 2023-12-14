@@ -8,7 +8,7 @@ from libcpp.string cimport string
 from libcpp cimport bool
 import inspect
 
-from gomea.fitness cimport FitnessFunction, GBOFitnessFunction
+from gomea.fitness cimport FitnessFunction, GBOFitnessFunction, BBOFitnessFunction
 from gomea.linkage cimport LinkageModel, StaticLinkageTree
 include "gomea/EmbeddedFitness.pxi"
 

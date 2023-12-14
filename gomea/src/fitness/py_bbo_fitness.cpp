@@ -40,20 +40,20 @@ double pyBBOFitnessFunction_t<double>::objectiveFunction( int objective_index, v
 }
 
 template<>
-double pyBBOFitnessFunction_t<char>::constraintFunction( int objective_index, vec_t<char> &variables )
+double pyBBOFitnessFunction_t<char>::constraintFunction( vec_t<char> &variables )
 {
 	double result = gomea_pyfitness_constraint_function_bbo_discrete(py_class,variables);
 	if( result == 1e308 )
-		throw std::runtime_error("FitnessFunction does not implement constraint_function(int,vector[char]).");
+		throw std::runtime_error("FitnessFunction does not implement constraint_function(vector[char]).");
 	return result;
 }
 
 template<>
-double pyBBOFitnessFunction_t<double>::constraintFunction( int objective_index, vec_t<double> &variables )
+double pyBBOFitnessFunction_t<double>::constraintFunction( vec_t<double> &variables )
 {
 	double result = gomea_pyfitness_constraint_function_bbo_realvalued(py_class,variables);
 	if( result == 1e308 )
-		throw std::runtime_error("FitnessFunction does not implement constraint_function(int,vector[double]).");
+		throw std::runtime_error("FitnessFunction does not implement constraint_function(vector[double]).");
 	return result;
 }
 
