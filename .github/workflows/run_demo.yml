@@ -9,7 +9,6 @@ on:
 
 jobs:
   build:
-
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
 
@@ -27,13 +26,81 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
     - name: Install dependencies
       run: make install
+      shell: bash
 
     - name: Run check
       run: python3 demos/demo.py
+      shell: bash
     
     - uses: actions/upload-artifact@v3
       with:
         name: wheel
         path: dist/
+        
+  src-dist:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - name: "Windows Latest"
+            os: windows-latest            
+          - name: "Ubuntu Latest"
+            os: ubuntu-latest            
+          - name: "MacOS Latest"
+            os: macos-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install from source
+      run: make src-install
+      shell: bash
+
+    - name: Run check
+      run: python3 demos/demo.py
+      shell: bash
+      
+  wheel:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - name: "Windows Latest"
+            os: windows-latest            
+          - name: "Ubuntu Latest"
+            os: ubuntu-latest            
+          - name: "MacOS Latest"
+            os: macos-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Build wheel
+      run: make install
+      shell: bash
+
+    - name: Run check
+      run: python3 demos/demo.py
+      shell: bash

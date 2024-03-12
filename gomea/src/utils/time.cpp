@@ -67,6 +67,11 @@ double getElapsedTimeSinceStartSeconds()
 	return getElapsedTimeSeconds(start_time);
 }
 
+double getElapsedTimeSinceStartSeconds(time_t customStartTime)
+{
+	return getElapsedTimeSeconds(customStartTime);
+}
+
 double getElapsedTimeSinceStartMilliseconds()
 {
 	return getElapsedTimeMicroseconds(start_time)*1e-3;

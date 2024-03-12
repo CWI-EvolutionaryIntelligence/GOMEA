@@ -100,6 +100,17 @@ void population_t::runGeneration()
 	number_of_generations++;
 }
 
+solution_t<double> *population_t::getElitist()
+{
+    solution_t<double> *best_so_far = individuals[0];
+    for( int i = 1; i < population_size; i++ )
+    {
+        if( fitness->betterFitness( individuals[i], best_so_far ) )
+            best_so_far = individuals[i];
+    }
+    return best_so_far;
+}
+
 void population_t::updateElitist()
 {
 	solution_t<double> *best_so_far = individuals[0];
@@ -234,12 +245,13 @@ void population_t::estimateDistributions()
 		{
 			mat full_covariance_matrix = distribution_t::estimateFullCovarianceMatrixML(selection, selection_size);
 			linkage_model->learnLinkageTreeFOS(full_covariance_matrix);
+			linkage_model->clearDistributions();
+			linkage_model->initializeDistributions();
 			linkage_model->shuffleFOS();
 			sampled_solutions = (partial_solution_t<double> ***)Malloc(linkage_model->size() * sizeof(partial_solution_t<double> **));
 			for (int j = 0; j < linkage_model->size(); j++)
 				sampled_solutions[j] = (partial_solution_t<double> **)Malloc(population_size * sizeof(partial_solution_t<double> *));
 		}
-		linkage_model->initializeDistributions();
 	}
 
 	assert( linkage_model->distributions.size() == linkage_model->size() );
@@ -324,16 +336,16 @@ void population_t::generateAndEvaluateNewSolutions()
 
 		for(int k = num_elitists_to_copy; k < population_size; k++ )
 			sampled_solutions[FOS_index][k] = linkage_model->generatePartialSolution( FOS_index, individuals[k], fitness );
-		
+
 		if( number_of_generations > 0 )
 		{
 			for(int k = num_elitists_to_copy; k <= number_of_AMS_solutions; k++ )
 				applyPartialAMS( sampled_solutions[FOS_index][k], linkage_model->getDistributionMultiplier(FOS_index) );
 		}
-		
+
 		for(int k = num_elitists_to_copy; k < population_size; k++ )
 			fitness->evaluatePartialSolution( individuals[k], sampled_solutions[FOS_index][k] );
-		
+
 		int num_improvements = 0;
 		bool *accept_improvement = new bool[population_size];
 		for(int k = num_elitists_to_copy; k < population_size; k++ )
@@ -653,7 +665,11 @@ void population_t::initializeFOS( linkage_config_t *linkage_config )
 		sampled_solutions = (partial_solution_t<double> ***)Malloc(linkage_model->size() * sizeof(partial_solution_t<double> **));
 		for (int j = 0; j < linkage_model->size(); j++)
 			sampled_solutions[j] = (partial_solution_t<double> **)Malloc(population_size * sizeof(partial_solution_t<double> *));
-		linkage_model->initializeDistributions();
+
+        if( !(linkage_config->type == linkage::CONDITIONAL) )
+        {
+		    linkage_model->initializeDistributions();
+		}
 	}
 	//linkage_model->printFOS();
 }

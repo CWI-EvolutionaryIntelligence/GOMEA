@@ -28,6 +28,11 @@ class OutputStatistics:
                 return stats.c_ptr[0].getMetricValues[double](metric_name)
             except Exception as err:
                 pass
+            try:
+                b_result = stats.c_ptr[0].getMetricValues[string](metric_name)
+                return [byte_string.decode('utf-8') for byte_string in b_result]
+            except Exception as err:
+                pass
 
         for metric_name in self.metrics:
             s_metric_name = metric_name.decode()

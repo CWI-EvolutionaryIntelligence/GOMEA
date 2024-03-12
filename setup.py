@@ -1,6 +1,6 @@
 VERSION_MAJOR = 1
 VERSION_MINOR = 0
-VERSION_PATCH = 1
+VERSION_PATCH = 4
 VERSION_STRING = '%s.%s.%s' % (VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)
 __version__ = VERSION_STRING
 
@@ -38,13 +38,11 @@ if platform.system() == "Darwin":
 
 if platform.system() == "Windows":
         compile_args = ["/std:c++17"]
-        link_args = ["/std:c++17"]
+        link_args = []
         if debug_mode:
                 compile_args.extend(['/UNDEBUG','/Zi','/g0'])
-                link_args.extend(['/UNDEBUG','/Zi','/g0'])
         else:
                 compile_args.extend(['/O2'])
-                link_args.extend(['/O2'])
 
 extensions = []
 
@@ -106,6 +104,7 @@ setup(
         include_path = ["."] + [np.get_include()],
         gdb_debug = debug_mode,
         language_level = "3"),
+    python_requires='<3.12',
     install_requires=["numpy>=1.23.0","tqdm"],
     zip_safe = False
 )

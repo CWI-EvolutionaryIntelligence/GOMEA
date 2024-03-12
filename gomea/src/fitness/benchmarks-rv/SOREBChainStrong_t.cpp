@@ -26,7 +26,7 @@ int SOREBChainStrong_t::getNumberOfSubfunctions()
 
 vec_t<int> SOREBChainStrong_t::inputsToSubfunction( int subfunction_index )
 {
-	vec_t<int> vec(2);
+	vec_t<int> vec;
 	vec.push_back(subfunction_index);
 	vec.push_back(subfunction_index+1);
 	return vec;
