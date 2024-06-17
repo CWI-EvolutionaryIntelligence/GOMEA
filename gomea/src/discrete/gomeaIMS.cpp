@@ -76,7 +76,7 @@ void gomeaIMS::run()
 		}
 	}
 	catch( utils::terminationException const& e){
-		std::cout << e.what() << std::endl;
+		//std::cout << e.what() << std::endl;
 	}
 	hasTerminated = true;
 	assert( numberOfGOMEAs > 0 );

@@ -43,9 +43,6 @@ class fitness_t : public fitness_generic_t
 		double  maximum_number_of_evaluations = -1.0,
 				maximum_number_of_seconds = -1.0;
 
-        // Own copy of execution start time, for correct time condition checks
-		time_t start_time;
-
 		// Gray-box specific
 		std::map<int,std::set<int>> variable_interaction_graph; // VIG[i] lists all variables dependent on variable x_i, excluding itself
 		std::map<int,std::set<int>> subfunction_dependency_map; // map[i] lists all subfunctions dependent on variable x_i
