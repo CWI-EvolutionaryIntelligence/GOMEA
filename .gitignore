@@ -8,9 +8,9 @@
 **.json
 **/problem_data/
 **/__pycache__/
-**/cython/*.cpp
-**/cython/*.h
-**/cython/*.hpp
+*.cpp
+*.h
+*.hpp
 **/*.dat
 build/
 dist/
