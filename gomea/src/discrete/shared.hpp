@@ -11,7 +11,6 @@ namespace discrete{
 class sharedInformation
 {
 	public:
-		time_t startTime;
 		double elitistSolutionHittingTimeMilliseconds,
 			   elitistSolutionHittingTimeEvaluations;
 
@@ -23,7 +22,6 @@ class sharedInformation
 
     sharedInformation(int maxArchiveSize)
     {
-        startTime = utils::getTimestamp();
         firstEvaluationEver = true;
         evaluatedSolutions = new solutionsArchive(maxArchiveSize);
         gomea::utils::clearTimers();
