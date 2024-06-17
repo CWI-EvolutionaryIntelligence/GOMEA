@@ -409,7 +409,7 @@ bool Population::FI(size_t offspringIndex)
 
 void Population::checkTimeLimit()
 {
-    if ( config->maximumNumberOfSeconds > 0 && utils::getElapsedTimeSeconds(sharedInformationPointer->startTime) > config->maximumNumberOfSeconds)
+    if ( config->maximumNumberOfSeconds > 0 && utils::getElapsedTimeSeconds(utils::start_time) > config->maximumNumberOfSeconds)
     {
         terminated = true;
         throw utils::terminationException("time");
@@ -429,7 +429,7 @@ void Population::updateElitistAndCheckVTR(solution_t<char> *solution)
     //if (sharedInformationPointer->firstEvaluationEver || (solution->getObjectiveValue() > sharedInformationPointer->elitist.getObjectiveValue()))
     if (sharedInformationPointer->firstEvaluationEver || problemInstance->betterFitness(solution,&sharedInformationPointer->elitist) )
     {
-        sharedInformationPointer->elitistSolutionHittingTimeMilliseconds = utils::getElapsedTimeMilliseconds(sharedInformationPointer->startTime);
+        sharedInformationPointer->elitistSolutionHittingTimeMilliseconds = utils::getElapsedTimeMilliseconds(utils::start_time);
         sharedInformationPointer->elitistSolutionHittingTimeEvaluations = problemInstance->number_of_evaluations;
 
         sharedInformationPointer->elitist = *solution;

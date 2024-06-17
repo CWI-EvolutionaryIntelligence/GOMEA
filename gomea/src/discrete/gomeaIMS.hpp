@@ -26,7 +26,6 @@ public:
         numberOfStatisticsWrites = 0;
 	bool isInitialized = false,
         hasTerminated = false;
-    time_t start_time;
 	output_statistics_t output;
 
     Config *config;

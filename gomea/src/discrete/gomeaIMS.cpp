@@ -75,7 +75,9 @@ void gomeaIMS::run()
 			numberOfGenerationsIMS++;
 		}
 	}
-	catch( utils::terminationException const& ){}
+	catch( utils::terminationException const& e){
+		//std::cout << e.what() << std::endl;
+	}
 	hasTerminated = true;
 	assert( numberOfGOMEAs > 0 );
 	writeStatistics(numberOfGOMEAs - 1);
