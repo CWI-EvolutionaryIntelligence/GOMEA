@@ -26,6 +26,7 @@ cdef class RealValuedGOMEA:
         linkage_model : LinkageModel = StaticLinkageTree(),
         lower_init_range: float = 0.0,
         upper_init_range: float = 1.0,
+        fitness_variance_tolerance: float=1e-20,
         random_seed: int=-1,
         verbose: bool=False,
         # IMS settings (optional)
@@ -50,7 +51,7 @@ cdef class RealValuedGOMEA:
         self.c_config.tau = 0.35
         self.c_config.distribution_multiplier_decrease = 0.9
         self.c_config.st_dev_ratio_threshold = 1.0
-        self.c_config.fitness_variance_tolerance = 0.0
+        self.c_config.fitness_variance_tolerance = fitness_variance_tolerance
         self.c_config.maximum_no_improvement_stretch = 100
         self.c_config.selection_during_gom = True
         self.c_config.update_elitist_during_gom = True 
