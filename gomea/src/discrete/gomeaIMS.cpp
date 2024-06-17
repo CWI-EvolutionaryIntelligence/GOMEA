@@ -308,6 +308,11 @@ void gomeaIMS::writeStatistics( int population_index )
     double population_constraint_var = GOMEAs[population_index]->getConstraintValueVariance();
     solution_t<double> *best_solution = GOMEAs[population_index]->getBestSolution();
     solution_t<double> *worst_solution = GOMEAs[population_index]->getWorstSolution();*/
+	if ( GOMEAs.size() <= population_index )
+	{
+		// GOMEA in question has terminated already - no statistics available to save.
+		return;
+	}
 
 	assert( sharedInformationInstance != NULL );
 	int key = numberOfStatisticsWrites;
