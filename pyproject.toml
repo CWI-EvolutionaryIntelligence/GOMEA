@@ -1,3 +1,15 @@
 [build-system]
-requires = ["setuptools", "wheel", "numpy>=1.23.0", "Cython<=0.29.32"] 
-build-backend = "setuptools.build_meta"
+build-backend = 'mesonpy'
+requires = ['meson-python', 'numpy>=1.23.0', 'Cython<=0.29.32']
+
+[project]
+name = 'gomea'
+version = '1.0.5'
+description = 'Library for the use of various variants of the Gene-pool Optimal Mixing Evolutionary Algorithm (GOMEA).'
+readme = 'README.md'
+requires-python = '>=3.8'
+license = {file = 'LICENSE'}
+authors = [
+  {name = 'Anton Bouter', email = 'Anton.Bouter@cwi.nl'},
+]
+url = 'https://github.com/abouter/gomea'
