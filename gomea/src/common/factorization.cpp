@@ -21,16 +21,14 @@ factorization_t::factorization_t( const vec_t<int> &variables, const std::set<in
 	addGroupOfVariables(variables,conditioned_variables);
 }
 
-void factorization_t::addGroupOfVariables( vec_t<int> indices, vec_t<int> indices_cond )
+void factorization_t::addGroupOfVariables( const vec_t<int> &indices, const vec_t<int> &indices_cond )
 {
-	std::sort(indices.begin(),indices.end());
-	std::sort(indices_cond.begin(),indices_cond.end());
 	for( int i : indices )
 		variables.push_back(i);
-	std::sort(variables.begin(),variables.end());
 	for( int i : indices_cond )
 		variables_conditioned_on.push_back(i);
-	sampling_order.push_back(sampling_order.size());
+	std::sort(variables.begin(),variables.end());
+	std::sort(variables_conditioned_on.begin(),variables_conditioned_on.end());
 }
 
 void factorization_t::addGroupOfVariables( const vec_t<int> &indices, const std::set<int> &indices_cond )
@@ -80,11 +78,7 @@ void factorization_t::updateConditionals( const std::map<int,std::set<int>> &var
 	
 	for( int x : cond )
 		variables_conditioned_on.push_back(x);
-}
-
-void factorization_t::setOrder( const vec_t<int> &sampling_order ) 
-{
-	this->sampling_order = sampling_order;
+	std::sort(variables_conditioned_on.begin(), variables_conditioned_on.end());
 }
 
 void factorization_t::initializeFrequencyTables( const vec_t<solution_t<char>*> &population ) 
@@ -116,7 +110,7 @@ vec_t<char> factorization_t::samplePartialSolutionConditional( solution_t<char> 
 	return samplePartialSolutionConditional(parent->variables, population, parent_index);
 }
 
-vec_t<char> factorization_t:: samplePartialSolutionConditional( const vec_t<char> &parent, const vec_t<solution_t<char>*> &population, int parent_index ) 
+vec_t<char> factorization_t::samplePartialSolutionConditional( const vec_t<char> &parent, const vec_t<solution_t<char>*> &population, int parent_index ) 
 {
 	vec_t<char> sample; // In the same order as 'variables'
 	vec_t<int> donorIndices(population.size());
@@ -125,51 +119,31 @@ vec_t<char> factorization_t:: samplePartialSolutionConditional( const vec_t<char
 		printf("%d ",variables[i]);
 	printf("\n");*/
 
-	//int og = sampling_order[i];
 	std::shuffle(donorIndices.begin(),donorIndices.end(),utils::rng);
-	int donors_tried = 0;
 	// Find a donor that is different from the parent and is a suitable conditioned donor for the parent
+	int donors_tried = 0;
+	int donor_index = -1; 
 	while( donors_tried < population.size() )
 	{
-		int donor_index = donorIndices[donors_tried];
+		donor_index = donorIndices[donors_tried];
 		if( donor_index != parent_index &&
 			!population[donor_index]->hasPartiallyEqualGenotype(parent, this->variables) &&
 			isConditionedDonor(population[donor_index], parent) ) 
 		{
-			for( int x : variables )
-				sample.push_back(population[donor_index]->variables[x]);
-			//printf("Donor found.\n");
-			break;
+			break; // Suitable donor found
 		}
 		donors_tried++;
 	}
 	if( donors_tried == population.size() ) // No suitable donor was found - take random solution from population
 	{
-		/*if( config->verbose )
-		{
-			printf("Random donor.\n");
-			printf("P: ");
-			for( int j = 0; j < parent.size(); j++ )
-			{
-				bool is_donated = false;
-				for( int x : variables )
-					if( j == x ) is_donated = true;
-				
-				if( is_donated ) printf("*");
-				printf("%d", parent[j]);
-				if( is_donated ) printf("* ");
-				else printf(" ");
-			}
-			printf("\n");
-		}*/
-
-		int donor_index = donorIndices[0]; // First index is a random solution, as donorIndices was shuffled
-		// Insert into parent
-		for( int x : variables )
-		{
-			sample.push_back(population[donor_index]->variables[x]);
-			assert(x == variables[sample.size()-1] ); // check if the order of the indices in 'variables' is the same as the 'variable_groups' when concatenated
-		}
+		donor_index = donorIndices[0]; // First index is a random solution, as donorIndices was shuffled
+	}
+		
+	// Insert into parent
+	for( int x : variables )
+	{
+		sample.push_back(population[donor_index]->variables[x]);
+		assert(x == variables[sample.size()-1] ); // check if the order of the indices in 'variables' is the same as the 'variable_groups' when concatenated
 	}
 	
 	assert( sample.size() == variables.size() );

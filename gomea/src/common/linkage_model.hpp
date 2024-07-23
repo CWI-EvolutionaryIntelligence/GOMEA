@@ -107,7 +107,6 @@ protected:
 	vec_t<factorization_t*> cond_factors; // Correspond to FOS elements for 'FG' conditional linkage models
     vec_t<int> condfact_order;
     graph_t condfact_interaction_graph;
-	factorization_t* full_factorization = NULL;
     
     int max_clique_size;
     bool include_cliques_as_fos_elements;
