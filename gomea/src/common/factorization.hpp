@@ -16,12 +16,11 @@ class factorization_t{
 		factorization_t( const vec_t<int> &variables, const vec_t<int> &conditioned_variables );
 		factorization_t( const vec_t<int> &variables, const std::set<int> &conditioned_variables );
 
-		vec_t<int> sampling_order;
 		vec_t<int> variables;
 		vec_t<int> variables_conditioned_on;
 		vec_t<vec_t<int>> frequency_tables;
 
-		void addGroupOfVariables( vec_t<int> indices, vec_t<int> indices_cond = vec_t<int>() );
+		void addGroupOfVariables( const vec_t<int> &indices, const vec_t<int> &indices_cond = vec_t<int>() );
 		void addGroupOfVariables( const vec_t<int> &indices, const std::set<int> &indices_cond );
 		void addGroupOfVariables( int index, const vec_t<int> &indices_cond );
 		void addGroupOfVariables( int index, int index_cond );

@@ -664,7 +664,7 @@ void population_t::initializeFOS( linkage_config_t *linkage_config )
 		}
 		sampled_solutions = (partial_solution_t<double> ***)utils::Malloc(linkage_model->size() * sizeof(partial_solution_t<double> **));
 		for (int j = 0; j < linkage_model->size(); j++)
-			sampled_solutions[j] = (partial_solution_t<double> **)Malloc(population_size * sizeof(partial_solution_t<double> *));
+			sampled_solutions[j] = (partial_solution_t<double> **)utils::Malloc(population_size * sizeof(partial_solution_t<double> *));
 
         if( !(linkage_config->type == linkage::CONDITIONAL) )
         {
