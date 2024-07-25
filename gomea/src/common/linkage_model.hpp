@@ -11,7 +11,7 @@
 #include <random>
 #include <memory>
 
-#include "gomea/src/common/factorization.hpp"
+#include "gomea/src/common/cond_factor.hpp"
 #include "gomea/src/common/linkage_config.hpp"
 #include "gomea/src/common/solution.hpp"
 #include "gomea/src/fitness/fitness.hpp"
@@ -68,7 +68,6 @@ public:
 
     void addGroup(int var_index);
     void addGroup(const std::set<int> &group);
-    void addGroup( factorization_t *fact );
     virtual void addGroup( vec_t<int> group );
     void addConditionedGroup(vec_t<int> variables);
     virtual void addConditionedGroup(vec_t<int> variables, std::set<int> conditioned_variables);
@@ -104,9 +103,9 @@ protected:
     bool filtered;
     int similarityMeasure;
 
-	vec_t<factorization_t*> cond_factors; // Correspond to FOS elements for 'FG' conditional linkage models
-    vec_t<int> condfact_order;
-    graph_t condfact_interaction_graph;
+	vec_t<cond_factor*> factorization; // Correspond to FOS elements for 'FG' conditional linkage models
+    vec_t<int> factorization_order;
+    graph_t factorization_interaction_graph;
     
     int max_clique_size;
     bool include_cliques_as_fos_elements;
