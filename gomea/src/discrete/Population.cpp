@@ -240,6 +240,8 @@ void Population::generateOffspring()
 		FOSInstance->determineParallelFOSOrder(problemInstance->variable_interaction_graph );
     }
         
+    if(config->verbose)
+        printf("Generation %d\n",numberOfGenerations);
     if (config->verbose && (FOSInstance->is_conditional || config->useParallelFOSOrder || config->fixFOSOrderForPopulation) )
         FOSInstance->printFOS();
 
@@ -268,9 +270,6 @@ void Population::generateOffspring()
         else
             noImprovementStretches[i] = 0;
     }
-    
-    if( config->verbose )
-        print();
 }
 
 bool Population::GOM(size_t offspringIndex)
