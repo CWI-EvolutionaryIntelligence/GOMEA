@@ -103,7 +103,7 @@ protected:
     bool filtered;
     int similarityMeasure;
 
-	vec_t<cond_factor*> factorization; // Correspond to FOS elements for 'FG' conditional linkage models
+	vec_t<cond_factor_t*> factorization; // Correspond to FOS elements for 'FG' conditional linkage models
     vec_t<int> factorization_order;
     graph_t factorization_interaction_graph;
     
