@@ -257,16 +257,12 @@ partial_solution_t<double> *cond_factor_Rt::generatePartialSolution( solution_t<
 {
 	vec_t<double> result = vec_t<double>(variables.size());
 	vec_t<double> means = vec_t<double>(variables.size());
-	std::unordered_map<int,int> sampled_indices;
 	
-	vec_t<int> indices = variable_groups[og];
-	int num_indices = indices.size();
-
 	int times_not_in_bounds = -1;
 	out_of_bounds_draws--;
 
 	vecE sample_result;
-	vecE sample_means = vecE(mean_vectors[og].size());
+	vecE sample_means = vecE(mean_vector.size());
 	bool ready = false;
 	do
 	{
@@ -284,10 +280,10 @@ partial_solution_t<double> *cond_factor_Rt::generatePartialSolution( solution_t<
 				printf("%10.3e ",sample_means[i]);
 			printf("\n");
 			for (size_t i = 0; i < sample_result.size(); i++)
-				printf("%10.3e ",fitness_function->getLowerRangeBound(indices[i]));
+				printf("%10.3e ",fitness_function->getLowerRangeBound(variables[i]));
 			printf("\n");
 			for (size_t i = 0; i < sample_result.size(); i++)
-				printf("%10.3e ",fitness_function->getUpperRangeBound(indices[i]));
+				printf("%10.3e ",fitness_function->getUpperRangeBound(variables[i]));
 			printf("\n");
 			exit(1);
 			/*vecE sample_result = vec(num_indices, fill::none);
@@ -300,38 +296,21 @@ partial_solution_t<double> *cond_factor_Rt::generatePartialSolution( solution_t<
 		}
 		else
 		{
-			for( int i = 0; i < mean_vectors[og].size(); i++ )
-				sample_means(i) = mean_vectors[og][i];
+			for( int i = 0; i < mean_vector.size(); i++ )
+				sample_means[i] = mean_vector[i];
 
-			vec_t<int> indices_cond = variables_conditioned_on[og];
-			int num_indices_cond = indices_cond.size();
-			/*printf("means_nc ");
-			for( double x : sample_means )
-				printf("%10.3e ",x);
-			printf("\n");*/
+			int num_indices_cond = variables_conditioned_on.size();
 			if( num_indices_cond > 0 )
 			{
-				vecE cond = vecE(num_indices_cond );
+				vecE cond = vecE(num_indices_cond);
 				for(int i = 0; i < num_indices_cond; i++ )
-				{
-					auto it = sampled_indices.find(indices_cond[i]);
-					if( it != sampled_indices.end() )
-					{
-						assert( variables[it->second] == indices_cond[i] );
-						cond[i] = result[it->second];
-					}
-					else
-						cond[i] = solution_conditioned_on->variables[indices_cond[i]];
-					cond[i] = cond[i] - mean_vectors_conditioned_on[og][i];
-				}
-				vecE sample_mean_inc = rho_matrices[og]*cond;
-				for(int i = 0; i < num_indices_cond; i++ )
-				{
+					cond[i] = solution_conditioned_on->variables[variables_conditioned_on[i]] - mean_vector_conditioned_on[i];
+				vecE sample_mean_inc = rho_matrix*cond;
+				for(int i = 0; i < mean_vector.size(); i++ )
 					sample_means[i] += sample_mean_inc[i];
-				}
 			}
-			vecE sample_zs = random1DNormalUnitVector(num_indices);
-			sample_result = sample_means + cholesky_decompositions[og] * sample_zs;
+			vecE sample_zs = utils::random1DNormalUnitVector(variables.size());
+			sample_result = sample_means + cholesky_decomposition * sample_zs;
 		}
 
 		ready = true;
@@ -339,7 +318,7 @@ partial_solution_t<double> *cond_factor_Rt::generatePartialSolution( solution_t<
 		{
 			for (size_t i = 0; i < sample_result.size(); i++)
 			{
-				if (!fitness_function->isParameterInRangeBounds(sample_result[i], indices[i]))
+				if (!fitness_function->isParameterInRangeBounds(sample_result[i], variables[i]))
 				{
 					ready = false;
 					break;
@@ -349,12 +328,10 @@ partial_solution_t<double> *cond_factor_Rt::generatePartialSolution( solution_t<
 	}
 	while( !ready );
 	
-	for( int i = 0; i < num_indices; i++ )
+	for( int i = 0; i < variables.size(); i++ )
 	{
-		assert( indices[i] == variables[index_in_var_array[og][i]] );
-		result[index_in_var_array[og][i]] = sample_result[i];
-		means[index_in_var_array[og][i]] = sample_means[i];
-		sampled_indices[indices[i]] = index_in_var_array[og][i];
+		result[i] = sample_result[i];
+		means[i] = sample_means[i];
 	}
 
 	partial_solution_t<double> *sol_res = new partial_solution_t<double>(result,variables);
