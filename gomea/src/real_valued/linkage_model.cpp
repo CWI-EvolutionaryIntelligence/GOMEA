@@ -196,6 +196,9 @@ linkage_model_rv_t::linkage_model_rv_t( size_t number_of_variables, const graph_
 		else
 			delete full_cond;
 	}
+	FOSorder = vec_t<int>(size());
+	for(int i = 0; i < size(); i++)
+ 		FOSorder[i] = i;
 }
 
 linkage_model_rv_t::~linkage_model_rv_t()
