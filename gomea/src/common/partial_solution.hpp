@@ -19,6 +19,7 @@ class partial_solution_t
 
 		partial_solution_t( int num_touched_variables );
 		partial_solution_t( const vec_t<T> &touched_variables, const vec_t<int> &touched_indices );
+		partial_solution_t( vec_t<double> &touched_variables, vec_t<double> &sample_zs, vec_t<int> &touched_indices );
 
 		void initMemory( int number_of_fitness_buffers, int number_of_objectives );
 		void initObjectiveValues( int number_of_objectives );
@@ -46,7 +47,15 @@ class partial_solution_t
 		
 		int getTouchedIndex( int ind );
 
+		void setSampleMean( vec_t<T> &means );
+
 		void print();
+
+		vec_t<T> sample_zs; // Samples z~N(0,I), later transformed to N(mu,C)
+		vec_t<T> sample_means;
+
+		bool is_accepted = false;
+		bool improves_elitist = false;
 
 	private:
 		vec_t<double> objective_values;

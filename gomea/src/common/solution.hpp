@@ -76,6 +76,7 @@ class solution_t
 		
 		vec_t<T> variables;
 		vec_t<double> fitness_buffers;
+		int NIS = 0;
 
 	private:
 		vec_t<double> objective_values;

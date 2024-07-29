@@ -3,8 +3,6 @@
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-= Section Includes -=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 #include "gomea/src/fitness/fitness.hpp"
 #include "gomea/src/real_valued/tools.hpp"
-#include "gomea/src/real_valued/partial_solutionRV.hpp"
-#include "gomea/src/real_valued/solutionRV.hpp"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
 namespace gomea{

@@ -250,6 +250,16 @@ linkage_model_rv_pt linkage_model_rv_t::from_file( std::string filename )
 	linkage_model_rv_pt new_fos = std::shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(filename));
 	return( new_fos );
 }
+
+void linkage_model_rv_t::addConditionedGroup( std::vector<int> variables, std::set<int> conditioned_variables )
+{
+	std::sort(variables.begin(),variables.end());
+	if( include_cliques_as_fos_elements )	
+		FOSStructure.push_back(variables);
+	
+	cond_factor_Rt *fact = new cond_factor_Rt(variables,conditioned_variables);
+	factorization.push_back( fact );
+}
 			
 double linkage_model_rv_t::getDistributionMultiplier( int element_index )
 {
@@ -409,7 +419,7 @@ void linkage_model_rv_t::estimateDistributions( solution_t<double> **selection, 
 
 void linkage_model_rv_t::estimateDistribution( int FOS_index, solution_t<double> **selection, int selection_size )
 {
-	distributions[FOS_index]->estimateDistribution(selection,selection_size);
+	factorization[FOS_index]->estimateDistribution(selection,selection_size,distribution_multipliers[FOS_index]);
 }
 
 void linkage_model_rv_t::adaptDistributionMultiplier( int FOS_index, partial_solution_t<double> **solutions, int num_solutions )
@@ -419,5 +429,53 @@ void linkage_model_rv_t::adaptDistributionMultiplier( int FOS_index, partial_sol
 	else
 		distributions[FOS_index]->adaptDistributionMultiplier(solutions,num_solutions);
 }
+
+bool linkage_model_rv_t::generationalImprovementForOnePopulationForFOSElement( partial_solution_t<double>** partial_solutions, int num_solutions, double *st_dev_ratio )
+{
+	*st_dev_ratio = 0.0;
+	bool generational_improvement = false;
+
+	for( size_t k = 0; k < factorization.size(); k++ )
+	{	
+		vec_t<int> indices = variable_groups[k];
+		int num_indices = variable_groups[k].size();
+		int number_of_improvements  = 0;
+
+		std::vector<double> average_z_of_improvements(num_indices,0.0);
+		
+		//matE cholinv = pseudoInverse( trimatl( cholesky_decompositions[k] ) );
+		matE cholinv = utils::pinv(cholesky_decompositions[k].triangularView<Eigen::Lower>());
+		vecE sample_means( num_indices );
+		for(int i = 0; i < num_solutions; i++ )
+		{
+			if( partial_solutions[i]->improves_elitist )
+			{
+				number_of_improvements++;
+				for(int j = 0; j < num_indices; j++ )
+				{
+					int ind = index_in_var_array[k][j];
+					sample_means[j] = partial_solutions[i]->touched_variables[ind] - partial_solutions[i]->sample_means[ind];
+				}
+				vecE z = cholinv * sample_means; //(partial_solutions[i]->touched_variables - partial_solutions[i]->sample_means);
+				for(int j = 0; j < num_indices; j++ )
+					average_z_of_improvements[j] += z[j];
+			}
+		}
+	
+		// Determine st.dev. ratio
+		if( number_of_improvements > 0 )
+		{
+			for(int i = 0; i < num_indices; i++ )
+			{
+				average_z_of_improvements[i] /= (double) number_of_improvements;
+				*st_dev_ratio = std::max( *st_dev_ratio, std::abs(average_z_of_improvements[i]) );
+			}
+			generational_improvement = true;
+		}
+	}
+	
+	return( generational_improvement );
+}
+
 
 }}

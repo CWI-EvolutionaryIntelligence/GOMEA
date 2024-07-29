@@ -5,7 +5,6 @@
 #include "gomea/src/utils/tools.hpp"
 #include "gomea/src/real_valued/tools.hpp"
 #include "gomea/src/real_valued/distribution.hpp"
-#include "gomea/src/real_valued/partial_solutionRV.hpp"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
 namespace gomea{
@@ -28,6 +27,8 @@ class linkage_model_rv_t : public linkage_model_t {
 			static std::shared_ptr<linkage_model_rv_t> custom_fos(size_t numberOfvariables_, const vec_t<vec_t<int>> &FOS);
 			static std::shared_ptr<linkage_model_rv_t> from_file(std::string filename);
 
+			void addConditionedGroup( std::vector<int> variables, std::set<int> conditioned_variables ) override;
+
 			void initializeDistributions();
 			void clearDistributions();
 
@@ -46,14 +47,16 @@ class linkage_model_rv_t : public linkage_model_t {
 			void estimateDistribution( int FOS_index, solution_t<double> **selection, int selection_size );
 			void adaptDistributionMultiplier( int FOS_index, partial_solution_t<double> **solutions, int num_solutions );
 
-			vec_t<distribution_t*> distributions;
-			int no_improvement_stretch = 0;
-			int maximum_no_improvement_stretch = 100;
-			
-			double p_accept = 0.05;
-			//vec_t<uvec> variables_conditioned_on; 
+			bool generationalImprovementForOnePopulationForFOSElement( partial_solution_t<double>** partial_solutions, int num_solutions, double *st_dev_ratio );
 
 			void print();
+
+			int no_improvement_stretch = 0;
+
+			int maximum_no_improvement_stretch = 100;
+			double p_accept = 0.05;
+
+			std::vector<double> distribution_multipliers;
 
 			int *next_variable_to_sample = NULL;
 

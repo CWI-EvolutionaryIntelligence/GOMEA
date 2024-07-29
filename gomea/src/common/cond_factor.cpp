@@ -81,19 +81,31 @@ void cond_factor_t::updateConditionals( const std::map<int,std::set<int>> &varia
 	std::sort(variables_conditioned_on.begin(), variables_conditioned_on.end());
 }
 
-void cond_factor_t::initializeFrequencyTables( const vec_t<solution_t<char>*> &population ) 
+void cond_factor_t::print()
+{
+	printf("[");
+	for( int x : variables )
+		printf(" %d",x);
+	printf("]->[");
+	for( int x : variables_conditioned_on )
+		printf(" %d",x);
+	printf("]\n");
+}
+
+
+void cond_factor_Dt::initializeFrequencyTables( const vec_t<solution_t<char>*> &population ) 
 {
 	vec_t<vec_t<int>> donor_list;
 	// TODO
 	assert(0);
 }
 
-bool cond_factor_t::isConditionedDonor( solution_t<char> *donor_candidate, solution_t<char> *parent )
+bool cond_factor_Dt::isConditionedDonor( solution_t<char> *donor_candidate, solution_t<char> *parent )
 {
 	return isConditionedDonor(donor_candidate, parent->variables);
 }
 
-bool cond_factor_t::isConditionedDonor( solution_t<char> *donor_candidate, const vec_t<char> &parent )
+bool cond_factor_Dt::isConditionedDonor( solution_t<char> *donor_candidate, const vec_t<char> &parent )
 {
 	for (int gene_ind : variables_conditioned_on)
 	{
@@ -105,12 +117,12 @@ bool cond_factor_t::isConditionedDonor( solution_t<char> *donor_candidate, const
 	return true;
 }
 
-vec_t<char> cond_factor_t::samplePartialSolutionConditional( solution_t<char> *parent, const vec_t<solution_t<char>*> &population, int parent_index ) 
+vec_t<char> cond_factor_Dt::samplePartialSolutionConditional( solution_t<char> *parent, const vec_t<solution_t<char>*> &population, int parent_index ) 
 {
 	return samplePartialSolutionConditional(parent->variables, population, parent_index);
 }
 
-vec_t<char> cond_factor_t::samplePartialSolutionConditional( const vec_t<char> &parent, const vec_t<solution_t<char>*> &population, int parent_index ) 
+vec_t<char> cond_factor_Dt::samplePartialSolutionConditional( const vec_t<char> &parent, const vec_t<solution_t<char>*> &population, int parent_index ) 
 {
 	vec_t<char> sample; // In the same order as 'variables'
 	vec_t<int> donorIndices(population.size());
@@ -149,18 +161,6 @@ vec_t<char> cond_factor_t::samplePartialSolutionConditional( const vec_t<char> &
 	assert( sample.size() == variables.size() );
 
 	return sample;
-}
-
-
-void cond_factor_t::print()
-{
-	printf("[");
-	for( int x : variables )
-		printf(" %d",x);
-	printf("]->[");
-	for( int x : variables_conditioned_on )
-		printf(" %d",x);
-	printf("]\n");
 }
 
 double cond_factor_Rt::estimateMean( int var, solution_t<double> **selection, int selection_size )
@@ -212,7 +212,7 @@ matE cond_factor_Rt::estimateCovarianceMatrixML( vec_t<int> &variables, solution
 	return( covariance_matrix );
 }
 
-void cond_factor_Rt::estimateDistribution( solution_t<double> **selection, int selection_size )
+void cond_factor_Rt::estimateDistribution( solution_t<double> **selection, int selection_size, double distribution_multiplier )
 {
 	int n = variables.size();
 	samples_drawn = 0;
@@ -337,53 +337,6 @@ partial_solution_t<double> *cond_factor_Rt::generatePartialSolution( solution_t<
 	partial_solution_t<double> *sol_res = new partial_solution_t<double>(result,variables);
 	sol_res->setSampleMean(means);
 	return(sol_res);
-}
-
-bool cond_factor_Rt::generationalImprovementForOnePopulationForFOSElement( partial_solution_t<double>** partial_solutions, int num_solutions, double *st_dev_ratio )
-{
-	*st_dev_ratio = 0.0;
-	bool generational_improvement = false;
-
-	for( size_t k = 0; k < variable_groups.size(); k++ )
-	{	
-		vec_t<int> indices = variable_groups[k];
-		int num_indices = variable_groups[k].size();
-		int number_of_improvements  = 0;
-
-		std::vector<double> average_z_of_improvements(num_indices,0.0);
-		
-		//matE cholinv = pseudoInverse( trimatl( cholesky_decompositions[k] ) );
-		matE cholinv = utils::pinv(cholesky_decompositions[k].triangularView<Eigen::Lower>());
-		vecE sample_means( num_indices );
-		for(int i = 0; i < num_solutions; i++ )
-		{
-			if( partial_solutions[i]->improves_elitist )
-			{
-				number_of_improvements++;
-				for(int j = 0; j < num_indices; j++ )
-				{
-					int ind = index_in_var_array[k][j];
-					sample_means[j] = partial_solutions[i]->touched_variables[ind] - partial_solutions[i]->sample_means[ind];
-				}
-				vecE z = cholinv * sample_means; //(partial_solutions[i]->touched_variables - partial_solutions[i]->sample_means);
-				for(int j = 0; j < num_indices; j++ )
-					average_z_of_improvements[j] += z[j];
-			}
-		}
-	
-		// Determine st.dev. ratio
-		if( number_of_improvements > 0 )
-		{
-			for(int i = 0; i < num_indices; i++ )
-			{
-				average_z_of_improvements[i] /= (double) number_of_improvements;
-				*st_dev_ratio = std::max( *st_dev_ratio, std::abs(average_z_of_improvements[i]) );
-			}
-			generational_improvement = true;
-		}
-	}
-	
-	return( generational_improvement );
 }
 
 }

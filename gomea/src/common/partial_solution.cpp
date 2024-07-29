@@ -189,6 +189,19 @@ void partial_solution_t<int>::print()
 	//printf("\n");
 }
 
+template<>
+partial_solution_t<double>::partial_solution_t( vec_t<double> &touched_variables, vec_t<double> &sample_zs, vec_t<int> &touched_indices ) : partial_solution_t(touched_variables,touched_indices)
+{
+	this->sample_zs = sample_zs;
+}
+
+template<>
+void partial_solution_t<double>::setSampleMean( vec_t<double> &means )
+{
+	this->sample_means = means;
+}
+
+
 template class partial_solution_t<char>;
 template class partial_solution_t<double>;
 
