@@ -656,11 +656,11 @@ bool rvg_t::checkTerminationCondition( void )
 			break;
 		}
 	}
-	if( allTrue )
+	/*if( allTrue )
 	{
 		restartLargestPopulation();
 		allTrue = false;
-	}
+	}*/
 
 	return( allTrue );
 }

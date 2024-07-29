@@ -68,22 +68,22 @@ lm = gomea.linkage.UCondFG()
 #lm = gomea.linkage.Full()
 #lm = gomea.linkage.StaticLinkageTree()
 nsucc = 0
-nruns = 0
+nruns = 10
 #rvgom = gomea.RealValuedGOMEA(fitness=frv,linkage_model=lm,max_number_of_evaluations=10000000)
 rvgom = gomea.RealValuedGOMEA(fitness=frv,linkage_model=lm, max_number_of_evaluations=5000000,base_population_size=40,max_number_of_populations=1,
-                              lower_init_range=-115,upper_init_range=-100,fitness_variance_tolerance=0.0)
+                              lower_init_range=-115,upper_init_range=-100,fitness_variance_tolerance=1e-20)
 #rvgom = gomea.RealValuedGOMEA(fitness=frv,linkage_model=lm,lower_init_range=0,upper_init_range=1, max_number_of_populations=1, base_population_size=100, max_number_of_evaluations=10000000)
 #rvgom = gomea.RealValuedGOMEA(fitness=frv,linkage_model=lm,lower_init_range=0,upper_init_range=1, max_number_of_populations=1, base_population_size=100, max_number_of_evaluations=10000000)
 #rvgom = gomea.RealValuedGOMEA(fitness=frv,linkage_model=lm,lower_init_range=-115,upper_init_range=-100, max_number_of_evaluations=10000000)
-print("ObjVal\tNumEvaluations\tGenerations\tTime(s)")
+#print("ObjVal\tNumEvaluations\tGenerations\tTime(s)")
 evals = []
 for i in range(nruns):
     result = rvgom.run()
-    print(result['best_obj_val'][-1],result['evaluations'][-1],result['generation'][-1],result['time'][-1])
+    print(result['generation'][-1],result['evaluations_black_box'][-1],result['time'][-1],result['best_obj_val'][-1],result['best_cons_val'][-1])
     if result['best_obj_val'][-1] < frv.value_to_reach:
         nsucc += 1
     evals.append(result['evaluations'][-1])
-print(nsucc,"/",nruns," successes")
+#print(nsucc,"/",nruns," successes")
 #print(np.median(evals))
 
 #result.printFinalStatistics()
@@ -106,8 +106,8 @@ lm = gomea.linkage.UCondHG()
 fd = gomea.fitness.MaxCut("benchmarks/problem_data/maxcut/set0c/n0000016i00.txt","benchmarks/problem_data/maxcut/set0c/n0000016i00.bkv")
 #fd = CustomTrapFunction(dim,k=5,value_to_reach=dim)
 nsucc = 0
-nruns = 1
-print("ObjVal\tFEV(G)\tFEV(B)\tTime(s)")
+nruns = 0
+#print("ObjVal\tFEV(G)\tFEV(B)\tTime(s)")
 for i in range(nruns):
     v = True 
     #dgom = gomea.DiscreteGOMEA(fitness=fd,linkage_model=lm,max_number_of_evaluations=1000000,random_seed=i,base_population_size=20,max_number_of_populations=1,verbose=v)

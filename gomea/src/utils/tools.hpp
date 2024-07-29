@@ -55,6 +55,9 @@ namespace utils{
 
 	int *greedyScatteredSubsetSelection( double **points, int number_of_points, int number_of_dimensions, int number_to_select );
 
+	int *hungarianAlgorithm( int **similarity_matrix, int dim );
+	void hungarianAlgorithmAddToTree(int x, int prevx, bool *S, int *prev, int *slack, int *slackx, int* lx, int *ly, int** similarity_matrix, int dim);
+
 	extern std::mt19937 rng;
 	extern long long random_seed;
 

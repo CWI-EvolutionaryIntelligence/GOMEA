@@ -86,6 +86,7 @@ linkage_model_rv_t::linkage_model_rv_t( size_t number_of_variables, const graph_
 	this->is_conditional = true;
 	this->is_static = true; 
 	this->max_clique_size = max_clique_size;
+	this->p_accept = 0.0;
 	assert( include_cliques_as_fos_elements || include_full_fos_element );
 	
 	const int UNVISITED = 0;
@@ -196,6 +197,10 @@ linkage_model_rv_t::linkage_model_rv_t( size_t number_of_variables, const graph_
 		else
 			delete full_cond;
 	}
+	
+	FOSorder = vec_t<int>(size());
+	for (int i = 0; i < size(); i++)
+		FOSorder[i] = i;
 }
 
 linkage_model_rv_t::~linkage_model_rv_t()
@@ -245,21 +250,6 @@ linkage_model_rv_pt linkage_model_rv_t::from_file( std::string filename )
 	linkage_model_rv_pt new_fos = std::shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(filename));
 	return( new_fos );
 }
-
-void linkage_model_rv_t::clearDistributions()
-{
-	distributions.clear();
-}
-
-void linkage_model_rv_t::initializeDistributions()
-{
-	assert( distributions.size() == 0 || distributions.size() == FOSStructure.size() );
-	if( distributions.size() == 0 )
-	{
-		for( vec_t<int> group : FOSStructure )
-			distributions.push_back( new normal_distribution_t(group) );
-	}
-}
 			
 double linkage_model_rv_t::getDistributionMultiplier( int element_index )
 {
@@ -271,28 +261,6 @@ double linkage_model_rv_t::getAcceptanceRate()
 	return( p_accept );
 }
 
-void linkage_model_rv_t::addGroup( std::vector<int> group ) 
-{
-	std::sort(group.begin(),group.end());
-	FOSStructure.push_back(group);
-	distributions.push_back( new normal_distribution_t(group) );
-}
-
-void linkage_model_rv_t::addGroup( distribution_t *dist )
-{
-	//std::sort(dist->variables.begin(),dist->variables.end());
-	FOSStructure.push_back(dist->variables);
-	distributions.push_back( dist );
-}
-
-void linkage_model_rv_t::addConditionedGroup( std::vector<int> variables, std::set<int> conditioned_variables )
-{
-	std::sort(variables.begin(),variables.end());
-	FOSStructure.push_back(variables);
-	conditional_distribution_t *dist = new conditional_distribution_t(variables,conditioned_variables);
-	distributions.push_back(dist);
-}
-
 // Learn a linkage tree
 void linkage_model_rv_t::learnLinkageTreeFOS( matE covariance_matrix )
 {
@@ -302,8 +270,8 @@ void linkage_model_rv_t::learnLinkageTreeFOS( matE covariance_matrix )
 	/* Compute Mutual Information matrix */
 	vec_t<vec_t<double>> MI_matrix = computeMIMatrix( covariance_matrix, number_of_variables );
 	linkage_model_t::learnLinkageTreeFOS(MI_matrix,true);
-	clearDistributions();
-	initializeDistributions();
+	//clearDistributions();
+	//initializeDistributions();
 }
 
 void linkage_model_rv_t::learnLinkageTreeFOS( vec_t<vec_t<double>> similarity_matrix, bool include_full_fos_element )
@@ -311,41 +279,8 @@ void linkage_model_rv_t::learnLinkageTreeFOS( vec_t<vec_t<double>> similarity_ma
 	assert( type == linkage::LINKAGE_TREE );
 	assert( !is_static );
 	linkage_model_t::learnLinkageTreeFOS(similarity_matrix,include_full_fos_element);
-	clearDistributions();
-	initializeDistributions();
-}
-
-void linkage_model_rv_t::randomizeOrder( const graph_t &variable_interaction_graph ) 
-{
-	std::vector<int> visited(number_of_variables,0);
-	std::vector<int> VIG_order = getGraphOrderBreadthFirst(variable_interaction_graph);
-	/*printf("VIG_ORDER: ");
-	for(int i = 0; i < VIG_order.size(); i++ )
-		printf("%d ",VIG_order[i]);
-	printf("\n");*/
-
-	int FOS_length = 0;
-	FOSorder = vec_t<int>(size());
-	if( include_cliques_as_fos_elements )
-	{
-		for(int i = 0; i < number_of_variables; i++ )
-		{
-			assert( FOSStructure[i][0] == i );
-			assert( elementSize(i) == 1 );
-			FOSorder[i] = VIG_order[i];
-			distributions[FOSorder[i]]->updateConditionals(variable_interaction_graph,visited);
-		}
-		FOS_length = number_of_variables;
-	}
-	for( int i = 0; i < number_of_variables; i++ )
-		visited[i] = 0;
-	if( include_full_fos_element )
-	{
-		FOSorder[FOS_length] = number_of_variables;
-		distributions[FOS_length]->setOrder(VIG_order);
-		distributions[FOS_length]->updateConditionals(variable_interaction_graph,visited);
-		//distributions[FOS_length]->print();
-	}
+	//clearDistributions();
+	//initializeDistributions();
 }
 
 vec_t<vec_t<double>> linkage_model_rv_t::computeMIMatrix( matE covariance_matrix, int n )
@@ -430,7 +365,7 @@ int *linkage_model_rv_t::matchFOSElements( linkage_model_rv_t *other )
 		}
 	}
 
-	int *hungarian_permutation = hungarianAlgorithm(FOS_element_similarity_matrix, size()-number_of_variables);
+	int *hungarian_permutation = utils::hungarianAlgorithm(FOS_element_similarity_matrix, size()-number_of_variables);
 	for(int i = 0; i < size()-number_of_variables; i++ )
 		permutation[i+number_of_variables] = hungarian_permutation[i]+number_of_variables;
 
@@ -440,165 +375,6 @@ int *linkage_model_rv_t::matchFOSElements( linkage_model_rv_t *other )
 	free( hungarian_permutation );
 
 	return( permutation );
-}
-
-int *linkage_model_rv_t::hungarianAlgorithm( int **similarity_matrix, int dim )
-{
-	int x,y,ty;
-
-	int *lx = (int*) utils::Malloc(dim*sizeof(int));
-	int *ly = (int*) utils::Malloc(dim*sizeof(int));
-	int *xy = (int*) utils::Malloc(dim*sizeof(int));
-	int *yx = (int*) utils::Malloc(dim*sizeof(int));
-	int *slack = (int*) utils::Malloc(dim*sizeof(int));
-	int *slackx = (int*) utils::Malloc(dim*sizeof(int));
-	int *prev = (int*) utils::Malloc(dim*sizeof(int));
-	bool *S = (bool*) utils::Malloc(dim*sizeof(bool));
-	bool *T = (bool*) utils::Malloc(dim*sizeof(bool));
-
-	int root = -1;
-	int max_match = 0;
-	for(int i = 0; i < dim; i++ )
-	{
-		lx[i] = 0;
-		ly[i] = 0;
-		xy[i] = -1;
-		yx[i] = -1;
-	}
-	for(int i = 0; i < dim; i++)
-		for(int j = 0; j < dim; j++)
-			if(similarity_matrix[i][j] > lx[i])
-				lx[i] = similarity_matrix[i][j];
-
-	bool terminated = false;
-	while(!terminated)
-	{
-		if (max_match == dim) break;
-
-		int wr = 0;
-		int rd = 0;
-		int *q = (int*) utils::Malloc(dim*sizeof(int));
-		for(int i = 0; i < dim; i++ )
-		{
-			S[i] = false;
-			T[i] = false;
-			prev[i] = -1;
-		}
-
-		for (x = 0; x < dim; x++)
-		{
-			if (xy[x] == -1)
-			{
-				q[wr++] = root = x;
-				prev[x] = -2;
-				S[x] = true;
-				break;
-			}
-		}
-
-		for (y = 0; y < dim; y++)
-		{
-			slack[y] = lx[root] + ly[y] - similarity_matrix[root][y];
-			slackx[y] = root;
-		}
-
-		while ( 1 )
-		{
-			while (rd < wr)
-			{
-				x = q[rd++];
-				for (y = 0; y < dim; y++)
-				{
-					if (similarity_matrix[x][y] == lx[x] + ly[y] && !T[y])
-					{
-						if (yx[y] == -1) break;
-						T[y] = true;
-						q[wr++] = yx[y];
-						hungarianAlgorithmAddToTree(yx[y], x, S, prev, slack, slackx, lx, ly, similarity_matrix, dim);
-					}
-				}
-				if (y < dim) break;
-			}
-			if (y < dim) break;
-
-			int delta = 100000000;
-			for(y = 0; y < dim; y++)
-				if(!T[y] && slack[y] < delta)
-					delta = slack[y];
-			for(x = 0; x < dim; x++)
-				if(S[x])
-					lx[x] -= delta;
-			for(y = 0; y < dim; y++)
-				if(T[y])
-					ly[y] += delta;
-			for(y = 0; y < dim; y++)
-				if(!T[y])
-					slack[y] -= delta;
-
-			wr = 0;
-			rd = 0;
-			for (y = 0; y < dim; y++)
-			{
-				if (!T[y] && slack[y] == 0)
-				{
-					if (yx[y] == -1)
-					{
-						x = slackx[y];
-						break;
-					}
-					else
-					{
-						T[y] = true;
-						if (!S[yx[y]])
-						{
-							q[wr++] = yx[y];
-							hungarianAlgorithmAddToTree(yx[y], slackx[y], S, prev, slack, slackx, lx, ly, similarity_matrix, dim);
-						}
-					}
-				}
-			}
-			if (y < dim) break;
-		}
-
-		if (y < dim)
-		{
-			max_match++;
-			for (int cx = x, cy = y; cx != -2; cx = prev[cx], cy = ty)
-			{
-				ty = xy[cx];
-				yx[cy] = cx;
-				xy[cx] = cy;
-			}
-		}
-		else terminated = true;
-
-		free( q );
-	}
-
-	free( lx );
-	free( ly );
-	free( yx );
-	free( slack );
-	free( slackx );
-	free( prev );
-	free( S );
-	free( T );
-
-	return xy;
-}
-
-void linkage_model_rv_t::hungarianAlgorithmAddToTree(int x, int prevx, bool *S, int *prev, int *slack, int *slackx, int* lx, int *ly, int** similarity_matrix, int dim) 
-{
-	S[x] = true;
-	prev[x] = prevx;
-	for (int y = 0; y < dim; y++)
-	{
-		if (lx[x] + ly[y] - similarity_matrix[x][y] < slack[y])
-		{
-			slack[y] = lx[x] + ly[y] - similarity_matrix[x][y];
-			slackx[y] = x;
-		}
-	}
 }
 
 void linkage_model_rv_t::print()

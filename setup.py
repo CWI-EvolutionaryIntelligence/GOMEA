@@ -27,11 +27,12 @@ fitness_src = glob.glob("gomea/src/fitness/*.cpp") + glob.glob("gomea/src/fitnes
 compile_args = ["-UNDEBUG","-std=c++17"]
 link_args = ["-UNDEBUG","-std=c++17"]
 if debug_mode:
-        compile_args.extend(['-g'])
-        link_args.extend(['-g'])
+        compile_args.extend(['-O0','-g', '-UNDEBUG'])
+        link_args.extend(['-O0','-g', '-UNDEBUG'])
 else:
-        compile_args.extend(['-O3','-g0'])
-        link_args.extend(['-O3','-g0'])
+        compile_args.extend(['-O2','-g0'])
+        link_args.extend(['-O2','-g0'])
+        
 if platform.system() == "Darwin":
         compile_args.extend(["-stdlib=libc++","-mmacosx-version-min=10.15"])
         link_args.extend(["-stdlib=libc++","-mmacosx-version-min=10.15"])

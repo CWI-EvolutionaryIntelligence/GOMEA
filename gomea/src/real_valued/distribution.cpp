@@ -122,6 +122,7 @@ double distribution_t::estimateCovariance( int vara, int varb, solution_t<double
 	for(int m = 0; m < selection_size; m++ )
 		cov += (selection[m]->variables[vara]-meana)*(selection[m]->variables[varb]-meanb);
 	cov /= (double) selection_size;
+	cov = std::max(0.0, cov);
 	return( cov );
 }
 
@@ -331,6 +332,17 @@ partial_solution_t<double> *normal_distribution_t::generatePartialSolution( solu
 		if( times_not_in_bounds >= 100 )
 		{
 			printf("Sampled out of bounds too many times.\n");
+			
+			for( size_t i = 0; i < result.size(); i++ )
+				printf("%10.3e ",mean_vector[i]);
+			printf("\n");
+			for (size_t i = 0; i < result.size(); i++)
+				printf("%10.3e ",fitness_function->getLowerRangeBound(i));
+			printf("\n");
+			for (size_t i = 0; i < result.size(); i++)
+				printf("%10.3e ",fitness_function->getUpperRangeBound(i));
+			printf("\n");
+
 			exit(1);
 			// TODO
 			/*result = vec(num_indices,fill::none);
@@ -479,242 +491,6 @@ void conditional_distribution_t::addGroupOfVariables( int index, int index_cond 
 	indices.push_back(index);
 	indices_cond.push_back(index_cond);
 	addGroupOfVariables(indices, indices_cond);
-}
-
-void conditional_distribution_t::estimateConditionalGaussianML( int variable_group_index, solution_t<double> **selection, int selection_size )
-{
-	int i = variable_group_index;	
-	vec_t<int> vars = variable_groups[i];
-	int n = vars.size();
-
-	mean_vectors[i] = estimateMeanVectorML(vars,selection,selection_size);
-	
-	/* Change the focus of the search to the best solution */
-	if( distribution_multiplier < 1.0 )
-		for(int j = 0; j < n; j++)
-			mean_vectors[i][j] = selection[0]->variables[vars[j]];
-
-	covariance_matrices[i] = estimateRegularCovarianceMatrixML(vars,mean_vectors[i],selection,selection_size);
-		
-	vec_t<int> vars_cond = variables_conditioned_on[i];
-	int n_cond = vars_cond.size(); 
-	if( n_cond > 0 )
-	{
-		mean_vectors_conditioned_on[i] = estimateMeanVectorML(vars_cond,selection,selection_size);
-		
-		matE A12( n, n_cond );
-		for(int j = 0; j < n; j++ )
-			for(int k = 0; k < n_cond; k++ )
-				A12(j,k) = estimateCovariance(vars[j],vars_cond[k],selection,selection_size) * distribution_multiplier;
-		//matE A22 = estimateCovarianceMatrixML(vars_cond,selection,selection_size);
-		matE A22 = estimateRegularCovarianceMatrixML(vars_cond,mean_vectors_conditioned_on[i],selection,selection_size);
-		matE A22inv = utils::pinv(A22);
-	   	//if( pinv(A22inv,A22) )
-		{
-			rho_matrices[i] = A12*A22inv;
-			matE submat = A12*A22inv*A12.transpose();
-			//matE zeros = A22*A22inv*A22 - A22;
-			covariance_matrices[i] -= submat;
-		}
-		//else
-		{
-			//printf("pseudo-inverse failed\n");
-		}
-	}
-	cholesky_decompositions[i] = utils::choleskyDecomposition( covariance_matrices[i] );
-}
-
-void conditional_distribution_t::updateConditionals( const std::map<int,std::set<int>> &variable_interaction_graph, std::vector<int> &visited ) 
-{
-	const int IS_VISITED = 1;
-	const int IN_CLIQUE = 2;
-	
-	variables_conditioned_on.clear();
-	variables_conditioned_on.resize(variable_groups.size());
-	
-	for( size_t i = 0; i < variable_groups.size(); i++ )
-	{
-		int ind = i;
-		if( order.size() > 0 )
-			ind = order[i];
-		vec_t<int> clique = variable_groups[ind];
-
-		// Add FOS element of all nodes in clique, conditioned on dependent, already visited variables
-		std::set<int> cond;
-		for( int v : clique )
-			visited[v] = IN_CLIQUE;
-		for( int v : clique )
-		{
-			for( int x : variable_interaction_graph.at(v) )
-			{
-				if( visited[x] == IS_VISITED )
-					cond.insert(x);
-			}
-		}
-		for( int v : clique )
-			visited[v] = IS_VISITED;
-		
-		vec_t<int> cond_vec;
-		for( int x : cond )
-			cond_vec.push_back(x);
-		variables_conditioned_on[ind] = cond_vec;
-	}
-}
-
-void conditional_distribution_t::estimateDistribution( solution_t<double> **selection, int selection_size )
-{
-	samples_drawn = 0;
-	out_of_bounds_draws = 0;
-	initializeMemory();
-	for( size_t i = 0; i < variable_groups.size(); i++ )
-		estimateConditionalGaussianML(i,selection,selection_size);
-}
-
-partial_solution_t<double> *conditional_distribution_t::generatePartialSolution( solution_t<double> *solution_conditioned_on, fitness::fitness_generic_t *fitness_function )
-{
-	vec_t<double> result = vec_t<double>(variables.size());
-	vec_t<double> means = vec_t<double>(variables.size());
-	std::unordered_map<int,int> sampled_indices;
-	for( size_t k = 0; k < variable_groups.size(); k++ )
-	{
-		int og = order[k];
-		vec_t<int> indices = variable_groups[og];
-		int num_indices = indices.size();
-
-		int times_not_in_bounds = -1;
-		out_of_bounds_draws--;
-
-		vecE sample_result;
-		vecE sample_means = vecE(mean_vectors[og].size());
-		bool ready = false;
-		do
-		{
-			times_not_in_bounds++;
-			samples_drawn++;
-			out_of_bounds_draws++;
-
-			if( times_not_in_bounds >= 100 )
-			{
-				printf("Sampled out of bounds too many times.\n");
-				exit(1);
-				/*vecE sample_result = vec(num_indices, fill::none);
-				vecE sample_means = vecE(num_indices, fill::none);
-				for(int i = 0; i < num_indices; i++ )
-				{
-					sample_result[i] = lower_init_ranges[indices[i]] + (upper_init_ranges[indices[i]] - lower_init_ranges[indices[i]])*randomRealUniform01();
-					sample_means[i] = lower_init_ranges[indices[i]] + (upper_init_ranges[indices[i]] - lower_init_ranges[indices[i]]) * 0.5;
-				}*/
-			}
-			else
-			{
-				for( int i = 0; i < mean_vectors[og].size(); i++ )
-					sample_means(i) = mean_vectors[og][i];
-
-				vec_t<int> indices_cond = variables_conditioned_on[og];
-				int num_indices_cond = indices_cond.size();
-				/*printf("means_nc ");
-				for( double x : sample_means )
-					printf("%10.3e ",x);
-				printf("\n");*/
-				if( num_indices_cond > 0 )
-				{
-					vecE cond = vecE(num_indices_cond );
-					for(int i = 0; i < num_indices_cond; i++ )
-					{
-						auto it = sampled_indices.find(indices_cond[i]);
-						if( it != sampled_indices.end() )
-						{
-							assert( variables[it->second] == indices_cond[i] );
-							cond[i] = result[it->second];
-						}
-						else
-							cond[i] = solution_conditioned_on->variables[indices_cond[i]];
-						cond[i] = cond[i] - mean_vectors_conditioned_on[og][i];
-					}
-					vecE sample_mean_inc = rho_matrices[og]*cond;
-					for(int i = 0; i < num_indices_cond; i++ )
-					{
-						sample_means[i] += sample_mean_inc[i];
-					}
-				}
-				vecE sample_zs = random1DNormalUnitVector(num_indices);
-				sample_result = sample_means + cholesky_decompositions[og] * sample_zs;
-			}
-
-			ready = true;
-			if( fitness_function != NULL )
-			{
-				for (size_t i = 0; i < result.size(); i++)
-				{
-					if (!fitness_function->isParameterInRangeBounds(result[i], indices[i]))
-					{
-						ready = false;
-						break;
-					}
-				}
-			}
-		}
-		while( !ready );
-		
-		for( int i = 0; i < num_indices; i++ )
-		{
-			assert( indices[i] == variables[index_in_var_array[og][i]] );
-			result[index_in_var_array[og][i]] = sample_result[i];
-			means[index_in_var_array[og][i]] = sample_means[i];
-			sampled_indices[indices[i]] = index_in_var_array[og][i];
-		}
-	}
-
-	partial_solution_t<double> *sol_res = new partial_solution_t<double>(result,variables);
-	sol_res->setSampleMean(means);
-	return(sol_res);
-}
-
-bool conditional_distribution_t::generationalImprovementForOnePopulationForFOSElement( partial_solution_t<double>** partial_solutions, int num_solutions, double *st_dev_ratio )
-{
-	*st_dev_ratio = 0.0;
-	bool generational_improvement = false;
-
-	for( size_t k = 0; k < variable_groups.size(); k++ )
-	{	
-		vec_t<int> indices = variable_groups[k];
-		int num_indices = variable_groups[k].size();
-		int number_of_improvements  = 0;
-
-		std::vector<double> average_z_of_improvements(num_indices,0.0);
-		
-		//matE cholinv = pseudoInverse( trimatl( cholesky_decompositions[k] ) );
-		matE cholinv = utils::pinv(cholesky_decompositions[k].triangularView<Eigen::Lower>());
-		vecE sample_means( num_indices );
-		for(int i = 0; i < num_solutions; i++ )
-		{
-			if( partial_solutions[i]->improves_elitist )
-			{
-				number_of_improvements++;
-				for(int j = 0; j < num_indices; j++ )
-				{
-					int ind = index_in_var_array[k][j];
-					sample_means[j] = partial_solutions[i]->touched_variables[ind] - partial_solutions[i]->sample_means[ind];
-				}
-				vecE z = cholinv * sample_means; //(partial_solutions[i]->touched_variables - partial_solutions[i]->sample_means);
-				for(int j = 0; j < num_indices; j++ )
-					average_z_of_improvements[j] += z[j];
-			}
-		}
-	
-		// Determine st.dev. ratio
-		if( number_of_improvements > 0 )
-		{
-			for(int i = 0; i < num_indices; i++ )
-			{
-				average_z_of_improvements[i] /= (double) number_of_improvements;
-				*st_dev_ratio = std::max( *st_dev_ratio, std::abs(average_z_of_improvements[i]) );
-			}
-			generational_improvement = true;
-		}
-	}
-	
-	return( generational_improvement );
 }
 			
 void conditional_distribution_t::setOrder( const vec_t<int> &order ) 

@@ -103,7 +103,7 @@ protected:
     bool filtered;
     int similarityMeasure;
 
-	vec_t<cond_factor*> factorization; // Correspond to FOS elements for 'FG' conditional linkage models
+	vec_t<cond_factor_t*> factorization; // Correspond to FOS elements for 'FG' conditional linkage models
     vec_t<int> factorization_order;
     graph_t factorization_interaction_graph;
     
@@ -119,7 +119,7 @@ protected:
 	linkage_model_t( size_t number_of_variables, const graph_t &variable_interaction_graph, int max_clique_size, bool include_cliques_as_fos_elements, bool include_full_fos_element );
     linkage_model_t( std::string filename );
 	
-    int determineNearestNeighbour(size_t index, const vec_t< vec_t< int > > &mpm ); 
+    int determineNearestNeighbour(size_t index, const vec_t<vec_t<int>> &mpm ); 
     vec_t<vec_t<double>> computeMIMatrix(vec_t<solution_t<char>*> &population, size_t alphabetSize);
     vec_t<vec_t<double>> computeNMIMatrix(vec_t<solution_t<char>*> &population, size_t alphabetSize);
     vec_t<vec_t<double>> computeHammingDistanceSimilarityMatrix( vec_t<solution_t<char>*> &population );

@@ -376,7 +376,7 @@ void linkage_model_t::addConditionedGroup( std::vector<int> variables, std::set<
 	if( include_cliques_as_fos_elements )	
 		FOSStructure.push_back(variables);
 	
-	cond_factor *fact = new cond_factor(variables,conditioned_variables);
+	cond_factor_t *fact = new cond_factor_t(variables,conditioned_variables);
 	factorization.push_back( fact );
 }
 
@@ -439,7 +439,7 @@ vec_t<char> linkage_model_t::samplePartialSolutionConditional( int FOS_index, so
 
 		for( int i = 0; i < factorization.size(); i++ )
 		{
-			cond_factor *fact = factorization[factorization_order[i]];
+			cond_factor_t *fact = factorization[factorization_order[i]];
 			vec_t<char> fact_sample = fact->samplePartialSolutionConditional(sample,population,parent_index);
 			// Insert partial sample into offspring sample
 			for( int j = 0; j < fact->variables.size(); j++ )
@@ -1013,7 +1013,7 @@ void linkage_model_t::learnLinkageTreeFOS( vec_t<vec_t<double>> similarity_matri
 /**
  * Determines nearest neighbour according to similarity values.
  */
-int linkage_model_t::determineNearestNeighbour(size_t index, const vec_t<vec_t< int> > &mpm)
+int linkage_model_t::determineNearestNeighbour(size_t index, const vec_t<vec_t<int> > &mpm)
 {
     size_t result = 0;
 

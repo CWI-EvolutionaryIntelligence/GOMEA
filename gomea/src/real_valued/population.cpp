@@ -322,6 +322,7 @@ void population_t::generateAndEvaluateNewSolutions()
 	int number_of_AMS_solutions = (int) (alpha_AMS*(population_size-1));
 
 	linkage_model->shuffleFOS();
+
 	for(int g = 0; g < linkage_model->size(); g++ )
 	{
 		int FOS_index = linkage_model->FOSorder[g];

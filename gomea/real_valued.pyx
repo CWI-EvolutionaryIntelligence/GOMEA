@@ -21,7 +21,9 @@ cdef class RealValuedGOMEA:
 
     def __cinit__(self,
         # Optimization problem settings (required)
-        fitness: FitnessFunction, 
+        fitness: FitnessFunction,
+        # Settings for optimization problem
+        #black_box_evaluations : bool=False,
         # GOMEA parameters
         linkage_model : LinkageModel = StaticLinkageTree(),
         lower_init_range: float = 0.0,
@@ -29,7 +31,7 @@ cdef class RealValuedGOMEA:
         fitness_variance_tolerance: float=1e-20,
         random_seed: int=-1,
         verbose: bool=False,
-        # IMS settings (optional)
+        # IMS settings
         max_number_of_populations: int = 25,
         max_number_of_generations: int = -1,
         IMS_subgeneration_factor: int = 8,

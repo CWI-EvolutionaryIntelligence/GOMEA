@@ -1,4 +1,4 @@
-**.o
+*.o
 **.obj
 **.so
 **.swp
@@ -8,9 +8,9 @@
 **.json
 **/problem_data/
 **/__pycache__/
-*.cpp
-*.h
-*.hpp
+gomea/*.cpp
+gomea/*.h
+gomea/*.hpp
 **/*.dat
 build/
 dist/

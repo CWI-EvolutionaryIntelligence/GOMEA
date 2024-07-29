@@ -7,7 +7,7 @@
             "request": "launch",
             "pythonConfig": "custom",
             "pythonLaunchName": "Python: main",
-            "cppConfig": "default (gdb) Attach"
+            "cppConfig": "default (gdb) Attach",
         },
         {
             "name": "(gdb) Attach",
