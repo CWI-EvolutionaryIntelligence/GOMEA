@@ -1,6 +1,6 @@
 [build-system]
 build-backend = 'mesonpy'
-requires = ['meson-python', 'Cython<=0.29.32']
+requires = ['meson-python', 'numpy>=1.23.0', 'Cython<=0.29.32']
 
 [project]
 name = 'gomea'
@@ -14,3 +14,13 @@ authors = [
 ]
 url = 'https://github.com/abouter/gomea'
 dependencies = ['numpy>=1.23.0','tqdm>=4.65.0']
+
+[tool.cibuildwheel.linux]
+before-all = "yum install numpy"
+build = ["cp38-*", "cp39-*", "cp310-*", "cp311-*", "cp312-*"]
+archs = ["auto64"]
+
+[tool.cibuildwheel.ubuntu]
+before-all = "apt install numpy"
+build = ["cp38-*", "cp39-*", "cp310-*", "cp311-*", "cp312-*"]
+archs = ["auto64"]
