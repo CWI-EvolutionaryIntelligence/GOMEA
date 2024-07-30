@@ -1,7 +1,7 @@
 from cpython cimport PyObject
 from libcpp.string cimport string
 
-include "gomea/EmbeddedFitness.pxi"
+include "EmbeddedFitness.pxi"
     
 cdef class FitnessFunction:
     def __cinit__(self, 
