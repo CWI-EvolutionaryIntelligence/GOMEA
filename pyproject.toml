@@ -1,6 +1,6 @@
 [build-system]
 build-backend = 'mesonpy'
-requires = ['meson-python', 'numpy>=1.23.0', 'Cython<=0.29.32']
+requires = ['meson-python', 'Cython<=0.29.32']
 
 [project]
 name = 'gomea'
@@ -14,4 +14,3 @@ authors = [
 ]
 url = 'https://github.com/abouter/gomea'
 dependencies = ['numpy>=1.23.0','tqdm>=4.65.0']
-
