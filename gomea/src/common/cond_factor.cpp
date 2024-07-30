@@ -192,7 +192,7 @@ vec_t<double> cond_factor_Rt::estimateMeanVectorML( vec_t<int> &variables, solut
 	return( mean_vector );
 }
 
-matE cond_factor_Rt::estimateCovarianceMatrixML( vec_t<int> &variables, solution_t<double> **selection, int selection_size )
+matE cond_factor_Rt::estimateCovarianceMatrixML( vec_t<int> &variables, solution_t<double> **selection, int selection_size, double distribution_multiplier )
 {
 	/* First do the maximum-likelihood estimate from data */
 	//mat covariance_matrix(variables.size(),variables.size(),fill::none);
@@ -225,7 +225,7 @@ void cond_factor_Rt::estimateDistribution( solution_t<double> **selection, int s
 		for(int j = 0; j < n; j++)
 			mean_vector[j] = selection[0]->variables[variables[j]];
 
-	covariance_matrix = estimateCovarianceMatrixML(variables,selection,selection_size);
+	covariance_matrix = estimateCovarianceMatrixML(variables,selection,selection_size,distribution_multiplier);
 		
 	int n_cond = variables_conditioned_on.size(); 
 	if( n_cond > 0 )
@@ -235,7 +235,7 @@ void cond_factor_Rt::estimateDistribution( solution_t<double> **selection, int s
 			for(int k = 0; k < n_cond; k++ )
 				A12(j,k) = estimateCovariance(variables[j],variables_conditioned_on[k],selection,selection_size) * distribution_multiplier;
 		//matE A22 = estimateCovarianceMatrixML(vars_cond,selection,selection_size);
-		matE A22 = estimateCovarianceMatrixML(variables_conditioned_on,selection,selection_size);
+		matE A22 = estimateCovarianceMatrixML(variables_conditioned_on,selection,selection_size,distribution_multiplier);
 		matE A22inv = utils::pinv(A22);
 	   	//if( pinv(A22inv,A22) )
 		{

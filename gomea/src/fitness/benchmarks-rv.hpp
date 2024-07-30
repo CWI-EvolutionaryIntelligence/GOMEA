@@ -4,7 +4,7 @@
 #include "gomea/src/fitness/bbo_fitness.hpp"
 #include "gomea/src/common/solution.hpp"
 #include "gomea/src/common/partial_solution.hpp"
-#include "gomea/src/common/gomea_defs.hpp"
+#include "gomea/src/utils/gomea_defs.hpp"
 #include "gomea/src/utils/tools.hpp"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 

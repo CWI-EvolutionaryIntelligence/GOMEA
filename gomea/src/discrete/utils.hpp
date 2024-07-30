@@ -14,7 +14,7 @@
 #include <cassert>
 
 #include "gomea/src/common/solution.hpp"
-#include "gomea/src/common/gomea_defs.hpp"
+#include "gomea/src/utils/gomea_defs.hpp"
 
 namespace gomea{
 namespace discrete{

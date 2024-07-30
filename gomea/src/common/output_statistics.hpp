@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gomea/src/common/gomea_defs.hpp"
+#include "gomea/src/utils/gomea_defs.hpp"
 #include "gomea/src/common/solution.hpp"
 
 namespace gomea{

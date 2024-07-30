@@ -3,7 +3,7 @@
 #include "gomea/src/fitness/fitness.hpp"
 #include "gomea/src/common/solution.hpp"
 #include "gomea/src/common/partial_solution.hpp"
-#include "gomea/src/common/gomea_defs.hpp"
+#include "gomea/src/utils/gomea_defs.hpp"
 #include "gomea/src/utils/embed.hpp"
 #include "gomea/src/utils/tools.hpp"
 

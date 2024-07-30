@@ -1,10 +1,11 @@
 #pragma once
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-= Section Includes -=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
-#include "gomea/src/common/gomea_defs.hpp"
+#include "gomea/src/utils/gomea_defs.hpp"
 #include "gomea/src/common/solution.hpp"
 #include "gomea/src/fitness/fitness.hpp"
 #include "gomea/src/utils/tools.hpp"
+#include "gomea/src/utils/rng.hpp"
 #include "gomea/src/utils/linalg.hpp"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
@@ -60,7 +61,7 @@ class cond_factor_Rt : public cond_factor_t{
 		double estimateMean( int var, solution_t<double> **selection, int selection_size );
 		double estimateCovariance( int vara, int varb, solution_t<double> **selection, int selection_size );
 		vec_t<double> estimateMeanVectorML( vec_t<int> &variables, solution_t<double> **selection, int selection_size );
-		matE estimateCovarianceMatrixML( vec_t<int> &variables, solution_t<double> **selection, int selection_size );
+		matE estimateCovarianceMatrixML( vec_t<int> &variables, solution_t<double> **selection, int selection_size, double distribution_multiplier );
 		void estimateDistribution( solution_t<double> **selection, int selection_size, double distribution_multiplier );
 
 		partial_solution_t<double> *generatePartialSolution( solution_t<double> *solution_conditioned_on, fitness::fitness_generic_t *fitness_function );

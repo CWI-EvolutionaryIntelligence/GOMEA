@@ -180,44 +180,6 @@ bool isPowerOfK(int n, int k)
     return (ceil(logNBaseK) == floor(logNBaseK));
 }
 
-vec_t<int> randomPermutation( int size )
-{
-    vec_t<int> perm(size);
-    iota(perm.begin(), perm.end(), 0);
-    std::shuffle( perm.begin(), perm.end(), rng );
-    return( perm );
-}
-
-/*vec random1DNormalUnitVector( int length )
-{
-    std::uniform_int_distribution<int> distribution(0,max);
-	return randn<vec>(length);
-}*/
-
-double randomRealUniform01()
-{
-    static std::uniform_real_distribution<double> distribution(0.0,1.0);
-	return distribution(rng);
-}
-
-int randomInt( int max )
-{
-    std::uniform_int_distribution<int> distribution(0,max);
-	return distribution(rng);
-}
-
-void initializeRandomNumberGenerator()
-{
-	utils::random_seed = static_cast<long long>(std::chrono::system_clock::now().time_since_epoch().count());
-	rng.seed(utils::random_seed);
-}
-
-void initializeRandomNumberGenerator( long long seed )
-{
-    utils::random_seed = seed;
-	rng.seed(utils::random_seed);
-}
-
 /*-=-=-=-=-=-=-=-=-=-=-=-=-= Section Merge Sort -=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 /**
  * Sorts an array of doubles and returns the sort-order (small to large).

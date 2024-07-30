@@ -2,10 +2,8 @@
 
 #include <Eigen>
 
+#include "gomea/src/utils/gomea_defs.hpp"
 #include "gomea/src/utils/tools.hpp"
-
-using matE = Eigen::MatrixXd;
-using vecE = Eigen::VectorXd;
 
 namespace gomea{
 	namespace utils{
