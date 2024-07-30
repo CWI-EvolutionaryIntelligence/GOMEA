@@ -19,3 +19,11 @@ dependencies = ['numpy>=1.23.0','tqdm>=4.65.0']
 before-all = "yum install numpy"
 build = ["cp38-*", "cp39-*", "cp310-*", "cp311-*", "cp312-*"]
 archs = ["auto64"]
+
+[tool.cibuildwheel.macos]
+before-all = "brew install numpy"
+build = ["cp38-*", "cp39-*", "cp310-*", "cp311-*", "cp312-*"]
+archs = ["auto64"]
+
+[tool.cibuildwheel.windows]
+archs = ["auto64"]
