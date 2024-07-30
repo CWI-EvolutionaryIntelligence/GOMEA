@@ -9,6 +9,8 @@ dependencies:
   - python-devtools=0.9.0
   - pip
   - pip:
+    - meson==1.3.2
+    - meson-python==0.16.0
     - numpy==1.23.3
     - wheel==0.37.1
     - setuptools==65.4.0
