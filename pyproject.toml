@@ -13,3 +13,5 @@ authors = [
   {name = 'Anton Bouter', email = 'Anton.Bouter@cwi.nl'},
 ]
 url = 'https://github.com/abouter/gomea'
+dependencies = ['numpy>=1.23.0','tqdm>=4.65.0']
+
