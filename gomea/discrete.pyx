@@ -12,7 +12,7 @@ from tqdm import tqdm
 import inspect
 
 from gomea.fitness cimport FitnessFunction, GBOFitnessFunction, BBOFitnessFunction
-include "gomea/EmbeddedFitness.pxi"
+include "EmbeddedFitness.pxi"
 
 # Create a Cython extension type which holds a C++ instance
 # as an attribute and create a bunch of forwarding methods
