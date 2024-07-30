@@ -1,4 +1,4 @@
-default: reinstall
+default: install-meson
 
 here: 
 	python3 setup.py build_ext --inplace
@@ -37,6 +37,11 @@ install:
 	pip3 -q install cython --user
 	python3 -m build --wheel
 	pip3 install dist/*.whl --user
+
+install-meson:
+	meson setup build --python.install-env auto
+	meson compile -C build
+	python -m pip install --no-build-isolation --editable .
 
 reinstall:
 	python3 -m build --wheel
