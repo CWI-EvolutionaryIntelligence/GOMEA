@@ -4,7 +4,7 @@ project('gomea', 'cpp', 'cython',
 fs = import('fs')
 py = import('python').find_installation(pure: false)
 
-numpy_dep = dependency('numpy')
+numpy_dep = dependency('numpy', required : false )
 python_dep = py.dependency(embed: true)
 cython = find_program('cython')
 
