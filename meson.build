@@ -2,9 +2,19 @@ project('gomea', 'cpp', 'cython',
     default_options : ['c_std=c17', 'cpp_std=c++17'])
 
 fs = import('fs')
-py = import('python').find_installation(pure: false)
+py = import('python').find_installation('python3', pure: false)
 
-numpy_dep = dependency('numpy', required : false )
+numpy_dep = dependency('numpy') 
+#numpy_inc = include_directories(py.get_path('platlib') / 'numpy' / 'core' / 'include')
+incdir_numpy = run_command(py,
+    [
+      '-c',
+      'import os; os.chdir(".."); import numpy; print(numpy.get_include())'
+    ],
+    check: true
+  ).stdout().strip()
+numpy_inc = include_directories(incdir_numpy)
+numpy_incdep = declare_dependency(include_directories : numpy_inc)
 python_dep = py.dependency(embed: true)
 cython = find_program('cython')
 
@@ -92,7 +102,7 @@ subdir('gomea')
 gomea_common_lib = static_library(
     'gomealib_common',
     common_src,
-    dependencies: [python_dep, numpy_dep],
+    dependencies: [python_dep, numpy_dep, numpy_incdep],
     cython_args: cython_args,
 )
 
@@ -102,7 +112,7 @@ gomea_fitness_lib = static_library(
     ['gomea/fitness.pyx', gomea_fitness_cython] + fitness_src,
     override_options : ['cython_language=cpp'],
     link_with: [gomea_common_lib],
-    dependencies: [python_dep, numpy_dep, cxxopts_dep, eigen_dep, gomea_fitness_cython_dep],
+    dependencies: [python_dep, numpy_dep, numpy_incdep, cxxopts_dep, eigen_dep, gomea_fitness_cython_dep],
     cython_args: cython_args,
 )
 
@@ -111,7 +121,7 @@ gomea_fitness_ex = py.extension_module(
     ['gomea/fitness.pyx'],
     link_with: [gomea_common_lib, gomea_fitness_lib],
     override_options : ['cython_language=cpp'],
-    dependencies: [numpy_dep, cxxopts_dep, eigen_dep, gomea_fitness_cython_dep],
+    dependencies: [numpy_dep, numpy_incdep, cxxopts_dep, eigen_dep, gomea_fitness_cython_dep],
     include_directories: [gomea_incl],
     cython_args: cython_args,
     install: true,
@@ -123,7 +133,7 @@ gomea_discrete_ex = py.extension_module(
     ['gomea/discrete.pyx'] + discrete_src,
     link_with: [gomea_common_lib, gomea_fitness_lib],
     override_options : ['cython_language=cpp'],
-    dependencies: [numpy_dep, cxxopts_dep, gomea_fitness_cython_dep],
+    dependencies: [numpy_dep, numpy_incdep, cxxopts_dep, gomea_fitness_cython_dep],
     include_directories: [gomea_incl],
     cython_args: cython_args,
     install: true,
@@ -135,7 +145,7 @@ gomea_real_valued_ex = py.extension_module(
     ['gomea/real_valued.pyx', gomea_real_valued_cython] + real_valued_src,
     link_with: [gomea_common_lib, gomea_fitness_lib],
     override_options : ['cython_language=cpp'],
-    dependencies: [numpy_dep, cxxopts_dep, eigen_dep, gomea_real_valued_cython_dep, gomea_fitness_cython_dep],
+    dependencies: [numpy_dep, numpy_incdep, cxxopts_dep, eigen_dep, gomea_real_valued_cython_dep, gomea_fitness_cython_dep],
     include_directories: [gomea_incl],
     cython_args: cython_args,
     install: true,
@@ -148,7 +158,7 @@ gomea_linkage = py.extension_module(
     ['gomea/linkage.pyx'],
     link_with: [gomea_common_lib],
     override_options : ['cython_language=cpp'],
-    dependencies: [numpy_dep],
+    dependencies: [numpy_dep, numpy_incdep],
     include_directories: [gomea_incl],
     cython_args: cython_args,
     install: true,
@@ -160,7 +170,7 @@ gomea_output = py.extension_module(
     ['gomea/output.pyx'],
     link_with: [gomea_common_lib],
     override_options : ['cython_language=cpp'],
-    dependencies: [numpy_dep],
+    dependencies: [numpy_dep, numpy_incdep],
     include_directories: [gomea_incl],
     cython_args: cython_args,
     install: true,
