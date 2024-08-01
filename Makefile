@@ -42,10 +42,7 @@ meson-install: meson-build
 docker-wheel: clean
 	sudo pipx run cibuildwheel     
 
-docker-wheel2:
-	sudo docker create --env=CIBUILDWHEEL --env=SOURCE_DATE_EPOCH --name=cibuildwheel-6d683698-2470-4742-ae56-ba607b84b770 --interactive --volume=/:/host quay.io/pypa/manylinux2014_x86_64:2024.07.02-0 /bin/bash
-
-reinstall:
+reinstall: install-deps
 	python3 -m build --wheel
 	pip3 install dist/*.whl --user --force-reinstall
 

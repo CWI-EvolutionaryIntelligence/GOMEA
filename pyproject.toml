@@ -16,13 +16,13 @@ url = 'https://github.com/abouter/gomea'
 dependencies = ['numpy>=1.23.0','tqdm>=4.65.0']
 
 [tool.cibuildwheel.linux]
-build = ["cp310-*", "cp311-*"]
+build = ["cp38-*manylinux*", "cp39-*manylinux*", "cp310-*manylinux*", "cp311-*manylinux*"]
 archs = ["auto64"]
 
 [tool.cibuildwheel.macos]
-build = ["cp310-*", "cp311-*"]
+build = ["cp38-*", "cp39-*", "cp310-*", "cp311-*"]
 archs = ["auto64"]
 
 [tool.cibuildwheel.windows]
-build = ["cp310-*", "cp311-*"]
+build = ["cp38-*", "cp39-*", "cp310-*", "cp311-*"]
 archs = ["auto64"]
