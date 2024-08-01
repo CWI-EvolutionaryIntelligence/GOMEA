@@ -15,7 +15,7 @@ incdir_numpy = run_command(py,
   ).stdout().strip()
 numpy_inc = include_directories(incdir_numpy)
 numpy_incdep = declare_dependency(include_directories : numpy_inc)
-python_dep = py.dependency(embed: true)
+python_dep = py.dependency(embed: false)
 cython = find_program('cython')
 
 # Dependencies - as originally specified in setup.py.
