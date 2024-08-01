@@ -31,8 +31,8 @@ cdef class LinkageTree(LinkageModel):
 cdef class StaticLinkageTree(LinkageModel):
     pass
 
-#cdef class Conditional(LinkageModel):
-#    pass
+cdef class Conditional(LinkageModel):
+    pass
 
 cdef class Custom(LinkageModel):
     pass
