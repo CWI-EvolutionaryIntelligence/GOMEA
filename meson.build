@@ -10,7 +10,7 @@ cython = find_program('cython')
 
 # Dependencies - as originally specified in setup.py.
 # Note that we may want to move to using dependency() as above.
-eigen_inc = include_directories('./gomea/lib/Eigen')
+eigen_inc = include_directories('./gomea/lib/Eigen/')
 eigen_dep = declare_dependency(include_directories : eigen_inc)
 cxxopts_inc = include_directories('./gomea/lib/cxxopts-3.1.1/include/')
 cxxopts_dep = declare_dependency(include_directories : cxxopts_inc)
@@ -25,6 +25,7 @@ cython_args = [
 
 # glob.glob("gomea/src/common/*.cpp") + glob.glob("gomea/src/utils/*.cpp")
 common_src = files([
+    'gomea/src/common/cond_factor.cpp',
     'gomea/src/common/linkage_config.cpp',
     'gomea/src/common/linkage_model.cpp',
     'gomea/src/common/output_statistics.cpp',
@@ -32,6 +33,7 @@ common_src = files([
     'gomea/src/common/solution.cpp',
 
     'gomea/src/utils/embed.cpp',
+    'gomea/src/utils/linalg.cpp',
     'gomea/src/utils/time.cpp',
     'gomea/src/utils/tools.cpp',
 ])
@@ -92,7 +94,7 @@ subdir('gomea')
 gomea_common_lib = static_library(
     'gomealib_common',
     common_src,
-    dependencies: [python_dep, numpy_dep],
+    dependencies: [python_dep, numpy_dep, eigen_dep],
     cython_args: cython_args,
 )
 
