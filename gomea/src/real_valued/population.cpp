@@ -321,7 +321,7 @@ void population_t::generateAndEvaluateNewSolutions()
 	double alpha_AMS = 0.5*tau*(((double) population_size)/((double) (population_size-1)));
 	int number_of_AMS_solutions = (int) (alpha_AMS*(population_size-1));
 
-	linkage_model->shuffleFOS();
+	//linkage_model->shuffleFOS(fitness->variable_interaction_graph);
 	for(int g = 0; g < linkage_model->size(); g++ )
 	{
 		int FOS_index = linkage_model->FOSorder[g];
