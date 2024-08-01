@@ -26,11 +26,11 @@
         },
         {
             "name": "Python: main",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/main.py",
+            "program": "${workspaceFolder}/debug/main.py",
             "console": "integratedTerminal",
-            "cwd": ""
+            "cwd": "${workspaceFolder}/debug/"
         }
     ]
 }
