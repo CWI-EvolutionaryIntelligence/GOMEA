@@ -12,12 +12,12 @@ build-sdist: install-deps
 	python3 -m build --sdist
 
 build-wheel: install-deps
-	python3 -m build --wheel -Csetup-args="-Dbuildtype=release"
+	python3 -m build --wheel
 
 build-all: build-sdist build-wheel
 
 dev: install-deps install-meson-deps
-	meson setup build --python.install-env auto --buildtype="release"
+	meson setup build --python.install-env auto
 	meson compile -C build
 	python -m pip install --no-build-isolation --editable .
 
