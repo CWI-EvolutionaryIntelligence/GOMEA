@@ -21,10 +21,17 @@ dev: install-deps install-meson-deps
 	meson compile -C build
 	python -m pip install --no-build-isolation --editable .
 
-debug: install-deps install-meson-deps
-	meson setup debug --python.install-env auto --buildtype="debug"
-	meson compile -C debug 
-	python -m pip install --no-build-isolation --editable .
+build-debug: install-deps install-meson-deps
+	meson setup build-debug --python.install-env auto --buildtype="debug"
+	meson compile -C build-debug
+
+install-debug: install-deps install-meson-deps build-debug
+	python -m pip install --no-binary :all: --debug --no-build-isolation --editable .
+
+debug: uninstall build-debug
+	mkdir -p debug/gomea/
+	cp -r build-debug/* debug/gomea/
+	cp -r gomea/__init__.py debug/gomea/
 
 cpp:
 	@mkdir -p build
@@ -39,6 +46,9 @@ reinstall: install-deps build-wheel
 src-install: install-deps build-sdist
 	pip3 install dist/*.tar.gz --user
 
+uninstall:
+	pip3 uninstall -y gomea
+
 cibuildwheel: clean
 	sudo pipx run cibuildwheel     
 
@@ -50,6 +60,8 @@ clean:
 	rm -rf gomea.egg-info/
 	rm -rf build/
 	rm -rf dist/
+	rm -rf build-debug/
+	rm -rf debug/gomea/
 	rm -f gomea/*.cpp
 	rm -f gomea/*.h
 	rm -f gomea/*.so
