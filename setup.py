@@ -104,6 +104,7 @@ setup(
         include_path = ["."] + [np.get_include()],
         gdb_debug = debug_mode,
         language_level = "3"),
+    python_requires='>=3.8',
     install_requires=["numpy>=1.23.0","tqdm"],
     zip_safe = False
 )
