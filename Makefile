@@ -6,6 +6,7 @@ here:
 install-deps:
 	pip3 -q install build --user
 	pip3 -q install cython --user
+	pip3 -q install numpy --user
 
 build: install-deps
 	python3 -m build --sdist
