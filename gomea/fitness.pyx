@@ -1,5 +1,6 @@
 from cpython cimport PyObject
 from libcpp.string cimport string
+from libcpp.pair cimport pair
 
 include "EmbeddedFitness.pxi"
     
@@ -17,11 +18,11 @@ cdef class FitnessFunction:
     ):
         self.rotation_matrix = np.ndarray(0)
 
-    cpdef initialize_rotation_matrix(self, int rotation_block_size, double rotation_angle):
+    cpdef initialize_rotation_matrix(self, int rotation_block_size, float rotation_angle):
         rotation_matrix : np.ndarray = np.identity(rotation_block_size)
-        theta : double = np.radians(rotation_angle)
-        cos_theta : double = np.cos(theta)
-        sin_theta : double = np.sin(theta)
+        theta : float = np.radians(rotation_angle)
+        cos_theta : float = np.cos(theta)
+        sin_theta : float = np.sin(theta)
         for index0 in range(rotation_block_size-1):
             for index1 in range(index0+1,rotation_block_size):
                 matrix = np.identity(rotation_block_size)
@@ -33,8 +34,8 @@ cdef class FitnessFunction:
         self.rotation_matrices[(rotation_block_size,rotation_angle)] = <PyObject*> rotation_matrix
         self.rotation_matrix = rotation_matrix
 
-    cpdef rotate_variables(self, np.ndarray variables, double rotation_angle):
-        key: pair[int,double] = (len(variables),rotation_angle)
+    cpdef rotate_variables(self, np.ndarray variables, float rotation_angle):
+        key = (len(variables),rotation_angle)
         if(self.rotation_matrices.count(key) == 0):
             self.initialize_rotation_matrix(len(variables), rotation_angle)
         rotation_matrix = <np.ndarray?> self.rotation_matrices[(len(variables),rotation_angle)]
@@ -45,7 +46,7 @@ cdef class FitnessFunction:
 cdef class YourFitnessFunctionDiscrete(FitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
-        value_to_reach : double = 1e308
+        value_to_reach : float = 1e308
     ):
         self.number_of_variables = number_of_variables
         self.value_to_reach = value_to_reach
@@ -57,7 +58,7 @@ cdef class YourFitnessFunctionDiscrete(FitnessFunction):
 cdef class YourFitnessFunctionRealValued(FitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
-        value_to_reach : double = 0.0
+        value_to_reach : float = 0.0
     ):
         self.number_of_variables = number_of_variables
         self.value_to_reach = value_to_reach
@@ -67,34 +68,34 @@ cdef class YourFitnessFunctionRealValued(FitnessFunction):
         del self.c_inst_realvalued
 
 cdef class GBOFitnessFunction(FitnessFunction):
-    cpdef int number_of_subfunctions( self ) except +:
+    cpdef int number_of_subfunctions( self ) except -1:
         return -1
     
-    cpdef vector[int] inputs_to_subfunction( self, int subfunction_index ) except +:
+    cpdef vector[int] inputs_to_subfunction( self, int subfunction_index ) except *:
         return []
     
-    cpdef double subfunction( self, int subfunction_index, np.ndarray variables ) except +:
-        return 1e308
+    cpdef double subfunction( self, int subfunction_index, np.ndarray variables ) except? INFINITY:
+        return INFINITY
     
-    cpdef double objective_function( self, int objective_index, np.ndarray fitness_buffers ) except +:
+    cpdef double objective_function( self, int objective_index, np.ndarray fitness_buffers ) except? INFINITY:
         return fitness_buffers[objective_index]
     
-    cpdef double constraint_function( self, np.ndarray fitness_buffers ) except +:
+    cpdef double constraint_function( self, np.ndarray fitness_buffers ) except? INFINITY:
         return 0
     
-    cpdef int number_of_fitness_buffers( self ) except +:
+    cpdef int number_of_fitness_buffers( self ) except -1:
         return 1
 
-    cpdef int fitness_buffer_index_for_subfunction( self, int subfunction_index ) except +: 
+    cpdef int fitness_buffer_index_for_subfunction( self, int subfunction_index ) except -1: 
         return 0
 
-    cpdef double similarity_measure( self, size_t var_a, size_t var_b ) except +:
+    cpdef double similarity_measure( self, size_t var_a, size_t var_b ) except? INFINITY:
         return -1
 
 cdef class GBOFitnessFunctionDiscrete(GBOFitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
-        value_to_reach : double = 1e308
+        value_to_reach : float = 1e308
     ):
         self.number_of_variables = number_of_variables
         self.value_to_reach = value_to_reach
@@ -106,7 +107,7 @@ cdef class GBOFitnessFunctionDiscrete(GBOFitnessFunction):
 cdef class GBOFitnessFunctionRealValued(GBOFitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
-        value_to_reach : double = 0.0
+        value_to_reach : float = 0.0
     ):
         self.number_of_variables = number_of_variables
         self.value_to_reach = value_to_reach
@@ -116,16 +117,16 @@ cdef class GBOFitnessFunctionRealValued(GBOFitnessFunction):
         del self.c_inst_realvalued
 
 cdef class BBOFitnessFunction(FitnessFunction):
-    cpdef double objective_function( self, int objective_index, np.ndarray variables ) except +:
-        return 1e308
+    cpdef float objective_function( self, int objective_index, np.ndarray variables ) except? INFINITY:
+        return INFINITY
     
-    cpdef double constraint_function( self, np.ndarray variables ) except +:
+    cpdef float constraint_function( self, np.ndarray variables ) except? INFINITY:
         return 0
 
 cdef class BBOFitnessFunctionDiscrete(BBOFitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
-        value_to_reach : double = 1e308
+        value_to_reach : float = 1e308
     ):
         self.number_of_variables = number_of_variables
         self.value_to_reach = value_to_reach
@@ -137,7 +138,7 @@ cdef class BBOFitnessFunctionDiscrete(BBOFitnessFunction):
 cdef class BBOFitnessFunctionRealValued(BBOFitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
-        value_to_reach : double = 0.0
+        value_to_reach : float = 0.0
     ):
         self.number_of_variables = number_of_variables
         self.value_to_reach = value_to_reach
@@ -150,7 +151,7 @@ cdef class BBOFitnessFunctionRealValued(BBOFitnessFunction):
 cdef class SphereFunction(GBOFitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
-        value_to_reach : double = 0.0
+        value_to_reach : float = 0.0
     ):
         self.c_inst_realvalued = new sphereFunction_t(number_of_variables,value_to_reach)
         self.number_of_variables = self.c_inst_realvalued.getNumberOfVariables()
@@ -159,7 +160,7 @@ cdef class SphereFunction(GBOFitnessFunction):
 cdef class SphereFunctionBBO(BBOFitnessFunction):
     def __cinit__(self,
         number_of_variables : int,
-        value_to_reach : double = 0.0
+        value_to_reach : float = 0.0
     ):
         self.c_inst_realvalued = new sphereFunctionBBO_t(number_of_variables,value_to_reach)
         self.number_of_variables = self.c_inst_realvalued.getNumberOfVariables()
@@ -168,7 +169,7 @@ cdef class SphereFunctionBBO(BBOFitnessFunction):
 cdef class RosenbrockFunction(GBOFitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
-        value_to_reach : double = 0.0
+        value_to_reach : float = 0.0
     ):
         self.c_inst_realvalued = new rosenbrockFunction_t(number_of_variables,value_to_reach)
         self.number_of_variables = self.c_inst_realvalued.getNumberOfVariables()
@@ -177,7 +178,7 @@ cdef class RosenbrockFunction(GBOFitnessFunction):
 cdef class RosenbrockFunctionBBO(BBOFitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
-        value_to_reach : double = 0.0
+        value_to_reach : float = 0.0
     ):
         self.c_inst_realvalued = new rosenbrockFunctionBBO_t(number_of_variables,value_to_reach)
         self.number_of_variables = self.c_inst_realvalued.getNumberOfVariables()
@@ -186,7 +187,7 @@ cdef class RosenbrockFunctionBBO(BBOFitnessFunction):
 cdef class SOREBChainStrong(GBOFitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
-        value_to_reach : double = 0.0
+        value_to_reach : float = 0.0
     ):
         self.c_inst_realvalued = new SOREBChainStrong_t(number_of_variables,value_to_reach)
         self.number_of_variables = self.c_inst_realvalued.getNumberOfVariables()
@@ -195,7 +196,7 @@ cdef class SOREBChainStrong(GBOFitnessFunction):
 cdef class SOREBChainStrongBBO(BBOFitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
-        value_to_reach : double = 0.0
+        value_to_reach : float = 0.0
     ):
         self.c_inst_realvalued = new SOREBChainStrongBBO_t(number_of_variables,value_to_reach)
         self.number_of_variables = self.c_inst_realvalued.getNumberOfVariables()
@@ -204,7 +205,7 @@ cdef class SOREBChainStrongBBO(BBOFitnessFunction):
 cdef class CirclesInASquareBBO(BBOFitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
-        value_to_reach : double = 0.0
+        value_to_reach : float = 0.0
     ):
         self.c_inst_realvalued = new circlesInASquareBBO_t(number_of_variables,value_to_reach)
         self.number_of_variables = self.c_inst_realvalued.getNumberOfVariables()

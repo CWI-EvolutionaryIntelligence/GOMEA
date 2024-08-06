@@ -11,13 +11,13 @@ cdef class Univariate(LinkageModel):
 
 cdef class BlockMarginalProduct(LinkageModel):
     def __cinit__(self,
-        block_size : size_t
+        block_size : int = -1
     ):
-        self.c_inst = new linkage_config_t(block_size)
+        self.c_inst = new linkage_config_t(True,block_size)
 
 cdef class Full(LinkageModel):
     def __cinit__(self):
-        self.c_inst = new linkage_config_t(0)
+        self.c_inst = new linkage_config_t(True,0)
 
 cdef class StaticLinkageTree(LinkageModel):
     def __cinit__(self,

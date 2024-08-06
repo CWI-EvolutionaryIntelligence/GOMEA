@@ -32,7 +32,7 @@ typedef enum{
 class linkage_config_t{
     public:
         linkage_config_t();
-        linkage_config_t( size_t block_size ); 
+        linkage_config_t( bool is_mpm_, int block_size_ ); // needs bool parameter to distinguish from FOS matrix constructor (in Cython)
         linkage_config_t( int similarityMeasure, bool filtered, int maximumSetSize, bool is_static );
         linkage_config_t( int max_clique_size_, bool include_cliques_as_fos_elements_, bool include_full_fos_element_);
         linkage_config_t( const vec_t<vec_t<int>> &FOS );
@@ -40,7 +40,8 @@ class linkage_config_t{
     
         linkage::linkage_model_type type;
 
-        size_t mpm_block_size = -1;
+        bool is_mpm = false;
+        int mpm_block_size = -1;
         
         int lt_similarity_measure = 0;
         bool lt_filtered = false;

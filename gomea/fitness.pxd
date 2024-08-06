@@ -3,6 +3,7 @@ from libcpp.vector cimport vector
 from libcpp.utility cimport pair
 from libcpp.string cimport string
 from libcpp.map cimport map
+from libc.math cimport INFINITY
 import numpy as np
 cimport numpy as np
 
@@ -101,20 +102,20 @@ cdef class FitnessFunction:
     cdef fitness_t[char] *c_inst_discrete
     cdef fitness_t[double] *c_inst_realvalued
     
-    cpdef initialize_rotation_matrix(self, int rotation_block_size, double rotation_angle)
-    cpdef rotate_variables(self, np.ndarray variables, double rotation_angle)
+    cpdef initialize_rotation_matrix(self, int rotation_block_size, float rotation_angle)
+    cpdef rotate_variables(self, np.ndarray variables, float rotation_angle)
 
 cdef class GBOFitnessFunction(FitnessFunction):
-    cpdef double subfunction( self, int subfunction_index, np.ndarray variables ) except +
-    cpdef double objective_function( self, int objective_index, np.ndarray fitness_buffers ) except +
-    cpdef double constraint_function( self, np.ndarray fitness_buffers ) except +
-    cpdef vector[int] inputs_to_subfunction( self, int ) except +
-    cpdef int number_of_subfunctions( self ) except +
+    cpdef double subfunction( self, int subfunction_index, np.ndarray variables ) except? INFINITY
+    cpdef double objective_function( self, int objective_index, np.ndarray fitness_buffers ) except? INFINITY
+    cpdef double constraint_function( self, np.ndarray fitness_buffers ) except? INFINITY
+    cpdef vector[int] inputs_to_subfunction( self, int ) except *
+    cpdef int number_of_subfunctions( self ) except -1
 
-    cpdef int number_of_fitness_buffers( self ) except +
-    cpdef int fitness_buffer_index_for_subfunction( self, int ) except +
+    cpdef int number_of_fitness_buffers( self ) except -1
+    cpdef int fitness_buffer_index_for_subfunction( self, int ) except -1
     
-    cpdef double similarity_measure( self, size_t, size_t ) except +
+    cpdef double similarity_measure( self, size_t, size_t ) except? INFINITY
 
 cdef class GBOFitnessFunctionDiscrete(GBOFitnessFunction):
     pass
@@ -123,8 +124,8 @@ cdef class GBOFitnessFunctionRealValued(GBOFitnessFunction):
     pass
 
 cdef class BBOFitnessFunction(FitnessFunction):
-    cpdef double objective_function( self, int objective_index, np.ndarray variables ) except +
-    cpdef double constraint_function( self, np.ndarray variables ) except +
+    cpdef float objective_function( self, int objective_index, np.ndarray variables ) except? INFINITY
+    cpdef float constraint_function( self, np.ndarray variables ) except? INFINITY
 
 cdef class BBOFitnessFunctionDiscrete(BBOFitnessFunction):
     pass

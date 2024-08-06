@@ -26,13 +26,13 @@ cdef class DiscreteGOMEA:
         fitness: FitnessFunction, 
         # GOMEA settings
         linkage_model : LinkageModel = StaticLinkageTree(),
-        max_number_of_populations : int=25,
-        IMS_subgeneration_factor: int=4,
-        base_population_size: int=2,
-        max_number_of_evaluations : int=-1,
-        max_number_of_generations : int=-1,
-        max_number_of_seconds : double=-1.0,
-        random_seed : int=-1,
+        max_number_of_populations : int = 25,
+        IMS_subgeneration_factor: int = 4,
+        base_population_size: int = 2,
+        max_number_of_evaluations : int = -1,
+        max_number_of_generations : int = -1,
+        max_number_of_seconds : float = -1.0,
+        random_seed : int = -1,
     ):
 
         # Initialize attributes 
