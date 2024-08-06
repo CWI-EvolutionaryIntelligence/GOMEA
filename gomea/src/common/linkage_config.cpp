@@ -1,4 +1,4 @@
-#include "gomea/src/common/linkage_model.hpp"
+#include "gomea/src/common/linkage_config.hpp"
 
 namespace gomea{
         
@@ -7,7 +7,7 @@ linkage_config_t::linkage_config_t()
 	type = linkage::UNIVARIATE;
 }
 
-linkage_config_t::linkage_config_t( size_t block_size_ ) : mpm_block_size(block_size_)
+linkage_config_t::linkage_config_t( bool is_mpm_, int block_size_ ) : is_mpm(is_mpm_), mpm_block_size(block_size_)
 {
 	type = linkage::MPM;
 }

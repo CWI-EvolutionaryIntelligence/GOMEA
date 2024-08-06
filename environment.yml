@@ -5,14 +5,14 @@ dependencies:
   - make
   - c-compiler
   - cxx-compiler
-  - python=3.8
+  - python=3.12
   - python-devtools=0.9.0
   - pip
   - pip:
-    - meson==1.3.2
+    - meson==1.5.1
     - meson-python==0.16.0
-    - numpy==1.23.3
-    - wheel==0.37.1
-    - setuptools==65.4.0
-    - Cython==0.29.32
+    - numpy==2.0.1
+    - wheel==0.44.0
+    - setuptools==72.1.0
+    - Cython==3.0.10
     - tqdm==4.65.0

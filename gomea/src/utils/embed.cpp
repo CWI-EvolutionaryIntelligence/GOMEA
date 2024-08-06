@@ -30,12 +30,6 @@ namespace gomea{
 				exit(1);
 			}
 
-			// Add a built-in module, before Py_Initialize
-			if (PyImport_AppendInittab(name, initfunc) == -1) {
-				fprintf(stderr, "Error: could not extend in-built modules table\n");
-				exit(1);
-			}
-
 			// Pass program name to the Python interpreter
 			Py_SetProgramName(embedded_program);
 

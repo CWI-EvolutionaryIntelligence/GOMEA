@@ -2,7 +2,7 @@ default: install
 
 install-deps:
 	pip3 -q install build --user
-	pip3 -q install cython==0.29.32 --user
+	pip3 -q install cython==3.0.10 --user
 	pip3 -q install numpy==2.0.1 --user
 
 install-meson-deps:
