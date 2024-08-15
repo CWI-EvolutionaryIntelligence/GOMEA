@@ -3,7 +3,7 @@
 #include <string> 
 #include <iostream>
 
-#include "gomea/src/discrete/Config.hpp"
+#include "gomea/src/discrete/config.hpp"
 
 namespace gomea{
 namespace discrete{
@@ -14,7 +14,7 @@ public:
     virtual void run() = 0;
     virtual ~GOMEA(){};
 
-    double readVTR(Config *config);
+    double readVTR(config_t *config);
 };
 
 }}

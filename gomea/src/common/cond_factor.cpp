@@ -2,10 +2,6 @@
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 namespace gomea{
 
-cond_factor_t::cond_factor_t() 
-{
-}
-
 cond_factor_t::cond_factor_t( const vec_t<int> &variables )
 {
 	addGroupOfVariables(variables);
@@ -19,6 +15,11 @@ cond_factor_t::cond_factor_t( const vec_t<int> &variables, const vec_t<int> &con
 cond_factor_t::cond_factor_t( const vec_t<int> &variables, const std::set<int> &conditioned_variables )
 {
 	addGroupOfVariables(variables,conditioned_variables);
+}
+
+size_t cond_factor_t::size()
+{
+	return variables.size();
 }
 
 void cond_factor_t::addGroupOfVariables( const vec_t<int> &indices, const vec_t<int> &indices_cond )
@@ -92,20 +93,19 @@ void cond_factor_t::print()
 	printf("]\n");
 }
 
-
-void cond_factor_Dt::initializeFrequencyTables( const vec_t<solution_t<char>*> &population ) 
+/*void cond_factor_Dt::initializeFrequencyTables( const vec_t<solution_t<char>*> &population ) 
 {
 	vec_t<vec_t<int>> donor_list;
 	// TODO
 	assert(0);
 }
 
-bool cond_factor_Dt::isConditionedDonor( solution_t<char> *donor_candidate, solution_t<char> *parent )
+bool cond_factor_t::isConditionedDonor( solution_t<char> *donor_candidate, solution_t<char> *parent )
 {
 	return isConditionedDonor(donor_candidate, parent->variables);
 }
 
-bool cond_factor_Dt::isConditionedDonor( solution_t<char> *donor_candidate, const vec_t<char> &parent )
+bool cond_factor_t::isConditionedDonor( solution_t<char> *donor_candidate, const vec_t<char> &parent )
 {
 	for (int gene_ind : variables_conditioned_on)
 	{
@@ -117,19 +117,16 @@ bool cond_factor_Dt::isConditionedDonor( solution_t<char> *donor_candidate, cons
 	return true;
 }
 
-vec_t<char> cond_factor_Dt::samplePartialSolutionConditional( solution_t<char> *parent, const vec_t<solution_t<char>*> &population, int parent_index ) 
+vec_t<char> cond_factor_t::samplePartialSolutionConditional( solution_t<char> *parent, const vec_t<solution_t<char>*> &population, int parent_index ) 
 {
 	return samplePartialSolutionConditional(parent->variables, population, parent_index);
 }
 
-vec_t<char> cond_factor_Dt::samplePartialSolutionConditional( const vec_t<char> &parent, const vec_t<solution_t<char>*> &population, int parent_index ) 
+vec_t<char> cond_factor_t::samplePartialSolutionConditional( const vec_t<char> &parent, const vec_t<solution_t<char>*> &population, int parent_index ) 
 {
 	vec_t<char> sample; // In the same order as 'variables'
 	vec_t<int> donorIndices(population.size());
     std::iota(donorIndices.begin(), donorIndices.end(), 0);
-	/*for( int i = 0; i < variables.size(); i++ )
-		printf("%d ",variables[i]);
-	printf("\n");*/
 
 	std::shuffle(donorIndices.begin(),donorIndices.end(),utils::rng);
 	// Find a donor that is different from the parent and is a suitable conditioned donor for the parent
@@ -194,7 +191,7 @@ vec_t<double> cond_factor_Rt::estimateMeanVectorML( vec_t<int> &variables, solut
 
 matE cond_factor_Rt::estimateCovarianceMatrixML( vec_t<int> &variables, solution_t<double> **selection, int selection_size, double distribution_multiplier )
 {
-	/* First do the maximum-likelihood estimate from data */
+	// First do the maximum-likelihood estimate from data
 	//mat covariance_matrix(variables.size(),variables.size(),fill::none);
 	matE covariance_matrix = matE(variables.size(),variables.size());
 	for( size_t j = 0; j < variables.size(); j++ )
@@ -220,7 +217,7 @@ void cond_factor_Rt::estimateDistribution( solution_t<double> **selection, int s
 
 	mean_vector = estimateMeanVectorML(variables,selection,selection_size);
 	
-	/* Change the focus of the search to the best solution */
+	// Change the focus of the search to the best solution
 	if( distribution_multiplier < 1.0 )
 		for(int j = 0; j < n; j++)
 			mean_vector[j] = selection[0]->variables[variables[j]];
@@ -286,13 +283,13 @@ partial_solution_t<double> *cond_factor_Rt::generatePartialSolution( solution_t<
 				printf("%10.3e ",fitness_function->getUpperRangeBound(variables[i]));
 			printf("\n");
 			exit(1);
-			/*vecE sample_result = vec(num_indices, fill::none);
-			vecE sample_means = vecE(num_indices, fill::none);
-			for(int i = 0; i < num_indices; i++ )
-			{
-				sample_result[i] = lower_init_ranges[indices[i]] + (upper_init_ranges[indices[i]] - lower_init_ranges[indices[i]])*randomRealUniform01();
-				sample_means[i] = lower_init_ranges[indices[i]] + (upper_init_ranges[indices[i]] - lower_init_ranges[indices[i]]) * 0.5;
-			}*/
+			//vecE sample_result = vec(num_indices, fill::none);
+			//vecE sample_means = vecE(num_indices, fill::none);
+			//for(int i = 0; i < num_indices; i++ )
+			//{
+			//	sample_result[i] = lower_init_ranges[indices[i]] + (upper_init_ranges[indices[i]] - lower_init_ranges[indices[i]])*randomRealUniform01();
+			//	sample_means[i] = lower_init_ranges[indices[i]] + (upper_init_ranges[indices[i]] - lower_init_ranges[indices[i]]) * 0.5;
+			//}
 		}
 		else
 		{
@@ -337,6 +334,6 @@ partial_solution_t<double> *cond_factor_Rt::generatePartialSolution( solution_t<
 	partial_solution_t<double> *sol_res = new partial_solution_t<double>(result,variables);
 	sol_res->setSampleMean(means);
 	return(sol_res);
-}
+}*/
 
 }

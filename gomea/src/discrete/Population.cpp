@@ -3,67 +3,69 @@
 namespace gomea{
 namespace discrete{
 
-Population::Population(Config *config_, fitness_t<char> *problemInstance_, sharedInformation *sharedInformationPointer_, size_t GOMEAIndex_, size_t populationSize_, linkage_model_pt FOSInstance_ ): 
+Population::Population(config_t *config_, fitness_t<char> *problemInstance_, sharedInformation *sharedInformationPointer_, size_t GOMEAIndex_, size_t populationSize_, linkage_model_pt FOSInstance_ ): 
         config(config_), 
         problemInstance(problemInstance_),
         sharedInformationPointer(sharedInformationPointer_),
         GOMEAIndex(GOMEAIndex_), 
         populationSize(populationSize_)
 {
-        terminated = false;
-        numberOfGenerations = 0;
-        averageFitness = 0.0;
-        
-        population.resize(populationSize);
-        offspringPopulation.resize(populationSize);
-        noImprovementStretches.resize(populationSize);
-        
-        vec_t<int> allGenes(problemInstance->number_of_variables);
-        iota(allGenes.begin(), allGenes.end(), 0);
+    terminated = false;
+    numberOfGenerations = 0;
+    averageFitness = 0.0;
+    
+    population.resize(populationSize);
+    offspringPopulation.resize(populationSize);
+    noImprovementStretches.resize(populationSize);
+    
+    vec_t<int> allGenes(problemInstance->number_of_variables);
+    iota(allGenes.begin(), allGenes.end(), 0);
 
-        for (size_t i = 0; i < populationSize; ++i)
+    for (size_t i = 0; i < populationSize; ++i)
+    {
+        noImprovementStretches[i] = 0;
+
+        population[i] = new solution_t<char>(problemInstance->number_of_variables, config->alphabetSize);
+        population[i]->randomInit(&gomea::utils::rng);
+        problemInstance->evaluate(population[i]);
+        
+        offspringPopulation[i] = new solution_t<char>(problemInstance->number_of_variables, config->alphabetSize);
+        *offspringPopulation[i] = *population[i];
+    }
+        
+    if( config->linkage_config != NULL )
+    {
+        if (config->linkage_config->type == linkage::CONDITIONAL)
         {
-            noImprovementStretches[i] = 0;
-
-            population[i] = new solution_t<char>(problemInstance->number_of_variables, config->alphabetSize);
-            population[i]->randomInit(&gomea::utils::rng);
-            problemInstance->evaluate(population[i]);
-            
-            offspringPopulation[i] = new solution_t<char>(problemInstance->number_of_variables, config->alphabetSize);
-            *offspringPopulation[i] = *population[i];
+            /*if (config->linkage_config->cond_include_full_fos_element)
+            {
+                throw std::runtime_error("Unsuitable linkage model for discrete optimization.");
+            }*/
+            if (problemInstance->variable_interaction_graph.size() == 0)
+                problemInstance->initializeVariableInteractionGraph();
+            FOSInstance = linkage_model_t::createFOSInstance(*config->linkage_config, problemInstance->number_of_variables, problemInstance->variable_interaction_graph);
         }
-			
-		if( config->linkage_config != NULL )
-		{
-            if (config->linkage_config->type == linkage::CONDITIONAL)
-            {
-                /*if (config->linkage_config->cond_include_full_fos_element)
-                {
-                    throw std::runtime_error("Unsuitable linkage model for discrete optimization.");
-                }*/
-                if (problemInstance->variable_interaction_graph.size() == 0)
-                    problemInstance->initializeVariableInteractionGraph();
-                FOSInstance = linkage_model_t::createFOSInstance(*config->linkage_config, problemInstance->number_of_variables, problemInstance->variable_interaction_graph);
-            }
-            else
-            {
-                FOSInstance = linkage_model_t::createFOSInstance( *config->linkage_config, problemInstance->number_of_variables );
-            }
-            FOSInstance->initializeDependentSubfunctions( problemInstance->subfunction_dependency_map );
-		}
-		else if( FOSInstance_ == NULL )
-		{
-			FOSInstance = linkage_model_t::createLinkageTreeFOSInstance(config->FOSIndex, problemInstance->number_of_variables, config->linkage_config->lt_similarity_measure, config->linkage_config->lt_maximum_set_size);
-		}
-		else FOSInstance = FOSInstance_;
+        else
+        {
+            FOSInstance = linkage_model_t::createFOSInstance( *config->linkage_config, problemInstance->number_of_variables );
+        }
+        FOSInstance->initializeDependentSubfunctions( problemInstance->subfunction_dependency_map );
+    }
+    else if( FOSInstance_ == NULL )
+    {
+        FOSInstance = linkage_model_t::createLinkageTreeFOSInstance(config->FOSIndex, problemInstance->number_of_variables, config->linkage_config->lt_similarity_measure, config->linkage_config->lt_maximum_set_size);
+    }
+    else FOSInstance = FOSInstance_;
 
-        if( config->verbose )
-            FOSInstance->printFOS();
-        
-        #ifdef DEBUG
-            std::cout << "New Population created! Population #" << GOMEAIndex << " PopulationSize:" << populationSize << endl;
-            std::cout << this;
-        #endif
+    sampler = new sampler_Dt(problemInstance->number_of_variables, config->alphabetSize, problemInstance);
+
+    if( config->verbose )
+        FOSInstance->printFOS();
+    
+    #ifdef DEBUG
+        std::cout << "New Population created! Population #" << GOMEAIndex << " PopulationSize:" << populationSize << endl;
+        std::cout << this;
+    #endif
 }
 
 Population::~Population()
@@ -300,7 +302,7 @@ bool Population::GOM(size_t offspringIndex)
             vec_t<char> donorGenes;
             if( FOSInstance->is_conditional )
             {
-                donorGenes = FOSInstance->samplePartialSolutionConditional( FOS_index, offspringPopulation[offspringIndex], population, offspringIndex ); 
+                donorGenes = sampler->sampleSolution( FOSInstance, FOS_index, offspringPopulation[offspringIndex], population, offspringIndex ); 
                 indicesTried = donorIndices.size();
             }
             else

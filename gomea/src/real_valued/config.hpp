@@ -1,7 +1,7 @@
 #pragma once
-#include "gomea/src/common/linkage_model.hpp"
 #include "gomea/src/fitness/fitness.hpp"
 #include "gomea/src/fitness/benchmarks-rv.hpp"
+#include "gomea/src/real_valued/linkage_model.hpp"
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 namespace gomea{
@@ -9,10 +9,10 @@ namespace realvalued{
 
 typedef gomea::fitness::fitness_t<double> fitness_t;
 
-class Config {
+class config_t {
 	public:
 		/*-=-=-=-=-=-=-=-=-=-=-=-= Section Header Functions -=-=-=-=-=-=-=-=-=-=-=-=*/
-		Config(){}; 
+		config_t(){}; 
 
 		/*-=-=-=-=-=-=-=-=-=-=-=- Options -=-=-=-=-=-=-=-=-=-=-=-=-*/
 		int problem_index;

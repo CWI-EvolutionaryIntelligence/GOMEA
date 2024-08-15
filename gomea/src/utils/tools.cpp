@@ -1,10 +1,9 @@
 #include "gomea/src/utils/tools.hpp"
+#include <queue>
 
 namespace gomea{
-	namespace utils{
+namespace utils{
 
-long long random_seed = 0;
-std::mt19937 rng;
 
 /*-=-=-=-=-=-=-=-=-=-=-= Section Elementary Operations -=-=-=-=-=-=-=-=-=-=-*/
 /**
@@ -431,6 +430,212 @@ int *greedyScatteredSubsetSelection( double **points, int number_of_points, int 
   free( indices_left );
 
   return( result );
+}
+
+std::vector<int> getGraphOrderBreadthFirst( const graph_t &graph )
+{
+	const int UNVISITED = 0;
+	const int IS_VISITED = 1;
+	const int IN_CLIQUE = 2;
+	const int IN_QUEUE = 3;
+
+	int num_nodes = graph.size();
+	std::vector<int> visited(num_nodes,0);
+	vec_t<int> var_order = gomea::utils::randomPermutation( num_nodes );
+
+	std::vector<int> graph_order;
+	for( int i = 0; i < num_nodes; i++ )
+	{
+		int ind = var_order[i];
+		if( visited[ind] == IS_VISITED )
+			continue;
+		visited[ind] = IN_CLIQUE;
+	
+		std::queue<int> q;
+		q.push(ind);
+
+		while( !q.empty() )
+		{
+			ind = q.front();
+			q.pop();
+
+			if( visited[ind] == IS_VISITED )
+				continue;
+			visited[ind] = IS_VISITED;
+
+			graph_order.push_back(ind);
+
+			for( int x : graph.at(ind) ) 
+			{
+				if( visited[x] == UNVISITED )
+				{
+					q.push(x);
+					visited[x] = IN_QUEUE;
+					//printf("Q[ %d ]\n",x);
+				}
+			}
+		}
+	}
+	return( graph_order );
+}
+
+int *hungarianAlgorithm( int **similarity_matrix, int dim )
+{
+	int x,y,ty;
+
+	int *lx = (int*) Malloc(dim*sizeof(int));
+	int *ly = (int*) Malloc(dim*sizeof(int));
+	int *xy = (int*) Malloc(dim*sizeof(int));
+	int *yx = (int*) Malloc(dim*sizeof(int));
+	int *slack = (int*) Malloc(dim*sizeof(int));
+	int *slackx = (int*) Malloc(dim*sizeof(int));
+	int *prev = (int*) Malloc(dim*sizeof(int));
+	bool *S = (bool*) Malloc(dim*sizeof(bool));
+	bool *T = (bool*) Malloc(dim*sizeof(bool));
+
+	int root = -1;
+	int max_match = 0;
+	for(int i = 0; i < dim; i++ )
+	{
+		lx[i] = 0;
+		ly[i] = 0;
+		xy[i] = -1;
+		yx[i] = -1;
+	}
+	for(int i = 0; i < dim; i++)
+		for(int j = 0; j < dim; j++)
+			if(similarity_matrix[i][j] > lx[i])
+				lx[i] = similarity_matrix[i][j];
+
+	bool terminated = false;
+	while(!terminated)
+	{
+		if (max_match == dim) break;
+
+		int wr = 0;
+		int rd = 0;
+		int *q = (int*) Malloc(dim*sizeof(int));
+		for(int i = 0; i < dim; i++ )
+		{
+			S[i] = false;
+			T[i] = false;
+			prev[i] = -1;
+		}
+
+		for (x = 0; x < dim; x++)
+		{
+			if (xy[x] == -1)
+			{
+				q[wr++] = root = x;
+				prev[x] = -2;
+				S[x] = true;
+				break;
+			}
+		}
+
+		for (y = 0; y < dim; y++)
+		{
+			slack[y] = lx[root] + ly[y] - similarity_matrix[root][y];
+			slackx[y] = root;
+		}
+
+		while ( 1 )
+		{
+			while (rd < wr)
+			{
+				x = q[rd++];
+				for (y = 0; y < dim; y++)
+				{
+					if (similarity_matrix[x][y] == lx[x] + ly[y] && !T[y])
+					{
+						if (yx[y] == -1) break;
+						T[y] = true;
+						q[wr++] = yx[y];
+						hungarianAlgorithmAddToTree(yx[y], x, S, prev, slack, slackx, lx, ly, similarity_matrix, dim);
+					}
+				}
+				if (y < dim) break;
+			}
+			if (y < dim) break;
+
+			int delta = 100000000;
+			for(y = 0; y < dim; y++)
+				if(!T[y] && slack[y] < delta)
+					delta = slack[y];
+			for(x = 0; x < dim; x++)
+				if(S[x])
+					lx[x] -= delta;
+			for(y = 0; y < dim; y++)
+				if(T[y])
+					ly[y] += delta;
+			for(y = 0; y < dim; y++)
+				if(!T[y])
+					slack[y] -= delta;
+
+			wr = 0;
+			rd = 0;
+			for (y = 0; y < dim; y++)
+			{
+				if (!T[y] && slack[y] == 0)
+				{
+					if (yx[y] == -1)
+					{
+						x = slackx[y];
+						break;
+					}
+					else
+					{
+						T[y] = true;
+						if (!S[yx[y]])
+						{
+							q[wr++] = yx[y];
+							hungarianAlgorithmAddToTree(yx[y], slackx[y], S, prev, slack, slackx, lx, ly, similarity_matrix, dim);
+						}
+					}
+				}
+			}
+			if (y < dim) break;
+		}
+
+		if (y < dim)
+		{
+			max_match++;
+			for (int cx = x, cy = y; cx != -2; cx = prev[cx], cy = ty)
+			{
+				ty = xy[cx];
+				yx[cy] = cx;
+				xy[cx] = cy;
+			}
+		}
+		else terminated = true;
+
+		free( q );
+	}
+
+	free( lx );
+	free( ly );
+	free( yx );
+	free( slack );
+	free( slackx );
+	free( prev );
+	free( S );
+	free( T );
+
+	return xy;
+}
+
+void hungarianAlgorithmAddToTree(int x, int prevx, bool *S, int *prev, int *slack, int *slackx, int* lx, int *ly, int** similarity_matrix, int dim) 
+{
+	S[x] = true;
+	prev[x] = prevx;
+	for (int y = 0; y < dim; y++)
+	{
+		if (lx[x] + ly[y] - similarity_matrix[x][y] < slack[y])
+		{
+			slack[y] = lx[x] + ly[y] - similarity_matrix[x][y];
+			slackx[y] = x;
+		}
+	}
 }
 
 

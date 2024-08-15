@@ -42,12 +42,13 @@
 namespace gomea{
 namespace realvalued{
 
-population_t::population_t( fitness_t *fitness, int population_size, double lower_init, double upper_init )
+population_t::population_t( fitness_t *fitness, int population_size, config_t *config )
 {
 	this->population_size = population_size;
 	this->fitness = fitness;
+	this->config = config;
 	initializeDefaultParameters();
-	initializeParameterRangeBounds( lower_init, upper_init );
+	initializeParameterRangeBounds( config->lower_user_range, config->upper_user_range );
 }
 
 population_t::~population_t()
@@ -243,10 +244,10 @@ void population_t::estimateDistributions()
 		assert( linkage_model->type == linkage::LINKAGE_TREE );
 		if (linkage_model->type == linkage::LINKAGE_TREE)
 		{
-			matE full_covariance_matrix = distribution_t::estimateFullCovarianceMatrixML(selection, selection_size);
+			matE full_covariance_matrix = distribution_Rt::estimateFullCovarianceMatrixML(selection, selection_size, 1.0);
 			linkage_model->learnLinkageTreeFOS(full_covariance_matrix);
-			linkage_model->clearDistributions();
-			linkage_model->initializeDistributions();
+			//linkage_model->clearDistributions();
+			//linkage_model->initializeDistributions();
 			linkage_model->shuffleFOS();
 			sampled_solutions = (partial_solution_t<double> ***)utils::Malloc(linkage_model->size() * sizeof(partial_solution_t<double> **));
 			for (int j = 0; j < linkage_model->size(); j++)
@@ -254,15 +255,12 @@ void population_t::estimateDistributions()
 		}
 	}
 
-	assert( linkage_model->distributions.size() == linkage_model->size() );
-	for( int i = 0; i < linkage_model->size(); i++ )
-		estimateDistribution(i);
 	updateAMSMeans();
 }
 
 void population_t::estimateDistribution( int FOS_index )
 {
-	linkage_model->estimateDistribution( FOS_index, selection, selection_size );
+	linkage_model->estimateDistributionForFOSElement( FOS_index, selection, selection_size );
 }
 
 double population_t::estimateMean( int var )
@@ -318,7 +316,7 @@ void population_t::generateAndEvaluateNewSolutions()
 	for(int k = num_elitists_to_copy; k < population_size; k++ )
 		individual_improved[k] = false;
 
-	double alpha_AMS = 0.5*tau*(((double) population_size)/((double) (population_size-1)));
+	double alpha_AMS = 0.5*config->tau*(((double) population_size)/((double) (population_size-1)));
 	int number_of_AMS_solutions = (int) (alpha_AMS*(population_size-1));
 
 	linkage_model->shuffleFOS();
@@ -327,16 +325,14 @@ void population_t::generateAndEvaluateNewSolutions()
 	{
 		int FOS_index = linkage_model->FOSorder[g];
 
-		if( selection_during_gom )
-		{
+		if( config->selection_during_gom )
 			makeSelection();
-			estimateDistribution(FOS_index);
-		}
-		if( update_elitist_during_gom )
+		estimateDistribution(FOS_index);
+		if( config->update_elitist_during_gom )
 			updateElitist();
 
 		for(int k = num_elitists_to_copy; k < population_size; k++ )
-			sampled_solutions[FOS_index][k] = linkage_model->generatePartialSolution( FOS_index, individuals[k], fitness );
+			sampled_solutions[FOS_index][k] = sampler->sampleSolution( linkage_model, FOS_index, individuals[k] );
 
 		if( number_of_generations > 0 )
 		{
@@ -401,7 +397,7 @@ void population_t::generateAndEvaluateNewSolutions()
 	int best_individual_index;
 	getBestInPopulation( &best_individual_index );
 	for(int k = num_elitists_to_copy; k < population_size; k++ )
-		if( individual_NIS[k] > maximum_no_improvement_stretch )
+		if( individual_NIS[k] > config->maximum_no_improvement_stretch )
 			applyForcedImprovements( k, best_individual_index );
 
 	if( generational_improvement )
@@ -613,13 +609,8 @@ solution_t<double> *population_t::getWorstSolution()
 void population_t::initializeDefaultParameters()
 {
 	eta_cov = 1.0;
-	tau = 0.35;
-	st_dev_ratio_threshold = 1.0;
-	distribution_multiplier_decrease = 0.9;
-	distribution_multiplier_increase = 1.0/distribution_multiplier_decrease;
-	maximum_no_improvement_stretch = 100;
 	delta_AMS = 2.0;
-	selection_size = (int) (tau * population_size);
+	selection_size = (int) (config->tau * population_size);
 }
 
 void population_t::initializeNewPopulationMemory()
@@ -637,7 +628,9 @@ void population_t::initializeNewPopulationMemory()
 
 	individual_NIS = (int*) utils::Malloc( population_size*sizeof(int));
 
-	initializeFOS(linkage_config);
+	initializeFOS(config->linkage_config);
+
+	sampler = new sampler_Rt(fitness);
 
 	population_terminated = false;
 
@@ -651,6 +644,7 @@ void population_t::initializeFOS( linkage_config_t *linkage_config )
 		if( fitness->variable_interaction_graph.size() == 0 )
 			fitness->initializeVariableInteractionGraph();
 		linkage_model = linkage_model_rv_t::createFOSInstance(*linkage_config, fitness->number_of_variables, fitness->variable_interaction_graph);
+		linkage_model->p_accept = 0.0;
 	}
 	else
 	{
@@ -667,12 +661,16 @@ void population_t::initializeFOS( linkage_config_t *linkage_config )
 		for (int j = 0; j < linkage_model->size(); j++)
 			sampled_solutions[j] = (partial_solution_t<double> **)utils::Malloc(population_size * sizeof(partial_solution_t<double> *));
 
-        if( !(linkage_config->type == linkage::CONDITIONAL) )
+        /*if( !(linkage_config->type == linkage::CONDITIONAL) )
         {
 		    linkage_model->initializeDistributions();
-		}
+		}*/
 	}
-	//linkage_model->printFOS();
+
+	linkage_model->maximum_no_improvement_stretch = config->maximum_no_improvement_stretch;
+	linkage_model->st_dev_ratio_threshold = config->st_dev_ratio_threshold;
+	linkage_model->distribution_multiplier_decrease = config->distribution_multiplier_decrease;
+	linkage_model->distribution_multiplier_increase = config->distribution_multiplier_increase;
 }
 
 void population_t::initializeFOSFromIndex( int FOSIndex )

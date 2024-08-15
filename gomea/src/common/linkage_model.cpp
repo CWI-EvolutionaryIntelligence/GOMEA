@@ -82,9 +82,8 @@ linkage_model_t::linkage_model_t( size_t number_of_variables_, size_t block_size
 	shuffleFOS();
 }
 
-linkage_model_t::linkage_model_t( size_t number_of_variables_, const vec_t<vec_t<int>> &FOS )
+linkage_model_t::linkage_model_t( size_t number_of_variables_, const vec_t<vec_t<int>> &FOS ) : linkage_model_t(number_of_variables_)
 {
-	number_of_variables = number_of_variables_;
 	size_t tot_size = 0;
 	for( vec_t<int> group : FOS )
 	{
@@ -221,7 +220,7 @@ linkage_model_t::linkage_model_t( size_t number_of_variables, const graph_t &var
 				}
 			}
 			addConditionedGroup( clique, cond );
-			factorization_order.push_back(factorization_order.size());
+			factorization->order.push_back(factorization->order.size());
 		}
 	}
 	if( include_full_fos_element ) 
@@ -300,6 +299,7 @@ linkage_model_t::linkage_model_t( std::string filename )
 		throw std::runtime_error(string);
 	}
 	is_static = true;
+	factorization = new factorization_t(number_of_variables);
 }
     
 linkage_model_pt linkage_model_t::univariate(size_t number_of_variables_)
@@ -358,10 +358,11 @@ void linkage_model_t::addGroup( const std::set<int> &group )
 	addGroup(vec);
 }
 
-void linkage_model_t::addGroup( vec_t<int> group ) 
+void linkage_model_t::addGroup( vec_t<int> variables ) 
 {
-	std::sort(group.begin(),group.end());
-	FOSStructure.push_back(group);
+	std::sort(variables.begin(),variables.end());
+	FOSStructure.push_back(variables);
+	factorization->addGroup( variables );
 }
 
 void linkage_model_t::addConditionedGroup( vec_t<int> variables ) 
@@ -370,91 +371,12 @@ void linkage_model_t::addConditionedGroup( vec_t<int> variables )
 	addConditionedGroup(variables,cond);
 }
 
-void linkage_model_t::addConditionedGroup( std::vector<int> variables, std::set<int> conditioned_variables )
+void linkage_model_t::addConditionedGroup( vec_t<int> variables, std::set<int> conditioned_variables )
 {
 	std::sort(variables.begin(),variables.end());
 	if( include_cliques_as_fos_elements )	
 		FOSStructure.push_back(variables);
-	
-	cond_factor_t *fact = new cond_factor_t(variables,conditioned_variables);
-	factorization.push_back( fact );
-}
-
-std::vector<int> linkage_model_t::getGraphOrderBreadthFirst( const graph_t &graph )
-{
-	const int UNVISITED = 0;
-	const int IS_VISITED = 1;
-	const int IN_CLIQUE = 2;
-	const int IN_QUEUE = 3;
-
-	int num_cliques = factorization.size();
-	std::vector<int> visited(num_cliques,0);
-	vec_t<int> var_order = gomea::utils::randomPermutation( num_cliques );
-
-	std::vector<int> VIG_order;
-	for( int i = 0; i < num_cliques; i++ )
-	{
-		int ind = var_order[i];
-		if( visited[ind] == IS_VISITED )
-			continue;
-		visited[ind] = IN_CLIQUE;
-	
-		std::queue<int> q;
-		q.push(ind);
-
-		while( !q.empty() )
-		{
-			ind = q.front();
-			q.pop();
-
-			if( visited[ind] == IS_VISITED )
-				continue;
-			visited[ind] = IS_VISITED;
-
-			VIG_order.push_back(ind);
-
-			for( int x : graph.at(ind) ) 
-			{
-				if( visited[x] == UNVISITED )
-				{
-					q.push(x);
-					visited[x] = IN_QUEUE;
-					//printf("Q[ %d ]\n",x);
-				}
-			}
-		}
-	}
-	return( VIG_order );
-}
-
-vec_t<char> linkage_model_t::samplePartialSolutionConditional( int FOS_index, solution_t<char> *parent, const vec_t<solution_t<char>*> &population, int parent_index ) 
-{
-	assert( is_conditional );
-	if( FOSStructure[FOS_index].size() == number_of_variables )
-	{
-		// Offspring sample starts as copy of parent
-		vec_t<char> sample(number_of_variables);
-		for( int i = 0; i < number_of_variables; i++ )
-			sample[i] = parent->variables[i];
-
-		for( int i = 0; i < factorization.size(); i++ )
-		{
-			cond_factor_t *fact = factorization[factorization_order[i]];
-			vec_t<char> fact_sample = fact->samplePartialSolutionConditional(sample,population,parent_index);
-			// Insert partial sample into offspring sample
-			for( int j = 0; j < fact->variables.size(); j++ )
-			{
-				int var_index = fact->variables[j];
-				sample[var_index] = fact_sample[j];
-				assert(FOSStructure[FOS_index][var_index] == var_index);
-			}
-		}
-		return sample;
-	}
-	else
-	{
-		return factorization[FOS_index]->samplePartialSolutionConditional(parent->variables,population,parent_index);
-	}
+	factorization->addGroup( variables, conditioned_variables );
 }
     
 void linkage_model_t::writeToFileFOS(std::string folder, int populationIndex, int generation)
@@ -507,35 +429,6 @@ void linkage_model_t::shuffleFOS()
     std::shuffle(FOSorder.begin(), FOSorder.end(), utils::rng);
 }
 
-void linkage_model_t::initializeCondFactorInteractionGraph( const graph_t &variable_interaction_graph )
-{
-	assert( is_conditional );
-	assert( factorization.size() > 0 );
-
-	// Save clique/factor index that each variable is in for faster lookup
-	vec_t<int> clique_index(factorization.size());
-	for( int i = 0; i < factorization.size(); i++ )
-	{
-		for( int x : factorization[i]->variables )
-			clique_index[x] = i;
-	}
-
-	// Find dependent cliques
-	for( int i = 0; i < factorization.size(); i++ )
-	{
-		std::set<int> neighboring_cliques;
-		for( int x : factorization[i]->variables )
-		{
-			for( int neighbor : variable_interaction_graph.at(x) )
-			{
-				int clique_of_neighbor = clique_index[neighbor];
-				neighboring_cliques.insert(clique_of_neighbor);
-			}
-		}
-		factorization_interaction_graph.insert({i,neighboring_cliques});
-	}
-}
-
 void linkage_model_t::shuffleFOS( const graph_t &variable_interaction_graph ) 
 {
 	if( !is_conditional )
@@ -544,25 +437,25 @@ void linkage_model_t::shuffleFOS( const graph_t &variable_interaction_graph )
 		return;
 	}
 	
-	if( factorization_interaction_graph.size() == 0 )
-		initializeCondFactorInteractionGraph(variable_interaction_graph);
+	if( factorization->factorization_interaction_graph.size() == 0 )
+		factorization->initializeCondFactorInteractionGraph(variable_interaction_graph);
 
 	//printf("SHUFFLING -- %d -- %d\n",include_cliques_as_fos_elements,include_full_fos_element);
 
-	factorization_order = getGraphOrderBreadthFirst(factorization_interaction_graph);
-	assert( factorization_order.size() == factorization.size() );
+	factorization->order = utils::getGraphOrderBreadthFirst(factorization->factorization_interaction_graph);
+	assert( factorization->order.size() == factorization->factors.size() );
 
 	std::vector<int> visited(number_of_variables,0);
-	FOSorder = vec_t<int>(factorization.size());
-	for(int i = 0; i < factorization.size(); i++ )
+	FOSorder = vec_t<int>(factorization->size());
+	for(int i = 0; i < factorization->size(); i++ )
 	{
-		FOSorder[i] = factorization_order[i];
-		factorization[factorization_order[i]]->updateConditionals(variable_interaction_graph,visited);
+		FOSorder[i] = factorization->order[i];
+		factorization->factors[factorization->order[i]]->updateConditionals(variable_interaction_graph,visited);
 	}
 	
 	if( include_full_fos_element )
 	{
-		FOSorder.push_back(factorization.size());
+		FOSorder.push_back(factorization->factors.size());
 	}
 
 	assert(FOSorder.size() == size());
@@ -747,11 +640,11 @@ void linkage_model_t::printFOS()
 	}
 	if( is_conditional )
 	{
-		for( int i = 0; i < factorization.size(); i++ )
+		for( int i = 0; i < factorization->factors.size(); i++ )
 		{
-			int og = factorization_order[i];
+			int og = factorization->order[i];
 			printf("[%d]",og);
-			factorization[og]->print();
+			factorization->factors[og]->print();
 		}
 	}
 }
@@ -1238,5 +1131,35 @@ void linkage_model_t::estimateParametersForSingleBinaryMarginal(vec_t<solution_t
     for (size_t i = 0; i < factorSize; i++)
         result[i] /= (double)population.size();
 }
+
+/*vec_t<char> linkage_model_t::samplePartialSolutionConditional( int FOS_index, solution_t<char> *parent, const vec_t<solution_t<char>*> &population, int parent_index ) 
+{
+	assert( is_conditional );
+	if( FOSStructure[FOS_index].size() == number_of_variables )
+	{
+		// Offspring sample starts as copy of parent
+		vec_t<char> sample(number_of_variables);
+		for( int i = 0; i < number_of_variables; i++ )
+			sample[i] = parent->variables[i];
+
+		for( int i = 0; i < factorization.size(); i++ )
+		{
+			cond_factor_t *fact = factorization[order[i]];
+			vec_t<char> fact_sample = fact->samplePartialSolutionConditional(sample,population,parent_index);
+			// Insert partial sample into offspring sample
+			for( int j = 0; j < fact->variables.size(); j++ )
+			{
+				int var_index = fact->variables[j];
+				sample[var_index] = fact_sample[j];
+				assert(FOSStructure[FOS_index][var_index] == var_index);
+			}
+		}
+		return sample;
+	}
+	else
+	{
+		return factorization[FOS_index]->samplePartialSolutionConditional(parent->variables,population,parent_index);
+	}
+}*/
 
 }

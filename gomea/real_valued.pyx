@@ -1,7 +1,7 @@
 # distutils: language = c++
 # cython: c_string_type=unicode, c_string_encoding=utf8
 
-from gomea.real_valued cimport rvg_t, Config
+from gomea.real_valued cimport rvg_t, config_t
 from gomea.output cimport OutputStatisticsWrapper
 from gomea.output import OutputStatistics
 from libcpp.string cimport string
@@ -17,7 +17,7 @@ include "EmbeddedFitness.pxi"
 # Python extension type.
 cdef class RealValuedGOMEA:
     cdef rvg_t c_inst  # Hold a C++ instance which we're wrapping
-    cdef Config c_config
+    cdef config_t c_config
 
     def __cinit__(self,
         # Optimization problem settings (required)
@@ -42,7 +42,7 @@ cdef class RealValuedGOMEA:
     ):
         
         # Initialize attributes 
-        self.c_config = Config()
+        self.c_config = config_t()
         self.c_config.problem_index = 0
         assert( (<FitnessFunction?>fitness).c_inst_realvalued != NULL, "FitnessFunction is not real-valued." )
         self.c_config.fitness = (<FitnessFunction?>fitness).c_inst_realvalued
@@ -52,6 +52,7 @@ cdef class RealValuedGOMEA:
         self.c_config.upper_user_range = upper_init_range
         self.c_config.tau = 0.35
         self.c_config.distribution_multiplier_decrease = 0.9
+        self.c_config.distribution_multiplier_increase = 1.0 / 0.9
         self.c_config.st_dev_ratio_threshold = 1.0
         self.c_config.fitness_variance_tolerance = fitness_variance_tolerance
         self.c_config.maximum_no_improvement_stretch = 100

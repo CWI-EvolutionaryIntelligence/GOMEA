@@ -14,6 +14,7 @@
 #include "gomea/src/common/cond_factor.hpp"
 #include "gomea/src/common/linkage_config.hpp"
 #include "gomea/src/common/solution.hpp"
+#include "gomea/src/common/factorization.hpp"
 #include "gomea/src/fitness/fitness.hpp"
 #include "gomea/src/utils/time.hpp"
 #include "gomea/src/utils/tools.hpp"
@@ -27,6 +28,8 @@ public:
 	size_t number_of_variables;
 	vec_t<vec_t<int>> parallelFOSGroups;
     vec_t<int> FOSorder;
+
+    factorization_t *factorization;
     
     vec_t<int> improvementCounters;
     vec_t<int> usageCounters;
@@ -36,7 +39,9 @@ public:
     bool is_conditional = false;
 	int maximumSetSize;
 
-    virtual ~linkage_model_t(){};
+    virtual ~linkage_model_t(){
+        delete factorization;
+    };
 
     static std::shared_ptr<linkage_model_t> createFOSInstance( const linkage_config_t &config, size_t number_of_variables = 0, const graph_t &VIG = graph_t() );
     static std::shared_ptr<linkage_model_t> createLinkageTreeFOSInstance(size_t FOSIndex, size_t number_of_variables, int similarityMeasure, int maximumFOSSetSize, bool is_static = false );
@@ -70,10 +75,7 @@ public:
     void addGroup(const std::set<int> &group);
     virtual void addGroup( vec_t<int> group );
     void addConditionedGroup(vec_t<int> variables);
-    virtual void addConditionedGroup(vec_t<int> variables, std::set<int> conditioned_variables);
-    vec_t<int> getGraphOrderBreadthFirst(const graph_t &graph);
-
-    vec_t<char> samplePartialSolutionConditional( int FOS_index, solution_t<char> *parent, const vec_t<solution_t<char>*> &population, int parent_index = -1 );
+    virtual void addConditionedGroup(vec_t<int> variables, std::set<int> conditioned_variables = std::set<int>());
 
     void writeToFileFOS(std::string folder, int populationIndex, int generation);
     void writeFOSStatistics(std::string folder, int populationIndex, int generation);
@@ -92,7 +94,6 @@ public:
     
     void learnLinkageTreeFOS( vec_t<solution_t<char>*> &population, size_t alphabetSize  );
 	void learnLinkageTreeFOS( vec_t<vec_t<double>> similarity_matrix, bool include_full_fos_element );
-    void initializeCondFactorInteractionGraph( const graph_t &variable_interaction_graph );
 
     void printFOS();
 
@@ -103,16 +104,14 @@ protected:
     bool filtered;
     int similarityMeasure;
 
-	vec_t<cond_factor_t*> factorization; // Correspond to FOS elements for 'FG' conditional linkage models
-    vec_t<int> factorization_order;
-    graph_t factorization_interaction_graph;
-    
     int max_clique_size;
     bool include_cliques_as_fos_elements;
     bool include_full_fos_element;
 
     
-    linkage_model_t( size_t number_of_variables_ ): number_of_variables(number_of_variables_), maximumSetSize(number_of_variables_) {}
+    linkage_model_t( size_t number_of_variables_ ): number_of_variables(number_of_variables_), maximumSetSize(number_of_variables_) {
+        factorization = new factorization_t(number_of_variables);
+    }
     linkage_model_t( size_t number_of_variables_, size_t block_size ); 
     linkage_model_t( size_t number_of_variables_, const vec_t<vec_t<int>> &FOS );
     linkage_model_t( size_t number_of_variables_, int similarityMeasure, bool filtered, int maximumSetSize, bool is_static );
@@ -123,6 +122,7 @@ protected:
     vec_t<vec_t<double>> computeMIMatrix(vec_t<solution_t<char>*> &population, size_t alphabetSize);
     vec_t<vec_t<double>> computeNMIMatrix(vec_t<solution_t<char>*> &population, size_t alphabetSize);
     vec_t<vec_t<double>> computeHammingDistanceSimilarityMatrix( vec_t<solution_t<char>*> &population );
+
     void estimateParametersForSingleBinaryMarginal(vec_t<solution_t<char>*> &population, size_t alphabetSize, vec_t<size_t> &indices, size_t &factorSize, vec_t<double> &result);
 };
 

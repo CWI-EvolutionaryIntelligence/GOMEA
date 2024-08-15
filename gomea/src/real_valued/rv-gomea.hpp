@@ -4,7 +4,7 @@
 #include "gomea/src/real_valued/population.hpp"
 #include "gomea/src/real_valued/tools.hpp"
 #include "gomea/src/real_valued/linkage_model.hpp"
-#include "gomea/src/real_valued/Config.hpp"
+#include "gomea/src/real_valued/config.hpp"
 #include "gomea/src/utils/embed.hpp"
 #include "gomea/real_valued.h"
 #include "gomea/fitness.h"
@@ -17,7 +17,7 @@ class rvg_t {
 	public:
 		/*-=-=-=-=-=-=-=-=-=-=-=-= Section Header Functions -=-=-=-=-=-=-=-=-=-=-=-=*/
 		rvg_t(); 
-		rvg_t(Config *config); 
+		rvg_t(config_t *config); 
 		rvg_t( int argc, char **argv );
 		~rvg_t();
 
@@ -65,7 +65,7 @@ class rvg_t {
 		int total_number_of_writes = 0;                              /* Total number of times a statistics file has been written. */
 		output_statistics_t output;
 		/*-=-=-=-=-=-=-=-=-=-=-=- Options -=-=-=-=-=-=-=-=-=-=-=-=-*/
-		Config *config;
+		config_t *config;
 		double eta_ams = 1.0,
 			   eta_cov = 1.0;
 		bool	use_guidelines = false;	 /* Whether to override parameters with guidelines (for those that exist). */

@@ -1,15 +1,15 @@
-#include "gomea/src/discrete/Config.hpp"
+#include "gomea/src/discrete/config.hpp"
 
 namespace gomea{
 namespace discrete{
 
-Config::Config(){}
+config_t::config_t(){}
 
 /**
  * Parses the command line.
  * For options, see printUsage.
  */
-void Config::splitString(const std::string &str, vec_t<std::string> &splitted, char delim)
+void config_t::splitString(const std::string &str, vec_t<std::string> &splitted, char delim)
 {
     size_t current, previous = 0;
     current = str.find(delim);
@@ -22,12 +22,12 @@ void Config::splitString(const std::string &str, vec_t<std::string> &splitted, c
     splitted.push_back(str.substr(previous, current - previous));
 }
 
-bool Config::isNumber(const std::string &str)
+bool config_t::isNumber(const std::string &str)
 {
     return !str.empty() && all_of(str.begin(), str.end(), ::isdigit);
 }
 
-bool Config::parseCommandLine(int argc, char **argv)
+bool config_t::parseCommandLine(int argc, char **argv)
 {
     // Default parameters for options are listed in header file.
     options.add_options()
@@ -154,12 +154,12 @@ bool Config::parseCommandLine(int argc, char **argv)
     return 1;
 }
 
-void Config::printUsage()
+void config_t::printUsage()
 {
   std::cout << options.help() << std::endl;
 }
 
-void Config::printOverview()
+void config_t::printOverview()
 {
   std::cout << "### Settings ######################################\n";
   std::cout << "#\n";
@@ -183,7 +183,7 @@ void Config::printOverview()
   std::cout << "### Settings ######################################\n";
 }
 
-void Config::checkOptions()
+void config_t::checkOptions()
 {
 }
 

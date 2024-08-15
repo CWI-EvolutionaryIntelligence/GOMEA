@@ -43,10 +43,13 @@ common_src = files([
     'gomea/src/common/output_statistics.cpp',
     'gomea/src/common/partial_solution.cpp',
     'gomea/src/common/solution.cpp',
+    'gomea/src/common/factorization.cpp',
 
     'gomea/src/utils/embed.cpp',
     'gomea/src/utils/time.cpp',
     'gomea/src/utils/tools.cpp',
+    'gomea/src/utils/rng.cpp',
+    'gomea/src/utils/linalg.cpp',
 ])
 # glob.glob("gomea/src/fitness/*.cpp") + glob.glob("gomea/src/fitness/benchmarks-rv/*.cpp") + glob.glob("gomea/src/fitness/benchmarks-discrete/*.cpp")
 fitness_src = files([
@@ -73,7 +76,7 @@ fitness_src = files([
 
 # glob.glob("gomea/src/discrete/*.cpp")
 discrete_src = [
-    'gomea/src/discrete/Config.cpp',
+    'gomea/src/discrete/config.cpp',
     'gomea/src/discrete/gomea.cpp',
     'gomea/src/discrete/gomeaIMS.cpp',
     'gomea/src/discrete/main.cpp',
@@ -83,13 +86,11 @@ discrete_src = [
 
 # glob.glob("gomea/src/real_valued/*.cpp")
 real_valued_src = [
-    'gomea/src/real_valued/linkage_model.cpp',
-    'gomea/src/real_valued/distribution.cpp',
-    'gomea/src/real_valued/partial_solutionRV.cpp',
-    'gomea/src/real_valued/solutionRV.cpp',
     'gomea/src/real_valued/rv-gomea.cpp',
+    'gomea/src/real_valued/distribution.cpp',
+    'gomea/src/real_valued/linkage_model.cpp',
     'gomea/src/real_valued/population.cpp',
-    'gomea/src/real_valued/Config.cpp',
+    'gomea/src/real_valued/config.cpp',
     'gomea/src/real_valued/tools.cpp'
 ]
 
@@ -105,7 +106,7 @@ subdir('gomea')
 gomea_common_lib = static_library(
     'gomealib_common',
     common_src,
-    dependencies: [python_dep, numpy_dep, numpy_incdep],
+    dependencies: [python_dep, numpy_dep, numpy_incdep, eigen_dep],
     cython_args: cython_args,
 )
 
@@ -136,7 +137,7 @@ gomea_discrete_ex = py.extension_module(
     ['gomea/discrete.pyx'] + discrete_src,
     link_with: [gomea_common_lib, gomea_fitness_lib],
     override_options : ['cython_language=cpp'],
-    dependencies: [numpy_dep, numpy_incdep, cxxopts_dep, gomea_fitness_cython_dep],
+    dependencies: [numpy_dep, numpy_incdep, cxxopts_dep, eigen_dep, gomea_fitness_cython_dep],
     include_directories: [gomea_incl],
     cython_args: cython_args,
     install: true,
@@ -161,7 +162,7 @@ gomea_linkage = py.extension_module(
     ['gomea/linkage.pyx'],
     link_with: [gomea_common_lib],
     override_options : ['cython_language=cpp'],
-    dependencies: [numpy_dep, numpy_incdep],
+    dependencies: [numpy_dep, numpy_incdep, eigen_dep],
     include_directories: [gomea_incl],
     cython_args: cython_args,
     install: true,
@@ -173,7 +174,7 @@ gomea_output = py.extension_module(
     ['gomea/output.pyx'],
     link_with: [gomea_common_lib],
     override_options : ['cython_language=cpp'],
-    dependencies: [numpy_dep, numpy_incdep],
+    dependencies: [numpy_dep, numpy_incdep, eigen_dep],
     include_directories: [gomea_incl],
     cython_args: cython_args,
     install: true,

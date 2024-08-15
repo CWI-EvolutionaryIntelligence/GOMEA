@@ -4,13 +4,14 @@
 #include <iostream> 
 #include <vector>
 
-#include "gomea/src/discrete/Config.hpp"
+#include "gomea/src/discrete/config.hpp"
 #include "gomea/src/discrete/shared.hpp"
 #include "gomea/src/fitness/fitness.hpp"
 #include "gomea/src/fitness/benchmarks-discrete.hpp"
 #include "gomea/src/common/solution.hpp"
 #include "gomea/src/common/partial_solution.hpp"
 #include "gomea/src/common/linkage_model.hpp"
+#include "gomea/src/discrete/sampler.hpp"
 
 namespace gomea{
 namespace discrete{
@@ -18,7 +19,7 @@ namespace discrete{
 class Population
 {
 public:
-    Config *config;
+    config_t *config;
     fitness_t<char> *problemInstance;
     sharedInformation *sharedInformationPointer;
     size_t GOMEAIndex;
@@ -27,6 +28,7 @@ public:
     vec_t<solution_t<char>*> population;
     vec_t<solution_t<char>*> offspringPopulation;
     vec_t<int> noImprovementStretches;
+    sampler_Dt *sampler;
 
     bool terminated;
     double averageFitness;
@@ -34,7 +36,7 @@ public:
     
     linkage_model_pt FOSInstance = NULL;
 
-    Population(Config *config_, fitness_t<char> *problemInstance_, sharedInformation *sharedInformationPointer_, size_t GOMEAIndex_, size_t populationSize_, linkage_model_pt FOSInstance_ = NULL );
+    Population(config_t *config_, fitness_t<char> *problemInstance_, sharedInformation *sharedInformationPointer_, size_t GOMEAIndex_, size_t populationSize_, linkage_model_pt FOSInstance_ = NULL );
     ~Population();
 
     friend std::ostream & operator << (std::ostream &out, const Population &populationInstance);

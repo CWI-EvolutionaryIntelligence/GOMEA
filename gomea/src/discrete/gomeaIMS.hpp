@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "gomea/src/discrete/Config.hpp"
+#include "gomea/src/discrete/config.hpp"
 #include "gomea/src/discrete/Population.hpp"
 #include "gomea/src/discrete/shared.hpp"
 #include "gomea/src/discrete/gomea.hpp"
@@ -28,14 +28,14 @@ public:
         hasTerminated = false;
 	output_statistics_t output;
 
-    Config *config;
+    config_t *config;
     vec_t<Population*> GOMEAs;
     fitness_t<char> *problemInstance = NULL;
     sharedInformation *sharedInformationInstance = NULL;
 
 	gomeaIMS();
 	//gomeaIMS(int _problemIndex, int _numberOfVariables, int _maximumNumberOfGOMEAs, int _IMSsubgenerationFactor, int _basePopulationSize, int _maxArchiveSize, string _folder );
-    gomeaIMS(Config *config_);
+    gomeaIMS(config_t *config_);
     ~gomeaIMS();
    
    	void initialize();

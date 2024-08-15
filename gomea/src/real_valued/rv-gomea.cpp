@@ -14,7 +14,7 @@ std::vector<population_t*> populations;
 rvg_t::rvg_t()
 {}
 
-rvg_t::rvg_t( Config *config )
+rvg_t::rvg_t( config_t *config )
 {
 	this->config = config;
     this->fitness = config->fitness;
@@ -41,7 +41,7 @@ rvg_t::rvg_t( Config *config )
 
 rvg_t::rvg_t( int argc, char **argv )
 {
-	this->config = new Config();
+	this->config = new config_t();
 
     parseCommandLine( argc, argv );
 
@@ -86,7 +86,7 @@ void rvg_t::parseCommandLine( int argc, char **argv )
  */
 void rvg_t::parseOptions( int argc, char **argv, int *index )
 {
-	config = new Config();
+	config = new config_t();
     double dummy;
 
     config->write_generational_statistics = false;
@@ -363,15 +363,7 @@ void rvg_t::initialize( void )
 void rvg_t::restartLargestPopulation()
 {
 	int pop_size = populations[populations.size()-1]->population_size;
-	population_t *new_pop = new population_t( fitness, pop_size, config->lower_user_range, config->upper_user_range );
-	new_pop->maximum_no_improvement_stretch = config->maximum_no_improvement_stretch;
-	new_pop->st_dev_ratio_threshold = config->st_dev_ratio_threshold;
-	new_pop->distribution_multiplier_decrease = config->distribution_multiplier_decrease;
-	new_pop->maximum_no_improvement_stretch = config->maximum_no_improvement_stretch;
-	new_pop->tau = config->tau;
-	new_pop->selection_during_gom = config->selection_during_gom;
-	new_pop->update_elitist_during_gom = config->update_elitist_during_gom;
-    new_pop->linkage_config = config->linkage_config;
+	population_t *new_pop = new population_t( fitness, pop_size, config );
 	new_pop->initialize();
 	delete( populations[populations.size()-1] );
 	populations[populations.size()-1] = new_pop;
@@ -382,15 +374,7 @@ void rvg_t::initializeNewPopulation()
 {
 	int new_pop_size = config->base_population_size;
 	if( populations.size() > 0 ) new_pop_size = 2 * populations[populations.size()-1]->population_size;
-	population_t *new_pop = new population_t( fitness, new_pop_size, config->lower_user_range, config->upper_user_range );
-	new_pop->maximum_no_improvement_stretch = config->maximum_no_improvement_stretch;
-	new_pop->st_dev_ratio_threshold = config->st_dev_ratio_threshold;
-	new_pop->distribution_multiplier_decrease = config->distribution_multiplier_decrease;
-	new_pop->maximum_no_improvement_stretch = config->maximum_no_improvement_stretch;
-	new_pop->tau = config->tau;
-	new_pop->selection_during_gom = config->selection_during_gom;
-	new_pop->update_elitist_during_gom = config->update_elitist_during_gom;
-    new_pop->linkage_config = config->linkage_config;
+	population_t *new_pop = new population_t( fitness, new_pop_size, config );
 	new_pop->initialize();
 	populations.push_back(new_pop);
 }

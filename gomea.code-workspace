@@ -73,7 +73,9 @@
 			"charconv": "cpp",
 			"format": "cpp",
 			"iomanip": "cpp",
-			"span": "cpp"
+			"span": "cpp",
+			"regex": "cpp",
+			"bitset": "cpp"
 		},
 		"python.terminal.executeInFileDir": true
 	}

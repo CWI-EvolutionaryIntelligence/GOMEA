@@ -4,9 +4,9 @@ from gomea.output cimport output_statistics_t
 from gomea.fitness cimport fitness_t
 from gomea.linkage cimport linkage_config_t 
 
-cdef extern from "gomea/src/discrete/Config.hpp" namespace "gomea::discrete":
-    cdef cppclass Config:
-        Config() except +
+cdef extern from "gomea/src/discrete/config.hpp" namespace "gomea::discrete":
+    cdef cppclass config_t:
+        config_t() except +
 
         int maximumNumberOfGOMEAs, IMSsubgenerationFactor, basePopulationSize, maxArchiveSize, maximumNumberOfEvaluations, maximumNumberOfGenerations, AnalyzeFOS
         long long randomSeed
@@ -19,7 +19,7 @@ cdef extern from "gomea/src/discrete/Config.hpp" namespace "gomea::discrete":
 cdef extern from "gomea/src/discrete/gomeaIMS.hpp" namespace "gomea::discrete":
     cdef cppclass gomeaIMS:
         gomeaIMS() except +
-        gomeaIMS(Config*) except +
+        gomeaIMS(config_t*) except +
         
         void run() except +
         void runGeneration() except +

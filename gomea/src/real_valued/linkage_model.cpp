@@ -79,136 +79,6 @@ linkage_model_rv_t::linkage_model_rv_t( const linkage_model_rv_t &other ) : link
 	is_static = other.is_static;
 }
 
-linkage_model_rv_t::linkage_model_rv_t( size_t number_of_variables, const graph_t &variable_interaction_graph, int max_clique_size, bool include_cliques_as_fos_elements, bool include_full_fos_element ) : linkage_model_t(number_of_variables)
-{
-	this->include_cliques_as_fos_elements = include_cliques_as_fos_elements;
-	this->include_full_fos_element = include_full_fos_element;
-	this->is_conditional = true;
-	this->is_static = true; 
-	this->max_clique_size = max_clique_size;
-	this->p_accept = 0.0;
-	assert( include_cliques_as_fos_elements || include_full_fos_element );
-	
-	const int UNVISITED = 0;
-	const int IS_VISITED = 1;
-	const int IN_CLIQUE = 2;
-	const int IN_QUEUE = 3;
-	std::vector<int> visited(number_of_variables,0);
-	vec_t<int> var_order = gomea::utils::randomPermutation( number_of_variables );
-
-	assert( variable_interaction_graph.size() == number_of_variables );
-	if( variable_interaction_graph.size() != number_of_variables )
-		throw std::runtime_error("Incorrectly initialized Variable Interaction Graph\n");
-
-	std::vector<int> VIG_order;
-	conditional_distribution_t *full_cond = NULL;
-	if( include_full_fos_element )
-		full_cond = new conditional_distribution_t();
-	for( int i = 0; i < number_of_variables; i++ )
-	{
-		int ind = var_order[i];
-		if( visited[ind] == IS_VISITED )
-			continue;
-		visited[ind] = IN_CLIQUE;
-	
-		std::queue<int> q;
-		q.push(ind);
-
-		while( !q.empty() )
-		{
-			ind = q.front();
-			q.pop();
-
-			if( visited[ind] == IS_VISITED )
-				continue;
-			visited[ind] = IS_VISITED;
-
-			VIG_order.push_back(ind);
-
-			std::vector<int> clique;
-			std::set<int> cond;
-			clique.push_back(ind);
-			vec_t<int> neighbors = vec_t<int>(variable_interaction_graph.at(ind).begin(),variable_interaction_graph.at(ind).end());
-			std::shuffle(neighbors.begin(),neighbors.end(),utils::rng);
-			for( int x : neighbors ) // neighbors of ind
-			{
-				if( visited[x] == IS_VISITED )
-					cond.insert(x);
-			}
-
-			for( int x : neighbors )
-			{
-				if( visited[x] != IS_VISITED )
-				{
-					bool add_to_clique = true;
-					std::set<int> next_neighbors = variable_interaction_graph.at(x);
-					if( (int) clique.size() >= max_clique_size )
-						add_to_clique = false;
-					if( add_to_clique )
-					{
-						for( int y : clique )
-						{
-							if( next_neighbors.find(y) == next_neighbors.end() ) // edge (x,y) does not exist
-							{
-								add_to_clique = false;
-								//printf("no E(%d,%d)\n",x,y);
-								break;
-							}
-						}
-					}
-					if( add_to_clique )
-					{
-						for( int y : cond )
-						{
-							if( next_neighbors.find(y) == next_neighbors.end() ) // edge (x,y) does not exist
-							{
-								add_to_clique = false;
-								//printf("no E(%d,%d)\n",x,y);
-								break;
-							}
-						}
-					}
-					if( add_to_clique )
-						clique.push_back(x);
-				}
-			}
-			for( int x : clique )
-			{
-				visited[x] = IS_VISITED;
-				for( int y : variable_interaction_graph.at(x) ) // neighbors of x
-				{
-					if( visited[y] == UNVISITED )
-					{
-						q.push(y);
-						visited[y] = IN_QUEUE;
-					}
-				}
-			}
-			if( include_cliques_as_fos_elements )	
-				addConditionedGroup( clique, cond );
-			if( include_full_fos_element )
-				full_cond->addGroupOfVariables( clique, cond );
-		}
-	}
-	if( include_full_fos_element ) 
-	{
-		if( size() != 1 ) // if length == 1, only 1 clique was found, which must have been the full model; in that case, do not add it again	
-			addGroup( full_cond );
-		else
-			delete full_cond;
-	}
-	
-	FOSorder = vec_t<int>(size());
-	for (int i = 0; i < size(); i++)
-		FOSorder[i] = i;
-}
-
-linkage_model_rv_t::~linkage_model_rv_t()
-{
-	for( auto d : distributions )
-		delete( d );
-}
-
 linkage_model_rv_pt linkage_model_rv_t::univariate(size_t number_of_variables_)
 {
 	linkage_model_rv_pt new_fos = std::shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(number_of_variables_,1));
@@ -251,19 +121,71 @@ linkage_model_rv_pt linkage_model_rv_t::from_file( std::string filename )
 	return( new_fos );
 }
 
-void linkage_model_rv_t::addConditionedGroup( std::vector<int> variables, std::set<int> conditioned_variables )
-{
-	std::sort(variables.begin(),variables.end());
-	if( include_cliques_as_fos_elements )	
-		FOSStructure.push_back(variables);
-	
-	cond_factor_Rt *fact = new cond_factor_Rt(variables,conditioned_variables);
-	factorization.push_back( fact );
+distribution_Rt *linkage_model_rv_t::getDistribution( int FOS_index ){
+	return( dynamic_cast<distribution_Rt*>(factorization->factors[FOS_index]->distribution) );
 }
-			
-double linkage_model_rv_t::getDistributionMultiplier( int element_index )
+
+double linkage_model_rv_t::getDistributionMultiplier( int FOS_index )
 {
-	return( distributions[element_index]->distribution_multiplier );
+	return( distribution_multipliers[FOS_index] );
+}
+
+void linkage_model_rv_t::adaptDistributionMultiplierNoStretch( int FOS_index, partial_solution_t<double>** partial_solutions, int num_solutions )
+{
+	bool improvementForFOSElement = false;
+	for(int i = 0; i < num_solutions; i++ )
+		if( partial_solutions[i]->improves_elitist )
+			improvementForFOSElement = true;
+
+	distribution_Rt *dist = getDistribution(FOS_index);
+	if( (((double) dist->out_of_bounds_draws)/((double) dist->samples_drawn)) > 0.9 )
+		distribution_multipliers[FOS_index] *= 0.5;
+
+	double st_dev_ratio = dist->getStandardDeviationRatio(partial_solutions, num_solutions);
+
+	if( improvementForFOSElement )
+	{
+		if( distribution_multipliers[FOS_index] < 1.0 )
+			distribution_multipliers[FOS_index] = 1.0;
+
+		if( st_dev_ratio > st_dev_ratio_threshold )
+			distribution_multipliers[FOS_index] *= distribution_multiplier_increase;
+	}
+	else
+	{
+		if( distribution_multipliers[FOS_index] > 1.0 )
+			distribution_multipliers[FOS_index] *= distribution_multiplier_decrease;
+
+		if( distribution_multipliers[FOS_index] < 1.0)
+			distribution_multipliers[FOS_index] = 1.0;
+	}
+}
+
+void linkage_model_rv_t::adaptDistributionMultiplierMaximumStretch( int FOS_index, partial_solution_t<double>** partial_solutions, int num_solutions )
+{
+	bool improvementForFOSElement = false;
+	for(int i = 0; i < num_solutions; i++ )
+		if( partial_solutions[i]->improves_elitist )
+			improvementForFOSElement = true;
+			
+	distribution_Rt *dist = getDistribution(FOS_index);
+	if( (((double) dist->out_of_bounds_draws)/((double) dist->samples_drawn)) > 0.9 )
+		distribution_multipliers[FOS_index] *= 0.5;
+
+	double st_dev_ratio = dist->getStandardDeviationRatio(partial_solutions, num_solutions);
+
+	if( improvementForFOSElement )
+	{
+		if( distribution_multipliers[FOS_index] < 1.0 )
+			distribution_multipliers[FOS_index] = 1.0;
+
+		if( st_dev_ratio > st_dev_ratio_threshold )
+			distribution_multipliers[FOS_index] *= distribution_multiplier_increase;
+	}
+	else
+	{
+		distribution_multipliers[FOS_index] *= distribution_multiplier_decrease;
+	}
 }
 
 double linkage_model_rv_t::getAcceptanceRate() 
@@ -405,77 +327,60 @@ void linkage_model_rv_t::print()
 	printf("}\n");
 }
 
-partial_solution_t<double> *linkage_model_rv_t::generatePartialSolution( int FOS_index, solution_t<double> *solution_conditioned_on, fitness::fitness_generic_t *fitness_function )
+void linkage_model_rv_t::estimateDistributionForFOSElement( int FOS_index, solution_t<double> **selection, int selection_size )
 {
-	return( distributions[FOS_index]->generatePartialSolution(solution_conditioned_on, fitness_function) );
+	if(distribution_multipliers.size() != size())
+		distribution_multipliers.resize(size());
+	distribution_multipliers[FOS_index] = 1.0;
+
+	if(FOSStructure[FOS_index].size() == number_of_variables)
+	{
+		for( int i = 0; i < factorization->size(); i++ )
+			estimateDistributionForFactor( i, selection, selection_size, distribution_multipliers[FOS_index] );	
+	}
+	else
+	{
+		int factor_index = FOS_index;
+		assert(factorization->factors[factor_index]->size() == FOSStructure[FOS_index].size());
+		assert(factorization->factors[factor_index]->variables[0] == FOSStructure[FOS_index][0]);
+		estimateDistributionForFactor( factor_index, selection, selection_size, distribution_multipliers[FOS_index] );
+	}
 }
 
-void linkage_model_rv_t::estimateDistributions( solution_t<double> **selection, int selection_size )
+void linkage_model_rv_t::estimateDistributionForFactor( int factor_index, solution_t<double> **selection, int selection_size, double distribution_multiplier )
 {
-	for( int i = 0; i < size(); i++ )
-		estimateDistribution( i, selection, selection_size );
-	FOSorder = gomea::utils::randomPermutation( size() );
-}
-
-void linkage_model_rv_t::estimateDistribution( int FOS_index, solution_t<double> **selection, int selection_size )
-{
-	factorization[FOS_index]->estimateDistribution(selection,selection_size,distribution_multipliers[FOS_index]);
+	getDistribution(factor_index)->estimateDistribution(selection,selection_size,distribution_multiplier);
 }
 
 void linkage_model_rv_t::adaptDistributionMultiplier( int FOS_index, partial_solution_t<double> **solutions, int num_solutions )
 {
 	if( no_improvement_stretch >= maximum_no_improvement_stretch )
-		distributions[FOS_index]->adaptDistributionMultiplierMaximumStretch(solutions,num_solutions);
+		adaptDistributionMultiplierMaximumStretch(FOS_index,solutions,num_solutions);
 	else
-		distributions[FOS_index]->adaptDistributionMultiplier(solutions,num_solutions);
+		adaptDistributionMultiplier(FOS_index,solutions,num_solutions);
 }
 
 bool linkage_model_rv_t::generationalImprovementForOnePopulationForFOSElement( partial_solution_t<double>** partial_solutions, int num_solutions, double *st_dev_ratio )
 {
 	*st_dev_ratio = 0.0;
 	bool generational_improvement = false;
-
-	for( size_t k = 0; k < factorization.size(); k++ )
-	{	
-		vec_t<int> indices = variable_groups[k];
-		int num_indices = variable_groups[k].size();
-		int number_of_improvements  = 0;
-
-		std::vector<double> average_z_of_improvements(num_indices,0.0);
-		
-		//matE cholinv = pseudoInverse( trimatl( cholesky_decompositions[k] ) );
-		matE cholinv = utils::pinv(cholesky_decompositions[k].triangularView<Eigen::Lower>());
-		vecE sample_means( num_indices );
-		for(int i = 0; i < num_solutions; i++ )
+	int number_of_improvements  = 0;
+	for(int i = 0; i < num_solutions; i++ )
+	{
+		if( partial_solutions[i]->improves_elitist )
 		{
-			if( partial_solutions[i]->improves_elitist )
-			{
-				number_of_improvements++;
-				for(int j = 0; j < num_indices; j++ )
-				{
-					int ind = index_in_var_array[k][j];
-					sample_means[j] = partial_solutions[i]->touched_variables[ind] - partial_solutions[i]->sample_means[ind];
-				}
-				vecE z = cholinv * sample_means; //(partial_solutions[i]->touched_variables - partial_solutions[i]->sample_means);
-				for(int j = 0; j < num_indices; j++ )
-					average_z_of_improvements[j] += z[j];
-			}
-		}
-	
-		// Determine st.dev. ratio
-		if( number_of_improvements > 0 )
-		{
-			for(int i = 0; i < num_indices; i++ )
-			{
-				average_z_of_improvements[i] /= (double) number_of_improvements;
-				*st_dev_ratio = std::max( *st_dev_ratio, std::abs(average_z_of_improvements[i]) );
-			}
 			generational_improvement = true;
+			break;
 		}
+	}
+
+	for( size_t k = 0; k < factorization->size(); k++ )
+	{
+		double SDR = getDistribution(k)->getStandardDeviationRatio(partial_solutions,num_solutions);
+		*st_dev_ratio = std::max( *st_dev_ratio, SDR );
 	}
 	
 	return( generational_improvement );
 }
-
 
 }}

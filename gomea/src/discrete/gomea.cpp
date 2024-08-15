@@ -3,7 +3,7 @@
 namespace gomea{
 namespace discrete{
 
-double GOMEA::readVTR(Config *config)
+double GOMEA::readVTR(config_t *config)
 {
     std::string filename = config->folder + "/vtr.txt";
     std::ifstream inFile;

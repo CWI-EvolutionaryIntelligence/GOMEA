@@ -5,8 +5,9 @@
 
 namespace gomea{
 
+class solution_Xt{};
 template<class T>
-class solution_t
+class solution_t : public solution_Xt
 {
 	public:
 		solution_t( int number_of_variables );

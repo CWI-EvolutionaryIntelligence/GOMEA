@@ -2,9 +2,10 @@
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-= Section Includes -=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 #include "gomea/src/fitness/fitness.hpp"
-#include "gomea/src/real_valued/Config.hpp"
+#include "gomea/src/real_valued/config.hpp"
 #include "gomea/src/real_valued/tools.hpp"
 #include "gomea/src/real_valued/linkage_model.hpp"
+#include "gomea/src/real_valued/sampler.hpp"
 #include "gomea/src/common/output_statistics.hpp"
 
 #include <deque>
@@ -16,7 +17,7 @@ namespace realvalued{
 class population_t {
 	public:
 		/*-=-=-=-=-=-=-=-=-=-=-=-= Section Header Functions -=-=-=-=-=-=-=-=-=-=-=-=*/
-	 	population_t( fitness_t *fitness, int population_size, double lower_init, double upper_init );
+	 	population_t( fitness_t *fitness, int population_size, config_t *config );
 	 	~population_t();
 		
 		void runGeneration();
@@ -60,18 +61,14 @@ class population_t {
 		
 		/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 		double eta_cov,
-			   tau,
-			   st_dev_ratio_threshold,
-			   distribution_multiplier_increase,
-			   distribution_multiplier_decrease,
 			  *lower_init_ranges,
 			  *upper_init_ranges;
-		int    maximum_no_improvement_stretch,
-			   num_elitists_to_copy = 1,
+		int    num_elitists_to_copy = 1,
 			   FOS_element_size;
 		int    problem_index;
 		double delta_AMS;
-		bool update_elitist_during_gom, selection_during_gom;
+		config_t *config;
+
 		/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 		partial_solution_t<double>*** sampled_solutions; 
 		int    number_of_generations,
@@ -87,8 +84,8 @@ class population_t {
 			   *mean_shift_vector,                                   /* The mean vectors of the previous generation, one for each population. */
 			   *prev_mean_vector;                                   /* The mean vectors of the previous generation, one for each population. */
 		bool  population_terminated;
-		linkage_config_t *linkage_config;
 		linkage_model_rv_pt linkage_model;
+		sampler_Rt *sampler;
 		/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 };
 

@@ -17,13 +17,13 @@ namespace discrete{
 
 using gomea::fitness::fitness_t;
 
-class Config
+class config_t
 {
 	void splitString(const std::string &str, vec_t<std::string> &splitted, char delim);
     bool isNumber(const std::string &s);
 
 public:
-	Config();
+	config_t();
 
     bool parseCommandLine(int argc, char **argv);
     void checkOptions();

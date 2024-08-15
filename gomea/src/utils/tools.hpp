@@ -3,6 +3,7 @@
 #include <chrono>
 #include <exception>
 #include "gomea/src/utils/gomea_defs.hpp"
+#include "gomea/src/utils/rng.hpp"
 
 namespace gomea{
 namespace utils{
@@ -34,10 +35,6 @@ namespace utils{
 	double distanceEuclidean( vec_t<double> &x, vec_t<double> &y );
 	double distanceEuclidean2D( double x1, double y1, double x2, double y2 );
 
-	vec_t<int> randomPermutation( int size );
-	double randomRealUniform01();
-	int randomInt( int max );
-
 	void initializeRandomNumberGenerator();
 	void initializeRandomNumberGenerator( long long seed );
 
@@ -57,6 +54,8 @@ namespace utils{
 
 	int *hungarianAlgorithm( int **similarity_matrix, int dim );
 	void hungarianAlgorithmAddToTree(int x, int prevx, bool *S, int *prev, int *slack, int *slackx, int* lx, int *ly, int** similarity_matrix, int dim);
+
+	std::vector<int> getGraphOrderBreadthFirst( const graph_t &graph );
 
 	extern std::mt19937 rng;
 	extern long long random_seed;

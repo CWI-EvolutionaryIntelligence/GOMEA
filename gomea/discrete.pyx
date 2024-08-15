@@ -3,7 +3,7 @@
 
 from gomea.output cimport OutputStatisticsWrapper
 from gomea.output import OutputStatistics
-from gomea.discrete cimport gomeaIMS, Config
+from gomea.discrete cimport gomeaIMS, config_t
 from gomea.linkage cimport LinkageModel, StaticLinkageTree
 from libcpp.string cimport string
 from libcpp cimport bool
@@ -19,7 +19,7 @@ include "EmbeddedFitness.pxi"
 # Python extension type.
 cdef class DiscreteGOMEA:
     cdef gomeaIMS c_inst  # Hold a C++ instance which we're wrapping
-    cdef Config c_config
+    cdef config_t c_config
 
     def __cinit__(self,
         # Optimization problem settings (required)
@@ -41,7 +41,7 @@ cdef class DiscreteGOMEA:
         #for arg, val in values.items():
             #setattr(self, arg, val)
 
-        self.c_config = Config()
+        self.c_config = config_t()
         assert( (<FitnessFunction?>fitness).c_inst_discrete != NULL, "FitnessFunction is not discrete." )
         self.c_config.fitness = (<FitnessFunction?>fitness).c_inst_discrete
         self.c_config.linkage_config = linkage_model.c_inst
