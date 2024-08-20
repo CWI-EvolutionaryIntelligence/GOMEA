@@ -11,9 +11,9 @@ vec_t<char> sampler_Dt::sampleSolution( linkage_model_pt linkage_model, int FOS_
 	else
 	{
 		assert( FOS_index < linkage_model->factorization->size() );
-		assert( linkage_model->factorization->factors[FOS_index].size() == linkage_model->elementSize(FOS_index) );
+		assert( linkage_model->factorization->factors[FOS_index]->size() == linkage_model->elementSize(FOS_index) );
 		for(int i = 0; i < linkage_model->elementSize(FOS_index); i++ )
-			assert( linkage_model->factorization->factors[FOS_index].variables[i] == linkage_model->FOSStructure[FOS_index][i] );
+			assert( linkage_model->factorization->factors[FOS_index]->variables[i] == linkage_model->FOSStructure[FOS_index][i] );
 		return samplePartialSolution(linkage_model->factorization->factors[FOS_index], parent, population, parent_index);
 	}
 }
@@ -26,8 +26,8 @@ vec_t<char> sampler_Dt::sampleFullSolutionConditional( factorization_t *factoriz
 	}*/
 
 	// Offspring sample starts as copy of parent
-	vec_t<char> sample(number_of_variables);
-	for( int i = 0; i < number_of_variables; i++ )
+	vec_t<char> sample(factorization->number_of_variables);
+	for( int i = 0; i < factorization->number_of_variables; i++ )
 		sample[i] = parent->variables[i];
 
 	for( int i = 0; i < factorization->size(); i++ )

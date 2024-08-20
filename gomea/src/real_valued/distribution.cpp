@@ -148,7 +148,7 @@ bool distribution_Rt::regularizeCovarianceMatrix( matE &cov_mat, vec_t<double> &
 {
 	// regularization for small populations
 	double number_of_samples = (double) selection_size;
-	int n = variables.size();
+	int n = factor->size();
 
 	// either use the univariate matrix as a prior,
 	// or a diagonal matrix with the mean variance on all diagonal entries
@@ -176,7 +176,7 @@ bool distribution_Rt::regularizeCovarianceMatrix( matE &cov_mat, vec_t<double> &
 			squared_cov(i,j) = 0.0;
 			for(int k = 0; k < selection_size; ++k)
 			{
-				temp = (selection[k]->variables[variables[i]]-mean_vector[i])*(selection[k]->variables[variables[j]]-mean_vector[j]);
+				temp = (selection[k]->variables[factor->variables[i]]-mean_vector[i])*(selection[k]->variables[factor->variables[j]]-mean_vector[j]);
 				squared_cov(i,j) += temp*temp;
 			}
 			squared_cov(i,j) /= number_of_samples;
@@ -232,30 +232,30 @@ bool distribution_Rt::regularizeCovarianceMatrix( matE &cov_mat, vec_t<double> &
 
 void distribution_Rt::estimateDistribution( solution_t<double> **selection, int selection_size, double distribution_multiplier )
 {
-	int n = variables.size();
-	int n_cond = variables_conditioned_on.size();
+	int n = factor->size();
+	int n_cond = factor->variables_conditioned_on.size();
 
 	samples_drawn = 0;
 	out_of_bounds_draws = 0;
 	
-	mean_vector = estimateMeanVectorML(variables,selection,selection_size);
+	mean_vector = estimateMeanVectorML(factor->variables,selection,selection_size);
 	
 	/* Change the focus of the search to the best solution */
 	if( distribution_multiplier < 1.0 )
-		for(size_t j = 0; j < variables.size(); j++)
-			mean_vector[j] = selection[0]->variables[variables[j]];
+		for(size_t j = 0; j < n; j++)
+			mean_vector[j] = selection[0]->variables[factor->variables[j]];
 
-	covariance_matrix = estimateRegularCovarianceMatrixML(variables,mean_vector,selection,selection_size,distribution_multiplier);
+	covariance_matrix = estimateRegularCovarianceMatrixML(factor->variables,mean_vector,selection,selection_size,distribution_multiplier);
 	if( n_cond > 0 )
 	{
-		mean_vector_conditioned_on = estimateMeanVectorML(variables_conditioned_on,selection,selection_size);
+		mean_vector_conditioned_on = estimateMeanVectorML(factor->variables_conditioned_on,selection,selection_size);
 		
 		matE A12( n, n_cond );
 		for(int j = 0; j < n; j++ )
 			for(int k = 0; k < n_cond; k++ )
-				A12(j,k) = estimateCovariance(variables[j],variables_conditioned_on[k],selection,selection_size) * distribution_multiplier;
+				A12(j,k) = estimateCovariance(factor->variables[j],factor->variables_conditioned_on[k],selection,selection_size) * distribution_multiplier;
 		//mat A22 = estimateCovarianceMatrixML(vars_cond,selection,selection_size);
-		matE A22 = estimateRegularCovarianceMatrixML(variables_conditioned_on,mean_vector_conditioned_on,selection,selection_size,distribution_multiplier);
+		matE A22 = estimateRegularCovarianceMatrixML(factor->variables_conditioned_on,mean_vector_conditioned_on,selection,selection_size,distribution_multiplier);
 		matE A22inv = utils::pinv(A22);
 	   	if( 1 ) //pinv(A22inv,A22) )
 		{
@@ -276,7 +276,7 @@ void distribution_Rt::estimateDistribution( solution_t<double> **selection, int 
 vecE distribution_Rt::sample()
 {
 	samples_drawn++;
-	vecE sample = cholesky_decomposition * random1DNormalUnitVector(variables.size());
+	vecE sample = cholesky_decomposition * random1DNormalUnitVector(factor->size());
 	for( size_t i = 0; i < sample.size(); i++ )
 		sample[i] += mean_vector[i];
 	return sample;
@@ -285,7 +285,7 @@ vecE distribution_Rt::sample()
 vecE distribution_Rt::sample(const vec_t<double> &sample_means)
 {
 	samples_drawn++;
-	vecE sample = cholesky_decomposition * utils::random1DNormalUnitVector(variables.size());
+	vecE sample = cholesky_decomposition * utils::random1DNormalUnitVector(factor->size());
 	for( size_t i = 0; i < sample.size(); i++ )
 	{
 		sample[i] += sample_means[i];
@@ -295,16 +295,16 @@ vecE distribution_Rt::sample(const vec_t<double> &sample_means)
 
 vec_t<double> distribution_Rt::getConditionalSampleMeans(vec_t<double> solution_conditioned_on)
 {
-	int num_indices_cond = variables_conditioned_on.size();
+	int num_indices_cond = factor->variables_conditioned_on.size();
 	assert( num_indices_cond > 0 );
-	assert( solution_conditioned_on.size() == num_variables );
+	//assert( solution_conditioned_on.size() == num_variables );
 
 	vecE cond = vecE(num_indices_cond);
 	for(int i = 0; i < num_indices_cond; i++ )
-		cond[i] = solution_conditioned_on[variables_conditioned_on[i]] - mean_vector_conditioned_on[i];
+		cond[i] = solution_conditioned_on[factor->variables_conditioned_on[i]] - mean_vector_conditioned_on[i];
 	vecE sample_mean_inc = rho_matrix*cond;
-	vec_t<double> sample_means( variables.size() );
-	for(int i = 0; i < variables.size(); i++ )
+	vec_t<double> sample_means( factor->size() );
+	for(int i = 0; i < factor->size(); i++ )
 		sample_means[i] = mean_vector[i] + sample_mean_inc[i];
 
 	return sample_means;
@@ -312,15 +312,15 @@ vec_t<double> distribution_Rt::getConditionalSampleMeans(vec_t<double> solution_
 
 vec_t<double> distribution_Rt::getConditionalSampleMeans(solution_t<double> *solution_conditioned_on)
 {
-	int num_indices_cond = variables_conditioned_on.size();
+	int num_indices_cond = factor->variables_conditioned_on.size();
 	assert( num_indices_cond > 0 );
 
 	vecE cond = vecE(num_indices_cond);
 	for(int i = 0; i < num_indices_cond; i++ )
-		cond[i] = solution_conditioned_on->variables[variables_conditioned_on[i]] - mean_vector_conditioned_on[i];
+		cond[i] = solution_conditioned_on->variables[factor->variables_conditioned_on[i]] - mean_vector_conditioned_on[i];
 	vecE sample_mean_inc = rho_matrix*cond;
-	vec_t<double> sample_means( variables.size() );
-	for(int i = 0; i < variables.size(); i++ )
+	vec_t<double> sample_means( factor->size() );
+	for(int i = 0; i < factor->size(); i++ )
 		sample_means[i] = mean_vector[i] + sample_mean_inc[i];
 
 	return sample_means;
@@ -330,24 +330,24 @@ double distribution_Rt::getStandardDeviationRatio( partial_solution_t<double> **
 {
 	double SDR = 0.0;
 	int number_of_improvements = 0;
-	std::vector<double> average_z_of_improvements(variables.size(),0.0);		
+	std::vector<double> average_z_of_improvements(factor->size(),0.0);		
 	//matE cholinv = pseudoInverse( trimatl( cholesky_decompositions[k] ) );
 	matE cholinv = utils::pinv(cholesky_decomposition.triangularView<Eigen::Lower>());
-	vecE sample_means( variables.size() );
+	vecE sample_means( factor->size() );
 	for(int i = 0; i < num_solutions; i++ )
 	{
-		assert(variables.size() == partial_solutions[i]->touched_variables.size());
+		assert(factor->size() == partial_solutions[i]->touched_indices.size());
 		if( partial_solutions[i]->improves_elitist )
 		{
 			number_of_improvements++;
-			for(int j = 0; j < variables.size(); j++ )
+			for(int j = 0; j < factor->size(); j++ )
 			{
-				int ind = variables[j]; //index_in_var_array[k][j];
-				assert(variables[j] == partial_solutions[i]->touched_variables[j]);
-				sample_means[j] = partial_solutions[i]->touched_variables[ind] - partial_solutions[i]->sample_means[ind];
+				//int ind = factor->variables[j]; //index_in_var_array[k][j];
+				assert(factor->variables[j] == partial_solutions[i]->touched_indices[j]);
+				sample_means[j] = partial_solutions[i]->touched_variables[j] - partial_solutions[i]->sample_means[j];
 			}
 			vecE z = cholinv * sample_means; //(partial_solutions[i]->touched_variables - partial_solutions[i]->sample_means);
-			for(int j = 0; j < variables.size(); j++ )
+			for(int j = 0; j < factor->size(); j++ )
 				average_z_of_improvements[j] += z[j];
 		}
 	}
@@ -355,7 +355,7 @@ double distribution_Rt::getStandardDeviationRatio( partial_solution_t<double> **
 	// Determine st.dev. ratio
 	if( number_of_improvements > 0 )
 	{
-		for(int i = 0; i < variables.size(); i++ )
+		for(int i = 0; i < factor->size(); i++ )
 		{
 			average_z_of_improvements[i] /= (double) number_of_improvements;
 			SDR = std::max( SDR, std::abs(average_z_of_improvements[i]) );

@@ -319,7 +319,7 @@ void population_t::generateAndEvaluateNewSolutions()
 	double alpha_AMS = 0.5*config->tau*(((double) population_size)/((double) (population_size-1)));
 	int number_of_AMS_solutions = (int) (alpha_AMS*(population_size-1));
 
-	linkage_model->shuffleFOS();
+	linkage_model->shuffleFOS(fitness->variable_interaction_graph);
 
 	for(int g = 0; g < linkage_model->size(); g++ )
 	{
@@ -630,7 +630,7 @@ void population_t::initializeNewPopulationMemory()
 
 	initializeFOS(config->linkage_config);
 
-	sampler = new sampler_Rt(fitness);
+	sampler = new sampler_Rt(fitness, config->lower_user_range, config->upper_user_range);
 
 	population_terminated = false;
 
@@ -671,6 +671,9 @@ void population_t::initializeFOS( linkage_config_t *linkage_config )
 	linkage_model->st_dev_ratio_threshold = config->st_dev_ratio_threshold;
 	linkage_model->distribution_multiplier_decrease = config->distribution_multiplier_decrease;
 	linkage_model->distribution_multiplier_increase = config->distribution_multiplier_increase;
+
+	for( auto &f : linkage_model->factorization->factors)
+		f->distribution = new distribution_Rt(f);
 }
 
 void population_t::initializeFOSFromIndex( int FOSIndex )

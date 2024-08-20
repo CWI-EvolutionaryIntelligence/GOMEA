@@ -357,7 +357,7 @@ void linkage_model_rv_t::adaptDistributionMultiplier( int FOS_index, partial_sol
 	if( no_improvement_stretch >= maximum_no_improvement_stretch )
 		adaptDistributionMultiplierMaximumStretch(FOS_index,solutions,num_solutions);
 	else
-		adaptDistributionMultiplier(FOS_index,solutions,num_solutions);
+		adaptDistributionMultiplierNoStretch(FOS_index,solutions,num_solutions);
 }
 
 bool linkage_model_rv_t::generationalImprovementForOnePopulationForFOSElement( partial_solution_t<double>** partial_solutions, int num_solutions, double *st_dev_ratio )

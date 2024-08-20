@@ -68,10 +68,11 @@ lm = gomea.linkage.UCondFG()
 #lm = gomea.linkage.Full()
 #lm = gomea.linkage.StaticLinkageTree()
 nsucc = 0
-nruns = 10
+nruns = 20
+ftol = 1e-20
 #rvgom = gomea.RealValuedGOMEA(fitness=frv,linkage_model=lm,max_number_of_evaluations=10000000)
-rvgom = gomea.RealValuedGOMEA(fitness=frv,linkage_model=lm, max_number_of_evaluations=5000000,base_population_size=40,max_number_of_populations=1,
-                              lower_init_range=-115,upper_init_range=-100,fitness_variance_tolerance=1e-20)
+rvgom = gomea.RealValuedGOMEA(fitness=frv,linkage_model=lm, max_number_of_evaluations=500000,base_population_size=40,max_number_of_populations=1,
+                              lower_init_range=-115,upper_init_range=-100,fitness_variance_tolerance=ftol)
 #rvgom = gomea.RealValuedGOMEA(fitness=frv,linkage_model=lm,lower_init_range=0,upper_init_range=1, max_number_of_populations=1, base_population_size=100, max_number_of_evaluations=10000000)
 #rvgom = gomea.RealValuedGOMEA(fitness=frv,linkage_model=lm,lower_init_range=0,upper_init_range=1, max_number_of_populations=1, base_population_size=100, max_number_of_evaluations=10000000)
 #rvgom = gomea.RealValuedGOMEA(fitness=frv,linkage_model=lm,lower_init_range=-115,upper_init_range=-100, max_number_of_evaluations=10000000)

@@ -5,17 +5,23 @@ namespace realvalued{
 
 partial_solution_t<double> *sampler_Rt::sampleSolution( linkage_model_pt linkage_model, int FOS_index, solution_t<double> *solution_conditioned_on )
 {
-	if( linkage_model->FOSStructure[FOS_index].size() == fitness_function->number_of_variables && linkage_model->is_conditional)
+	if(linkage_model->is_conditional)
 	{
 		assert(solution_conditioned_on != nullptr);
-		return sampleFullSolutionConditional(linkage_model->factorization, solution_conditioned_on->variables);
+		if( linkage_model->FOSStructure[FOS_index].size() == fitness_function->number_of_variables )
+		{
+			return sampleFullSolutionConditional(linkage_model->factorization, solution_conditioned_on->variables);
+		}
+		else
+		{
+			assert( FOS_index < linkage_model->factorization->size() );
+			assert( linkage_model->factorization->factors[FOS_index]->size() == linkage_model->elementSize(FOS_index) );
+			for(int i = 0; i < linkage_model->elementSize(FOS_index); i++ )
+				assert( linkage_model->factorization->factors[FOS_index]->variables[i] == linkage_model->FOSStructure[FOS_index][i] );
+			return samplePartialSolution(linkage_model->factorization->factors[FOS_index], solution_conditioned_on->variables);
+		}
 	}
-	else
-	{
-		assert( FOS_index < linkage_model->factorization->size() );
-		assert( linkage_model->factorization->factors[FOS_index].size() == linkage_model->elementSize(FOS_index) );
-		for(int i = 0; i < linkage_model->elementSize(FOS_index); i++ )
-			assert( linkage_model->factorization->factors[FOS_index].variables[i] == linkage_model->FOSStructure[FOS_index][i] );
+	else{
 		return samplePartialSolution(linkage_model->factorization->factors[FOS_index]);
 	}
 }
@@ -49,7 +55,7 @@ partial_solution_t<double> *sampler_Rt::samplePartialSolution( cond_factor_t *fa
 {
 	distribution_Rt *dist = static_cast<distribution_Rt*>(factor->distribution);
 
-	vec_t<double> result = vec_t<double>(factor->variables.size());
+	vec_t<double> result = vec_t<double>(factor->size());
 	
 	int times_not_in_bounds = 0;
 
@@ -60,14 +66,15 @@ partial_solution_t<double> *sampler_Rt::samplePartialSolution( cond_factor_t *fa
 	{
 		if( times_not_in_bounds >= 100 )
 		{
-			exit(1);
-			//vecE sample_result = vec(num_indices, fill::none);
-			//vecE sample_means = vecE(num_indices, fill::none);
-			//for(int i = 0; i < num_indices; i++ )
-			//{
-			//	sample_result[i] = lower_init_ranges[indices[i]] + (upper_init_ranges[indices[i]] - lower_init_ranges[indices[i]])*randomRealUniform01();
-			//	sample_means[i] = lower_init_ranges[indices[i]] + (upper_init_ranges[indices[i]] - lower_init_ranges[indices[i]]) * 0.5;
-			//}
+			throw std::runtime_error("Error: sampler_Rt::samplePartialSolution: Sampled out of bounds too many times.");
+			
+			/*vecE sample_result = vecE(factor->size());
+			vecE sample_means = vecE(factor->size());
+			for(int i = 0; i < factor->size(); i++ )
+			{
+				sample_result[i] = lower_init_range + (upper_init_range - lower_init_range)*utils::randomRealUniform01();
+				sample_means[i] = lower_init_range + (upper_init_range - lower_init_range) * 0.5;
+			}*/
 		}
 		else
 		{
@@ -79,7 +86,7 @@ partial_solution_t<double> *sampler_Rt::samplePartialSolution( cond_factor_t *fa
 			}
 			else
 			{
-				assert(solution_conditioned_on.size() == factor->num_variables);
+				assert(solution_conditioned_on.size() > 0);
 				sample_means = dist->getConditionalSampleMeans(solution_conditioned_on);
 				sample_result = dist->sample(sample_means);
 			}
@@ -92,6 +99,7 @@ partial_solution_t<double> *sampler_Rt::samplePartialSolution( cond_factor_t *fa
 			{
 				if (!fitness_function->isParameterInRangeBounds(sample_result[i], factor->variables[i]))
 				{
+					printf("Out of bounds: %f\n", sample_result[i]);
 					ready = false;
 					dist->out_of_bounds_draws++;
 					times_not_in_bounds++;

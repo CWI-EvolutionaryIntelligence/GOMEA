@@ -57,7 +57,7 @@ Population::Population(config_t *config_, fitness_t<char> *problemInstance_, sha
     }
     else FOSInstance = FOSInstance_;
 
-    sampler = new sampler_Dt(problemInstance->number_of_variables, config->alphabetSize, problemInstance);
+    sampler = new sampler_Dt(config->alphabetSize, problemInstance);
 
     if( config->verbose )
         FOSInstance->printFOS();
@@ -252,7 +252,8 @@ void Population::generateOffspring()
         if (!FOSInstance->is_conditional && !config->useParallelFOSOrder && !config->fixFOSOrderForPopulation)
         {
             FOSInstance->shuffleFOS();
-            FOSInstance->printFOS();
+            if(config->verbose)
+                FOSInstance->printFOS();
         }
 
         solution_t<char> backup = *population[i];

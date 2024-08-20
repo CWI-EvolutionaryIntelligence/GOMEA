@@ -2,8 +2,8 @@
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-= Section Includes -=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 #include "gomea/src/fitness/fitness.hpp"
-#include "gomea/src/real_valued/tools.hpp"
 #include "gomea/src/common/distribution.hpp"
+#include "gomea/src/real_valued/tools.hpp"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
 namespace gomea{
@@ -11,17 +11,14 @@ namespace realvalued{
 
 class distribution_Rt : public distribution_t {
 	public:
-		distribution_Rt( vec_t<int> variables );
-		distribution_Rt( const vec_t<int> &variables, const vec_t<int> &conditioned_variables ) : variables(variables), variables_conditioned_on(conditioned_variables){};
-		distribution_Rt( const vec_t<int> &variables, const std::set<int> &conditioned_variables );
+		distribution_Rt( cond_factor_t *factor ) : factor(factor){};
 		virtual ~distribution_Rt(){};
 
 		// Parameter settings and default values
 		int samples_drawn = 0;
 		int out_of_bounds_draws = 0;
-			
-		vec_t<int> variables;
-		vec_t<int> variables_conditioned_on;
+
+		cond_factor_t *factor;
 
 		vec_t<double> mean_vector;
 		vec_t<double> mean_vector_conditioned_on;

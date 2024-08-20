@@ -38,12 +38,14 @@ cython_args = [
 
 # glob.glob("gomea/src/common/*.cpp") + glob.glob("gomea/src/utils/*.cpp")
 common_src = files([
+    'gomea/src/common/cond_factor.cpp',
+    'gomea/src/common/distribution.cpp',
+    'gomea/src/common/factorization.cpp',
     'gomea/src/common/linkage_config.cpp',
     'gomea/src/common/linkage_model.cpp',
     'gomea/src/common/output_statistics.cpp',
     'gomea/src/common/partial_solution.cpp',
     'gomea/src/common/solution.cpp',
-    'gomea/src/common/factorization.cpp',
 
     'gomea/src/utils/embed.cpp',
     'gomea/src/utils/time.cpp',
@@ -81,17 +83,19 @@ discrete_src = [
     'gomea/src/discrete/gomeaIMS.cpp',
     'gomea/src/discrete/main.cpp',
     'gomea/src/discrete/Population.cpp',
-    'gomea/src/discrete/utils.cpp'
+    'gomea/src/discrete/sampler.cpp',
+    'gomea/src/discrete/utils.cpp',
 ]
 
 # glob.glob("gomea/src/real_valued/*.cpp")
 real_valued_src = [
-    'gomea/src/real_valued/rv-gomea.cpp',
+    'gomea/src/real_valued/config.cpp',
     'gomea/src/real_valued/distribution.cpp',
     'gomea/src/real_valued/linkage_model.cpp',
     'gomea/src/real_valued/population.cpp',
-    'gomea/src/real_valued/config.cpp',
-    'gomea/src/real_valued/tools.cpp'
+    'gomea/src/real_valued/rv-gomea.cpp',
+    'gomea/src/real_valued/sampler.cpp',
+    'gomea/src/real_valued/tools.cpp',
 ]
 
 py_dep = py.dependency()

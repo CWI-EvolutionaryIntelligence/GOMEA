@@ -252,29 +252,35 @@ matE choleskyDecomposition( const matE &matrix )
         ipvt[i] = 0;
     }
 
-    info = linpackDCHDC( a, n, n, work, ipvt );
-
     matE result = matE(n,n);
-    if( info != n ) /* Matrix is not positive definite */
+    bool err = false;
+    info = linpackDCHDC( a, n, n, work, ipvt );
+    if( info != n )
     {
+        err = true;
+    }
+
+    if(!err)
+    {
+        k = 0;
+        for( i = 0; i < n; i++ )
+        {
+            for( j = 0; j < n; j++ )
+            {
+                if(a[k] < 0) err = true;
+                result(i,j) = i < j ? 0.0 : a[k];
+                k++;
+            }
+        }
+    }
+
+    if(err){
         k = 0;
         for( i = 0; i < n; i++ )
         {
             for( j = 0; j < n; j++ )
             {
                 result(i,j) = i != j ? 0.0 : sqrt( matrix(i,j) );
-                k++;
-            }
-        }
-    }
-    else
-    {
-        k = 0;
-        for( i = 0; i < n; i++ )
-        {
-            for( j = 0; j < n; j++ )
-            {
-                result(i,j) = i < j ? 0.0 : a[k];
                 k++;
             }
         }
