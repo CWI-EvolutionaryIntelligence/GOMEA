@@ -124,8 +124,8 @@ cdef class GBOFitnessFunctionRealValued(GBOFitnessFunction):
     pass
 
 cdef class BBOFitnessFunction(FitnessFunction):
-    cpdef float objective_function( self, int objective_index, np.ndarray variables ) except? INFINITY
-    cpdef float constraint_function( self, np.ndarray variables ) except? INFINITY
+    cpdef double objective_function( self, int objective_index, np.ndarray variables ) except? INFINITY
+    cpdef double constraint_function( self, np.ndarray variables ) except? INFINITY
 
 cdef class BBOFitnessFunctionDiscrete(BBOFitnessFunction):
     pass
