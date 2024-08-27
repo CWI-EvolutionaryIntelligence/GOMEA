@@ -14,6 +14,7 @@ template<class T>
 class BBOFitnessFunction_t : public fitness_t<T> 
 {
 	public:
+		BBOFitnessFunction_t();
 		BBOFitnessFunction_t( int number_of_parameters );
 		BBOFitnessFunction_t( int number_of_parameters, double vtr );
 

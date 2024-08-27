@@ -5,10 +5,14 @@ namespace gomea{
 namespace fitness{
 
 template<>
+fitness_t<char>::fitness_t() : fitness_t(-1,0,false,MAX) {}
+template<>
 fitness_t<char>::fitness_t( int number_of_variables ) : fitness_t(number_of_variables,0,false,MAX) {}
 template<>
 fitness_t<char>::fitness_t( int number_of_variables, double vtr ) : fitness_t(number_of_variables,vtr,true,MAX) {}
 
+template<>
+fitness_t<double>::fitness_t() : fitness_t(-1,0,false,MIN) {}
 template<>
 fitness_t<double>::fitness_t( int number_of_variables ) : fitness_t(number_of_variables,0,false,MIN) {}
 template<>

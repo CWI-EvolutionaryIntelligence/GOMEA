@@ -12,8 +12,9 @@ gomeaIMS::gomeaIMS()
 	return;
 }
 
-gomeaIMS::gomeaIMS(Config *config_): config(config_)
+gomeaIMS::gomeaIMS(Config *config_)
 {
+	config = config_;
     maximumNumberOfGOMEAs   = config->maximumNumberOfGOMEAs;
     IMSsubgenerationFactor  = config->IMSsubgenerationFactor;
     basePopulationSize      = config->basePopulationSize;

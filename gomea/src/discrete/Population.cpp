@@ -3,7 +3,7 @@
 namespace gomea{
 namespace discrete{
 
-Population::Population(Config *config_, fitness_t<char> *problemInstance_, sharedInformation *sharedInformationPointer_, size_t GOMEAIndex_, size_t populationSize_, linkage_model_pt FOSInstance_ ): 
+Population::Population(Config *config_, fitness_pt<char> problemInstance_, sharedInformation *sharedInformationPointer_, size_t GOMEAIndex_, size_t populationSize_, linkage_model_pt FOSInstance_ ): 
         config(config_), 
         problemInstance(problemInstance_),
         sharedInformationPointer(sharedInformationPointer_),
@@ -364,62 +364,6 @@ bool Population::FI(size_t offspringIndex)
 
     return solutionHasChanged;
 }
-
-/*void Population::evaluateSolution(solution_t<char> *parent, gomea::partial_solution_t<char> *solution ) 
-{
-    checkTimeLimit();
-
-    //std::cout << "before eval" << solution -> fitness << std::endl;
-    if (config->usePartialEvaluations && solution != NULL)
-    {
-        problemInstance->calculateFitnessPartialEvaluations(solution, solutionBefore, touchedGenes, fitnessBefore);
-        sharedInformationPointer->numberOfEvaluations += (double)touchedGenes.size() / problemInstance->number_of_variables;
-    }
-    else
-    {
-        problemInstance->calculateFitness(solution);
-        sharedInformationPointer->numberOfEvaluations += 1;
-    }
-
-    updateElitistAndCheckVTR(solution);
-}*/
-
-/*void Population::evaluateSolution(solution_t<char> *solution, solution_t<char> *solutionBefore, vec_t<int> &touchedGenes, double fitnessBefore)
-{
-    checkTimeLimit();
-
-    // Do the actual evaluation
-    archiveRecord searchResult;
-    
-    if (config->saveEvaluations)
-        sharedInformationPointer->evaluatedSolutions->checkAlreadyEvaluated(solution->variables, &searchResult);
-    
-    if (searchResult.isFound)
-        solution->setObjectiveValue(searchResult.value);
-    else
-    { 
-        //std::cout << "before eval" << solution -> fitness << std::endl;
-        if (config->usePartialEvaluations && solutionBefore != NULL)
-        {
-            assert(0);
-            // TODO
-            //problemInstance->evaluatePartialSolution(solution, solutionBefore, touchedGenes, fitnessBefore);
-            sharedInformationPointer->numberOfEvaluations += (double)touchedGenes.size() / problemInstance->number_of_variables;
-        }
-        else
-        {
-            assert(0);
-            // TODO
-            //problemInstance->evaluate(solution);
-            sharedInformationPointer->numberOfEvaluations += 1;
-        }
-
-        if (config->saveEvaluations)
-            sharedInformationPointer->evaluatedSolutions->insertSolution(solution->variables, solution->getObjectiveValue());
-    }
-
-    updateElitistAndCheckVTR(solution);
-}*/
 
 void Population::checkTimeLimit()
 {

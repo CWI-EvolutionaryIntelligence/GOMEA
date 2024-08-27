@@ -26,11 +26,8 @@ public:
         numberOfStatisticsWrites = 0;
 	bool isInitialized = false,
         hasTerminated = false;
-	output_statistics_t output;
-
-    Config *config;
     vec_t<Population*> GOMEAs;
-    fitness_t<char> *problemInstance = NULL;
+    fitness_pt<char> problemInstance = NULL;
     sharedInformation *sharedInformationInstance = NULL;
 
 	gomeaIMS();

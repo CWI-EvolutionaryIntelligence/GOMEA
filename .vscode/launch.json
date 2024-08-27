@@ -10,6 +10,14 @@
             "cppConfig": "default (gdb) Attach"
         },
         {
+            "name": "C++ Discrete gdb",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build_cpp/DiscreteGOMEA",
+            "args": ["-F10000", "0", "10", "0"],
+            "cwd": "${workspaceFolder}/build_cpp/"
+        },
+        {
             "name": "(gdb) Attach",
             "type": "cppdbg",
             "program": "gdb",

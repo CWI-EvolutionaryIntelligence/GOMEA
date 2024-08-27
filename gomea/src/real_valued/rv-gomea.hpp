@@ -6,8 +6,9 @@
 #include "gomea/src/real_valued/linkage_model.hpp"
 #include "gomea/src/real_valued/Config.hpp"
 #include "gomea/src/utils/embed.hpp"
-#include "gomea/real_valued.h"
-#include "gomea/fitness.h"
+#include "gomea/src/fitness/fitness.hpp"
+//#include "gomea/real_valued.h"
+//#include "gomea/fitness.h"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
 namespace gomea{

@@ -40,6 +40,7 @@ public:
     static std::string getTypeName( linkage::linkage_model_type type );
     
     static std::shared_ptr<linkage_model_t> univariate(size_t numberOfVariables_);
+    static std::shared_ptr<linkage_model_t> full(size_t numberOfVariables_);
     static std::shared_ptr<linkage_model_t> linkage_tree(size_t numberOfVariables_, int similarityMeasure_, bool filtered_,  int maximumSetSize_, bool is_static_ );
     static std::shared_ptr<linkage_model_t> marginal_product_model(size_t numberOfVariables_, size_t block_size);
     static std::shared_ptr<linkage_model_t> custom_fos(size_t numberOfVariables_, const vec_t<vec_t<int>> &FOS);
