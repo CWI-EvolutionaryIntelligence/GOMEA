@@ -6,6 +6,7 @@
 #include "gomea/src/utils/tools.hpp"
 #include "gomea/src/utils/time.hpp"
 #include <map>
+#include <memory>
 
 namespace gomea{
 namespace fitness{
@@ -27,6 +28,7 @@ template<class T>
 class fitness_t : public fitness_generic_t
 {
 	protected:
+		fitness_t(); 
 		fitness_t( int number_of_variables ); 
 		fitness_t( int number_of_variables, double vtr );
 
@@ -103,5 +105,8 @@ class fitness_t : public fitness_generic_t
 
 		vec_t<vec_t<double>> similarity_matrix;
 };
+
+template<typename T>
+using fitness_pt = std::shared_ptr<fitness_t<T>>;
 
 }}

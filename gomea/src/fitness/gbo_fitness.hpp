@@ -14,6 +14,7 @@ template<class T>
 class GBOFitnessFunction_t : public fitness_t<T> 
 {
 	public:
+		GBOFitnessFunction_t();
 		GBOFitnessFunction_t( int number_of_parameters );
 		GBOFitnessFunction_t( int number_of_parameters, double vtr );
 

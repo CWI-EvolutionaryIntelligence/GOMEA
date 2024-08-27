@@ -19,13 +19,13 @@ namespace gomea{
 namespace linkage
 {
 typedef enum{
-	UNIVARIATE,
-    FULL,
-    MPM,
-	LINKAGE_TREE,
-    CONDITIONAL,
-    FROM_FILE,
-    CUSTOM_LM
+	UNIVARIATE = 0,
+    FULL = 1,
+    MPM = 2,
+	LINKAGE_TREE = 3,
+    CONDITIONAL = 4,
+    FROM_FILE = 5,
+    CUSTOM_LM = 6
 } linkage_model_type;
 }
 

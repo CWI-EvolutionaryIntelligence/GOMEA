@@ -934,8 +934,8 @@ void rvg_t::run( void )
 {
     //printf("Running RV-GOMEA\n");
 
-    int out = gomea::utils::initializePythonEmbedding("gomea", PyInit_real_valued);
-    assert(out == 0);
+    //int out = gomea::utils::initializePythonEmbedding("gomea", PyInit_real_valued);
+    //assert(out == 0);
 
     utils::initStartTime();
 	utils::clearTimers();

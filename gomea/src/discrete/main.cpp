@@ -21,6 +21,8 @@ int main(int argc, char **argv)
     catch (gomea::utils::customException &ex)
     {}
 
+    gomeaInstance->output.writeToFile("out.dat");
+
     delete gomeaInstance;
     delete config;
     

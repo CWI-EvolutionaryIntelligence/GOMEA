@@ -34,5 +34,4 @@ linkage_config_t::linkage_config_t( int max_clique_size_, bool include_cliques_a
 	type = linkage::CONDITIONAL;
 }
 
-
-}
+} // namespace gomea
