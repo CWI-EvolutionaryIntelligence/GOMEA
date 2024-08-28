@@ -255,3 +255,23 @@ cdef class MaxCutBBO(BBOFitnessFunction):
         self.c_inst_discrete = new maxCutBBO_t(str.encode(input_file),str.encode(vtr_file))
         self.number_of_variables = self.c_inst_discrete.getNumberOfVariables()
         self.value_to_reach = self.c_inst_discrete.getVTR()
+
+cdef class NKLandscapes(GBOFitnessFunction):
+    def __cinit__(self, 
+        number_of_variables : int,
+        K : int = 5,
+        seed : int = 0
+    ):
+        self.c_inst_discrete = new NKlandscapes_t(number_of_variables,K,seed)
+        self.number_of_variables = self.c_inst_discrete.getNumberOfVariables()
+        self.value_to_reach = self.c_inst_discrete.getVTR()
+
+cdef class NKLandscapesBBO(BBOFitnessFunction):
+    def __cinit__(self, 
+        number_of_variables : int,
+        K : int = 5,
+        seed : int = 0
+    ):
+        self.c_inst_discrete = new NKlandscapesBBO_t(number_of_variables,K,seed)
+        self.number_of_variables = self.c_inst_discrete.getNumberOfVariables()
+        self.value_to_reach = self.c_inst_discrete.getVTR()
