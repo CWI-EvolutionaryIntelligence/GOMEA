@@ -36,7 +36,7 @@ int NKlandscapes_t::getNumberOfSubfunctions()
 		
 double NKlandscapes_t::subfunction( int subfunction_index, vec_t<char> &variables )
 {
-	uint fitness_key = 0; // integer representation of bits that are used as input to the subfunction
+	size_t fitness_key = 0; // integer representation of bits that are used as input to the subfunction
 	for( int i = 0; i < K; i++ )
 	{
 		int bit_index = (subfunction_index + i);

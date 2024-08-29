@@ -36,7 +36,7 @@ double NKlandscapesBBO_t::objectiveFunction( int objective_index, vec_t<char> &v
 	double fitness = 0;
 	for( int i = 0; i < fitness_tables.size(); i++ )
 	{
-		uint fitness_key = 0; // integer representation of bits that are used as input to the subfunction
+		size_t fitness_key = 0; // integer representation of bits that are used as input to the subfunction
 		for( int j = 0; j < K; j++ )
 		{
 			int bit_index = (i + j);
