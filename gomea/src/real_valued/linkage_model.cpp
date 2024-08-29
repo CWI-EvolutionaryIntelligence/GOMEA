@@ -668,7 +668,7 @@ void linkage_model_rv_t::print()
 	printf("}\n");
 }
 
-partial_solution_t<double> *linkage_model_rv_t::generatePartialSolution( int FOS_index, solution_t<double> *solution_conditioned_on, fitness::fitness_generic_t *fitness_function )
+partial_solution_t<double> *linkage_model_rv_t::generatePartialSolution( int FOS_index, solution_t<double> *solution_conditioned_on, fitness_pt<double> fitness_function )
 {
 	return( distributions[FOS_index]->generatePartialSolution(solution_conditioned_on, fitness_function) );
 }

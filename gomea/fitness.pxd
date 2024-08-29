@@ -109,7 +109,7 @@ cdef class FitnessFunction:
     cdef np.ndarray rotation_matrix
 
     cdef shared_ptr[fitness_t[char]] c_inst_discrete
-    cdef fitness_t[double] *c_inst_realvalued
+    cdef shared_ptr[fitness_t[double]] c_inst_realvalued
     
     cpdef void initialize_rotation_matrix(self, int rotation_block_size, double rotation_angle)
     cpdef np.ndarray rotate_variables(self, np.ndarray variables, double rotation_angle)

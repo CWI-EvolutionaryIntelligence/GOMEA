@@ -60,12 +60,11 @@ cdef class YourFitnessFunctionRealValued(FitnessFunction):
         number_of_variables : int,
         value_to_reach : float = 0.0
     ):
+        cdef yourFitnessFunctionRealValued *ptr = new yourFitnessFunctionRealValued(number_of_variables,value_to_reach)
+        cdef shared_ptr[yourFitnessFunctionRealValued] ptr_shared = shared_ptr[yourFitnessFunctionRealValued]()
+        self.c_inst_realvalued = ptr_shared
         self.number_of_variables = number_of_variables
         self.value_to_reach = value_to_reach
-        self.c_inst_realvalued = new yourFitnessFunctionRealValued(number_of_variables,value_to_reach)
-    
-    def __dealloc__(self):
-        del self.c_inst_realvalued
 
 cdef class GBOFitnessFunction(FitnessFunction):
     cpdef int number_of_subfunctions( self ) except -1:
@@ -108,12 +107,11 @@ cdef class GBOFitnessFunctionRealValued(GBOFitnessFunction):
         number_of_variables : int,
         value_to_reach : float = 0.0
     ):
+        cdef pyGBOFitnessFunction_t[double] *ptr = new pyGBOFitnessFunction_t[double](number_of_variables,value_to_reach,<PyObject*>self)
+        cdef shared_ptr[pyGBOFitnessFunction_t[double]] ptr_shared = shared_ptr[pyGBOFitnessFunction_t[double]](ptr)
+        self.c_inst_realvalued = ptr_shared
         self.number_of_variables = number_of_variables
         self.value_to_reach = value_to_reach
-        self.c_inst_realvalued = new pyGBOFitnessFunction_t[double](number_of_variables,value_to_reach,<PyObject*>self)
-    
-    def __dealloc__(self):
-        del self.c_inst_realvalued
 
 cdef class BBOFitnessFunction(FitnessFunction):
     cpdef double objective_function( self, int objective_index, np.ndarray variables ) except? INFINITY:
@@ -138,76 +136,81 @@ cdef class BBOFitnessFunctionRealValued(BBOFitnessFunction):
         number_of_variables : int,
         value_to_reach : float = 0.0
     ):
+        cdef pyBBOFitnessFunction_t[double] *ptr = new pyBBOFitnessFunction_t[double](number_of_variables,value_to_reach,<PyObject*>self)
+        cdef shared_ptr[pyBBOFitnessFunction_t[double]] ptr_shared = shared_ptr[pyBBOFitnessFunction_t[double]](ptr)
+        self.c_inst_realvalued = ptr_shared
         self.number_of_variables = number_of_variables
         self.value_to_reach = value_to_reach
-        self.c_inst_realvalued = new pyBBOFitnessFunction_t[double](number_of_variables,value_to_reach,<PyObject*>self)
-    
-    def __dealloc__(self):
-        del self.c_inst_realvalued
-
 
 cdef class SphereFunction(GBOFitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
         value_to_reach : float = 0.0
     ):
-        self.c_inst_realvalued = new sphereFunction_t(number_of_variables,value_to_reach)
-        self.number_of_variables = self.c_inst_realvalued.getNumberOfVariables()
-        self.value_to_reach = self.c_inst_realvalued.getVTR()
+        cdef sphereFunction_t *tmp_ptr = new sphereFunction_t(number_of_variables,value_to_reach)
+        self.c_inst_realvalued = shared_ptr[sphereFunction_t](tmp_ptr)
+        self.number_of_variables = tmp_ptr.getNumberOfVariables()
+        self.value_to_reach = tmp_ptr.getVTR()
 
 cdef class SphereFunctionBBO(BBOFitnessFunction):
     def __cinit__(self,
         number_of_variables : int,
         value_to_reach : float = 0.0
     ):
-        self.c_inst_realvalued = new sphereFunctionBBO_t(number_of_variables,value_to_reach)
-        self.number_of_variables = self.c_inst_realvalued.getNumberOfVariables()
-        self.value_to_reach = self.c_inst_realvalued.getVTR()
+        cdef sphereFunctionBBO_t *tmp_ptr = new sphereFunctionBBO_t(number_of_variables,value_to_reach)
+        self.c_inst_realvalued = shared_ptr[sphereFunctionBBO_t](tmp_ptr)
+        self.number_of_variables = tmp_ptr.getNumberOfVariables()
+        self.value_to_reach = tmp_ptr.getVTR()
 
 cdef class RosenbrockFunction(GBOFitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
         value_to_reach : float = 0.0
     ):
-        self.c_inst_realvalued = new rosenbrockFunction_t(number_of_variables,value_to_reach)
-        self.number_of_variables = self.c_inst_realvalued.getNumberOfVariables()
-        self.value_to_reach = self.c_inst_realvalued.getVTR()
+        cdef rosenbrockFunction_t *tmp_ptr = new rosenbrockFunction_t(number_of_variables,value_to_reach)
+        self.c_inst_realvalued = shared_ptr[rosenbrockFunction_t](tmp_ptr) 
+        self.number_of_variables = tmp_ptr.getNumberOfVariables()
+        self.value_to_reach = tmp_ptr.getVTR()
 
 cdef class RosenbrockFunctionBBO(BBOFitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
         value_to_reach : float = 0.0
     ):
-        self.c_inst_realvalued = new rosenbrockFunctionBBO_t(number_of_variables,value_to_reach)
-        self.number_of_variables = self.c_inst_realvalued.getNumberOfVariables()
-        self.value_to_reach = self.c_inst_realvalued.getVTR()
+        cdef rosenbrockFunctionBBO_t *tmp_ptr = new rosenbrockFunctionBBO_t(number_of_variables,value_to_reach)
+        self.c_inst_realvalued = shared_ptr[rosenbrockFunctionBBO_t](tmp_ptr) 
+        self.number_of_variables = tmp_ptr.getNumberOfVariables()
+        self.value_to_reach = tmp_ptr.getVTR()
 
 cdef class SOREBChainStrong(GBOFitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
         value_to_reach : float = 0.0
     ):
-        self.c_inst_realvalued = new SOREBChainStrong_t(number_of_variables,value_to_reach)
-        self.number_of_variables = self.c_inst_realvalued.getNumberOfVariables()
-        self.value_to_reach = self.c_inst_realvalued.getVTR()
+        cdef SOREBChainStrong_t *tmp_ptr = new SOREBChainStrong_t(number_of_variables,value_to_reach)
+        self.c_inst_realvalued = shared_ptr[SOREBChainStrong_t](tmp_ptr)
+        self.number_of_variables = tmp_ptr.getNumberOfVariables()
+        self.value_to_reach = tmp_ptr.getVTR()
 
 cdef class SOREBChainStrongBBO(BBOFitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
         value_to_reach : float = 0.0
     ):
-        self.c_inst_realvalued = new SOREBChainStrongBBO_t(number_of_variables,value_to_reach)
-        self.number_of_variables = self.c_inst_realvalued.getNumberOfVariables()
-        self.value_to_reach = self.c_inst_realvalued.getVTR()
+        cdef SOREBChainStrongBBO_t *tmp_ptr = new SOREBChainStrongBBO_t(number_of_variables,value_to_reach)
+        self.c_inst_realvalued = shared_ptr[SOREBChainStrongBBO_t](tmp_ptr)
+        self.number_of_variables = tmp_ptr.getNumberOfVariables()
+        self.value_to_reach = tmp_ptr.getVTR()
 
 cdef class CirclesInASquareBBO(BBOFitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
         value_to_reach : float = 0.0
     ):
-        self.c_inst_realvalued = new circlesInASquareBBO_t(number_of_variables,value_to_reach)
-        self.number_of_variables = self.c_inst_realvalued.getNumberOfVariables()
-        self.value_to_reach = self.c_inst_realvalued.getVTR()
+        cdef circlesInASquareBBO_t *tmp_ptr = new circlesInASquareBBO_t(number_of_variables,value_to_reach)
+        self.c_inst_realvalued = shared_ptr[circlesInASquareBBO_t](tmp_ptr)
+        self.number_of_variables = tmp_ptr.getNumberOfVariables()
+        self.value_to_reach = tmp_ptr.getVTR()
 
 
 cdef class OneMaxFunction(GBOFitnessFunction):

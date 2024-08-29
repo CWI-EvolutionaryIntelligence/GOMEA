@@ -7,7 +7,8 @@
 namespace gomea{
 namespace realvalued{
 
-typedef gomea::fitness::fitness_t<double> fitness_t;
+using gomea::fitness::fitness_t;
+using gomea::fitness::fitness_pt;
 
 class Config {
 	public:
@@ -40,7 +41,7 @@ class Config {
 		double vtr,                                           /* The value-to-reach (function value of best solution that is feasible). */
 			   lower_user_range,                              /* The initial lower range-bound indicated by the user (same for all dimensions). */
 			   upper_user_range;                              /* The initial upper range-bound indicated by the user (same for all dimensions). */
-		fitness_t *fitness;
+		fitness_pt<double> fitness;
         linkage_config_t *linkage_config;
 		long long random_seed;
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
