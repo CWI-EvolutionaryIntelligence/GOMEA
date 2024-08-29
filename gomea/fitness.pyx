@@ -18,7 +18,7 @@ cdef class FitnessFunction:
     ):
         self.rotation_matrix = np.ndarray(0)
 
-    cpdef initialize_rotation_matrix(self, int rotation_block_size, float rotation_angle):
+    cpdef void initialize_rotation_matrix(self, int rotation_block_size, double rotation_angle):
         rotation_matrix : np.ndarray = np.identity(rotation_block_size)
         theta : float = np.radians(rotation_angle)
         cos_theta : float = np.cos(theta)
@@ -26,15 +26,15 @@ cdef class FitnessFunction:
         for index0 in range(rotation_block_size-1):
             for index1 in range(index0+1,rotation_block_size):
                 matrix = np.identity(rotation_block_size)
-                matrix[index0][index0] = cos_theta;
-                matrix[index0][index1] = -sin_theta;
-                matrix[index1][index0] = sin_theta;
-                matrix[index1][index1] = cos_theta;
+                matrix[index0][index0] = cos_theta
+                matrix[index0][index1] = -sin_theta
+                matrix[index1][index0] = sin_theta
+                matrix[index1][index1] = cos_theta
                 rotation_matrix = np.matmul(matrix, rotation_matrix)
         self.rotation_matrices[(rotation_block_size,rotation_angle)] = <PyObject*> rotation_matrix
         self.rotation_matrix = rotation_matrix
 
-    cpdef rotate_variables(self, np.ndarray variables, float rotation_angle):
+    cpdef np.ndarray rotate_variables(self, np.ndarray variables, double rotation_angle):
         key = (len(variables),rotation_angle)
         if(self.rotation_matrices.count(key) == 0):
             self.initialize_rotation_matrix(len(variables), rotation_angle)
