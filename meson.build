@@ -68,7 +68,10 @@ fitness_src = files([
     'gomea/src/fitness/benchmarks-discrete/maxCut_t.cpp',
     'gomea/src/fitness/benchmarks-discrete/deceptiveTrapBBO_t.cpp',
     'gomea/src/fitness/benchmarks-discrete/maxCutBBO_t.cpp',
-    'gomea/src/fitness/benchmarks-discrete/oneMax_t.cpp'
+    'gomea/src/fitness/benchmarks-discrete/NKlandscapes_t.cpp',
+    'gomea/src/fitness/benchmarks-discrete/NKlandscapesBBO_t.cpp',
+    'gomea/src/fitness/benchmarks-discrete/oneMax_t.cpp',
+    'gomea/src/fitness/benchmarks-discrete/oneMaxBBO_t.cpp',
 ])
 
 # glob.glob("gomea/src/discrete/*.cpp")

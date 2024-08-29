@@ -23,6 +23,13 @@ class oneMax_t: public GBOFitnessFunction_t<char>
 		double subfunction( int subfunction_index, vec_t<char> &variables );
 };
 
+class oneMaxBBO_t: public BBOFitnessFunction_t<char>
+{
+	public:
+		oneMaxBBO_t( int number_of_variables );
+		double objectiveFunction( int objective_index, vec_t<char> &variables );
+};
+
 class deceptiveTrap_t: public GBOFitnessFunction_t<char>
 {
 	public:
@@ -73,6 +80,36 @@ class maxCutBBO_t: public BBOFitnessFunction_t<char>
 
 		void readInputFile( std::string input_file );
 		void readVTRFile( std::string input_file );
+};
+
+class NKlandscapes_t: public GBOFitnessFunction_t<char>
+{
+	public:
+		NKlandscapes_t( int number_of_variables, int K, long long fitness_table_seed );
+		int getNumberOfSubfunctions(); 
+		vec_t<int> inputsToSubfunction( int subfunction_index );
+		
+	private:
+		int K;
+		long long fitness_table_seed;
+		vec_t<vec_t<double>> fitness_tables;
+
+		void initializeFitnessTables();
+		double subfunction( int subfunction_index, vec_t<char> &variables );
+};
+
+class NKlandscapesBBO_t: public BBOFitnessFunction_t<char>
+{
+	public:
+		NKlandscapesBBO_t( int number_of_variables, int K, long long fitness_table_seed );
+		double objectiveFunction( int objective_index, vec_t<char> &variables );
+		
+	private:
+		int K;
+		long long fitness_table_seed;
+		vec_t<vec_t<double>> fitness_tables;
+
+		void initializeFitnessTables();
 };
 
 }}
