@@ -267,8 +267,8 @@ cdef class NKLandscapes(GBOFitnessFunction):
     ):
         cdef NKlandscapes_t *tmp_ptr = new NKlandscapes_t(number_of_variables,K,seed)
         self.c_inst_discrete = shared_ptr[NKlandscapes_t](tmp_ptr)
-        self.number_of_variables = self.c_inst_discrete.getNumberOfVariables()
-        self.value_to_reach = self.c_inst_discrete.getVTR()
+        self.number_of_variables = tmp_ptr.getNumberOfVariables()
+        self.value_to_reach = tmp_ptr.getVTR()
 
 cdef class NKLandscapesBBO(BBOFitnessFunction):
     def __cinit__(self, 
@@ -278,5 +278,5 @@ cdef class NKLandscapesBBO(BBOFitnessFunction):
     ):
         cdef NKlandscapesBBO_t *tmp_ptr = new NKlandscapesBBO_t(number_of_variables,K,seed)
         self.c_inst_discrete = shared_ptr[NKlandscapesBBO_t](tmp_ptr)
-        self.number_of_variables = self.c_inst_discrete.getNumberOfVariables()
-        self.value_to_reach = self.c_inst_discrete.getVTR()
+        self.number_of_variables = tmp_ptr.getNumberOfVariables()
+        self.value_to_reach = tmp_ptr.getVTR()
