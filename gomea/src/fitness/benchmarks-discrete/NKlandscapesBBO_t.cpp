@@ -37,9 +37,9 @@ double NKlandscapesBBO_t::objectiveFunction( int objective_index, vec_t<char> &v
 	for( int i = 0; i < number_of_variables; i++ )
 	{
 		uint fitness_key = 0; // integer representation of bits that are used as input to the subfunction
-		for( int j = 0; j < K; j++ )
+		for( int j = 0; j < K && i+j < number_of_variables; j++ )
 		{
-			int bit_index = (i + j) % number_of_variables;
+			int bit_index = (i + j);
 			fitness_key = (fitness_key<<1) + variables[bit_index];
 		}
 		assert((int)fitness_key < (1<<K));

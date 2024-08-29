@@ -37,9 +37,9 @@ int NKlandscapes_t::getNumberOfSubfunctions()
 double NKlandscapes_t::subfunction( int subfunction_index, vec_t<char> &variables )
 {
 	uint fitness_key = 0; // integer representation of bits that are used as input to the subfunction
-	for( int i = 0; i < K; i++ )
+	for( int i = 0; (i < K && subfunction_index+i < number_of_variables); i++ )
 	{
-		int bit_index = (subfunction_index + i) % number_of_variables;
+		int bit_index = (subfunction_index + i);
 		fitness_key = (fitness_key<<1) + variables[bit_index];
 	}
 	assert((int)fitness_key < (1<<K));
@@ -49,8 +49,8 @@ double NKlandscapes_t::subfunction( int subfunction_index, vec_t<char> &variable
 vec_t<int> NKlandscapes_t::inputsToSubfunction( int subfunction_index )
 {
 	vec_t<int> inputs;
-	for( int i = 0; i < K; i++ )
-		inputs.push_back( (subfunction_index + i) % number_of_variables );
+	for( int i = 0; (i < K && subfunction_index+i < number_of_variables); i++ )
+		inputs.push_back( (subfunction_index + i) );
 	return( inputs );
 }
 
