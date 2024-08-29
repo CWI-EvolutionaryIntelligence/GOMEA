@@ -93,6 +93,14 @@ cdef extern from "gomea/src/fitness/benchmarks-discrete.hpp" namespace "gomea::f
         maxCutBBO_t() except +
         maxCutBBO_t(string,string) except +
 
+    cdef cppclass NKlandscapes_t(GBOFitnessFunction_t[char]):
+        NKlandscapes_t() except +
+        NKlandscapes_t(int,int,long long) except +
+
+    cdef cppclass NKlandscapesBBO_t(BBOFitnessFunction_t[char]):
+        NKlandscapesBBO_t() except +
+        NKlandscapesBBO_t(int,int,long long) except +
+
 cdef class FitnessFunction:
     cdef public int number_of_variables
     cdef public double value_to_reach
