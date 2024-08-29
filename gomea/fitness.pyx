@@ -1,6 +1,7 @@
 from cpython cimport PyObject
 from libcpp.string cimport string
 from libcpp.pair cimport pair
+from libcpp.memory cimport make_shared, shared_ptr
 
 include "EmbeddedFitness.pxi"
     
@@ -48,12 +49,11 @@ cdef class YourFitnessFunctionDiscrete(FitnessFunction):
         number_of_variables : int,
         value_to_reach : float = 1e308
     ):
+        cdef yourFitnessFunctionDiscrete *ptr = new yourFitnessFunctionDiscrete(number_of_variables,value_to_reach)
+        cdef shared_ptr[yourFitnessFunctionDiscrete] ptr_shared = shared_ptr[yourFitnessFunctionDiscrete]()
+        self.c_inst_discrete = ptr_shared
         self.number_of_variables = number_of_variables
-        self.value_to_reach = value_to_reach
-        self.c_inst_discrete = new yourFitnessFunctionDiscrete(number_of_variables,value_to_reach)
-    
-    def __dealloc__(self):
-        del self.c_inst_discrete
+        self.value_to_reach = value_to_reach        
 
 cdef class YourFitnessFunctionRealValued(FitnessFunction):
     def __cinit__(self, 
@@ -97,12 +97,11 @@ cdef class GBOFitnessFunctionDiscrete(GBOFitnessFunction):
         number_of_variables : int,
         value_to_reach : float = 1e308
     ):
+        cdef pyGBOFitnessFunction_t[char] *ptr = new pyGBOFitnessFunction_t[char](number_of_variables,value_to_reach,<PyObject*>self)
+        cdef shared_ptr[pyGBOFitnessFunction_t[char]] ptr_shared = shared_ptr[pyGBOFitnessFunction_t[char]](ptr)
+        self.c_inst_discrete = ptr_shared
         self.number_of_variables = number_of_variables
         self.value_to_reach = value_to_reach
-        self.c_inst_discrete = new pyGBOFitnessFunction_t[char](number_of_variables,value_to_reach,<PyObject*>self)
-    
-    def __dealloc__(self):
-        del self.c_inst_discrete
 
 cdef class GBOFitnessFunctionRealValued(GBOFitnessFunction):
     def __cinit__(self, 
@@ -128,12 +127,11 @@ cdef class BBOFitnessFunctionDiscrete(BBOFitnessFunction):
         number_of_variables : int,
         value_to_reach : float = 1e308
     ):
+        cdef pyBBOFitnessFunction_t[char] *ptr = new pyBBOFitnessFunction_t[char](number_of_variables,value_to_reach,<PyObject*>self)
+        cdef shared_ptr[pyBBOFitnessFunction_t[char]] ptr_shared = shared_ptr[pyBBOFitnessFunction_t[char]](ptr)
+        self.c_inst_discrete = ptr_shared
         self.number_of_variables = number_of_variables
         self.value_to_reach = value_to_reach
-        self.c_inst_discrete = new pyBBOFitnessFunction_t[char](number_of_variables,value_to_reach,<PyObject*>self)
-    
-    def __dealloc__(self):
-        del self.c_inst_discrete
 
 cdef class BBOFitnessFunctionRealValued(BBOFitnessFunction):
     def __cinit__(self, 
@@ -216,45 +214,50 @@ cdef class OneMaxFunction(GBOFitnessFunction):
     def __cinit__(self, 
         number_of_variables : int
     ):
-        self.c_inst_discrete = new oneMax_t(number_of_variables)
-        self.number_of_variables = self.c_inst_discrete.getNumberOfVariables()
-        self.value_to_reach = self.c_inst_discrete.getVTR()
+        cdef oneMax_t *tmp_ptr = new oneMax_t(number_of_variables)
+        self.c_inst_discrete = shared_ptr[oneMax_t](tmp_ptr)
+        self.number_of_variables = tmp_ptr.getNumberOfVariables()
+        self.value_to_reach = tmp_ptr.getVTR()
 
 cdef class DeceptiveTrapFunction(GBOFitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
         trap_size : int
     ):
-        self.c_inst_discrete = new deceptiveTrap_t(number_of_variables,trap_size)
-        self.number_of_variables = self.c_inst_discrete.getNumberOfVariables()
-        self.value_to_reach = self.c_inst_discrete.getVTR()
+        cdef deceptiveTrap_t *tmp_ptr = new deceptiveTrap_t(number_of_variables,trap_size)
+        self.c_inst_discrete = shared_ptr[deceptiveTrap_t](tmp_ptr)
+        self.number_of_variables = tmp_ptr.getNumberOfVariables()
+        self.value_to_reach = tmp_ptr.getVTR()
 
 cdef class DeceptiveTrapFunctionBBO(BBOFitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
         trap_size : int
     ):
-        self.c_inst_discrete = new deceptiveTrapBBO_t(number_of_variables,trap_size)
-        self.number_of_variables = self.c_inst_discrete.getNumberOfVariables()
-        self.value_to_reach = self.c_inst_discrete.getVTR()
+        cdef deceptiveTrapBBO_t *tmp_ptr = new deceptiveTrapBBO_t(number_of_variables,trap_size)
+        self.c_inst_discrete = shared_ptr[deceptiveTrapBBO_t](tmp_ptr)
+        self.number_of_variables = tmp_ptr.getNumberOfVariables()
+        self.value_to_reach = tmp_ptr.getVTR()
 
 cdef class MaxCut(GBOFitnessFunction):
     def __cinit__(self,
         input_file : str,
         vtr_file : str = ""
     ):
-        self.c_inst_discrete = new maxCut_t(str.encode(input_file),str.encode(vtr_file))
-        self.number_of_variables = self.c_inst_discrete.getNumberOfVariables()
-        self.value_to_reach = self.c_inst_discrete.getVTR()
+        cdef maxCut_t *tmp_ptr = new maxCut_t(str.encode(input_file),str.encode(vtr_file))
+        self.c_inst_discrete = shared_ptr[maxCut_t](tmp_ptr)
+        self.number_of_variables = tmp_ptr.getNumberOfVariables()
+        self.value_to_reach = tmp_ptr.getVTR()
 
 cdef class MaxCutBBO(BBOFitnessFunction):
     def __cinit__(self,
         input_file : str,
         vtr_file : str = ""
     ):
-        self.c_inst_discrete = new maxCutBBO_t(str.encode(input_file),str.encode(vtr_file))
-        self.number_of_variables = self.c_inst_discrete.getNumberOfVariables()
-        self.value_to_reach = self.c_inst_discrete.getVTR()
+        cdef maxCutBBO_t *tmp_ptr = new maxCutBBO_t(str.encode(input_file),str.encode(vtr_file))
+        self.c_inst_discrete = shared_ptr[maxCutBBO_t](tmp_ptr)
+        self.number_of_variables = tmp_ptr.getNumberOfVariables()
+        self.value_to_reach = tmp_ptr.getVTR()
 
 cdef class NKLandscapes(GBOFitnessFunction):
     def __cinit__(self, 
@@ -262,7 +265,8 @@ cdef class NKLandscapes(GBOFitnessFunction):
         K : int = 5,
         seed : int = 0
     ):
-        self.c_inst_discrete = new NKlandscapes_t(number_of_variables,K,seed)
+        cdef NKlandscapes_t *tmp_ptr = new NKlandscapes_t(number_of_variables,K,seed)
+        self.c_inst_discrete = shared_ptr[NKlandscapes_t](tmp_ptr)
         self.number_of_variables = self.c_inst_discrete.getNumberOfVariables()
         self.value_to_reach = self.c_inst_discrete.getVTR()
 
@@ -272,6 +276,7 @@ cdef class NKLandscapesBBO(BBOFitnessFunction):
         K : int = 5,
         seed : int = 0
     ):
-        self.c_inst_discrete = new NKlandscapesBBO_t(number_of_variables,K,seed)
+        cdef NKlandscapesBBO_t *tmp_ptr = new NKlandscapesBBO_t(number_of_variables,K,seed)
+        self.c_inst_discrete = shared_ptr[NKlandscapesBBO_t](tmp_ptr)
         self.number_of_variables = self.c_inst_discrete.getNumberOfVariables()
         self.value_to_reach = self.c_inst_discrete.getVTR()

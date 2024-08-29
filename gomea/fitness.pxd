@@ -4,6 +4,7 @@ from libcpp.utility cimport pair
 from libcpp.string cimport string
 from libcpp.map cimport map
 from libc.math cimport INFINITY
+from libcpp.memory cimport shared_ptr
 import numpy as np
 cimport numpy as np
 
@@ -107,7 +108,7 @@ cdef class FitnessFunction:
     cdef map[pair[int,double],PyObject*] rotation_matrices
     cdef np.ndarray rotation_matrix
 
-    cdef fitness_t[char] *c_inst_discrete
+    cdef shared_ptr[fitness_t[char]] c_inst_discrete
     cdef fitness_t[double] *c_inst_realvalued
     
     cpdef initialize_rotation_matrix(self, int rotation_block_size, float rotation_angle)
