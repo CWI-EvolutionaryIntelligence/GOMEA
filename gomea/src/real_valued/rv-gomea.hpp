@@ -7,8 +7,6 @@
 #include "gomea/src/real_valued/Config.hpp"
 #include "gomea/src/utils/embed.hpp"
 #include "gomea/src/fitness/fitness.hpp"
-//#include "gomea/real_valued.h"
-//#include "gomea/fitness.h"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
 namespace gomea{
@@ -40,7 +38,6 @@ class rvg_t {
 		void initializeNewPopulation( void );
 		void initializeProblem(); 
 		void restartLargestPopulation();
-		fitness_t *getFitnessClass( int problem_index );
 		void writeGenerationalStatisticsForOnePopulation( int population_index );
 		void writeGenerationalSolutions( bool final );
 		void writeGenerationalSolutionsBest( bool final );
@@ -62,7 +59,7 @@ class rvg_t {
 
 		/*-=-=-=-=-=-=-=-=-=-=-=- Variables -=-=-=-=-=-=-=-=-=-=-=-=-*/
 		std::vector<population_t*> populations;
-		fitness_t *fitness;
+		fitness_pt<double> fitness;
 		int total_number_of_writes = 0;                              /* Total number of times a statistics file has been written. */
 		output_statistics_t output;
 		/*-=-=-=-=-=-=-=-=-=-=-=- Options -=-=-=-=-=-=-=-=-=-=-=-=-*/

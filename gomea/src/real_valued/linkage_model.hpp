@@ -54,7 +54,7 @@ class linkage_model_rv_t : public linkage_model_t {
 			//void initializeNormalDistribution(int FOS_index);
 			//void initializeConditionalDistribution( int FOS_index );
 
-			partial_solution_t<double> *generatePartialSolution( int FOS_index, solution_t<double> *solution_conditioned_on, fitness::fitness_generic_t *fitness_function = NULL );
+			partial_solution_t<double> *generatePartialSolution( int FOS_index, solution_t<double> *solution_conditioned_on, fitness_pt<double> fitness_function = NULL );
 			void estimateDistributions( solution_t<double> **selection, int selection_size );
 			void estimateDistribution( int FOS_index, solution_t<double> **selection, int selection_size );
 			void adaptDistributionMultiplier( int FOS_index, partial_solution_t<double> **solutions, int num_solutions );

@@ -1,5 +1,6 @@
 from libcpp.string cimport string
 from libcpp cimport bool
+from libcpp.memory cimport shared_ptr
 from gomea.output cimport output_statistics_t
 from gomea.fitness cimport fitness_t
 from gomea.linkage cimport linkage_config_t
@@ -13,7 +14,7 @@ cdef extern from "src/real_valued/Config.hpp" namespace "gomea::realvalued":
         bool fix_seed, use_vtr, write_generational_statistics, write_generational_solutions, black_box_evaluations, selection_during_gom, update_elitist_during_gom, verbose, print_verbose_overview
         long long random_seed
         linkage_config_t *linkage_config
-        fitness_t[double] *fitness
+        shared_ptr[fitness_t[double]] fitness
 
 cdef extern from "src/real_valued/rv-gomea.hpp" namespace "gomea::realvalued":
     cdef cppclass rvg_t:

@@ -3,6 +3,7 @@
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-= Section Includes -=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 #include "gomea/src/fitness/fitness.hpp"
 #include "gomea/src/real_valued/tools.hpp"
+#include "gomea/src/real_valued/Config.hpp"
 #include "gomea/src/real_valued/partial_solutionRV.hpp"
 #include "gomea/src/real_valued/solutionRV.hpp"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
@@ -49,7 +50,7 @@ class distribution_t {
 		virtual void updateConditionals( const std::map<int,std::set<int>> &variable_interaction_graph, std::vector<int> &visited );
 		virtual void setOrder( const vec_t<int> &order ); 
 		virtual void estimateDistribution( solution_t<double> **selection, int selection_size ) = 0;	
-		virtual partial_solution_t<double> *generatePartialSolution( solution_t<double> *parent, fitness::fitness_generic_t *fitness_function = NULL ) = 0;
+		virtual partial_solution_t<double> *generatePartialSolution( solution_t<double> *parent, fitness_pt<double> fitness_function = NULL ) = 0;
 		virtual void print();
 };
 
@@ -62,7 +63,7 @@ class normal_distribution_t : public distribution_t {
 			mat cholesky_decomposition; 
 			
 			void estimateDistribution( solution_t<double> **selection, int selection_size );
-			partial_solution_t<double> *generatePartialSolution( solution_t<double> *parent = NULL, fitness::fitness_generic_t *fitness_function = NULL );
+			partial_solution_t<double> *generatePartialSolution( solution_t<double> *parent = NULL, fitness_pt<double> fitness_function = NULL );
 			
 			bool generationalImprovementForOnePopulationForFOSElement( partial_solution_t<double>** partial_solutions, int num_solutions, double *st_dev_ratio );
 };
@@ -94,7 +95,7 @@ class conditional_distribution_t : public distribution_t {
 			void setOrder( const vec_t<int> &order );
 			void updateConditionals( const std::map<int,std::set<int>> &variable_interaction_graph, std::vector<int> &visited );
 
-			partial_solution_t<double> *generatePartialSolution( solution_t<double> *solution_conditioned_on = NULL, fitness::fitness_generic_t *fitness_function = NULL ); 
+			partial_solution_t<double> *generatePartialSolution( solution_t<double> *solution_conditioned_on = NULL, fitness_pt<double> fitness_function = NULL ); 
 			bool generationalImprovementForOnePopulationForFOSElement( partial_solution_t<double>** partial_solutions, int num_solutions, double *st_dev_ratio );
 		private:
 			void initializeMemory();
