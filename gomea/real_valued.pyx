@@ -71,10 +71,7 @@ cdef class RealValuedGOMEA:
 
         # Initialize C++ instance
         self.c_inst = rvg_t(&self.c_config)
-    
-    def print_usage(self):
-        self.c_inst.printUsage()
-
+        
     def run(self):
         self.c_inst.run()
         return OutputStatistics(OutputStatisticsWrapper.from_ptr(&self.c_inst.output))
