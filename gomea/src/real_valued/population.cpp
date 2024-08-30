@@ -674,59 +674,6 @@ void population_t::initializeFOS( linkage_config_t *linkage_config )
 	//linkage_model->printFOS();
 }
 
-void population_t::initializeFOSFromIndex( int FOSIndex )
-{
-	linkage_model_rv_pt new_FOS = NULL;
-
-	int max_clique_size;
-	bool include_cliques_as_fos_elements, include_full_fos_element; 
-	if( FOSIndex > 0 )
-	{
-		//new_FOS = new linkage_model_rv_t( fitness->number_of_variables, FOS_element_size );
-		new_FOS = linkage_model_rv_t::marginal_product_model( fitness->number_of_variables, FOSIndex );
-	}
-	else if( FOSIndex == -1 )
-	{
-		new_FOS = linkage_model_rv_t::full( fitness->number_of_variables ); 
-	}
-	else if( FOSIndex == -2 )
-	{
-		new_FOS = linkage_model_rv_t::linkage_tree( fitness->number_of_variables, 0, false, -1, false );
-	}
-	else if( FOSIndex == -3 )
-	{
-		vec_t<vec_t<int>> FOS;
-		vec_t<int> full_fos_element;
-		for( int i = 0; i < fitness->number_of_variables; i++ )
-		{
-			vec_t<int> e;
-			e.push_back(i);
-			full_fos_element.push_back(i);
-			FOS.push_back(e);
-		}
-		FOS.push_back(full_fos_element);
-		//new_FOS = new linkage_model_rv_t( fitness->number_of_variables );
-		new_FOS = linkage_model_rv_t::custom_fos( fitness->number_of_variables, FOS );
-	}
-	else if( FOSIndex <= -10 )
-	{
-		int id = -1 * FOSIndex;
-		id /= 10;
-		include_full_fos_element = (id%10) == 1;
-		id /= 10;
-		include_cliques_as_fos_elements = (id%10) == 1;
-		id /= 10;
-		max_clique_size = id;
-		new_FOS = linkage_model_rv_t::conditional(fitness->number_of_variables,fitness->variable_interaction_graph,max_clique_size,include_cliques_as_fos_elements,include_full_fos_element);
-	}
-	else
-	{
-		assert(0);
-	}
-
-	linkage_model = new_FOS;
-}
-
 /**
  * Initializes the parameter range bounds.
  */
