@@ -78,6 +78,30 @@ vec_t<std::string> output_statistics_t::getAllMetricNames()
     return metrics;
 }
 
+void output_statistics_t::printMetrics()
+{
+    printf("# ");
+    for (auto const &v : metrics_map)
+        printf("%20s ", v.first.c_str());
+    printf("\n");
+
+    for( int k : all_keys )
+    {
+        for (auto const &item : metrics_map)
+        {
+            auto vals = item.second;
+            std::string strval = std::visit([](auto&& arg){
+                if constexpr (std::is_same_v<std::decay_t<decltype(arg)>, std::string>) {
+                    return arg;
+                } else {
+                    return std::to_string(arg);
+                }}, vals[k]);
+            printf("%20s ", strval.c_str());
+        }
+        printf("\n");
+    }
+}
+
 void output_statistics_t::writeToFile(std::string filename) 
 {
     char    string[1000];

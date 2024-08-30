@@ -26,6 +26,7 @@ class output_statistics_t
         template<class T>
         T getMetricValue( std::string metric_name, int key );
 
+        void printMetrics();
         void writeToFile( std::string filename = "statistics.dat" );
         
         std::unordered_map<std::string, std::unordered_map<int,metric_t>> metrics_map;

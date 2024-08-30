@@ -18,6 +18,14 @@
             "cwd": "${workspaceFolder}/build_cpp/"
         },
         {
+            "name": "C++ Real-Valued gdb",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build_cpp/RealValuedGOMEA",
+            "args": ["-s","-f","1","-r","0","10","-100","-115","0.35","10","1","0.9","1","100000","1e-10","100","0","10"],
+            "cwd": "${workspaceFolder}/build_cpp/"
+        },
+        {
             "name": "(gdb) Attach",
             "type": "cppdbg",
             "program": "gdb",
