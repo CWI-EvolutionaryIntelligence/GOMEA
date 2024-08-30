@@ -33,10 +33,6 @@ debug: uninstall build-debug
 	cp -r build-debug/* debug/gomea/
 	cp -r gomea/__init__.py debug/gomea/
 
-#cpp:
-#	@mkdir -p build
-#	g++ -g -Wall -std=c++17 -DCPP_STANDALONE -I./ -Igomea/ -IEigen/ gomea/src/discrete/*.cpp gomea/src/fitness/*.cpp gomea/src/common/*.cpp gomea/src/utils/*.cpp -o build/DiscreteGOMEA
-
 install: install-deps build-wheel
 	pip3 install dist/*.whl --user
 
