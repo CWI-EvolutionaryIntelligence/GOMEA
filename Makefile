@@ -1,8 +1,8 @@
-
+CXXL=$(CXX)
 ifneq ($(OS),Windows_NT)
 	UNAME_S := $(shell uname -s)
 	ifeq ($(UNAME_S),Darwin)
-		CXX = clang++
+		CXXL=clang++
 	endif
 endif
 
@@ -17,24 +17,24 @@ install-meson-deps:
 	pip3 -q install meson==1.5.1 --user
 
 build-sdist: install-deps
-	python3 -m build --sdist
+	CXX=$(CXXL) python3 -m build --sdist
 
 build-wheel: install-deps
-	python3 -m build --wheel
+	CXX=$(CXXL) python3 -m build --wheel
 
 build-all: build-sdist build-wheel
 
 dev: install-deps install-meson-deps
-	meson setup build --python.install-env auto
-	meson compile -C build
+	CXX=$(CXXL) meson setup build --python.install-env auto
+	CXX=$(CXXL) meson compile -C build
 	python -m pip install --no-build-isolation --editable .
 
 build-debug: install-deps install-meson-deps
-	meson setup build-debug --python.install-env auto --buildtype="debug"
-	meson compile -C build-debug
+	CXX=$(CXXL) meson setup build-debug --python.install-env auto --buildtype="debug"
+	CXX=$(CXXL) meson compile -C build-debug
 
 install-debug: install-deps install-meson-deps build-debug
-	python -m pip install --no-binary :all: --debug --no-build-isolation --editable .
+	CXX=$(CXXL) python -m pip install --no-binary :all: --debug --no-build-isolation --editable .
 
 debug: uninstall build-debug
 	mkdir -p debug/gomea/
