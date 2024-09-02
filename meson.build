@@ -2,8 +2,7 @@ project('gomea', 'cpp', 'cython',
     default_options : ['c_std=c17', 
         'cpp_std=c++17',
         'buildtype=release',
-        'vsenv=true',
-        'cpp_link_args="-Wl,-keep_dwarf_unwind"'])
+        'vsenv=true'])
 
 fs = import('fs')
 py = import('python').find_installation('python3', pure: false)
@@ -34,6 +33,11 @@ cython_args = [
     meson.current_build_dir(),
     '-X always_allow_keywords=true'
 ]
+
+cpp_link_args = []
+if(build_machine.system() == 'darwin')
+    cpp_link_args = ['-Wl,-keep_dwarf_unwind']
+endif
 
 # file listings.
 
@@ -111,6 +115,7 @@ gomea_common_lib = static_library(
     common_src,
     dependencies: [python_dep, numpy_dep, numpy_incdep],
     cython_args: cython_args,
+    link_args : cpp_link_args,
 )
 
 # To share symbols for fitness across modules.
@@ -121,6 +126,7 @@ gomea_fitness_lib = static_library(
     link_with: [gomea_common_lib],
     dependencies: [python_dep, numpy_dep, numpy_incdep, cxxopts_dep, eigen_dep, gomea_fitness_cython_dep],
     cython_args: cython_args,
+    link_args : cpp_link_args,
 )
 
 gomea_fitness_ex = py.extension_module(
@@ -131,6 +137,7 @@ gomea_fitness_ex = py.extension_module(
     dependencies: [numpy_dep, numpy_incdep, cxxopts_dep, eigen_dep, gomea_fitness_cython_dep],
     include_directories: [gomea_incl],
     cython_args: cython_args,
+    link_args : cpp_link_args,
     install: true,
     subdir: 'gomea',
 )
@@ -143,6 +150,7 @@ gomea_discrete_ex = py.extension_module(
     dependencies: [numpy_dep, numpy_incdep, cxxopts_dep, gomea_fitness_cython_dep],
     include_directories: [gomea_incl],
     cython_args: cython_args,
+    link_args : cpp_link_args,
     install: true,
     subdir: 'gomea',
 )
@@ -155,6 +163,7 @@ gomea_real_valued_ex = py.extension_module(
     dependencies: [numpy_dep, numpy_incdep, cxxopts_dep, eigen_dep, gomea_real_valued_cython_dep, gomea_fitness_cython_dep],
     include_directories: [gomea_incl],
     cython_args: cython_args,
+    link_args : cpp_link_args,
     install: true,
     subdir: 'gomea',
 )
@@ -168,6 +177,7 @@ gomea_linkage = py.extension_module(
     dependencies: [numpy_dep, numpy_incdep],
     include_directories: [gomea_incl],
     cython_args: cython_args,
+    link_args : cpp_link_args,
     install: true,
     subdir: 'gomea',
 )
@@ -180,6 +190,7 @@ gomea_output = py.extension_module(
     dependencies: [numpy_dep, numpy_incdep],
     include_directories: [gomea_incl],
     cython_args: cython_args,
+    link_args : cpp_link_args,
     install: true,
     subdir: 'gomea',
 )
