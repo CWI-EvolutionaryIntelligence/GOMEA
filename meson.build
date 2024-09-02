@@ -2,7 +2,8 @@ project('gomea', 'cpp', 'cython',
     default_options : ['c_std=c17', 
         'cpp_std=c++17',
         'buildtype=release',
-        'vsenv=true'])
+        'vsenv=true',
+        'cpp_link_args=-Wl,-keep_dwarf_unwind'])
 
 fs = import('fs')
 py = import('python').find_installation('python3', pure: false)
