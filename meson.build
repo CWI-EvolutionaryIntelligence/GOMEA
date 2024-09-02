@@ -3,7 +3,7 @@ project('gomea', 'cpp', 'cython',
         'cpp_std=c++17',
         'buildtype=release',
         'vsenv=true',
-        'cpp_link_args=-Wl,-keep_dwarf_unwind'])
+        'cpp_link_args="-Wl,-keep_dwarf_unwind"'])
 
 fs = import('fs')
 py = import('python').find_installation('python3', pure: false)
