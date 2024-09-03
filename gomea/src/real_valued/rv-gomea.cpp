@@ -649,7 +649,7 @@ void rvg_t::run( void )
     {
         runAllPopulations();
     }
-	catch( utils::customException const& ){
+	catch( utils::customException &e ){
         for( auto &p : populations )
             p->updateElitist();
     }
@@ -674,19 +674,5 @@ void rvg_t::run( void )
 }
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
-
-/**
- * The main function:
- * - interpret parameters on the command line
- * - run the algorithm with the interpreted parameters
- */
-int main( int argc, char **argv )
-{
-	rvg_t rvgomea = rvg_t(argc, argv);
-
-	rvgomea.run();
-	
-	return( 0 );
-}
 
 }}
