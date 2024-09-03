@@ -20,7 +20,7 @@ class pyGBOFitnessFunction_t : public GBOFitnessFunction_t<T>
 		double getSimilarityMeasure( size_t var_a, size_t var_b );
 
 		double objectiveFunction( int objective_index, vec_t<double> &fitness_buffers );
-		double constraintFunction( int objective_index, vec_t<double> &fitness_buffers );
+		double constraintFunction( vec_t<double> &fitness_buffers );
 		int getNumberOfFitnessBuffers();
 		int getIndexOfFitnessBuffer( int subfunction_index );
 		

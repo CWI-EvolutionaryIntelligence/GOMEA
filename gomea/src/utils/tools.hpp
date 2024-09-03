@@ -7,17 +7,10 @@
 namespace gomea{
 	namespace utils{
 
-		class customException : public std::exception
+		class terminationException : public std::runtime_error
 		{
-			private:
-				std::string message;
-
 			public:
-				customException(std::string message_) : message(message_) {}
-				const char *what() const throw()
-				{
-					return message.c_str();
-				}
+				terminationException(std::string message_) : runtime_error(message_) {}
 		};
 
 	double **matrixMatrixMultiplication( double **matrix0, double **matrix1, int n0, int n1, int n2 );
