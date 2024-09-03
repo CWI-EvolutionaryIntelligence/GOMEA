@@ -33,11 +33,12 @@ cython_args = [
     meson.current_build_dir(),
     '-X always_allow_keywords=true'
 ]
-cpp_args = []
+cpp_args = ['-fexceptions','-frtti']
 cpp_link_args = []
 if(build_machine.system() == 'darwin')
     cpp_args = ['-fexceptions','-frtti']
 endif
+message('CPP args:',cpp_args)
 
 # file listings.
 
@@ -115,6 +116,7 @@ gomea_common_lib = static_library(
     common_src,
     dependencies: [python_dep, numpy_dep, numpy_incdep],
     cython_args: cython_args,
+    cpp_args : cpp_args,
     link_args : cpp_link_args,
 )
 
