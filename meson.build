@@ -33,10 +33,10 @@ cython_args = [
     meson.current_build_dir(),
     '-X always_allow_keywords=true'
 ]
-cpp_args = ['-fexceptions','-frtti']
+cpp_args = []
 cpp_link_args = []
 if(build_machine.system() == 'darwin')
-    cpp_args = ['-fexceptions','-frtti']
+    cpp_args = ['-fno-rtti']
 endif
 message('CPP args:',cpp_args)
 
