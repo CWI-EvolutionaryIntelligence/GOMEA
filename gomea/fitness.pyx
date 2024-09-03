@@ -1,7 +1,7 @@
 from cpython cimport PyObject
 from libcpp.string cimport string
 from libcpp.pair cimport pair
-from libcpp.memory cimport make_shared, shared_ptr
+from libcpp.memory cimport shared_ptr
 
 include "EmbeddedFitness.pxi"
     
@@ -50,7 +50,7 @@ cdef class YourFitnessFunctionDiscrete(FitnessFunction):
         value_to_reach : float = 1e308
     ):
         cdef yourFitnessFunctionDiscrete *ptr = new yourFitnessFunctionDiscrete(number_of_variables,value_to_reach)
-        cdef shared_ptr[yourFitnessFunctionDiscrete] ptr_shared = shared_ptr[yourFitnessFunctionDiscrete]()
+        cdef shared_ptr[yourFitnessFunctionDiscrete] ptr_shared = shared_ptr[yourFitnessFunctionDiscrete](ptr)
         self.c_inst_discrete = ptr_shared
         self.number_of_variables = number_of_variables
         self.value_to_reach = value_to_reach        
@@ -61,7 +61,7 @@ cdef class YourFitnessFunctionRealValued(FitnessFunction):
         value_to_reach : float = 0.0
     ):
         cdef yourFitnessFunctionRealValued *ptr = new yourFitnessFunctionRealValued(number_of_variables,value_to_reach)
-        cdef shared_ptr[yourFitnessFunctionRealValued] ptr_shared = shared_ptr[yourFitnessFunctionRealValued]()
+        cdef shared_ptr[yourFitnessFunctionRealValued] ptr_shared = shared_ptr[yourFitnessFunctionRealValued](ptr)
         self.c_inst_realvalued = ptr_shared
         self.number_of_variables = number_of_variables
         self.value_to_reach = value_to_reach
