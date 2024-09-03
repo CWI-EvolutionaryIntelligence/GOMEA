@@ -370,7 +370,7 @@ void Population::checkTimeLimit()
     if ( config->maximumNumberOfSeconds > 0 && utils::getElapsedTimeSeconds(utils::start_time) > config->maximumNumberOfSeconds)
     {
         terminated = true;
-        throw utils::customException("time");
+        throw utils::terminationException("time");
     }
 }
 
@@ -394,7 +394,7 @@ void Population::updateElitistAndCheckVTR(solution_t<char> *solution)
             //writeElitistSolutionToFile(config->folder, sharedInformationPointer->elitistSolutionHittingTimeEvaluations, sharedInformationPointer->elitistSolutionHittingTimeMilliseconds, solution);
             //std::cout << "VTR HIT!\n";
             terminated = true;
-            throw utils::customException("vtr");
+            throw utils::terminationException("vtr");
         }
     
         //writeStatisticsToFile(config->folder, sharedInformationPointer->elitistSolutionHittingTimeEvaluations, sharedInformationPointer->elitistSolutionHittingTimeMilliseconds, solution);

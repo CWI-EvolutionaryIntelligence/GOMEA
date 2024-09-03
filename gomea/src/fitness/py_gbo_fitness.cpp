@@ -65,7 +65,7 @@ double pyGBOFitnessFunction_t<T>::objectiveFunction( int objective_index, vec_t<
 }
 
 template<class T>
-double pyGBOFitnessFunction_t<T>::constraintFunction( int objective_index, vec_t<double> &fitness_buffers )
+double pyGBOFitnessFunction_t<T>::constraintFunction( vec_t<double> &fitness_buffers )
 {
 	double result = gomea_pyfitness_constraint_function_gbo(py_class,fitness_buffers);
 	return result;

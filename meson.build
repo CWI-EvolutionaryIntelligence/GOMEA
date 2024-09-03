@@ -37,7 +37,6 @@ cpp_args = []
 cpp_link_args = []
 if(build_machine.system() == 'darwin')
     cpp_args = ['-fexceptions','-frtti']
-    cpp_link_args = ['-Wl,-keep_dwarf_unwind']
 endif
 
 # file listings.
