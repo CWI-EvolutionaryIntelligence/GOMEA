@@ -33,9 +33,10 @@ cython_args = [
     meson.current_build_dir(),
     '-X always_allow_keywords=true'
 ]
-
+cpp_args = []
 cpp_link_args = []
 if(build_machine.system() == 'darwin')
+    cpp_args = ['-fexceptions','-frtti']
     cpp_link_args = ['-Wl,-keep_dwarf_unwind']
 endif
 
@@ -126,6 +127,7 @@ gomea_fitness_lib = static_library(
     link_with: [gomea_common_lib],
     dependencies: [python_dep, numpy_dep, numpy_incdep, cxxopts_dep, eigen_dep, gomea_fitness_cython_dep],
     cython_args: cython_args,
+    cpp_args : cpp_args,
     link_args : cpp_link_args,
 )
 
@@ -137,6 +139,7 @@ gomea_fitness_ex = py.extension_module(
     dependencies: [numpy_dep, numpy_incdep, cxxopts_dep, eigen_dep, gomea_fitness_cython_dep],
     include_directories: [gomea_incl],
     cython_args: cython_args,
+    cpp_args : cpp_args,
     link_args : cpp_link_args,
     install: true,
     subdir: 'gomea',
@@ -150,6 +153,7 @@ gomea_discrete_ex = py.extension_module(
     dependencies: [numpy_dep, numpy_incdep, cxxopts_dep, gomea_fitness_cython_dep],
     include_directories: [gomea_incl],
     cython_args: cython_args,
+    cpp_args : cpp_args,
     link_args : cpp_link_args,
     install: true,
     subdir: 'gomea',
@@ -163,6 +167,7 @@ gomea_real_valued_ex = py.extension_module(
     dependencies: [numpy_dep, numpy_incdep, cxxopts_dep, eigen_dep, gomea_real_valued_cython_dep, gomea_fitness_cython_dep],
     include_directories: [gomea_incl],
     cython_args: cython_args,
+    cpp_args : cpp_args,
     link_args : cpp_link_args,
     install: true,
     subdir: 'gomea',
@@ -177,6 +182,7 @@ gomea_linkage = py.extension_module(
     dependencies: [numpy_dep, numpy_incdep],
     include_directories: [gomea_incl],
     cython_args: cython_args,
+    cpp_args : cpp_args,
     link_args : cpp_link_args,
     install: true,
     subdir: 'gomea',
@@ -190,6 +196,7 @@ gomea_output = py.extension_module(
     dependencies: [numpy_dep, numpy_incdep],
     include_directories: [gomea_incl],
     cython_args: cython_args,
+    cpp_args : cpp_args,
     link_args : cpp_link_args,
     install: true,
     subdir: 'gomea',
