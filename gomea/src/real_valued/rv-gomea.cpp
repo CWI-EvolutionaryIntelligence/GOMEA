@@ -649,7 +649,7 @@ void rvg_t::run( void )
     {
         runAllPopulations();
     }
-	catch( gomea::utils::terminationException &e ){
+	catch( std::runtime_error &e ){
         for( auto &p : populations )
             p->updateElitist();
     }

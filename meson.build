@@ -35,10 +35,6 @@ cython_args = [
 ]
 cpp_args = []
 cpp_link_args = []
-if(build_machine.system() == 'darwin')
-    cpp_args = []
-endif
-message('CPP args:',cpp_args)
 
 # file listings.
 
