@@ -19,7 +19,7 @@ class Population
 {
 public:
     Config *config;
-    fitness_pt<char> problemInstance;
+    fitness_t<char> *problemInstance;
     sharedInformation *sharedInformationPointer;
     size_t GOMEAIndex;
     size_t populationSize;
@@ -34,7 +34,7 @@ public:
     
     linkage_model_pt FOSInstance = NULL;
 
-    Population(Config *config_, fitness_pt<char> problemInstance_, sharedInformation *sharedInformationPointer_, size_t GOMEAIndex_, size_t populationSize_, linkage_model_pt FOSInstance_ = NULL );
+    Population(Config *config_, fitness_t<char> *problemInstance_, sharedInformation *sharedInformationPointer_, size_t GOMEAIndex_, size_t populationSize_, linkage_model_pt FOSInstance_ = NULL );
     ~Population();
 
     friend std::ostream & operator << (std::ostream &out, const Population &populationInstance);

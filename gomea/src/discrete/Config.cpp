@@ -207,13 +207,13 @@ bool Config::parseCommandLine(int argc, char **argv)
     if(!usePartialEvaluations){
         switch(problem_index){
             case 0:
-                fitness = std::shared_ptr<fitness_t<char>>(new fitness::oneMaxBBO_t(num_variables));
+                fitness = new fitness::oneMaxBBO_t(num_variables);
                 break;
             case 1:
-                fitness = std::shared_ptr<fitness_t<char>>(new fitness::deceptiveTrapBBO_t(num_variables, 5));
+                fitness = new fitness::deceptiveTrapBBO_t(num_variables, 5);
                 break;
             case 2:
-                fitness = std::shared_ptr<fitness_t<char>>(new fitness::maxCutBBO_t(problemInstancePath, vtrFilePath));
+                fitness = new fitness::maxCutBBO_t(problemInstancePath, vtrFilePath);
                 break;
             default:
                 throw std::invalid_argument("Invalid problem index.");
@@ -222,13 +222,13 @@ bool Config::parseCommandLine(int argc, char **argv)
     else{
         switch(problem_index){
             case 0:
-                fitness = std::shared_ptr<fitness_t<char>>(new fitness::oneMax_t(num_variables));
+                fitness = new fitness::oneMax_t(num_variables);
                 break;
             case 1:
-                fitness = std::shared_ptr<fitness_t<char>>(new fitness::deceptiveTrap_t(num_variables, 5));
+                fitness = new fitness::deceptiveTrap_t(num_variables, 5);
                 break;
             case 2:
-                fitness = std::shared_ptr<fitness_t<char>>(new fitness::maxCut_t(problemInstancePath, vtrFilePath));
+                fitness = new fitness::maxCut_t(problemInstancePath, vtrFilePath);
                 break;
             default:
                 throw std::invalid_argument("Invalid problem index.");

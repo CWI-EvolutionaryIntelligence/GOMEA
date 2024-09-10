@@ -1,6 +1,5 @@
 from libcpp.string cimport string
 from libcpp cimport bool
-from libcpp.memory cimport shared_ptr
 from gomea.output cimport output_statistics_t
 from gomea.fitness cimport fitness_t
 from gomea.linkage cimport linkage_config_t 
@@ -14,7 +13,7 @@ cdef extern from "gomea/src/discrete/Config.hpp" namespace "gomea::discrete":
         bool fix_seed
         double maximumNumberOfSeconds
         string folder, problemInstancePath
-        shared_ptr[fitness_t[char]] fitness
+        fitness_t[char] *fitness
         linkage_config_t *linkage_config
 
 cdef extern from "gomea/src/discrete/gomeaIMS.hpp" namespace "gomea::discrete":

@@ -27,7 +27,7 @@ public:
 	bool isInitialized = false,
         hasTerminated = false;
     vec_t<Population*> GOMEAs;
-    fitness_pt<char> problemInstance = NULL;
+    fitness_t<char> *problemInstance = NULL;
     sharedInformation *sharedInformationInstance = NULL;
 
 	gomeaIMS();

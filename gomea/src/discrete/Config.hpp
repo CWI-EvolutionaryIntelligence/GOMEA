@@ -16,7 +16,6 @@ namespace gomea{
 namespace discrete{
 
 using gomea::fitness::fitness_t;
-using gomea::fitness::fitness_pt;
 
 class Config
 {
@@ -31,7 +30,7 @@ public:
     void checkOptions();
     void printOverview();
     
-	fitness_pt<char> fitness;
+	fitness_t<char> *fitness;
 	int usePartialEvaluations              = 1,                  
 		useParallelGOM		               = 1,                  
 		useParallelFOSOrder	               = 0,

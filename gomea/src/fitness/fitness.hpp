@@ -106,7 +106,4 @@ class fitness_t : public fitness_generic_t
 		vec_t<vec_t<double>> similarity_matrix;
 };
 
-template<typename T>
-using fitness_pt = std::shared_ptr<fitness_t<T>>;
-
 }}

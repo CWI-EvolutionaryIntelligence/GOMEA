@@ -24,6 +24,7 @@ int main(int argc, char **argv)
     gomeaInstance->output.writeToFile("out.dat");
 
     delete gomeaInstance;
+    delete config->fitness;
     delete config;
     
     return 0;
