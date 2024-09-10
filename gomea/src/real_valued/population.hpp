@@ -17,7 +17,7 @@ namespace realvalued{
 class population_t {
 	public:
 		/*-=-=-=-=-=-=-=-=-=-=-=-= Section Header Functions -=-=-=-=-=-=-=-=-=-=-=-=*/
-	 	population_t( fitness_t *fitness, int population_size, double lower_init, double upper_init );
+	 	population_t( fitness_t<double> *fitness, int population_size, double lower_init, double upper_init );
 	 	~population_t();
 		
 		void runGeneration();
@@ -81,7 +81,7 @@ class population_t {
 			   *individual_NIS;                                      /* The number of generations a solution has not improved. */
 		solution_t<double> **individuals,
 			   		**selection;                                          /* Selected solutions, one for each population. */
-		fitness_t *fitness;
+		fitness_t<double> *fitness;
 		double *ranks,                                               /* Ranks of population members. */
 			   objective_value_elitist,                         /* Objective values of selected solutions. */
 			   constraint_value_elitist,                        /* Sum of all constraint violations of selected solutions. */

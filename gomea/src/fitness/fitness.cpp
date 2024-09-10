@@ -5,10 +5,14 @@ namespace gomea{
 namespace fitness{
 
 template<>
+fitness_t<char>::fitness_t() : fitness_t(-1,0,false,MAX) {}
+template<>
 fitness_t<char>::fitness_t( int number_of_variables ) : fitness_t(number_of_variables,0,false,MAX) {}
 template<>
 fitness_t<char>::fitness_t( int number_of_variables, double vtr ) : fitness_t(number_of_variables,vtr,true,MAX) {}
 
+template<>
+fitness_t<double>::fitness_t() : fitness_t(-1,0,false,MIN) {}
 template<>
 fitness_t<double>::fitness_t( int number_of_variables ) : fitness_t(number_of_variables,0,false,MIN) {}
 template<>
@@ -434,7 +438,7 @@ void fitness_t<T>::checkEvaluationLimitTerminationCondition()
 {
 	if( maximum_number_of_evaluations > 0 && number_of_evaluations >= maximum_number_of_evaluations )
 	{
-        throw utils::customException("evaluations");
+        throw utils::terminationException("evaluations");
 	}
 }
 
@@ -443,7 +447,7 @@ void fitness_t<T>::checkTimeLimitTerminationCondition()
 {
 	if( maximum_number_of_seconds > 0 && utils::getElapsedTimeSinceStartSeconds(utils::start_time) >= maximum_number_of_seconds )
 	{
-        throw utils::customException("time");
+        throw utils::terminationException("time");
 	}
 }
 

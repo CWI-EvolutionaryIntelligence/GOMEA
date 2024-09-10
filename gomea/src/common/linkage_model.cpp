@@ -187,6 +187,12 @@ linkage_model_t::linkage_model_t( std::string filename )
     
 linkage_model_pt linkage_model_t::univariate(size_t numberOfVariables_)
 {
+	linkage_model_pt new_fos = std::shared_ptr<linkage_model_t>(new linkage_model_t(numberOfVariables_,1));
+	return( new_fos );
+}
+
+linkage_model_pt linkage_model_t::full(size_t numberOfVariables_)
+{
 	linkage_model_pt new_fos = std::shared_ptr<linkage_model_t>(new linkage_model_t(numberOfVariables_,0));
 	return( new_fos );
 }

@@ -365,68 +365,12 @@ bool Population::FI(size_t offspringIndex)
     return solutionHasChanged;
 }
 
-/*void Population::evaluateSolution(solution_t<char> *parent, gomea::partial_solution_t<char> *solution ) 
-{
-    checkTimeLimit();
-
-    //std::cout << "before eval" << solution -> fitness << std::endl;
-    if (config->usePartialEvaluations && solution != NULL)
-    {
-        problemInstance->calculateFitnessPartialEvaluations(solution, solutionBefore, touchedGenes, fitnessBefore);
-        sharedInformationPointer->numberOfEvaluations += (double)touchedGenes.size() / problemInstance->number_of_variables;
-    }
-    else
-    {
-        problemInstance->calculateFitness(solution);
-        sharedInformationPointer->numberOfEvaluations += 1;
-    }
-
-    updateElitistAndCheckVTR(solution);
-}*/
-
-/*void Population::evaluateSolution(solution_t<char> *solution, solution_t<char> *solutionBefore, vec_t<int> &touchedGenes, double fitnessBefore)
-{
-    checkTimeLimit();
-
-    // Do the actual evaluation
-    archiveRecord searchResult;
-    
-    if (config->saveEvaluations)
-        sharedInformationPointer->evaluatedSolutions->checkAlreadyEvaluated(solution->variables, &searchResult);
-    
-    if (searchResult.isFound)
-        solution->setObjectiveValue(searchResult.value);
-    else
-    { 
-        //std::cout << "before eval" << solution -> fitness << std::endl;
-        if (config->usePartialEvaluations && solutionBefore != NULL)
-        {
-            assert(0);
-            // TODO
-            //problemInstance->evaluatePartialSolution(solution, solutionBefore, touchedGenes, fitnessBefore);
-            sharedInformationPointer->numberOfEvaluations += (double)touchedGenes.size() / problemInstance->number_of_variables;
-        }
-        else
-        {
-            assert(0);
-            // TODO
-            //problemInstance->evaluate(solution);
-            sharedInformationPointer->numberOfEvaluations += 1;
-        }
-
-        if (config->saveEvaluations)
-            sharedInformationPointer->evaluatedSolutions->insertSolution(solution->variables, solution->getObjectiveValue());
-    }
-
-    updateElitistAndCheckVTR(solution);
-}*/
-
 void Population::checkTimeLimit()
 {
     if ( config->maximumNumberOfSeconds > 0 && utils::getElapsedTimeSeconds(utils::start_time) > config->maximumNumberOfSeconds)
     {
         terminated = true;
-        throw utils::customException("time");
+        throw utils::terminationException("time");
     }
 }
 
@@ -450,7 +394,7 @@ void Population::updateElitistAndCheckVTR(solution_t<char> *solution)
             //writeElitistSolutionToFile(config->folder, sharedInformationPointer->elitistSolutionHittingTimeEvaluations, sharedInformationPointer->elitistSolutionHittingTimeMilliseconds, solution);
             //std::cout << "VTR HIT!\n";
             terminated = true;
-            throw utils::customException("vtr");
+            throw utils::terminationException("vtr");
         }
     
         //writeStatisticsToFile(config->folder, sharedInformationPointer->elitistSolutionHittingTimeEvaluations, sharedInformationPointer->elitistSolutionHittingTimeMilliseconds, solution);

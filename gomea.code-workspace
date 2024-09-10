@@ -58,7 +58,22 @@
 			"tuple": "cpp",
 			"typeinfo": "cpp",
 			"utility": "cpp",
-			"variant": "cpp"
+			"variant": "cpp",
+			"cstdarg": "cpp",
+			"hash_map": "cpp",
+			"condition_variable": "cpp",
+			"unordered_set": "cpp",
+			"algorithm": "cpp",
+			"iterator": "cpp",
+			"memory_resource": "cpp",
+			"optional": "cpp",
+			"random": "cpp",
+			"mutex": "cpp",
+			"cinttypes": "cpp",
+			"charconv": "cpp",
+			"format": "cpp",
+			"iomanip": "cpp",
+			"span": "cpp"
 		},
 		"python.terminal.executeInFileDir": true
 	}
