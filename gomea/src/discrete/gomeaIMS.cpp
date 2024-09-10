@@ -76,7 +76,7 @@ void gomeaIMS::run()
 			numberOfGenerationsIMS++;
 		}
 	}
-	catch( utils::customException const& e){
+	catch( utils::terminationException const& e){
 		//std::cout << e.what() << std::endl;
 	}
 	hasTerminated = true;
@@ -112,7 +112,7 @@ void gomeaIMS::runGeneration()
 		else
 			currentGOMEAIndex = minimumGOMEAIndex;
 	}
-	catch( utils::customException const& )
+	catch( utils::terminationException const& )
 	{
 		hasTerminated = true;
 		writeStatistics( currentGOMEAIndex );

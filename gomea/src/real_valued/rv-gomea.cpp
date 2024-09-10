@@ -949,7 +949,7 @@ void rvg_t::run( void )
     {
         runAllPopulations();
     }
-	catch( utils::customException const& ){
+	catch( utils::terminationException const& ){
         for( auto &p : populations )
             p->updateElitist();
     }
