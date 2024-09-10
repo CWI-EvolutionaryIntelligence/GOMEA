@@ -50,7 +50,10 @@ cdef class YourFitnessFunctionDiscrete(FitnessFunction):
     ):
         self.c_inst_discrete = new yourFitnessFunctionDiscrete(number_of_variables,value_to_reach)
         self.number_of_variables = number_of_variables
-        self.value_to_reach = value_to_reach        
+        self.value_to_reach = value_to_reach
+
+    def __dealloc__(self):
+        del self.c_inst_discrete    
 
 cdef class YourFitnessFunctionRealValued(FitnessFunction):
     def __cinit__(self, 
@@ -97,6 +100,9 @@ cdef class GBOFitnessFunctionDiscrete(GBOFitnessFunction):
         self.number_of_variables = number_of_variables
         self.value_to_reach = value_to_reach
         self.c_inst_discrete = new pyGBOFitnessFunction_t[char](number_of_variables,value_to_reach,<PyObject*>self)
+    
+    def __dealloc__(self):
+        del self.c_inst_discrete
 
 cdef class GBOFitnessFunctionRealValued(GBOFitnessFunction):
     def __cinit__(self, 
@@ -125,6 +131,9 @@ cdef class BBOFitnessFunctionDiscrete(BBOFitnessFunction):
         self.number_of_variables = number_of_variables
         self.value_to_reach = value_to_reach
         self.c_inst_discrete = new pyBBOFitnessFunction_t[char](number_of_variables,value_to_reach,<PyObject*>self)
+
+    def __dealloc__(self):
+        del self.c_inst_discrete
 
 cdef class BBOFitnessFunctionRealValued(BBOFitnessFunction):
     def __cinit__(self, 
