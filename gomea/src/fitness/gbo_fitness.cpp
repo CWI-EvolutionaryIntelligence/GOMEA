@@ -4,6 +4,12 @@ namespace gomea{
 namespace fitness{
 
 template<class T>
+GBOFitnessFunction_t<T>::GBOFitnessFunction_t() : fitness_t<T>()
+{
+	this->name = "Custom fitness function (C++)";
+}
+
+template<class T>
 GBOFitnessFunction_t<T>::GBOFitnessFunction_t( int number_of_variables ) : fitness_t<T>(number_of_variables)
 {
 	this->name = "Custom fitness function (C++)";

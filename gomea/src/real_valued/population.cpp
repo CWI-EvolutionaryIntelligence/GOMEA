@@ -42,7 +42,7 @@
 namespace gomea{
 namespace realvalued{
 
-population_t::population_t( fitness_t *fitness, int population_size, double lower_init, double upper_init )
+population_t::population_t( fitness_t<double> *fitness, int population_size, double lower_init, double upper_init )
 {
 	this->population_size = population_size;
 	this->fitness = fitness;

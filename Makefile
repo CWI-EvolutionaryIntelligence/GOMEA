@@ -32,11 +32,7 @@ debug: uninstall build-debug
 	mkdir -p debug/gomea/
 	cp -r build-debug/* debug/gomea/
 	cp -r gomea/__init__.py debug/gomea/
-
-cpp:
-	@mkdir -p build
-	g++ -g -Wall -std=c++17 -DCPP_STANDALONE -I./ -Igomea/ -IEigen/ gomea/src/discrete/*.cpp gomea/src/fitness/*.cpp gomea/src/common/*.cpp gomea/src/utils/*.cpp -o build/DiscreteGOMEA
-
+	
 install: install-deps build-wheel
 	pip3 install dist/*.whl --user
 
@@ -59,6 +55,7 @@ clean:
 	rm -f *.so
 	rm -rf gomea.egg-info/
 	rm -rf build/
+	rm -rf build_cpp/
 	rm -rf dist/
 	rm -rf build-debug/
 	rm -rf debug/gomea/
@@ -67,3 +64,51 @@ clean:
 	rm -f gomea/*.so
 	rm -rf cython_debug/
 	rm -rf gomea/__pycache__/
+
+
+######################################################################################################
+
+
+CXX=g++
+CXX_INC=-I./ -Igomea/ -Igomea/lib/Eigen/ -Igomea/lib/cxxopts-3.1.1/include/
+CXXFLAGS=-g -fopenmp -Wall -std=c++17 -DCPP_STANDALONE $(CXX_INC)  #-pg ## For profiling
+SRCDIR=gomea/src
+OBJDIR=build_cpp/obj
+OBJDIR_DISCRETE=build_cpp/obj_discrete
+OBJDIR_RV=build_cpp/obj_realvalued
+BINDIR=build_cpp
+
+# list of all source files
+SRCS=$(wildcard $(SRCDIR)/fitness/*.cpp $(SRCDIR)/common/*.cpp $(SRCDIR)/utils/*.cpp)
+SRCS_DISCRETE=$(wildcard $(SRCDIR)/fitness/benchmarks-discrete/*.cpp $(SRCDIR)/discrete/*.cpp)
+SRCS_RV=$(wildcard $(SRCDIR)/fitness/benchmarks-rv/*.cpp $(SRCDIR)/real_valued/*.cpp)
+
+# generate a list of object files based on source files
+OBJS=$(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o,$(SRCS))
+OBJS_DISCRETE=$(patsubst $(SRCDIR)/%.cpp,$(OBJDIR_DISCRETE)/%.o,$(SRCS_DISCRETE))
+OBJS_RV=$(patsubst $(SRCDIR)/%.cpp,$(OBJDIR_RV)/%.o,$(SRCS_RV))
+
+# the final executable file
+TARGET_DISCRETE=$(BINDIR)/DiscreteGOMEA
+TARGET_RV=$(BINDIR)/RealValuedGOMEA
+
+#### Object files ####
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
+	@mkdir -p $(@D)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(OBJDIR_DISCRETE)/%.o: $(SRCDIR)/%.cpp
+	@mkdir -p $(@D)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(OBJDIR_RV)/%.o: $(SRCDIR)/%.cpp
+	@mkdir -p $(@D)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(TARGET_DISCRETE): $(OBJS_DISCRETE) $(OBJS)
+	$(CXX) $(CXXFLAGS) $^ -o $@
+
+$(TARGET_RV): $(OBJS_RV) $(OBJS)
+	$(CXX) $(CXXFLAGS) $^ -o $@
+
+cpp: $(TARGET_DISCRETE) $(TARGET_RV)
