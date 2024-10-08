@@ -70,7 +70,20 @@ population_t::~population_t()
 	if( linkage_model->is_static )
 	{
 		for(int j = 0; j < linkage_model->size(); j++ )
+		{
+			// Clean up sampled solutions that were not cleaned up due to the exception that aborted their cleanup
+			// (i.e. termination criterion)
+			for(int k = num_elitists_to_copy; k < population_size; k++ )
+			{
+				if (sampled_solutions[j][k] != NULL)
+				{
+					delete( sampled_solutions[j][k] );
+					sampled_solutions[j][k] = NULL;
+				}
+			}
+
 			free( sampled_solutions[j] );
+		}
 		free( sampled_solutions );
 	}
 }
@@ -314,7 +327,7 @@ void population_t::generateAndEvaluateNewSolutions()
 	if( !fitness->black_box_optimization && (number_of_generations+1) % 50 == 0 )
 		evaluateCompletePopulation();
 
-	bool *individual_improved = new bool[population_size];
+	vec_t<char> individual_improved = vec_t<char>(population_size);
 	for(int k = num_elitists_to_copy; k < population_size; k++ )
 		individual_improved[k] = false;
 
@@ -347,7 +360,7 @@ void population_t::generateAndEvaluateNewSolutions()
 			fitness->evaluatePartialSolution( individuals[k], sampled_solutions[FOS_index][k] );
 
 		int num_improvements = 0;
-		bool *accept_improvement = new bool[population_size];
+		vec_t<char> accept_improvement = vec_t<char>(population_size);
 		for(int k = num_elitists_to_copy; k < population_size; k++ )
 		{
 			accept_improvement[k] = checkForImprovement( individuals[k], sampled_solutions[FOS_index][k] );
@@ -370,15 +383,19 @@ void population_t::generateAndEvaluateNewSolutions()
 			if( fitness->betterFitness( sampled_solutions[FOS_index][k]->getObjectiveValue(), sampled_solutions[FOS_index][k]->getConstraintValue(), objective_value_elitist, constraint_value_elitist ) )
 				sampled_solutions[FOS_index][k]->improves_elitist = true;
 		}
-		delete[] accept_improvement;
 
 		linkage_model->adaptDistributionMultiplier( FOS_index, &sampled_solutions[FOS_index][num_elitists_to_copy], population_size-num_elitists_to_copy );
 	}
 
 	for(int g = 0; g < linkage_model->size(); g++ )
+	{
 		for(int k = num_elitists_to_copy; k < population_size; k++ )
+		{
 			delete( sampled_solutions[g][k] );
-	
+			sampled_solutions[g][k] = NULL;
+		}
+	}
+
 	if( number_of_generations > 0 )
 	{
 		for(int k = num_elitists_to_copy; k <= number_of_AMS_solutions; k++ )
@@ -418,8 +435,6 @@ void population_t::generateAndEvaluateNewSolutions()
 		if( all_multipliers_leq_one )
 			linkage_model->no_improvement_stretch++;
 	}
-
-	delete[] individual_improved;
 }
 
 void population_t::applyPartialAMS( partial_solution_t<double> *solution, double cmul )
@@ -664,7 +679,14 @@ void population_t::initializeFOS( linkage_config_t *linkage_config )
 		}
 		sampled_solutions = (partial_solution_t<double> ***)Malloc(linkage_model->size() * sizeof(partial_solution_t<double> **));
 		for (int j = 0; j < linkage_model->size(); j++)
+		{
 			sampled_solutions[j] = (partial_solution_t<double> **)Malloc(population_size * sizeof(partial_solution_t<double> *));
+
+			for (size_t m = 0; m < population_size; m++)
+			{
+				sampled_solutions[j][m] = NULL;
+			}
+		}
 
         if( !(linkage_config->type == linkage::CONDITIONAL) )
         {
