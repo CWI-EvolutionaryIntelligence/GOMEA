@@ -18,6 +18,7 @@ include "EmbeddedFitness.pxi"
 cdef class RealValuedGOMEA:
     cdef rvg_t c_inst  # Hold a C++ instance which we're wrapping
     cdef Config c_config
+    cdef FitnessFunction fitness
 
     def __cinit__(self,
         # Optimization problem settings (required)
@@ -42,6 +43,13 @@ cdef class RealValuedGOMEA:
         self.c_config.problem_index = 0
         assert( (<FitnessFunction?>fitness).c_inst_realvalued != NULL, "FitnessFunction is not real-valued." )
         self.c_config.fitness = (<FitnessFunction?>fitness).c_inst_realvalued
+        # as we only store a pointer to a field of the FitnessFunction (which actually manages the memory around the pointer)
+        # there is the risk of the FitnessFunction being removed & its contents deallocated. This leaves the above pointer dangling.
+        # This is particularly likely if the FitnessFunction was constructed as an argument to this class -
+        # in which case it & corresponding memory will be deallocated after this initialization procedure has completed.
+        # Fix this by keeping the reference to the FitnessFunction around for as long as this instance exists.
+        self.fitness = fitness
+
         self.c_config.linkage_config = linkage_model.c_inst
         self.c_config.use_vtr = True 
         self.c_config.lower_user_range = lower_init_range
