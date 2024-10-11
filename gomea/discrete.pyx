@@ -20,6 +20,7 @@ include "EmbeddedFitness.pxi"
 cdef class DiscreteGOMEA:
     cdef gomeaIMS c_inst  # Hold a C++ instance which we're wrapping
     cdef Config c_config
+    cdef FitnessFunction fitness
 
     def __cinit__(self,
         # Optimization problem settings (required)
@@ -43,6 +44,13 @@ cdef class DiscreteGOMEA:
         self.c_config = Config()
         assert( (<FitnessFunction?>fitness).c_inst_discrete != NULL, "FitnessFunction is not discrete." )
         self.c_config.fitness = (<FitnessFunction?>fitness).c_inst_discrete
+        # as we only store a pointer to a field of the FitnessFunction (which actually manages the memory around the pointer)
+        # there is the risk of the FitnessFunction being removed & its contents deallocated. This leaves the above pointer dangling.
+        # This is particularly likely if the FitnessFunction was constructed as an argument to this class -
+        # in which case it & corresponding memory will be deallocated after this initialization procedure has completed.
+        # Fix this by keeping the reference to the FitnessFunction around for as long as this instance exists.
+        self.fitness = fitness
+
         self.c_config.linkage_config = linkage_model.c_inst
         self.c_config.folder = string(b"output_discrete_gomea")
         self.c_config.maximumNumberOfGOMEAs = max_number_of_populations
