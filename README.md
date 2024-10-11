@@ -21,10 +21,16 @@ The most straightforward installation option is through pip, as follows.
 pip install gomea
 ```
 
-To build from source, execute the following in the root GOMEA folder.
+To build from source, it is recommended to create a [conda](https://docs.conda.io/projects/conda/en/latest/index.html) virtual environment with the dependencies listed in `environment.yml`, as follows:
+```
+conda env create --file=environments.yml
+conda activate gomea
+```
+Then compile and install the code by executing the following in the root GOMEA folder.
 ```
 make install
 ```
+You can now start using the library by calling `import gomea` in your code, or by running any of the demo scripts present in the `demos` directory.
 
 ## RUN
 Running a simple benchmark problem, e.g., the Rosenbrock function, can be done as follows:
