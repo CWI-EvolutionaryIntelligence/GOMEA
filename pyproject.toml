@@ -7,7 +7,7 @@ name = 'gomea'
 version = '1.0.5'
 description = 'Library for the use of various variants of the Gene-pool Optimal Mixing Evolutionary Algorithm (GOMEA).'
 readme = 'README.md'
-requires-python = '>=3.8'
+requires-python = '>=3.9'
 license = {file = 'LICENSE'}
 authors = [
   {name = 'Anton Bouter', email = 'Anton.Bouter@cwi.nl'},
@@ -16,13 +16,13 @@ url = 'https://github.com/abouter/gomea'
 dependencies = ['numpy>=1.23.0','tqdm>=4.65.0']
 
 [tool.cibuildwheel.linux]
-build = ["cp38-*manylinux*", "cp39-*manylinux*", "cp310-*manylinux*", "cp311-*manylinux*"]
+build = ["cp39-*manylinux*", "cp310-*manylinux*", "cp311-*manylinux*"]
 archs = ["auto64"]
 
 [tool.cibuildwheel.macos]
-build = ["cp38-*", "cp39-*", "cp310-*", "cp311-*"]
+build = ["cp39-*", "cp310-*", "cp311-*"]
 archs = ["auto64"]
 
 [tool.cibuildwheel.windows]
-build = ["cp38-*", "cp39-*", "cp310-*", "cp311-*"]
+build = ["cp39-*", "cp310-*", "cp311-*"]
 archs = ["auto64"]
