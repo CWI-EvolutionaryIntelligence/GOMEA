@@ -23,7 +23,7 @@ pip install gomea
 
 To build from source, it is recommended to create a [conda](https://docs.conda.io/projects/conda/en/latest/index.html) virtual environment with the dependencies listed in `environment.yml`, as follows:
 ```
-conda env create --file=environments.yml
+conda env create --file=environment.yml
 conda activate gomea
 ```
 Then compile and install the code by executing the following in the root GOMEA folder.
