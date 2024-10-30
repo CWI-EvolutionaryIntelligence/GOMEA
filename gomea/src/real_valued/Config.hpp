@@ -33,8 +33,8 @@ class Config {
 			   print_verbose_overview = false,                        /* Whether to print a overview of settings (0 = no). */
 			   fix_seed = false,                                      /* Whether a fixed seed is used. */
 			   black_box_evaluations = false,                         /* Whether full (black-box) evaluations must always be performed. */
-			   write_generational_statistics = false,                 /* Whether to compute and write statistics every generation (0 = no). */
-			   write_generational_solutions = false,                  /* Whether to write the population every generation (0 = no). */
+			   generational_statistics = true,                 		  /* Whether to compute and write statistics every generation (0 = no). */
+			   generational_solution = true,                  		  /* Whether to write the population every generation (0 = no). */
 			   selection_during_gom = false,
 			   update_elitist_during_gom = false,
 			   verbose = false;
