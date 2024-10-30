@@ -97,8 +97,8 @@ cdef class GBOFitnessFunction(FitnessFunction):
 cdef class GBOFitnessFunctionDiscrete(GBOFitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
+        value_to_reach : float = 1e308,
         alphabet_size : int = 2,
-        value_to_reach : float = 1e308
     ):
         self.number_of_variables = number_of_variables
         self.alphabet_size = alphabet_size
@@ -130,8 +130,8 @@ cdef class BBOFitnessFunction(FitnessFunction):
 cdef class BBOFitnessFunctionDiscrete(BBOFitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
+        value_to_reach : float = 1e308,
         alphabet_size : int = 2,
-        value_to_reach : float = 1e308
     ):
         self.number_of_variables = number_of_variables
         self.alphabet_size = alphabet_size
