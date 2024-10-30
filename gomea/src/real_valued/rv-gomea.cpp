@@ -89,8 +89,8 @@ void rvg_t::parseOptions( int argc, char **argv, int *index )
 	config = new Config();
     double dummy;
 
-    config->write_generational_statistics = false;
-    config->write_generational_solutions  = false;
+    config->generational_statistics       = false;
+    config->generational_solution         = false;
     config->print_verbose_overview        = false;
     config->use_vtr                       = false;
 	use_guidelines                        = false;
@@ -114,8 +114,8 @@ void rvg_t::parseOptions( int argc, char **argv, int *index )
                 switch( argv[*index][1] )
                 {
                 case 'h': printUsage(); break;
-                case 's': config->write_generational_statistics = true; break;
-                case 'w': config->write_generational_solutions  = true; break;
+                case 's': config->generational_statistics       = true; break;
+                case 'w': config->generational_solution         = true; break;
                 case 'v': config->print_verbose_overview        = true; break;
                 case 'r': config->use_vtr                       = true; break;
                 case 'g': use_guidelines                        = true; break;
@@ -258,8 +258,8 @@ void rvg_t::printVerboseOverview( void )
 
     printf("### Settings ######################################\n");
     printf("#\n");
-    printf("# Statistics writing every generation: %s\n", config->write_generational_statistics ? "enabled" : "disabled");
-    printf("# Population file writing            : %s\n", config->write_generational_solutions ? "enabled" : "disabled");
+    printf("# Statistics writing every generation: %s\n", config->generational_statistics ? "enabled" : "disabled");
+    printf("# Population file writing            : %s\n", config->generational_solution ? "enabled" : "disabled");
     printf("# Use of value-to-reach (vtr)        : %s\n", config->use_vtr ? "enabled" : "disabled");
     printf("#\n");
     printf("###################################################\n");
@@ -436,7 +436,7 @@ std::vector<double> rvg_t::getOverallBestFitness()
     return( result );
 }
 
-void rvg_t::writeGenerationalStatisticsForOnePopulation( int population_index )
+void rvg_t::writeGenerationalStatisticsForOnePopulation( int population_index, bool is_final )
 {
     /* Average, best and worst */
     /*double population_objective_avg  = populations[population_index]->getFitnessMean();
@@ -447,19 +447,29 @@ void rvg_t::writeGenerationalStatisticsForOnePopulation( int population_index )
     solution_t<double> *worst_solution = populations[population_index]->getWorstSolution();*/
 
     int key = total_number_of_writes;
-    output.addMetricValue("generation",key,populations[population_index]->number_of_generations);
-    output.addMetricValue("evaluations",key,fitness->number_of_evaluations);
-    output.addMetricValue("time",key,utils::getElapsedTimeSinceStartSeconds());
-    output.addMetricValue("eval_time",key,utils::getTimer("eval_time"));
-    output.addMetricValue("population_index",key,population_index);
-    output.addMetricValue("population_size",key,populations[population_index]->population_size);
-    output.addMetricValue("best_genotype",key,getElitist()->variablesToString());
-    output.addMetricValue("best_obj_val",key,fitness->elitist_objective_value);
-    output.addMetricValue("best_cons_val",key,fitness->elitist_constraint_value);
+    double elapsed_time = utils::getElapsedTimeSinceStartSeconds();
+    double eval_time = utils::getTimer("eval_time");
+    output.addGenerationalMetricValue("generation",key,populations[population_index]->number_of_generations);
+    output.addGenerationalMetricValue("evaluations",key,fitness->number_of_evaluations);
+    output.addGenerationalMetricValue("time",key,elapsed_time);
+    output.addGenerationalMetricValue("eval_time",key,eval_time);
+    output.addGenerationalMetricValue("population_index",key,population_index);
+    output.addGenerationalMetricValue("population_size",key,populations[population_index]->population_size);
+    output.addGenerationalMetricValue("best_obj_val",key,fitness->elitist_objective_value);
+    output.addGenerationalMetricValue("best_cons_val",key,fitness->elitist_constraint_value);
     //output.addMetricValue("subpop_best_obj_val",key,best_solution->getObjectiveValue());
     //output.addMetricValue("subpop_best_cons_val",key,best_solution->getConstraintValue());
     //output.addMetricValue("subpop_obj_val_avg",key,population_objective_avg);
     //output.addMetricValue("subpop_obj_val_var",key,population_objective_var);
+    if( is_final ){
+        output.addFinalMetricValue("evaluations",fitness->number_of_evaluations);
+        output.addFinalMetricValue("time",elapsed_time);
+        output.addFinalMetricValue("eval_time",eval_time);
+        output.addFinalMetricValue("best_solution",getElitist()->variablesToString());
+        output.addFinalMetricValue("best_obj_val",fitness->elitist_objective_value);
+        output.addFinalMetricValue("best_cons_val",fitness->elitist_constraint_value);
+    }
+
     total_number_of_writes++;
 }
 
@@ -865,13 +875,13 @@ void rvg_t::generationalStepAllPopulationsRecursiveFold( int population_index_sm
             {
 				populations[population_index]->runGeneration();
 
-				//if( config->write_generational_statistics )
-				//if( populations.size() == 1 && config->write_generational_statistics )
-				if( populations[population_index]->number_of_generations % 10 == 1 && config->write_generational_statistics )
+				//if( config->generational_statistics )
+				//if( populations.size() == 1 && config->generational_statistics )
+				if( populations[population_index]->number_of_generations % 10 == 1 && config->generational_statistics )
 					writeGenerationalStatisticsForOnePopulation( population_index );
 
-				if( populations.size() == 1 && config->write_generational_solutions )
-					writeGenerationalSolutions( 0 );
+				//if( populations.size() == 1 && config->generational_solution )
+					//writeGenerationalSolutions( 0 );
 
                 if( checkSubgenerationTerminationConditions() )
                 {
@@ -898,20 +908,20 @@ void rvg_t::runAllPopulations()
         {
             initializeNewPopulation();
             
-			if( populations.size() == 1 && config->write_generational_statistics )
+			if( populations.size() == 1 && config->generational_statistics )
 				writeGenerationalStatisticsForOnePopulation( 0 );
 
-            if( populations.size() == 1 && config->write_generational_solutions )
-                writeGenerationalSolutions( 0 );
+            //if( populations.size() == 1 && config->generational_solution )
+                //writeGenerationalSolutions( 0 );
         }
 
         generationalStepAllPopulations();
 
-        if( populations.size() > 1 && config->write_generational_statistics )
+        if( populations.size() > 1 && config->generational_statistics )
             writeGenerationalStatisticsForOnePopulation( populations.size()-1 );
 
-        if( populations.size() > 1 && config->write_generational_solutions )
-            writeGenerationalSolutions( 0 );
+        //if( populations.size() > 1 && config->generational_solution )
+            //writeGenerationalSolutions( 0 );
     }
 }
 
@@ -948,7 +958,7 @@ void rvg_t::run( void )
         for( auto &p : populations )
             p->updateElitist();
     }
-	writeGenerationalStatisticsForOnePopulation( populations.size()-1 );
+	writeGenerationalStatisticsForOnePopulation( populations.size()-1, true );
     ezilaitini();
 
 	/*printf("evals %f ", fitness->number_of_evaluations);

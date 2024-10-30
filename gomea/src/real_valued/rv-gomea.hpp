@@ -38,7 +38,7 @@ class rvg_t {
 		void initializeNewPopulation( void );
 		void initializeProblem(); 
 		void restartLargestPopulation();
-		void writeGenerationalStatisticsForOnePopulation( int population_index );
+		void writeGenerationalStatisticsForOnePopulation( int population_index, bool is_final = false );
 		void writeGenerationalSolutions( bool final );
 		void writeGenerationalSolutionsBest( bool final );
 		bool checkTerminationCondition( void );

@@ -31,6 +31,8 @@ public:
     void printOverview();
     
 	fitness_t<char> *fitness;
+    bool generational_statistics = true,
+         generational_solution = true;
 	int usePartialEvaluations              = 1,                  
 		useParallelGOM		               = 1,                  
 		useParallelFOSOrder	               = 0,

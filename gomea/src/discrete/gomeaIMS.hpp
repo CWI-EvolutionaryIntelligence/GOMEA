@@ -48,8 +48,7 @@ public:
     void run();
 	void runGeneration();
 	void runGeneration( int GOMEAIndex );
-    void writeStatistics( Population *population );
-    void writeStatistics( int population_index );
+    void writeStatistics( int population_index, bool is_final = false );
     void ezilaitini();
 };
 
