@@ -46,14 +46,16 @@ cdef class FitnessFunction:
 cdef class YourFitnessFunctionDiscrete(FitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
+        alphabet_size : int = 2,
         value_to_reach : float = 1e308
     ):
-        self.c_inst_discrete = new yourFitnessFunctionDiscrete(number_of_variables,value_to_reach)
         self.number_of_variables = number_of_variables
+        self.alphabet_size = alphabet_size
         self.value_to_reach = value_to_reach
+        self.c_inst_discrete = new yourFitnessFunctionDiscrete(number_of_variables,alphabet_size,value_to_reach)
 
     def __dealloc__(self):
-        del self.c_inst_discrete    
+        del self.c_inst_discrete
 
 cdef class YourFitnessFunctionRealValued(FitnessFunction):
     def __cinit__(self, 
@@ -95,11 +97,13 @@ cdef class GBOFitnessFunction(FitnessFunction):
 cdef class GBOFitnessFunctionDiscrete(GBOFitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
+        alphabet_size : int = 2,
         value_to_reach : float = 1e308
     ):
         self.number_of_variables = number_of_variables
+        self.alphabet_size = alphabet_size
         self.value_to_reach = value_to_reach
-        self.c_inst_discrete = new pyGBOFitnessFunction_t[char](number_of_variables,value_to_reach,<PyObject*>self)
+        self.c_inst_discrete = new pyGBOFitnessFunction_t[char](number_of_variables,alphabet_size,value_to_reach,<PyObject*>self)
     
     def __dealloc__(self):
         del self.c_inst_discrete
@@ -126,11 +130,13 @@ cdef class BBOFitnessFunction(FitnessFunction):
 cdef class BBOFitnessFunctionDiscrete(BBOFitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
+        alphabet_size : int = 2,
         value_to_reach : float = 1e308
     ):
         self.number_of_variables = number_of_variables
+        self.alphabet_size = alphabet_size
         self.value_to_reach = value_to_reach
-        self.c_inst_discrete = new pyBBOFitnessFunction_t[char](number_of_variables,value_to_reach,<PyObject*>self)
+        self.c_inst_discrete = new pyBBOFitnessFunction_t[char](number_of_variables,alphabet_size,value_to_reach,<PyObject*>self)
 
     def __dealloc__(self):
         del self.c_inst_discrete

@@ -15,6 +15,8 @@ class pyBBOFitnessFunction_t : public BBOFitnessFunction_t<T>
 	public:
 		pyBBOFitnessFunction_t( int number_of_parameters, PyObject *obj );
 		pyBBOFitnessFunction_t( int number_of_parameters, double vtr, PyObject *obj );
+		pyBBOFitnessFunction_t( int number_of_parameters, int alphabet_size, PyObject *obj );
+		pyBBOFitnessFunction_t( int number_of_parameters, int alphabet_size, double vtr, PyObject *obj );
 
 		double objectiveFunction( int objective_index, vec_t<T> &variables );
 		double constraintFunction( vec_t<T> &variables );

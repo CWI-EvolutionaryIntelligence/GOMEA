@@ -5,23 +5,38 @@ namespace gomea{
 namespace fitness{
 
 template<>
-fitness_t<char>::fitness_t() : fitness_t(-1,0,false,MAX) {}
+fitness_t<char>::fitness_t() : fitness_t(-1,MAX) {}
 template<>
-fitness_t<char>::fitness_t( int number_of_variables ) : fitness_t(number_of_variables,0,false,MAX) {}
+fitness_t<char>::fitness_t( int number_of_variables ) : fitness_t(number_of_variables,MAX) {}
 template<>
-fitness_t<char>::fitness_t( int number_of_variables, double vtr ) : fitness_t(number_of_variables,vtr,true,MAX) {}
+fitness_t<char>::fitness_t( int number_of_variables, double vtr ) : fitness_t(number_of_variables,MAX) {
+	this->vtr = vtr;
+	this->use_vtr = true;
+}
+template<>
+fitness_t<char>::fitness_t( int number_of_variables, int alphabet_size ) : fitness_t(number_of_variables,MAX) {
+	this->alphabet_size = alphabet_size;
+}
+template<>
+fitness_t<char>::fitness_t( int number_of_variables, int alphabet_size, double vtr ) : fitness_t(number_of_variables,MAX) {
+	this->alphabet_size = alphabet_size;
+	this->vtr = vtr;
+	this->use_vtr = true;
+}
 
 template<>
-fitness_t<double>::fitness_t() : fitness_t(-1,0,false,MIN) {}
+fitness_t<double>::fitness_t() : fitness_t(-1,MIN) {}
 template<>
-fitness_t<double>::fitness_t( int number_of_variables ) : fitness_t(number_of_variables,0,false,MIN) {}
+fitness_t<double>::fitness_t( int number_of_variables ) : fitness_t(number_of_variables,MIN) {}
 template<>
-fitness_t<double>::fitness_t( int number_of_variables, double vtr ) : fitness_t(number_of_variables,vtr,true,MIN) {}
+fitness_t<double>::fitness_t( int number_of_variables, double vtr ) : fitness_t(number_of_variables,MIN) {
+	this->vtr = vtr;
+	this->use_vtr = true;
+}
 
 template<class T>
-fitness_t<T>::fitness_t( int number_of_variables, double vtr, bool use_vtr, opt_mode optimization_mode )
-	: name("Fitness function"), number_of_variables(number_of_variables), optimization_mode(optimization_mode), vtr(vtr), use_vtr(use_vtr)
-	{}
+fitness_t<T>::fitness_t( int number_of_variables, opt_mode optimization_mode )
+	: name("Fitness function"), number_of_variables(number_of_variables), optimization_mode(optimization_mode){}
 
 template<class T>
 fitness_t<T>::~fitness_t(){
@@ -461,6 +476,18 @@ template<class T>
 double fitness_t<T>::getVTR()
 {
 	return this->vtr;
+}
+
+template<class T>
+int fitness_t<T>::getAlphabetSize()
+{
+	throw std::runtime_error("Fitness function of this type does not implement getAlphabetSize().");
+}
+
+template<>
+int fitness_t<char>::getAlphabetSize()
+{
+	return this->alphabet_size;
 }
 
 template class fitness_t<char>;
