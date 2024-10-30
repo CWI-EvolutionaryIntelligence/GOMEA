@@ -5,16 +5,34 @@
 namespace gomea{
 namespace fitness{
 
-template<class T>
-pyGBOFitnessFunction_t<T>::pyGBOFitnessFunction_t( int number_of_parameters, PyObject *obj ) : GBOFitnessFunction_t<T>(number_of_parameters)
+template<>
+pyGBOFitnessFunction_t<char>::pyGBOFitnessFunction_t( int number_of_parameters, int alphabet_size, PyObject *obj ) : GBOFitnessFunction_t<char>(number_of_parameters)
+{
+	this->name = "Your own fitness function (Python)";
+	this->py_class = obj;
+	this->alphabet_size = alphabet_size;
+	this->initialize();
+}
+
+template<>
+pyGBOFitnessFunction_t<char>::pyGBOFitnessFunction_t( int number_of_parameters, int alphabet_size, double vtr, PyObject *obj ) : GBOFitnessFunction_t<char>(number_of_parameters,vtr)
+{
+	this->name = "Your own fitness function (Python)";
+	this->py_class = obj;
+	this->alphabet_size = alphabet_size;
+	this->initialize();
+}
+
+template<>
+pyGBOFitnessFunction_t<double>::pyGBOFitnessFunction_t( int number_of_parameters, PyObject *obj ) : GBOFitnessFunction_t<double>(number_of_parameters)
 {
 	this->name = "Your own fitness function (Python)";
 	this->py_class = obj;
 	this->initialize();
 }
 
-template<class T>
-pyGBOFitnessFunction_t<T>::pyGBOFitnessFunction_t( int number_of_parameters, double vtr, PyObject *obj ) : GBOFitnessFunction_t<T>(number_of_parameters,vtr)
+template<>
+pyGBOFitnessFunction_t<double>::pyGBOFitnessFunction_t( int number_of_parameters, double vtr, PyObject *obj ) : GBOFitnessFunction_t<double>(number_of_parameters,vtr)
 {
 	this->name = "Your own fitness function (Python)";
 	this->py_class = obj;

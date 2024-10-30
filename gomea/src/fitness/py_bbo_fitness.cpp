@@ -5,16 +5,34 @@
 namespace gomea{
 namespace fitness{
 
-template<class T>
-pyBBOFitnessFunction_t<T>::pyBBOFitnessFunction_t( int number_of_parameters, PyObject *obj ) : BBOFitnessFunction_t<T>(number_of_parameters)
+template<>
+pyBBOFitnessFunction_t<char>::pyBBOFitnessFunction_t( int number_of_parameters, int alphabet_size, PyObject *obj ) : BBOFitnessFunction_t<char>(number_of_parameters)
+{
+	this->name = "Your own fitness function (Python)";
+	this->py_class = obj;
+	this->alphabet_size = alphabet_size;
+	this->initialize();
+}
+
+template<>
+pyBBOFitnessFunction_t<char>::pyBBOFitnessFunction_t( int number_of_parameters, int alphabet_size, double vtr, PyObject *obj ) : BBOFitnessFunction_t<char>(number_of_parameters,vtr)
+{
+	this->name = "Your own fitness function (Python)";
+	this->py_class = obj;
+	this->alphabet_size = alphabet_size;
+	this->initialize();
+}
+
+template<>
+pyBBOFitnessFunction_t<double>::pyBBOFitnessFunction_t( int number_of_parameters, PyObject *obj ) : BBOFitnessFunction_t<double>(number_of_parameters)
 {
 	this->name = "Your own fitness function (Python)";
 	this->py_class = obj;
 	this->initialize();
 }
 
-template<class T>
-pyBBOFitnessFunction_t<T>::pyBBOFitnessFunction_t( int number_of_parameters, double vtr, PyObject *obj ) : BBOFitnessFunction_t<T>(number_of_parameters,vtr)
+template<>
+pyBBOFitnessFunction_t<double>::pyBBOFitnessFunction_t( int number_of_parameters, double vtr, PyObject *obj ) : BBOFitnessFunction_t<double>(number_of_parameters,vtr)
 {
 	this->name = "Your own fitness function (Python)";
 	this->py_class = obj;
@@ -60,15 +78,25 @@ double pyBBOFitnessFunction_t<double>::constraintFunction( vec_t<double> &variab
 template<class T>
 double pyBBOFitnessFunction_t<T>::getLowerRangeBound( int dimension )
 {
-	assert(0);
-	return( -1 );
+	throw std::runtime_error("FitnessFunction does not implement getLowerRangeBound(int).");
 }
 
 template<class T>	
 double pyBBOFitnessFunction_t<T>::getUpperRangeBound( int dimension )
 {
-	assert(0);
-	return( -1 );
+	throw std::runtime_error("FitnessFunction does not implement getUpperRangeBound(int).");
+}
+
+template<>
+double pyBBOFitnessFunction_t<char>::getLowerRangeBound( int dimension )
+{
+	return( 0 );
+}
+
+template<>	
+double pyBBOFitnessFunction_t<char>::getUpperRangeBound( int dimension )
+{
+	return( alphabet_size-1 );
 }
 
 template<>

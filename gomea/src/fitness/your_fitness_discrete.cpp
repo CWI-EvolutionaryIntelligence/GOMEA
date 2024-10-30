@@ -3,10 +3,11 @@
 namespace gomea{
 namespace fitness{
 
-yourFitnessFunctionDiscrete::yourFitnessFunctionDiscrete( int number_of_variables, double vtr ) : GBOFitnessFunction_t(number_of_variables,vtr) 
+yourFitnessFunctionDiscrete::yourFitnessFunctionDiscrete( int number_of_variables, int alphabet_size, double vtr ) : GBOFitnessFunction_t(number_of_variables,vtr) 
 {
 	this->name = "Your own fitness function (C++)";
 	this->vtr = vtr;
+	this->alphabet_size = alphabet_size;
 	assert( number_of_variables % trap_size == 0 );
 	this->initialize();
 }
