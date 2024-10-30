@@ -8,7 +8,7 @@ namespace fitness{
 class yourFitnessFunctionDiscrete : public GBOFitnessFunction_t<char> 
 {
 	public:
-		yourFitnessFunctionDiscrete( int number_of_variables, double vtr );
+		yourFitnessFunctionDiscrete( int number_of_variables, int alphabet_size, double vtr );
 		
 		int getNumberOfSubfunctions();
 		vec_t<int> inputsToSubfunction( int subfunction_index );

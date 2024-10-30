@@ -26,17 +26,19 @@ cdef extern from "gomea/src/fitness/py_gbo_fitness.hpp" namespace "gomea::fitnes
         pyGBOFitnessFunction_t() except +
         pyGBOFitnessFunction_t(int,PyObject*) except +
         pyGBOFitnessFunction_t(int,double,PyObject*) except +
+        pyGBOFitnessFunction_t(int,int,double,PyObject*) except +
 
 cdef extern from "gomea/src/fitness/py_bbo_fitness.hpp" namespace "gomea::fitness":
     cdef cppclass pyBBOFitnessFunction_t[T](fitness_t[T]):
         pyBBOFitnessFunction_t() except +
         pyBBOFitnessFunction_t(int,PyObject*) except +
         pyBBOFitnessFunction_t(int,double,PyObject*) except +
+        pyBBOFitnessFunction_t(int,int,double,PyObject*) except +
 
 cdef extern from "gomea/src/fitness/your_fitness_discrete.hpp" namespace "gomea::fitness":
     cdef cppclass yourFitnessFunctionDiscrete(GBOFitnessFunction_t[char]):
         yourFitnessFunctionDiscrete() except +
-        yourFitnessFunctionDiscrete(int,double) except +
+        yourFitnessFunctionDiscrete(int,int,double) except +
 
 cdef extern from "gomea/src/fitness/your_fitness_realvalued.hpp" namespace "gomea::fitness":
     cdef cppclass yourFitnessFunctionRealValued(GBOFitnessFunction_t[double]):

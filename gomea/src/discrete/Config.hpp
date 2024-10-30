@@ -59,7 +59,6 @@ public:
     bool fix_seed = false;
     long long randomSeed;
     
-    size_t alphabetSize = 2;
     size_t maxArchiveSize = 1000000;
     int maximumNumberOfGOMEAs  = 100,
         IMSsubgenerationFactor = 4,

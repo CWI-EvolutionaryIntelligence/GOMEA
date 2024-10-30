@@ -15,6 +15,9 @@ class pyGBOFitnessFunction_t : public GBOFitnessFunction_t<T>
 	public:
 		pyGBOFitnessFunction_t( int number_of_parameters, PyObject *obj );
 		pyGBOFitnessFunction_t( int number_of_parameters, double vtr, PyObject *obj );
+		pyGBOFitnessFunction_t( int number_of_parameters, int alphabet_size, PyObject *obj );
+		pyGBOFitnessFunction_t( int number_of_parameters, int alphabet_size, double vtr, PyObject *obj );
+
 		int getNumberOfSubfunctions();
 		vec_t<int> inputsToSubfunction( int subfunction_index );
 		double getSimilarityMeasure( size_t var_a, size_t var_b );

@@ -25,11 +25,11 @@ Population::Population(Config *config_, fitness_t<char> *problemInstance_, share
         {
             noImprovementStretches[i] = 0;
 
-            population[i] = new solution_t<char>(problemInstance->number_of_variables, config->alphabetSize);
+            population[i] = new solution_t<char>(problemInstance->number_of_variables, problemInstance->alphabet_size);
             population[i]->randomInit(&gomea::utils::rng);
             problemInstance->evaluate(population[i]);
             
-            offspringPopulation[i] = new solution_t<char>(problemInstance->number_of_variables, config->alphabetSize);
+            offspringPopulation[i] = new solution_t<char>(problemInstance->number_of_variables, problemInstance->alphabet_size);
             *offspringPopulation[i] = *population[i];
         }
 			
@@ -190,7 +190,7 @@ void Population::makeOffspring()
         }
         else
         {
-            FOSInstance->learnLinkageTreeFOS(population, config->alphabetSize );
+            FOSInstance->learnLinkageTreeFOS(population, problemInstance->alphabet_size );
             FOSInstance->initializeDependentSubfunctions(problemInstance->subfunction_dependency_map);
         }
     }

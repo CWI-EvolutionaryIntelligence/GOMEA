@@ -28,9 +28,11 @@ template<class T>
 class fitness_t : public fitness_generic_t
 {
 	protected:
-		fitness_t(); 
-		fitness_t( int number_of_variables ); 
+		fitness_t();
+		fitness_t( int number_of_variables );
 		fitness_t( int number_of_variables, double vtr );
+		fitness_t( int number_of_variables, int alphabet_size );
+		fitness_t( int number_of_variables, int alphabet_size, double vtr );
 
 	public:
 		virtual ~fitness_t();
@@ -39,6 +41,7 @@ class fitness_t : public fitness_generic_t
 		std::string name;
 		int number_of_variables;
 		int number_of_objectives = 1;
+		int alphabet_size = 2;
 		opt_mode optimization_mode;
 
 		// Termination conditions
@@ -53,9 +56,9 @@ class fitness_t : public fitness_generic_t
 		double **rotation_matrix;
 
 		// Options
-		double vtr; // value-to-reach
+		double vtr = 0.0; // value-to-reach
 		bool black_box_optimization = false;
-		bool use_vtr;
+		bool use_vtr = false;
 		
 		// Optimization progress
 		double number_of_evaluations; // discounted in GBO
@@ -93,10 +96,11 @@ class fitness_t : public fitness_generic_t
 		void checkTimeLimitTerminationCondition();
 
 		int getNumberOfVariables();
+		int getAlphabetSize();
 		double getVTR();
 
 	private:
-		fitness_t( int number_of_variables, double vtr, bool use_vtr, opt_mode optimization_mode );
+		fitness_t( int number_of_variables, opt_mode optimization_mode );
 		virtual void evaluationFunction( solution_t<T> *solution ) = 0;
 		//virtual void partialEvaluationFunction( solution_t<T> *parent, partial_solution_t<T> *solution, const std::set<int> &dependent_subfunctions );
 		virtual void partialEvaluationFunction( solution_t<T> *parent, partial_solution_t<T> *solution );
