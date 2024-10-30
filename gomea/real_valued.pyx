@@ -36,6 +36,10 @@ cdef class RealValuedGOMEA:
         # Termination settings (optional)
         max_number_of_evaluations : float = -1,
         max_number_of_seconds : float = -1,
+        # Output settings (optional)
+        generational_statistics = True,
+        generational_solution = True,
+        verbose = False,
     ):
         
         # Initialize attributes 
@@ -68,9 +72,9 @@ cdef class RealValuedGOMEA:
         self.c_config.maximum_number_of_evaluations = max_number_of_evaluations
         self.c_config.maximum_number_of_seconds = max_number_of_seconds
         self.c_config.black_box_evaluations = False
-        self.c_config.write_generational_statistics = True 
-        self.c_config.write_generational_solutions = False
-        self.c_config.verbose = False
+        self.c_config.generational_statistics = generational_statistics 
+        self.c_config.generational_solution = generational_solution
+        self.c_config.verbose = verbose
         self.c_config.print_verbose_overview = False 
         self.c_config.fix_seed = 0
         if random_seed != -1:

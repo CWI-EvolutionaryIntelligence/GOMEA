@@ -5,8 +5,10 @@ from libcpp.vector cimport vector
 cdef extern from "gomea/src/common/output_statistics.hpp" namespace "gomea":
     cdef cppclass output_statistics_t:
         output_statistics_t() except +
-        vector[string] getAllMetricNames() except +
-        vector[T] getMetricValues[T](string) except +
+        vector[string] getGenerationalMetricNames() except +
+        vector[T] getGenerationalMetricValues[T](string) except +
+        vector[string] getFinalMetricNames() except +
+        T getFinalMetricValue[T](string) except +
 
 cdef class OutputStatisticsWrapper:
     cdef output_statistics_t *c_ptr

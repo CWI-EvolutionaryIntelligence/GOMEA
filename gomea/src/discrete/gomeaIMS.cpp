@@ -80,7 +80,7 @@ void gomeaIMS::run()
 		//std::cout << e.what() << std::endl;
 	}
 	hasTerminated = true;
-	writeStatistics(numberOfGOMEAs - 1);
+	writeStatistics(numberOfGOMEAs - 1, true);
 	ezilaitini();
 }
 
@@ -295,7 +295,7 @@ bool gomeaIMS::checkTerminationGOMEA(int GOMEAIndex)
     return true;
 }
 
-void gomeaIMS::writeStatistics( int population_index )
+void gomeaIMS::writeStatistics( int population_index, bool is_final )
 {
     /*double population_objective_avg  = GOMEAs[population_index]->getFitnessMean();
     double population_constraint_avg = GOMEAs[population_index]->getConstraintValueMean();
@@ -312,20 +312,32 @@ void gomeaIMS::writeStatistics( int population_index )
 	assert( sharedInformationInstance != NULL );
 	int key = numberOfStatisticsWrites;
     double evals = problemInstance->number_of_evaluations;
+	double elapsed_time = utils::getElapsedTimeSinceStartSeconds();
+	double eval_time = utils::getTimer("eval_time");
     //double elitist_evals = sharedInformationInstance->elitistSolutionHittingTimeEvaluations;
     //double time_s = sharedInformationInstance->elitistSolutionHittingTimeMilliseconds/1000.0;
 	double best_fitness = sharedInformationInstance->elitistFitness;
-    output.addMetricValue("generation",key,(int)GOMEAs[population_index]->numberOfGenerations);
-    output.addMetricValue("evaluations",key,evals);
+    output.addGenerationalMetricValue("generation",key,(int)GOMEAs[population_index]->numberOfGenerations);
+    output.addGenerationalMetricValue("evaluations",key,evals);
     //output.addMetricValue("elitist_hitting_evaluations",key,elitist_evals);
-    output.addMetricValue("time",key,utils::getElapsedTimeSinceStartSeconds());
-    output.addMetricValue("eval_time",key,utils::getTimer("eval_time"));
-    output.addMetricValue("population_index",key,population_index);
-    output.addMetricValue("population_size",key,(int)GOMEAs[population_index]->populationSize);
-    output.addMetricValue("best_obj_val",key,sharedInformationInstance->elitistFitness);
-    output.addMetricValue("best_cons_val",key,sharedInformationInstance->elitistConstraintValue);
+    output.addGenerationalMetricValue("time",key,elapsed_time);
+    output.addGenerationalMetricValue("eval_time",key,eval_time);
+    output.addGenerationalMetricValue("population_index",key,population_index);
+    output.addGenerationalMetricValue("population_size",key,(int)GOMEAs[population_index]->populationSize);
+    output.addGenerationalMetricValue("best_obj_val",key,sharedInformationInstance->elitistFitness);
+    output.addGenerationalMetricValue("best_cons_val",key,sharedInformationInstance->elitistConstraintValue);
     //output.addMetricValue("obj_val_avg",key,population_objective_avg);
     //output.addMetricValue("obj_val_var",key,population_objective_var);
+
+	if( is_final ){
+		output.addFinalMetricValue("evaluations",evals);
+		output.addFinalMetricValue("time",elapsed_time);
+		output.addFinalMetricValue("eval_time",eval_time);
+		output.addFinalMetricValue("best_solution",sharedInformationInstance->elitist.variablesToString());
+		output.addFinalMetricValue("best_obj_val",sharedInformationInstance->elitistFitness);
+		output.addFinalMetricValue("best_cons_val",sharedInformationInstance->elitistConstraintValue);
+	}
+
 	numberOfStatisticsWrites++;
 }
 

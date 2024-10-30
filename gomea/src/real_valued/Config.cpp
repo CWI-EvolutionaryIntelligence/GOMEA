@@ -27,8 +27,8 @@ void Config::parseOptions( int argc, char **argv, int *index )
 {
     double dummy;
 
-    write_generational_statistics = false;
-    write_generational_solutions  = false;
+    generational_statistics       = false;
+    generational_solution         = false;
     print_verbose_overview        = false;
     use_vtr                       = false;
 	use_guidelines                = false;
@@ -53,8 +53,8 @@ void Config::parseOptions( int argc, char **argv, int *index )
                 {
                 case 'h': printUsage(); break;
                 case 'P': printInstalledProblems(); break;
-                case 's': write_generational_statistics = true; break;
-                case 'w': write_generational_solutions  = true; break;
+                case 's': generational_statistics       = true; break;
+                case 'w': generational_solution         = true; break;
                 case 'v': print_verbose_overview        = true; break;
                 case 'r': use_vtr                       = true; break;
                 case 'g': use_guidelines                = true; break;
@@ -281,8 +281,8 @@ void Config::printVerboseOverview( void )
 
     printf("### Settings ######################################\n");
     printf("#\n");
-    printf("# Statistics writing every generation: %s\n", write_generational_statistics ? "enabled" : "disabled");
-    printf("# Population file writing            : %s\n", write_generational_solutions ? "enabled" : "disabled");
+    printf("# Statistics writing every generation: %s\n", generational_statistics ? "enabled" : "disabled");
+    printf("# Population file writing            : %s\n", generational_solution ? "enabled" : "disabled");
     printf("# Use of value-to-reach (vtr)        : %s\n", use_vtr ? "enabled" : "disabled");
     printf("#\n");
     printf("###################################################\n");
