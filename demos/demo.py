@@ -57,7 +57,7 @@ for i in range(nruns):
         nsucc += 1
 print(nsucc,"/",nruns," successes")
 #result.printFinalStatistics()
-#result.printAllStatistics()
+result.printAllStatistics()
 
 #fd = gomea.fitness.OneMaxFunction(1000)
 #lm = gomea.linkage.StaticLinkageTree(maximum_set_size=5)
@@ -79,5 +79,4 @@ for i in range(nruns):
     if result['best_obj_val'][-1] == dim:
         nsucc += 1
 print(nsucc,"/",nruns," successes")
-#result.printFinalStatistics()
-#result.printAllStatistics()
+result.printAllStatistics()
