@@ -4,10 +4,10 @@ import numpy as np
 # Custom fitness function resembling the concatenated deceptive trap function of size k
 class CustomTrapFunction(gomea.fitness.BBOFitnessFunctionDiscrete):
     # Any members must be assigned in __new__ to make them accessible during instantiation of superclass
-    def __new__(self, number_of_variables, k, value_to_reach):
+    def __new__(self, number_of_variables, k, **kwargs):
         assert( number_of_variables % k == 0 )
         self.k = k
-        return super().__new__(self,number_of_variables,value_to_reach)
+        return super().__new__(self,number_of_variables,**kwargs)
 
     def objective_function(self, objective_index, variables):
         f = 0
