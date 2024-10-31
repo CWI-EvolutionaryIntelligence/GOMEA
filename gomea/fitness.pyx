@@ -99,6 +99,7 @@ cdef class GBOFitnessFunctionDiscrete(GBOFitnessFunction):
         number_of_variables : int,
         value_to_reach : float = 1e308,
         alphabet_size : int = 2,
+        **kwargs
     ):
         self.number_of_variables = number_of_variables
         self.alphabet_size = alphabet_size
@@ -111,7 +112,8 @@ cdef class GBOFitnessFunctionDiscrete(GBOFitnessFunction):
 cdef class GBOFitnessFunctionRealValued(GBOFitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
-        value_to_reach : float = 0.0
+        value_to_reach : float = 0.0,
+        **kwargs
     ):
         self.number_of_variables = number_of_variables
         self.value_to_reach = value_to_reach
@@ -132,6 +134,7 @@ cdef class BBOFitnessFunctionDiscrete(BBOFitnessFunction):
         number_of_variables : int,
         value_to_reach : float = 1e308,
         alphabet_size : int = 2,
+        **kwargs
     ):
         self.number_of_variables = number_of_variables
         self.alphabet_size = alphabet_size
@@ -144,7 +147,8 @@ cdef class BBOFitnessFunctionDiscrete(BBOFitnessFunction):
 cdef class BBOFitnessFunctionRealValued(BBOFitnessFunction):
     def __cinit__(self, 
         number_of_variables : int,
-        value_to_reach : float = 0.0
+        value_to_reach : float = 0.0,
+        **kwargs
     ):
         self.number_of_variables = number_of_variables
         self.value_to_reach = value_to_reach
