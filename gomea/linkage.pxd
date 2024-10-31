@@ -7,7 +7,7 @@ from libcpp cimport bool
 cdef extern from "gomea/src/common/linkage_config.hpp" namespace "gomea":
     cdef cppclass linkage_config_t:
         linkage_config_t() except +
-        linkage_config_t(int,bool) except +
+        linkage_config_t(bool,int) except +
         linkage_config_t(int,bool,int,bool) except +
         linkage_config_t(int,bool,bool) except +
         linkage_config_t(vector[vector[int]]) except +
