@@ -34,7 +34,8 @@ class Config {
 			   fix_seed = false,                                      /* Whether a fixed seed is used. */
 			   black_box_evaluations = false,                         /* Whether full (black-box) evaluations must always be performed. */
 			   generational_statistics = true,                 		  /* Whether to compute and write statistics every generation (0 = no). */
-			   generational_solution = true,                  		  /* Whether to write the population every generation (0 = no). */
+			   generational_solution = false,                  		  /* Whether to write the population every generation (0 = no). */
+			   write_generational_population = false,
 			   selection_during_gom = false,
 			   update_elitist_during_gom = false,
 			   verbose = false;

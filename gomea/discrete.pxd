@@ -10,7 +10,7 @@ cdef extern from "gomea/src/discrete/Config.hpp" namespace "gomea::discrete":
 
         int maximumNumberOfGOMEAs, IMSsubgenerationFactor, basePopulationSize, maxArchiveSize, maximumNumberOfEvaluations, maximumNumberOfGenerations, AnalyzeFOS
         long long randomSeed
-        bool fix_seed
+        bool fix_seed, generational_statistics, generational_solution, verbose
         double maximumNumberOfSeconds
         string folder, problemInstancePath
         fitness_t[char] *fitness

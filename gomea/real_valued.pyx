@@ -23,22 +23,22 @@ cdef class RealValuedGOMEA:
     def __cinit__(self,
         # Optimization problem settings (required)
         fitness: FitnessFunction, 
-        # GOMEA parameters
+        # GOMEA settings (optional)
         linkage_model : LinkageModel = StaticLinkageTree(),
         lower_init_range: float = 0.0,
         upper_init_range: float = 1.0,
         random_seed: int=-1,
         # IMS settings (optional)
         max_number_of_populations: int = 25,
-        max_number_of_generations: int = -1,
         IMS_subgeneration_factor: int = 8,
         base_population_size: int = 10,
         # Termination settings (optional)
+        max_number_of_generations: int = -1,
         max_number_of_evaluations : float = -1,
         max_number_of_seconds : float = -1,
         # Output settings (optional)
         generational_statistics = True,
-        generational_solution = True,
+        generational_solution = False,
         verbose = False,
     ):
         
@@ -80,6 +80,8 @@ cdef class RealValuedGOMEA:
         if random_seed != -1:
             self.c_config.random_seed = random_seed
             self.c_config.fix_seed = 1
+
+
 
         # Initialize C++ instance
         self.c_inst = rvg_t(&self.c_config)

@@ -326,6 +326,8 @@ void gomeaIMS::writeStatistics( int population_index, bool is_final )
     output.addGenerationalMetricValue("population_size",key,(int)GOMEAs[population_index]->populationSize);
     output.addGenerationalMetricValue("best_obj_val",key,sharedInformationInstance->elitistFitness);
     output.addGenerationalMetricValue("best_cons_val",key,sharedInformationInstance->elitistConstraintValue);
+	if( config->generational_solution )
+		output.addGenerationalMetricValue("best_solution",key,sharedInformationInstance->elitist.variablesToString());
     //output.addMetricValue("obj_val_avg",key,population_objective_avg);
     //output.addMetricValue("obj_val_var",key,population_objective_var);
 
