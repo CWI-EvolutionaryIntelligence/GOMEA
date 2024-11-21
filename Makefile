@@ -1,18 +1,18 @@
 default: install
 
 install-deps:
-	pip3 -q install build --user
-	pip3 -q install cython==3.0.10 --user
-	pip3 -q install numpy==2.0.1 --user
+	pip -q install build --user
+	pip -q install cython==3.0.10 --user
+	pip -q install numpy==2.0.1 --user
 
 install-meson-deps:
-	pip3 -q install meson==1.5.1 --user
+	pip -q install meson==1.5.1 --user
 
 build-sdist: install-deps
-	python3 -m build --sdist
+	python -m build --sdist
 
 build-wheel: install-deps
-	python3 -m build --wheel
+	python -m build --wheel
 
 build-all: build-sdist build-wheel
 
@@ -34,16 +34,16 @@ debug: uninstall build-debug
 	cp -r gomea/__init__.py debug/gomea/
 	
 install: install-deps build-wheel
-	pip3 install dist/*.whl --user
+	pip install dist/*.whl --user
 
 reinstall: install-deps build-wheel
-	pip3 install dist/*.whl --user --force-reinstall
+	pip install dist/*.whl --user --force-reinstall
 
 src-install: install-deps build-sdist
-	pip3 install dist/*.tar.gz --user
+	pip install dist/*.tar.gz --user
 
 uninstall:
-	pip3 uninstall -y gomea
+	pip uninstall -y gomea
 
 cibuildwheel: clean
 	sudo pipx run cibuildwheel     
@@ -69,9 +69,9 @@ clean:
 ######################################################################################################
 
 
-CXX=g++
-CXX_INC=-I./ -Igomea/ -Igomea/lib/Eigen/ -Igomea/lib/cxxopts-3.1.1/include/
-CXXFLAGS=-g -fopenmp -Wall -std=c++17 -DCPP_STANDALONE $(CXX_INC)  #-pg ## For profiling
+CXX_GOMEA_CPP=g++
+CXX_INC_GOMEA_CPP=-I./ -Igomea/ -Igomea/lib/Eigen/ -Igomea/lib/cxxopts-3.1.1/include/
+CXXFLAGS_GOMEA_CPP=-g -fopenmp -Wall -std=c++17 -DCPP_STANDALONE $(CXX_INC_GOMEA_CPP)  #-pg ## For profiling
 SRCDIR=gomea/src
 OBJDIR=build_cpp/obj
 OBJDIR_DISCRETE=build_cpp/obj_discrete
@@ -95,20 +95,20 @@ TARGET_RV=$(BINDIR)/RealValuedGOMEA
 #### Object files ####
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	@mkdir -p $(@D)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX_GOMEA_CPP) $(CXXFLAGS_GOMEA_CPP) -c $< -o $@
 
 $(OBJDIR_DISCRETE)/%.o: $(SRCDIR)/%.cpp
 	@mkdir -p $(@D)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX_GOMEA_CPP) $(CXXFLAGS_GOMEA_CPP) -c $< -o $@
 
 $(OBJDIR_RV)/%.o: $(SRCDIR)/%.cpp
 	@mkdir -p $(@D)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX_GOMEA_CPP) $(CXXFLAGS_GOMEA_CPP) -c $< -o $@
 
 $(TARGET_DISCRETE): $(OBJS_DISCRETE) $(OBJS)
-	$(CXX) $(CXXFLAGS) $^ -o $@
+	$(CXX_GOMEA_CPP) $(CXXFLAGS_GOMEA_CPP) $^ -o $@
 
 $(TARGET_RV): $(OBJS_RV) $(OBJS)
-	$(CXX) $(CXXFLAGS) $^ -o $@
+	$(CXX_GOMEA_CPP) $(CXXFLAGS_GOMEA_CPP) $^ -o $@
 
 cpp: $(TARGET_DISCRETE) $(TARGET_RV)
