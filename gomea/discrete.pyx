@@ -25,15 +25,21 @@ cdef class DiscreteGOMEA:
     def __cinit__(self,
         # Optimization problem settings (required)
         fitness: FitnessFunction, 
-        # GOMEA settings
+        # GOMEA settings (optional)
         linkage_model : LinkageModel = StaticLinkageTree(),
+        random_seed : int = -1,
+        # IMS settings (optional)
         max_number_of_populations : int = 25,
         IMS_subgeneration_factor: int = 4,
         base_population_size: int = 2,
-        max_number_of_evaluations : int = -1,
+        # Termination settings (optional)
         max_number_of_generations : int = -1,
+        max_number_of_evaluations : int = -1,
         max_number_of_seconds : float = -1.0,
-        random_seed : int = -1,
+        # Output settings (optional)
+        generational_statistics = True,
+        generational_solution = False,
+        verbose = False,
     ):
 
         # Initialize attributes 
@@ -65,6 +71,9 @@ cdef class DiscreteGOMEA:
         #if analyze_fos:
         #    self.c_config.AnalyzeFOS = 1
         #self.c_config.verbose = False 
+        self.c_config.generational_statistics = generational_statistics
+        self.c_config.generational_solution = generational_solution
+        self.c_config.verbose = verbose
         self.c_config.fix_seed = False
         if random_seed != -1:
             self.c_config.randomSeed = random_seed

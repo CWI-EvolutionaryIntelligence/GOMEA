@@ -32,7 +32,9 @@ public:
     
 	fitness_t<char> *fitness;
     bool generational_statistics = true,
-         generational_solution = true;
+         generational_solution = false,
+         write_generational_population = false,
+         verbose = false;
 	int usePartialEvaluations              = 1,                  
 		useParallelGOM		               = 1,                  
 		useParallelFOSOrder	               = 0,
