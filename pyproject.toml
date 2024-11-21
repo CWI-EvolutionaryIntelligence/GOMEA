@@ -1,10 +1,10 @@
 [build-system]
 build-backend = 'mesonpy'
-requires = ['meson-python', 'numpy>=1.23.0', 'Cython>=3.0']
+requires = ['meson-python', 'numpy>=2.0.1', 'Cython>=3.0']
 
 [project]
 name = 'gomea'
-version = '1.0.6'
+version = '1.0.7'
 description = 'Library for the use of various variants of the Gene-pool Optimal Mixing Evolutionary Algorithm (GOMEA).'
 readme = 'README.md'
 requires-python = '>=3.9'
