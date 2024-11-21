@@ -461,6 +461,9 @@ void rvg_t::writeGenerationalStatisticsForOnePopulation( int population_index, b
     //output.addMetricValue("subpop_best_cons_val",key,best_solution->getConstraintValue());
     //output.addMetricValue("subpop_obj_val_avg",key,population_objective_avg);
     //output.addMetricValue("subpop_obj_val_var",key,population_objective_var);
+    if( config->generational_solution )
+		output.addGenerationalMetricValue("best_solution",key,getElitist()->variablesToString());
+    
     if( is_final ){
         output.addFinalMetricValue("evaluations",fitness->number_of_evaluations);
         output.addFinalMetricValue("time",elapsed_time);
