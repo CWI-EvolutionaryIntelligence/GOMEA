@@ -39,6 +39,7 @@ cdef class RealValuedGOMEA:
         # Output settings (optional)
         generational_statistics = True,
         generational_solution = False,
+        #output_frequency = 'GEN',
         verbose = False,
     ):
         
@@ -76,6 +77,15 @@ cdef class RealValuedGOMEA:
         self.c_config.generational_solution = generational_solution
         self.c_config.verbose = verbose
         self.c_config.print_verbose_overview = False 
+        output_frequency = 'GEN'
+        if output_frequency == 'GEN':
+            self.c_config.output_frequency = GEN
+        elif output_frequency == 'IMS_GEN':
+            self.c_config.output_frequency = IMS_GEN
+        elif output_frequency == 'NEW_ELITE':
+            self.c_config.output_frequency = NEW_ELITE
+        else:
+            raise ValueError("output_frequency must be one of 'GEN', 'IMS_GEN', 'NEW_ELITE'")
         self.c_config.fix_seed = 0
         if random_seed != -1:
             self.c_config.random_seed = random_seed

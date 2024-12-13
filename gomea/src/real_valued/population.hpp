@@ -17,7 +17,7 @@ namespace realvalued{
 class population_t {
 	public:
 		/*-=-=-=-=-=-=-=-=-=-=-=-= Section Header Functions -=-=-=-=-=-=-=-=-=-=-=-=*/
-	 	population_t( fitness_t<double> *fitness, int population_size, double lower_init, double upper_init );
+	 	population_t( fitness_t<double> *fitness, int population_size, double lower_init, double upper_init, int population_index = -1 );
 	 	~population_t();
 		
 		void runGeneration();
@@ -57,6 +57,7 @@ class population_t {
 		void initializeParameterRangeBounds( double lower_user_range, double upper_user_range );
 		void initializeProblem( int problem_index );
 		void initializePopulationAndFitnessValues();
+		void writeGenerationalStatistics( bool is_final = false );
 		/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 		
 		/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
@@ -69,8 +70,9 @@ class population_t {
 			  *upper_init_ranges;
 		int    maximum_no_improvement_stretch,
 			   num_elitists_to_copy = 1,
-			   FOS_element_size;
-		int    problem_index;
+			   FOS_element_size,
+			   problem_index,
+			   population_index;
 		double delta_AMS;
 		bool update_elitist_during_gom, selection_during_gom;
 		/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
@@ -90,6 +92,8 @@ class population_t {
 		bool  population_terminated;
 		linkage_config_t *linkage_config;
 		linkage_model_rv_pt linkage_model;
+		output_statistics_t *output;
+		Config *config;
 		/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 };
 

@@ -21,6 +21,7 @@ gomeaIMS::gomeaIMS(Config *config_)
 	problemInstance 		= config->fitness;
     problemInstance->maximum_number_of_evaluations = config->maximumNumberOfEvaluations;
     problemInstance->maximum_number_of_seconds = config->maximumNumberOfSeconds;
+	problemInstance->output_frequency = config->output_frequency;
 	if( config->fix_seed )
 		utils::initializeRandomNumberGenerator(config->randomSeed);
 	else
@@ -132,7 +133,8 @@ void gomeaIMS::runGeneration( int GOMEAIndex )
 
 	GOMEAs[GOMEAIndex]->numberOfGenerations++;
 		
-	writeStatistics( GOMEAIndex );
+	if( config->output_frequency == GEN )
+		writeStatistics( GOMEAIndex );
 }
 
 bool gomeaIMS::checkTermination()
@@ -216,12 +218,13 @@ void gomeaIMS::initializeNewGOMEA()
     Population *newPopulation = NULL;
 
     if (numberOfGOMEAs == 0)
-        newPopulation = new Population(config, problemInstance, sharedInformationInstance, numberOfGOMEAs, basePopulationSize);
+        newPopulation = new Population(config, &output, problemInstance, sharedInformationInstance, numberOfGOMEAs, basePopulationSize);
     else
-        newPopulation = new Population(config, problemInstance, sharedInformationInstance, numberOfGOMEAs, 2 * GOMEAs[numberOfGOMEAs-1]->populationSize, GOMEAs[0]->FOSInstance );
-    
+        newPopulation = new Population(config, &output, problemInstance, sharedInformationInstance, numberOfGOMEAs, 2 * GOMEAs[numberOfGOMEAs-1]->populationSize, GOMEAs[0]->FOSInstance );
     GOMEAs.push_back(newPopulation);
     numberOfGOMEAs++;
+
+	writeStatistics( numberOfGOMEAs-1 );
 }
 
 void gomeaIMS::generationalStepAllGOMEAs()
@@ -261,6 +264,9 @@ void gomeaIMS::GOMEAGenerationalStepAllGOMEAsRecursiveFold(int GOMEAIndexSmalles
         for(GOMEAIndex = GOMEAIndexSmallest; GOMEAIndex < GOMEAIndexBiggest; GOMEAIndex++)
             GOMEAGenerationalStepAllGOMEAsRecursiveFold(GOMEAIndexSmallest, GOMEAIndex);
     }
+
+	if( config->output_frequency == IMS_GEN )
+		writeStatistics( GOMEAIndex );
 }
 
 bool gomeaIMS::checkTerminationGOMEA(int GOMEAIndex)
@@ -308,39 +314,7 @@ void gomeaIMS::writeStatistics( int population_index, bool is_final )
 		// GOMEA in question has terminated already - no statistics available to save.
 		return;
 	}
-
-	assert( sharedInformationInstance != NULL );
-	int key = numberOfStatisticsWrites;
-    double evals = problemInstance->number_of_evaluations;
-	double elapsed_time = utils::getElapsedTimeSinceStartSeconds();
-	double eval_time = utils::getTimer("eval_time");
-    //double elitist_evals = sharedInformationInstance->elitistSolutionHittingTimeEvaluations;
-    //double time_s = sharedInformationInstance->elitistSolutionHittingTimeMilliseconds/1000.0;
-	double best_fitness = sharedInformationInstance->elitistFitness;
-    output.addGenerationalMetricValue("generation",key,(int)GOMEAs[population_index]->numberOfGenerations);
-    output.addGenerationalMetricValue("evaluations",key,evals);
-    //output.addMetricValue("elitist_hitting_evaluations",key,elitist_evals);
-    output.addGenerationalMetricValue("time",key,elapsed_time);
-    output.addGenerationalMetricValue("eval_time",key,eval_time);
-    output.addGenerationalMetricValue("population_index",key,population_index);
-    output.addGenerationalMetricValue("population_size",key,(int)GOMEAs[population_index]->populationSize);
-    output.addGenerationalMetricValue("best_obj_val",key,sharedInformationInstance->elitistFitness);
-    output.addGenerationalMetricValue("best_cons_val",key,sharedInformationInstance->elitistConstraintValue);
-	if( config->generational_solution )
-		output.addGenerationalMetricValue("best_solution",key,sharedInformationInstance->elitist.variablesToString());
-    //output.addMetricValue("obj_val_avg",key,population_objective_avg);
-    //output.addMetricValue("obj_val_var",key,population_objective_var);
-
-	if( is_final ){
-		output.addFinalMetricValue("evaluations",evals);
-		output.addFinalMetricValue("time",elapsed_time);
-		output.addFinalMetricValue("eval_time",eval_time);
-		output.addFinalMetricValue("best_solution",sharedInformationInstance->elitist.variablesToString());
-		output.addFinalMetricValue("best_obj_val",sharedInformationInstance->elitistFitness);
-		output.addFinalMetricValue("best_cons_val",sharedInformationInstance->elitistConstraintValue);
-	}
-
-	numberOfStatisticsWrites++;
+	GOMEAs[population_index]->writeStatistics(is_final);
 }
 
 

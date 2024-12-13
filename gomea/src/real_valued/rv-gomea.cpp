@@ -20,6 +20,7 @@ rvg_t::rvg_t( Config *config )
     this->fitness = config->fitness;
     this->fitness->maximum_number_of_evaluations = config->maximum_number_of_evaluations;
     this->fitness->maximum_number_of_seconds = config->maximum_number_of_seconds;
+    this->fitness->output_frequency = config->output_frequency;
 
     if( use_guidelines )
     {
@@ -205,9 +206,9 @@ void rvg_t::optionError( char **argv, int index )
  */
 void rvg_t::parseParameters( int argc, char **argv, int *index )
 {
-    if( (argc - *index) < 15 )
+    if( (argc - *index) < 14 )
     {
-        printf("Number of parameters is incorrect, require 15 parameters (you provided %d).\n\n", (argc - *index));
+        printf("Number of parameters is incorrect, require 14 parameters (you provided %d).\n\n", (argc - *index));
 
         printUsage();
     }
@@ -222,21 +223,20 @@ void rvg_t::parseParameters( int argc, char **argv, int *index )
     noError = noError && sscanf( argv[*index+1], "%d", &fitness->number_of_variables );
     noError = noError && sscanf( argv[*index+2], "%lf", &config->lower_user_range );
     noError = noError && sscanf( argv[*index+3], "%lf", &config->upper_user_range );
-    noError = noError && sscanf( argv[*index+4], "%lf", &rotation_angle );
-    noError = noError && sscanf( argv[*index+5], "%lf", &config->tau );
-    noError = noError && sscanf( argv[*index+6], "%d", &config->base_population_size );
-    noError = noError && sscanf( argv[*index+7], "%d", &config->maximum_number_of_populations );
-    noError = noError && sscanf( argv[*index+8], "%lf", &config->distribution_multiplier_decrease );
-    noError = noError && sscanf( argv[*index+9], "%lf", &config->st_dev_ratio_threshold );
-    noError = noError && sscanf( argv[*index+10], "%lf", &config->maximum_number_of_evaluations );
-    noError = noError && sscanf( argv[*index+11], "%lf", &config->vtr );
-    noError = noError && sscanf( argv[*index+12], "%d", &config->maximum_no_improvement_stretch );
-    noError = noError && sscanf( argv[*index+13], "%lf", &config->fitness_variance_tolerance );
-    noError = noError && sscanf( argv[*index+14], "%lf", &config->maximum_number_of_seconds );
-	if( argc-*index > 15 )
+    noError = noError && sscanf( argv[*index+4], "%lf", &config->tau );
+    noError = noError && sscanf( argv[*index+5], "%d", &config->base_population_size );
+    noError = noError && sscanf( argv[*index+6], "%d", &config->maximum_number_of_populations );
+    noError = noError && sscanf( argv[*index+7], "%lf", &config->distribution_multiplier_decrease );
+    noError = noError && sscanf( argv[*index+8], "%lf", &config->st_dev_ratio_threshold );
+    noError = noError && sscanf( argv[*index+9], "%lf", &config->maximum_number_of_evaluations );
+    noError = noError && sscanf( argv[*index+10], "%lf", &config->vtr );
+    noError = noError && sscanf( argv[*index+11], "%d", &config->maximum_no_improvement_stretch );
+    noError = noError && sscanf( argv[*index+12], "%lf", &config->fitness_variance_tolerance );
+    noError = noError && sscanf( argv[*index+13], "%lf", &config->maximum_number_of_seconds );
+	if( argc-*index > 14 )
 	{
-		noError = noError && sscanf( argv[*index+15], "%d", &a );
-    	noError = noError && sscanf( argv[*index+16], "%d", &b );
+		noError = noError && sscanf( argv[*index+14], "%d", &a );
+    	noError = noError && sscanf( argv[*index+15], "%d", &b );
 		config->selection_during_gom = a==1?true:false;
 		config->update_elitist_during_gom = b==1?true:false;
 	}
@@ -341,7 +341,6 @@ void rvg_t::printUsage( void )
  */
 void rvg_t::initialize( void )
 {
-    total_number_of_writes = 0;
     config->number_of_subgenerations_per_population_factor = 8;
     fitness->number_of_evaluations = 0;
     output = output_statistics_t();
@@ -363,7 +362,7 @@ void rvg_t::initialize( void )
 void rvg_t::restartLargestPopulation()
 {
 	int pop_size = populations[populations.size()-1]->population_size;
-	population_t *new_pop = new population_t( fitness, pop_size, config->lower_user_range, config->upper_user_range );
+	population_t *new_pop = new population_t( fitness, pop_size, config->lower_user_range, config->upper_user_range, populations.size()-1 );
 	new_pop->maximum_no_improvement_stretch = config->maximum_no_improvement_stretch;
 	new_pop->st_dev_ratio_threshold = config->st_dev_ratio_threshold;
 	new_pop->distribution_multiplier_decrease = config->distribution_multiplier_decrease;
@@ -372,6 +371,8 @@ void rvg_t::restartLargestPopulation()
 	new_pop->selection_during_gom = config->selection_during_gom;
 	new_pop->update_elitist_during_gom = config->update_elitist_during_gom;
     new_pop->linkage_config = config->linkage_config;
+    new_pop->output = &output;
+    new_pop->config = config;
 	new_pop->initialize();
 	delete( populations[populations.size()-1] );
 	populations[populations.size()-1] = new_pop;
@@ -382,7 +383,7 @@ void rvg_t::initializeNewPopulation()
 {
 	int new_pop_size = config->base_population_size;
 	if( populations.size() > 0 ) new_pop_size = 2 * populations[populations.size()-1]->population_size;
-	population_t *new_pop = new population_t( fitness, new_pop_size, config->lower_user_range, config->upper_user_range );
+	population_t *new_pop = new population_t( fitness, new_pop_size, config->lower_user_range, config->upper_user_range, populations.size() );
 	new_pop->maximum_no_improvement_stretch = config->maximum_no_improvement_stretch;
 	new_pop->st_dev_ratio_threshold = config->st_dev_ratio_threshold;
 	new_pop->distribution_multiplier_decrease = config->distribution_multiplier_decrease;
@@ -391,6 +392,8 @@ void rvg_t::initializeNewPopulation()
 	new_pop->selection_during_gom = config->selection_during_gom;
 	new_pop->update_elitist_during_gom = config->update_elitist_during_gom;
     new_pop->linkage_config = config->linkage_config;
+    new_pop->output = &output;
+    new_pop->config = config;
 	new_pop->initialize();
 	populations.push_back(new_pop);
 }
@@ -445,35 +448,11 @@ void rvg_t::writeGenerationalStatisticsForOnePopulation( int population_index, b
     double population_constraint_var = populations[population_index]->getConstraintValueVariance();
     solution_t<double> *best_solution = populations[population_index]->getBestSolution();
     solution_t<double> *worst_solution = populations[population_index]->getWorstSolution();*/
-
-    int key = total_number_of_writes;
-    double elapsed_time = utils::getElapsedTimeSinceStartSeconds();
-    double eval_time = utils::getTimer("eval_time");
-    output.addGenerationalMetricValue("generation",key,populations[population_index]->number_of_generations);
-    output.addGenerationalMetricValue("evaluations",key,fitness->number_of_evaluations);
-    output.addGenerationalMetricValue("time",key,elapsed_time);
-    output.addGenerationalMetricValue("eval_time",key,eval_time);
-    output.addGenerationalMetricValue("population_index",key,population_index);
-    output.addGenerationalMetricValue("population_size",key,populations[population_index]->population_size);
-    output.addGenerationalMetricValue("best_obj_val",key,fitness->elitist_objective_value);
-    output.addGenerationalMetricValue("best_cons_val",key,fitness->elitist_constraint_value);
-    //output.addMetricValue("subpop_best_obj_val",key,best_solution->getObjectiveValue());
-    //output.addMetricValue("subpop_best_cons_val",key,best_solution->getConstraintValue());
-    //output.addMetricValue("subpop_obj_val_avg",key,population_objective_avg);
-    //output.addMetricValue("subpop_obj_val_var",key,population_objective_var);
-    if( config->generational_solution )
-		output.addGenerationalMetricValue("best_solution",key,getElitist()->variablesToString());
-    
-    if( is_final ){
-        output.addFinalMetricValue("evaluations",fitness->number_of_evaluations);
-        output.addFinalMetricValue("time",elapsed_time);
-        output.addFinalMetricValue("eval_time",eval_time);
-        output.addFinalMetricValue("best_solution",getElitist()->variablesToString());
-        output.addFinalMetricValue("best_obj_val",fitness->elitist_objective_value);
-        output.addFinalMetricValue("best_cons_val",fitness->elitist_constraint_value);
+    if(population_index >= populations.size())
+    {
+        throw std::runtime_error("Population index out of bounds.");
     }
-
-    total_number_of_writes++;
+    populations[population_index]->writeGenerationalStatistics(is_final);
 }
 
 /**

@@ -42,7 +42,7 @@
 namespace gomea{
 namespace realvalued{
 
-population_t::population_t( fitness_t<double> *fitness, int population_size, double lower_init, double upper_init )
+population_t::population_t( fitness_t<double> *fitness, int population_size, double lower_init, double upper_init , int population_index )
 {
 	this->population_size = population_size;
 	this->fitness = fitness;
@@ -794,6 +794,46 @@ void population_t::initializePopulationAndFitnessValues()
 		fitness->evaluate( individuals[j] );
 	}
 	updateElitist();
+}
+
+void population_t::writeGenerationalStatistics( bool is_final )
+{
+    /* Average, best and worst */
+    /*double population_objective_avg  = populations[population_index]->getFitnessMean();
+    double population_constraint_avg = populations[population_index]->getConstraintValueMean();
+    double population_objective_var  = populations[population_index]->getFitnessVariance();
+    double population_constraint_var = populations[population_index]->getConstraintValueVariance();
+    solution_t<double> *best_solution = populations[population_index]->getBestSolution();
+    solution_t<double> *worst_solution = populations[population_index]->getWorstSolution();*/
+
+    int key = output->number_of_writes;
+    double elapsed_time = utils::getElapsedTimeSinceStartSeconds();
+    double eval_time = utils::getTimer("eval_time");
+    output->addGenerationalMetricValue("generation",key,number_of_generations);
+    output->addGenerationalMetricValue("evaluations",key,fitness->number_of_evaluations);
+    output->addGenerationalMetricValue("time",key,elapsed_time);
+    output->addGenerationalMetricValue("eval_time",key,eval_time);
+    output->addGenerationalMetricValue("population_index",key,population_index);
+    output->addGenerationalMetricValue("population_size",key,population_size);
+    output->addGenerationalMetricValue("best_obj_val",key,fitness->elitist_objective_value);
+    output->addGenerationalMetricValue("best_cons_val",key,fitness->elitist_constraint_value);
+    //output->addMetricValue("subpop_best_obj_val",key,best_solution->getObjectiveValue());
+    //output->addMetricValue("subpop_best_cons_val",key,best_solution->getConstraintValue());
+    //output->addMetricValue("subpop_obj_val_avg",key,population_objective_avg);
+    //output->addMetricValue("subpop_obj_val_var",key,population_objective_var);
+    if( config->generational_solution )
+		output->addGenerationalMetricValue("best_solution",key,getElitist()->variablesToString());
+    
+    if( is_final ){
+        output->addFinalMetricValue("evaluations",fitness->number_of_evaluations);
+        output->addFinalMetricValue("time",elapsed_time);
+        output->addFinalMetricValue("eval_time",eval_time);
+        output->addFinalMetricValue("best_solution",getElitist()->variablesToString());
+        output->addFinalMetricValue("best_obj_val",fitness->elitist_objective_value);
+        output->addFinalMetricValue("best_cons_val",fitness->elitist_constraint_value);
+    }
+
+    output->number_of_writes++;
 }
 
 }}

@@ -60,7 +60,6 @@ class rvg_t {
 		/*-=-=-=-=-=-=-=-=-=-=-=- Variables -=-=-=-=-=-=-=-=-=-=-=-=-*/
 		std::vector<population_t*> populations;
 		fitness_t<double> *fitness;
-		int total_number_of_writes = 0;                              /* Total number of times a statistics file has been written. */
 		output_statistics_t output;
 		/*-=-=-=-=-=-=-=-=-=-=-=- Options -=-=-=-=-=-=-=-=-=-=-=-=-*/
 		Config *config;
