@@ -42,6 +42,7 @@ class output_statistics_t
         std::unordered_map<std::string, metric_t> final_metrics_map;
         std::set<int> generational_keys;
         solution_t<genotype_t> *elitist_solution;
+        int number_of_writes = 0;
 };
 
 }

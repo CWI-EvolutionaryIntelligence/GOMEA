@@ -53,6 +53,7 @@ public:
         FOSIndex = 0;
 	int GPUIndex = -1;
 	int maximumFOSSetSize = -1;
+    output_frequency_t output_frequency = output_frequency_t::GEN;
 
     std::string folder = "discrete_gomea_output";
     //std::string problemName,

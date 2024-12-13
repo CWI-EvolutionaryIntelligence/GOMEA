@@ -3,8 +3,9 @@
 namespace gomea{
 namespace discrete{
 
-Population::Population(Config *config_, fitness_t<char> *problemInstance_, sharedInformation *sharedInformationPointer_, size_t GOMEAIndex_, size_t populationSize_, linkage_model_pt FOSInstance_ ): 
-        config(config_), 
+Population::Population(Config *config_, output_statistics_t *output_, fitness_t<char> *problemInstance_, sharedInformation *sharedInformationPointer_, size_t GOMEAIndex_, size_t populationSize_, linkage_model_pt FOSInstance_ ): 
+        config(config_),
+        output(output_),
         problemInstance(problemInstance_),
         sharedInformationPointer(sharedInformationPointer_),
         GOMEAIndex(GOMEAIndex_), 
@@ -292,6 +293,8 @@ bool Population::GOM(size_t offspringIndex)
                 //evaluateSolution(offspringPopulation[offspringIndex], backup, touchedGenes, backup->getObjectiveValue());
                 //problemInstance->evaluatePartialSolution(offspringPopulation[offspringIndex], partial_offspring, FOSInstance->getDependentSubfunctions(ind) );
                 problemInstance->evaluatePartialSolution(offspringPopulation[offspringIndex], partial_offspring );
+                if( problemInstance->output_frequency == NEW_ELITE && !problemInstance->elitist_was_written )
+                    writeStatistics();
 
                 // accept the change if this solution is not the elitist and the fitness is at least equally good (allows random walk in neutral fitness landscape)
                 // however, if this is the elitist solution, only accept strict improvements, to avoid convergence problems
@@ -344,6 +347,8 @@ bool Population::FI(size_t offspringIndex)
         if (!donorEqualToOffspring)
         {
             problemInstance->evaluatePartialSolution(offspringPopulation[offspringIndex], partial_offspring );
+            if( problemInstance->output_frequency == NEW_ELITE && !problemInstance->elitist_was_written )
+                writeStatistics();
 
             if (partial_offspring->getObjectiveValue() > offspringPopulation[offspringIndex]->getObjectiveValue() ) 
             {
@@ -403,6 +408,43 @@ void Population::updateElitistAndCheckVTR(solution_t<char> *solution)
     }
 
     sharedInformationPointer->firstEvaluationEver = false;
+}
+
+void Population::writeStatistics( bool is_final )
+{
+    assert( sharedInformationPointer != NULL );
+	int key = output->number_of_writes;
+    double evals = problemInstance->number_of_evaluations;
+	double elapsed_time = utils::getElapsedTimeSinceStartSeconds();
+	double eval_time = utils::getTimer("eval_time");
+    //double elitist_evals = sharedInformationPointer->elitistSolutionHittingTimeEvaluations;
+    //double time_s = sharedInformationPointer->elitistSolutionHittingTimeMilliseconds/1000.0;
+	//double best_fitness = sharedInformationPointer->elitistFitness;
+    output->addGenerationalMetricValue("generation",key,(int)numberOfGenerations);
+    output->addGenerationalMetricValue("evaluations",key,evals);
+    //output->addMetricValue("elitist_hitting_evaluations",key,elitist_evals);
+    output->addGenerationalMetricValue("time",key,elapsed_time);
+    output->addGenerationalMetricValue("eval_time",key,eval_time);
+    output->addGenerationalMetricValue("population_index",key,(int)GOMEAIndex);
+    output->addGenerationalMetricValue("population_size",key,(int)populationSize);
+    output->addGenerationalMetricValue("best_obj_val",key,problemInstance->elitist_objective_value);
+    output->addGenerationalMetricValue("best_cons_val",key,problemInstance->elitist_constraint_value);
+	if( config->generational_solution )
+		output->addGenerationalMetricValue("best_solution",key,sharedInformationPointer->elitist.variablesToString());
+    //output->addMetricValue("obj_val_avg",key,population_objective_avg);
+    //output->addMetricValue("obj_val_var",key,population_objective_var);
+
+	if( is_final ){
+		output->addFinalMetricValue("evaluations",evals);
+		output->addFinalMetricValue("time",elapsed_time);
+		output->addFinalMetricValue("eval_time",eval_time);
+		output->addFinalMetricValue("best_solution",sharedInformationPointer->elitist.variablesToString());
+		output->addFinalMetricValue("best_obj_val",problemInstance->elitist_objective_value);
+		output->addFinalMetricValue("best_cons_val",problemInstance->elitist_constraint_value);
+	}
+
+    problemInstance->elitist_was_written = true;
+	output->number_of_writes++;
 }
 
 

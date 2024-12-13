@@ -11,6 +11,7 @@ cdef extern from "gomea/src/discrete/Config.hpp" namespace "gomea::discrete":
         int maximumNumberOfGOMEAs, IMSsubgenerationFactor, basePopulationSize, maxArchiveSize, maximumNumberOfEvaluations, maximumNumberOfGenerations, AnalyzeFOS
         long long randomSeed
         bool fix_seed, generational_statistics, generational_solution, verbose
+        output_frequency_t output_frequency
         double maximumNumberOfSeconds
         string folder, problemInstancePath
         fitness_t[char] *fitness
@@ -26,3 +27,7 @@ cdef extern from "gomea/src/discrete/gomeaIMS.hpp" namespace "gomea::discrete":
         bool checkTermination() except +
         double getProgressUntilTermination() except +
         output_statistics_t output
+
+cdef extern from "src/common/gomea_defs.hpp" namespace "gomea":
+    ctypedef enum output_frequency_t:
+        GEN, IMS_GEN, NEW_ELITE

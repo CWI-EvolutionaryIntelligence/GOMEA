@@ -97,17 +97,19 @@ void fitness_t<T>::evaluate( solution_t<T> *solution )
 	evaluationFunction( solution );
 	utils::addToTimer("eval_time",t);
 
-	if( use_vtr && !vtr_hit_status && solution->getConstraintValue() == 0 && solution->getObjectiveValue() <= vtr  )
+	if( use_vtr && !vtr_hit_status && betterFitness(solution->getObjectiveValue(), solution->getConstraintValue(), vtr, 0.0)  )
 	{
 		vtr_hit_status = true;
 		elitist_objective_value = solution->getObjectiveValue();
 		elitist_constraint_value = solution->getConstraintValue();
+		elitist_was_written = false;
 	}
 
 	if( !vtr_hit_status && betterFitness(solution->getObjectiveValue(), solution->getConstraintValue(), elitist_objective_value, elitist_constraint_value) )
 	{
 		elitist_objective_value = solution->getObjectiveValue();
 		elitist_constraint_value = solution->getConstraintValue();
+		elitist_was_written = false;
 	}
 }
 
@@ -147,6 +149,20 @@ void fitness_t<T>::evaluatePartialSolutionBlackBox( solution_t<T> *parent, parti
 	delete[] var_backup;
 	
 	utils::addToTimer("eval_time",t);
+	if( use_vtr && !vtr_hit_status && betterFitness(solution->getObjectiveValue(), solution->getConstraintValue(), vtr, 0.0)  )
+	{
+		vtr_hit_status = true;
+		elitist_objective_value = solution->getObjectiveValue();
+		elitist_constraint_value = solution->getConstraintValue();
+		elitist_was_written = false;
+	}
+
+	if( !vtr_hit_status && betterFitness(solution->getObjectiveValue(), solution->getConstraintValue(), elitist_objective_value, elitist_constraint_value) )
+	{
+		elitist_objective_value = solution->getObjectiveValue();
+		elitist_constraint_value = solution->getConstraintValue();
+		elitist_was_written = false;
+	}
 }
 
 /*template<class T>
@@ -194,14 +210,15 @@ void fitness_t<T>::evaluatePartialSolution( solution_t<T> *parent, partial_solut
 		number_of_evaluations--;
 #endif
 
-		if( use_vtr && !vtr_hit_status && solution->getConstraintValue() == 0 && solution->getObjectiveValue() <= vtr  )
+		if( use_vtr && !vtr_hit_status && betterFitness(solution->getObjectiveValue(), solution->getConstraintValue(), vtr, 0.0)  )
 		{
 			evaluatePartialSolutionBlackBox( parent, solution );
-			if( solution->getConstraintValue() == 0 && solution->getObjectiveValue() <= vtr  )
+			if( betterFitness(solution->getObjectiveValue(), solution->getConstraintValue(), vtr, 0.0)  )
 			{
 				vtr_hit_status = true;
 				elitist_objective_value = solution->getObjectiveValue();
 				elitist_constraint_value = solution->getConstraintValue();
+				elitist_was_written = false;
 			}
 		}
 	}
@@ -210,6 +227,7 @@ void fitness_t<T>::evaluatePartialSolution( solution_t<T> *parent, partial_solut
 	{
 		elitist_objective_value = solution->getObjectiveValue();
 		elitist_constraint_value = solution->getConstraintValue();
+		elitist_was_written = false;
 	}
 }
 
@@ -232,8 +250,11 @@ void fitness_t<T>::initializeRun()
 {
 	number_of_evaluations = 0.0;	// discounted in GBO
 	full_number_of_evaluations = 0; // not discounted in GBO
-	elitist_objective_value = 1e308;
-	elitist_constraint_value = 1e308;
+	if( opt_mode::MIN == optimization_mode )
+		elitist_objective_value = INFINITY;
+	else
+		elitist_objective_value = -INFINITY;
+	elitist_constraint_value = INFINITY;
 	vtr_hit_status = false;
 }
 

@@ -11,6 +11,7 @@
 #include "gomea/src/common/solution.hpp"
 #include "gomea/src/common/partial_solution.hpp"
 #include "gomea/src/common/linkage_model.hpp"
+#include "gomea/src/common/output_statistics.hpp"
 
 namespace gomea{
 namespace discrete{
@@ -21,6 +22,7 @@ public:
     Config *config;
     fitness_t<char> *problemInstance;
     sharedInformation *sharedInformationPointer;
+    output_statistics_t *output;
     size_t GOMEAIndex;
     size_t populationSize;
 
@@ -34,7 +36,7 @@ public:
     
     linkage_model_pt FOSInstance = NULL;
 
-    Population(Config *config_, fitness_t<char> *problemInstance_, sharedInformation *sharedInformationPointer_, size_t GOMEAIndex_, size_t populationSize_, linkage_model_pt FOSInstance_ = NULL );
+    Population(Config *config_, output_statistics_t *output_, fitness_t<char> *problemInstance_, sharedInformation *sharedInformationPointer_, size_t GOMEAIndex_, size_t populationSize_, linkage_model_pt FOSInstance_ = NULL );
     ~Population();
 
     friend std::ostream & operator << (std::ostream &out, const Population &populationInstance);
@@ -56,6 +58,7 @@ public:
     bool FI(size_t offspringIndex);
     void updateElitistAndCheckVTR(solution_t<char> *solution);
     void checkTimeLimit();
+    void writeStatistics( bool is_final = false );
 };
 
 }}
