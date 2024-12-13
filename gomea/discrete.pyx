@@ -39,6 +39,7 @@ cdef class DiscreteGOMEA:
         # Output settings (optional)
         generational_statistics = True,
         generational_solution = False,
+        output_frequency = 'GEN',
         verbose = False,
     ):
 
@@ -74,6 +75,14 @@ cdef class DiscreteGOMEA:
         self.c_config.generational_statistics = generational_statistics
         self.c_config.generational_solution = generational_solution
         self.c_config.verbose = verbose
+        if output_frequency.lower() == 'gen':
+            self.c_config.output_frequency = GEN
+        elif output_frequency.lower() == 'ims_gen':
+            self.c_config.output_frequency = IMS_GEN
+        elif output_frequency.lower() == 'new_elite':
+            self.c_config.output_frequency = NEW_ELITE
+        else:
+            raise ValueError("output_frequency must be one of 'GEN', 'IMS_GEN', 'NEW_ELITE'")
         self.c_config.fix_seed = False
         if random_seed != -1:
             self.c_config.randomSeed = random_seed

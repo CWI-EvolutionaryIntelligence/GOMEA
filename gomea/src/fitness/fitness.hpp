@@ -3,6 +3,7 @@
 #include "gomea/src/common/gomea_defs.hpp"
 #include "gomea/src/common/solution.hpp"
 #include "gomea/src/common/partial_solution.hpp"
+#include "gomea/src/common/output_statistics.hpp"
 #include "gomea/src/utils/tools.hpp"
 #include "gomea/src/utils/time.hpp"
 #include <map>
@@ -59,6 +60,8 @@ class fitness_t : public fitness_generic_t
 		double vtr = 0.0; // value-to-reach
 		bool black_box_optimization = false;
 		bool use_vtr = false;
+		output_frequency_t output_frequency = output_frequency_t::GEN;
+		bool elitist_was_written = true;
 		
 		// Optimization progress
 		double number_of_evaluations; // discounted in GBO

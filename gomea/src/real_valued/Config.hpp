@@ -56,6 +56,7 @@ class Config {
 		double vtr = 0.0,                                           		/* The value-to-reach (function value of best solution that is feasible). */
 			   lower_user_range = 0.0,                              /* The initial lower range-bound indicated by the user (same for all dimensions). */
 			   upper_user_range = 1.0;                              /* The initial upper range-bound indicated by the user (same for all dimensions). */
+		output_frequency_t output_frequency = output_frequency_t::GEN;
 		fitness_t<double> *fitness = NULL;
         linkage_config_t *linkage_config = NULL;
 		long long random_seed = 0;
