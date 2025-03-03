@@ -41,7 +41,7 @@ jobs:
     
     - uses: actions/upload-artifact@v4
       with:
-        name: wheel
+        name: wheel-${{ matrix.config.os }}
         path: dist/
         
   src-dist:
