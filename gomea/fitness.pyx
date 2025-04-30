@@ -41,7 +41,12 @@ cdef class FitnessFunction:
         rotation_matrix = <np.ndarray?> self.rotation_matrices[(len(variables),rotation_angle)]
         rotated_variables = np.matmul(rotation_matrix, variables)
         return rotated_variables
+
+    cpdef double lower_range_bound(self, int variable_index):
+        return -INFINITY
         
+    cpdef double upper_range_bound(self, int variable_index):
+        return INFINITY
 
 cdef class YourFitnessFunctionDiscrete(FitnessFunction):
     def __cinit__(self, 

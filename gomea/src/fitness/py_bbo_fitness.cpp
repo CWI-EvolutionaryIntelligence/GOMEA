@@ -76,39 +76,35 @@ double pyBBOFitnessFunction_t<double>::constraintFunction( vec_t<double> &variab
 }
 
 template<class T>
-double pyBBOFitnessFunction_t<T>::getLowerRangeBound( int dimension )
+double pyBBOFitnessFunction_t<T>::getLowerRangeBound( int variable_index )
 {
-	throw std::runtime_error("FitnessFunction does not implement getLowerRangeBound(int).");
+	return gomea_pyfitness_lower_range_bound(py_class,variable_index);
 }
 
 template<class T>	
-double pyBBOFitnessFunction_t<T>::getUpperRangeBound( int dimension )
+double pyBBOFitnessFunction_t<T>::getUpperRangeBound( int variable_index )
 {
-	throw std::runtime_error("FitnessFunction does not implement getUpperRangeBound(int).");
+	return gomea_pyfitness_upper_range_bound(py_class,variable_index);
 }
 
 template<>
-double pyBBOFitnessFunction_t<char>::getLowerRangeBound( int dimension )
+double pyBBOFitnessFunction_t<char>::getLowerRangeBound( int variable_index )
 {
-	return( 0 );
+	double result = gomea_pyfitness_lower_range_bound(py_class,variable_index);
+	if( result == -INFINITY ){
+		return 0;
+	}
+	return result;
 }
 
 template<>	
-double pyBBOFitnessFunction_t<char>::getUpperRangeBound( int dimension )
+double pyBBOFitnessFunction_t<char>::getUpperRangeBound( int variable_index )
 {
-	return( alphabet_size-1 );
-}
-
-template<>
-double pyBBOFitnessFunction_t<double>::getLowerRangeBound( int dimension )
-{
-	return( -1e308 );
-}
-
-template<>	
-double pyBBOFitnessFunction_t<double>::getUpperRangeBound( int dimension )
-{
-	return( 1e308 );
+	double result = gomea_pyfitness_upper_range_bound(py_class,variable_index);
+	if( result == INFINITY ){
+		return alphabet_size-1;
+	}
+	return result;
 }
 
 template class pyBBOFitnessFunction_t<char>;

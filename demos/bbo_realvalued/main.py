@@ -10,10 +10,16 @@ class CustomRosenbrockFunction(gomea.fitness.BBOFitnessFunctionRealValued):
             y = variables[i+1]
             f += 100*(y-x*x)*(y-x*x) + (1.0-x)*(1.0-x)
         return f
+    
+    def lower_range_bound(self, variable_index):
+        return -10
+    
+    def upper_range_bound(self, variable_index):
+        return 10
 
 dim = 10
 frv = CustomRosenbrockFunction(dim,value_to_reach=1e-6)
 lm = gomea.linkage.Univariate()
-rvgom = gomea.RealValuedGOMEA(fitness=frv, linkage_model=lm, lower_init_range=-115, upper_init_range=-100, max_number_of_populations=1, base_population_size=100, max_number_of_evaluations=1000000)
+rvgom = gomea.RealValuedGOMEA(fitness=frv, linkage_model=lm, lower_init_range=-10, upper_init_range=10, max_number_of_populations=1, base_population_size=100, max_number_of_evaluations=1000000)
 result = rvgom.run()
 result.printAllStatistics()

@@ -120,3 +120,13 @@ cdef public double gomea_pyfitness_similarity_measure(obj, size_t var_a, size_t 
     fitness_obj = <GBOFitnessFunction?>obj
     cdef double result = fitness_obj.similarity_measure(var_a,var_b)
     return result
+
+cdef public double gomea_pyfitness_lower_range_bound(obj, int variable_index) except? -INFINITY:
+    fitness_obj = <FitnessFunction?>obj
+    cdef double result = fitness_obj.lower_range_bound(variable_index)
+    return result
+
+cdef public double gomea_pyfitness_upper_range_bound(obj, int variable_index) except? INFINITY:
+    fitness_obj = <FitnessFunction?>obj
+    cdef double result = fitness_obj.upper_range_bound(variable_index)
+    return result
