@@ -114,6 +114,8 @@ cdef class FitnessFunction:
     
     cpdef void initialize_rotation_matrix(self, int rotation_block_size, double rotation_angle)
     cpdef np.ndarray rotate_variables(self, np.ndarray variables, double rotation_angle)
+    cpdef double lower_range_bound(self, int variable_index)
+    cpdef double upper_range_bound(self, int variable_index)
 
 cdef class GBOFitnessFunction(FitnessFunction):
     cpdef double subfunction( self, int subfunction_index, np.ndarray variables ) except? INFINITY
