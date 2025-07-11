@@ -16,7 +16,7 @@ std::string linkage_model_t::getTypeName( linkage::linkage_model_type type )
     return "Unknown type";
 }
 
-linkage_model_pt linkage_model_t::createLinkageTreeFOSInstance(size_t FOSIndex, size_t numberOfVariables, int similarityMeasure, int maximumFOSSetSize, bool is_static )
+linkage_model_pt linkage_model_t::createLinkageTreeFOSInstance(size_t FOSIndex, size_t numberOfVariables, linkage::similarity_measure_type similarityMeasure, int maximumFOSSetSize, bool is_static )
 {
     switch (FOSIndex)
     {
@@ -104,7 +104,7 @@ linkage_model_t::linkage_model_t( size_t numberOfVariables_, const vec_t<vec_t<i
 	shuffleFOS();
 }
 
-linkage_model_t::linkage_model_t(size_t numberOfVariables_, int similarityMeasure_, bool filtered_, int maximumSetSize_, bool is_static_ ) : linkage_model_t(numberOfVariables_)
+linkage_model_t::linkage_model_t(size_t numberOfVariables_, linkage::similarity_measure_type similarityMeasure_, bool filtered_, int maximumSetSize_, bool is_static_ ) : linkage_model_t(numberOfVariables_)
 {
 	numberOfVariables = numberOfVariables_;
 	similarityMeasure = similarityMeasure_;
@@ -203,7 +203,7 @@ linkage_model_pt linkage_model_t::marginal_product_model( size_t numberOfVariabl
 	return( new_fos );
 }
         
-linkage_model_pt linkage_model_t::linkage_tree(size_t numberOfVariables_, int similarityMeasure_, bool filtered_, int maximumSetSize_, bool is_static_ )
+linkage_model_pt linkage_model_t::linkage_tree(size_t numberOfVariables_, linkage::similarity_measure_type similarityMeasure_, bool filtered_, int maximumSetSize_, bool is_static_ )
 {
 	linkage_model_pt new_fos = std::shared_ptr<linkage_model_t>(new linkage_model_t(numberOfVariables_, similarityMeasure_, filtered_, maximumSetSize_, is_static_));
 	return( new_fos );
@@ -221,7 +221,7 @@ linkage_model_pt linkage_model_t::custom_fos( size_t numberOfVariables_, const v
 	return( new_fos );
 }
     
-int linkage_model_t::getSimilarityMeasure()
+linkage::similarity_measure_type linkage_model_t::getSimilarityMeasure()
 {
 	return similarityMeasure;
 }
@@ -453,7 +453,7 @@ vec_t<int> linkage_model_t::graphColoring( std::map<int,std::set<int>> &VIG )
     
 void linkage_model_t::printFOS()
 {
-	printf("Linkage model: (sim:%d,static:%d,)\n",similarityMeasure,is_static);
+	printf("Linkage model: (sim:%d,static:%d,)\n",(int)similarityMeasure,is_static);
 	for( size_t i = 0; i < FOSStructure.size(); i++ )
 	{
 		printf("[%d]{",i);
@@ -472,22 +472,18 @@ void linkage_model_t::printFOS()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
     
-void linkage_model_t::learnLinkageTreeFOS(vec_t<solution_t<char>*> &population, size_t alphabetSize )
+void linkage_model_t::learnLinkageTreeFOS( fitness::fitness_t<char> *problemInstance, vec_t<solution_t<char>*> &population )
 {
 	vec_t<vec_t<double>> MI_matrix;
 
     /* Compute Mutual Information matrix */
-	if (similarityMeasure == 0) // MI
-	{
-		MI_matrix = computeMIMatrix(population, alphabetSize);
-	}
-	else if (similarityMeasure == 1) // normalized MI
-	{
-		MI_matrix = computeNMIMatrix(population, alphabetSize);
-	}
-	else
-	{
-		throw std::runtime_error("Unknown similarity measure.\n");
+	switch (similarityMeasure){
+		case linkage::similarity_measure_type::MI     : MI_matrix = computeMIMatrix(population, problemInstance->alphabet_size); break;
+		case linkage::similarity_measure_type::NMI    : MI_matrix = computeNMIMatrix(population, problemInstance->alphabet_size); break;
+		case linkage::similarity_measure_type::VIG    : MI_matrix = problemInstance->getSimilarityMatrix(similarityMeasure); break;
+		case linkage::similarity_measure_type::TIGHT  : MI_matrix = problemInstance->getSimilarityMatrix(similarityMeasure); break;
+		case linkage::similarity_measure_type::RANDOM : MI_matrix = problemInstance->getSimilarityMatrix(similarityMeasure); break;
+		default: throw std::runtime_error("Unknown similarity measure.\n");
 	}
     
 	learnLinkageTreeFOS(MI_matrix,false);
@@ -495,7 +491,7 @@ void linkage_model_t::learnLinkageTreeFOS(vec_t<solution_t<char>*> &population, 
 
 void linkage_model_t::learnLinkageTreeFOS( vec_t<vec_t<double>> similarity_matrix, bool include_full_fos_element )
 {
-	assert( type == linkage::LINKAGE_TREE );
+	assert( type == linkage::linkage_model_type::LINKAGE_TREE );
 
     FOSStructure.clear();
     vec_t<int> mpmFOSMap;
@@ -571,7 +567,7 @@ void linkage_model_t::learnLinkageTreeFOS( vec_t<vec_t<double>> similarity_matri
 		bool skipFOSElement = false;
 		if( filtered )
 		{
-			if ( (similarityMeasure == 0 || similarityMeasure == 1 ) )
+			if ( (similarityMeasure == linkage::MI || similarityMeasure == linkage::NMI ) )
 			{
 				if( S_Matrix[r1][r0] >= 1-(1e-6))
 					skipFOSElement = true;
@@ -776,7 +772,7 @@ vec_t<vec_t<double>> linkage_model_t::computeMIMatrix( vec_t<solution_t<char>*> 
         {
             vec_t<size_t> indices{i, j};
             vec_t<double> factorProbabilities;
-            estimateParametersForSingleBinaryMarginal(population, alphabetSize, indices, factorSize, factorProbabilities);
+            estimateParametersForSingleBinaryMarginal(population, alphabetSize, indices, factorSize, factorProbabilities, MI_truncation_factor);
 
             MI_Matrix[i][j] = 0.0;
             for(size_t k = 0; k < factorSize; k++)
@@ -790,7 +786,7 @@ vec_t<vec_t<double>> linkage_model_t::computeMIMatrix( vec_t<solution_t<char>*> 
 
         vec_t<size_t> indices{i};
         vec_t<double> factorProbabilities;
-        estimateParametersForSingleBinaryMarginal(population, alphabetSize, indices, factorSize, factorProbabilities);
+        estimateParametersForSingleBinaryMarginal(population, alphabetSize, indices, factorSize, factorProbabilities, MI_truncation_factor);
 
         MI_Matrix[i][i] = 0.0;
         for (size_t k = 0; k < factorSize; k++)
@@ -863,13 +859,13 @@ vec_t<vec_t<double>> linkage_model_t::computeNMIMatrix( vec_t<solution_t<char>*>
             size_t factorSize_joint, factorSize_i, factorSize_j;
 
             vec_t<size_t> indices_joint{i, j};
-            estimateParametersForSingleBinaryMarginal(population, alphabetSize, indices_joint, factorSize_joint, factorProbabilities_joint);
+            estimateParametersForSingleBinaryMarginal(population, alphabetSize, indices_joint, factorSize_joint, factorProbabilities_joint, MI_truncation_factor);
             
             vec_t<size_t> indices_i{i};
-            estimateParametersForSingleBinaryMarginal(population, alphabetSize, indices_i, factorSize_i, factorProbabilities_i);
+            estimateParametersForSingleBinaryMarginal(population, alphabetSize, indices_i, factorSize_i, factorProbabilities_i, MI_truncation_factor);
             
             vec_t<size_t> indices_j{j};
-            estimateParametersForSingleBinaryMarginal(population, alphabetSize, indices_j, factorSize_j, factorProbabilities_j);
+            estimateParametersForSingleBinaryMarginal(population, alphabetSize, indices_j, factorSize_j, factorProbabilities_j, MI_truncation_factor);
 
             MI_Matrix[i][j] = 0.0;
             
@@ -925,10 +921,10 @@ void linkage_model_t::writeMIMatrixToFile(vec_t<vec_t<double>> MI_Matrix, std::s
 }
 
 /**
- * Estimates the cumulative probability distribution of a
+ * Estimates the probability distribution of a
  * single binary marginal.
  */
-void linkage_model_t::estimateParametersForSingleBinaryMarginal(vec_t<solution_t<char>*> &population, size_t alphabetSize, vec_t<size_t> &indices, size_t &factorSize, vec_t<double> &result)
+void linkage_model_t::estimateParametersForSingleBinaryMarginal(vec_t<solution_t<char>*> &population, size_t alphabetSize, vec_t<size_t> &indices, size_t &factorSize, vec_t<double> &result, double truncation_factor)
 {
     size_t numberOfIndices = indices.size();
     factorSize = (int)pow(alphabetSize, numberOfIndices);
@@ -936,21 +932,38 @@ void linkage_model_t::estimateParametersForSingleBinaryMarginal(vec_t<solution_t
     result.resize(factorSize);
     fill(result.begin(), result.end(), 0.0);
 
-    for (size_t i = 0; i < population.size(); i++)
+	size_t num_solutions = population.size();
+	vec_t<int> selection_indices(num_solutions);
+	std::iota(selection_indices.begin(), selection_indices.end(), 0);
+	if( truncation_factor < 1.0 ) 
+	{
+		num_solutions = (int) (truncation_factor * population.size());
+		assert(num_solutions > 0);
+		// Sort by ascending objective value
+		std::sort(selection_indices.begin(),selection_indices.end(),
+			[&population](int ind_a, int ind_b){
+				return population[ind_a]->getObjectiveValue() > population[ind_b]->getObjectiveValue();
+			}
+		);
+	}
+	assert(population[selection_indices[0]]->getObjectiveValue() >= population[selection_indices[num_solutions-1]]->getObjectiveValue());
+
+    for (size_t i = 0; i < num_solutions; i++)
     {
-        int index = 0;
+		int pop_index = selection_indices[i];
+        int bitmap_index = 0;
         int power = 1;
         for (int j = numberOfIndices-1; j >= 0; j--)
         {
-            index += (int)population[i]->variables[indices[j]] * power;
+            bitmap_index += (int)population[pop_index]->variables[indices[j]] * power;
             power *= alphabetSize;
         }
 
-        result[index] += 1.0;
+        result[bitmap_index] += 1.0;
     }
 
     for (size_t i = 0; i < factorSize; i++)
-        result[i] /= (double)population.size();
+        result[i] /= num_solutions;
 }
 
 }

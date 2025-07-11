@@ -41,6 +41,10 @@ public:
 
     friend std::ostream & operator << (std::ostream &out, const Population &populationInstance);
 
+    void initializeAndEvaluatePopulation();
+    void initializePopulationProbabilisticallyComplete();
+    void initializePopulationRandomUniform();
+
     void calculateAverageFitness();
     double getFitnessMean();
     double getFitnessVariance();
@@ -54,7 +58,8 @@ public:
     void generateOffspring();
     void evaluateSolution(solution_t<char> *solution);
     void evaluateSolution(solution_t<char> *solution, solution_t<char> *solutionBefore, vec_t<int> &touchedGenes, double fitnessBefore);
-    bool GOM(size_t offspringIndex);
+    bool GOM(size_t offspringIndex, int FOSIndex, bool isElitistSolution = false);
+    void GeneInvariantGOM(size_t parent_index, int FOS_index);
     bool FI(size_t offspringIndex);
     void updateElitistAndCheckVTR(solution_t<char> *solution);
     void checkTimeLimit();

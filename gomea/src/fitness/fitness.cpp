@@ -87,6 +87,24 @@ bool fitness_t<T>::betterFitness( solution_t<T> *sol_x, solution_t<T> *sol_y )
 }
 
 template<class T>
+bool fitness_t<T>::betterFitness( solution_t<T> *sol_x, partial_solution_t<T> *sol_y ) 
+{
+	return( betterFitness( sol_x->getObjectiveValue(), sol_x->getConstraintValue(), sol_y->getObjectiveValue(), sol_y->getConstraintValue() ) );
+}
+
+template<class T>
+bool fitness_t<T>::betterFitness( partial_solution_t<T> *sol_x, solution_t<T> *sol_y ) 
+{
+	return( betterFitness( sol_x->getObjectiveValue(), sol_x->getConstraintValue(), sol_y->getObjectiveValue(), sol_y->getConstraintValue() ) );
+}
+
+template<class T>
+bool fitness_t<T>::betterFitness( partial_solution_t<T> *sol_x, partial_solution_t<T> *sol_y ) 
+{
+	return( betterFitness( sol_x->getObjectiveValue(), sol_x->getConstraintValue(), sol_y->getObjectiveValue(), sol_y->getConstraintValue() ) );
+}
+
+template<class T>
 void fitness_t<T>::evaluate( solution_t<T> *solution )
 {
 	checkTermination();
@@ -291,22 +309,24 @@ void fitness_t<T>::printVariableInteractionGraph()
 
 
 template<class T>
-vec_t<vec_t<double>> fitness_t<T>::getSimilarityMatrix( int similarity_measure_index )
+vec_t<vec_t<double>> fitness_t<T>::getSimilarityMatrix( linkage::similarity_measure_type similarity_measure )
 {
 	if( similarity_matrix.size() == 0 )
 	{
 		similarity_matrix.resize(number_of_variables);
-		for (size_t i = 0; i < number_of_variables; i++)
+		for (int i = 0; i < number_of_variables; i++)
 		{
 			similarity_matrix[i].resize(number_of_variables);
 			similarity_matrix[i][i] = 1e100;
-			for (size_t j = 0; j < i; j++)
+			for (int j = 0; j < i; j++)
 			{
 				double sim;
-				if( similarity_measure_index == 2 )
-					sim = getSimilarityMeasure(i, j);
-				else
-					sim = utils::randomRealUniform01();
+				switch( similarity_measure ){
+					case linkage::similarity_measure_type::VIG    : sim = getSimilarityMeasure(i, j); break;
+					case linkage::similarity_measure_type::TIGHT  : sim = number_of_variables - abs(i-j); break;
+					case linkage::similarity_measure_type::RANDOM : sim = utils::randomRealUniform01(); break;
+					default : throw std::runtime_error("Unknown similarity measure.");
+				}
 				similarity_matrix[i][j] = sim;
 				similarity_matrix[j][i] = sim;
 			}
@@ -318,7 +338,6 @@ vec_t<vec_t<double>> fitness_t<T>::getSimilarityMatrix( int similarity_measure_i
 template<class T>
 double fitness_t<T>::getSimilarityMeasure( size_t var_a, size_t var_b )
 {
-	assert(0);
 	throw std::runtime_error("Fitness function does not implement getSimilarityMeasure(size_t,size_t).");
 }
 

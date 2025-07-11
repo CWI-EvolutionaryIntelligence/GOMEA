@@ -17,6 +17,9 @@ cdef class FitnessFunction:
         **kwargs
     ):
         self.rotation_matrix = np.ndarray(0)
+    
+    cpdef double similarity_measure( self, size_t var_a, size_t var_b ) except? INFINITY:
+        return -1
 
     cpdef void initialize_rotation_matrix(self, int rotation_block_size, double rotation_angle):
         rotation_matrix : np.ndarray = np.identity(rotation_block_size)
@@ -90,9 +93,6 @@ cdef class GBOFitnessFunction(FitnessFunction):
 
     cpdef int fitness_buffer_index_for_subfunction( self, int subfunction_index ) except -1: 
         return 0
-
-    cpdef double similarity_measure( self, size_t var_a, size_t var_b ) except? INFINITY:
-        return -1
 
 cdef class GBOFitnessFunctionDiscrete(GBOFitnessFunction):
     def __cinit__(self, 

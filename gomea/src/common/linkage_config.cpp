@@ -7,15 +7,17 @@ linkage_config_t::linkage_config_t()
 	type = linkage::UNIVARIATE;
 }
 
-linkage_config_t::linkage_config_t( bool is_mpm_, int block_size_ ) : is_mpm(is_mpm_), mpm_block_size(block_size_)
+linkage_config_t::linkage_config_t( int block_size_ ) : mpm_block_size(block_size_)
 {
 	type = linkage::MPM;
+	is_mpm = true;
 }
 
-linkage_config_t::linkage_config_t(int similarityMeasure_, bool filtered_, int maximumSetSize_, bool is_static_ ) 
-	: lt_similarity_measure(similarityMeasure_), lt_filtered(filtered_), lt_maximum_set_size(maximumSetSize_), lt_is_static(is_static_)
+linkage_config_t::linkage_config_t(std::string similarityMeasure_, bool filtered_, int maximumSetSize_, bool is_static ) 
+	: lt_filtered(filtered_), lt_maximum_set_size(maximumSetSize_), lt_is_static(is_static)
 {
 	type = linkage::LINKAGE_TREE;
+	lt_similarity_measure = parseSimilarityMeasure(similarityMeasure_);
 }
 
 linkage_config_t::linkage_config_t( const vec_t<vec_t<int>> &FOS_ ) : FOS(FOS_)

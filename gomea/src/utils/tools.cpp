@@ -134,4 +134,18 @@ void initializeRandomNumberGenerator( long long seed )
 	rng.seed(utils::random_seed);
 }
 
+std::string toLower(std::string _str)
+{
+    std::string str = _str;
+    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+    return str;
+}
+
+std::string toUpper(std::string _str)
+{
+    std::string str = _str;
+    std::transform(str.begin(), str.end(), str.begin(), ::toupper);
+    return str;
+}
+
 }}

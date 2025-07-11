@@ -232,7 +232,7 @@ linkage_model_rv_pt linkage_model_rv_t::custom_fos( size_t numberOfVariables_, c
 	return( new_fos );
 }
     
-linkage_model_rv_pt linkage_model_rv_t::linkage_tree(size_t numberOfVariables_, int similarityMeasure_, bool filtered_, int maximumSetSize_, bool is_static_ ) 
+linkage_model_rv_pt linkage_model_rv_t::linkage_tree(size_t numberOfVariables_, linkage::similarity_measure_type similarityMeasure_, bool filtered_, int maximumSetSize_, bool is_static_ ) 
 {
 	linkage_model_rv_pt new_fos = std::shared_ptr<linkage_model_rv_t>(new linkage_model_rv_t(numberOfVariables_, similarityMeasure_, filtered_, maximumSetSize_, is_static_));
 	return( new_fos );

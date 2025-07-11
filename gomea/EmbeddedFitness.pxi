@@ -117,6 +117,6 @@ cdef public int gomea_pyfitness_numberOfSubfunctions(obj) except -1:
     return n
 
 cdef public double gomea_pyfitness_similarity_measure(obj, size_t var_a, size_t var_b) except? INFINITY:
-    fitness_obj = <GBOFitnessFunction?>obj
+    fitness_obj = <FitnessFunction?>obj
     cdef double result = fitness_obj.similarity_measure(var_a,var_b)
     return result

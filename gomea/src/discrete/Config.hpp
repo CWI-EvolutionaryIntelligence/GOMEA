@@ -9,6 +9,7 @@
 #include <cxxopts.hpp>
 
 #include "gomea/src/common/linkage_model.hpp"
+#include "gomea/src/common/linkage_config.hpp"
 #include "gomea/src/fitness/fitness.hpp"
 #include "gomea/src/fitness/benchmarks-discrete.hpp"
 
@@ -31,10 +32,11 @@ public:
     void printOverview();
     
 	fitness_t<char> *fitness;
-    bool generational_statistics = true,
-         generational_solution = false,
-         write_generational_population = false,
-         verbose = false;
+    bool gene_invariant = false, 
+        generational_statistics = true,
+        generational_solution = false,
+        write_generational_population = false,
+        verbose = false;
 	int usePartialEvaluations              = 1,                  
 		useParallelGOM		               = 1,                  
 		useParallelFOSOrder	               = 0,

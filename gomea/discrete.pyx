@@ -27,6 +27,7 @@ cdef class DiscreteGOMEA:
         fitness: FitnessFunction, 
         # GOMEA settings (optional)
         linkage_model : LinkageModel = StaticLinkageTree(),
+        gene_invariant : bool = False,
         random_seed : int = -1,
         # IMS settings (optional)
         max_number_of_populations : int = 25,
@@ -37,10 +38,10 @@ cdef class DiscreteGOMEA:
         max_number_of_evaluations : int = -1,
         max_number_of_seconds : float = -1.0,
         # Output settings (optional)
-        generational_statistics = True,
-        generational_solution = False,
-        output_frequency = 'GEN',
-        verbose = False,
+        generational_statistics : bool = True,
+        generational_solution : bool = False,
+        output_frequency : str = 'GEN',
+        verbose : bool = False,
     ):
 
         # Initialize attributes 
@@ -69,6 +70,7 @@ cdef class DiscreteGOMEA:
         self.c_config.maximumNumberOfGenerations = max_number_of_generations
         self.c_config.maximumNumberOfSeconds = max_number_of_seconds
         self.c_config.AnalyzeFOS = 0
+        self.c_config.gene_invariant = gene_invariant
         #if analyze_fos:
         #    self.c_config.AnalyzeFOS = 1
         #self.c_config.verbose = False 

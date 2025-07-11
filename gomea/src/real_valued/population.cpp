@@ -713,7 +713,7 @@ void population_t::initializeFOSFromIndex( int FOSIndex )
 	}
 	else if( FOSIndex == -2 )
 	{
-		new_FOS = linkage_model_rv_t::linkage_tree( fitness->number_of_variables, 0, false, -1, false );
+		new_FOS = linkage_model_rv_t::linkage_tree( fitness->number_of_variables, linkage::similarity_measure_type::MI, false, -1, false );
 	}
 	else if( FOSIndex == -3 )
 	{

@@ -111,6 +111,20 @@ double pyBBOFitnessFunction_t<double>::getUpperRangeBound( int dimension )
 	return( 1e308 );
 }
 
+template<class T>
+double pyBBOFitnessFunction_t<T>::getSimilarityMeasure( size_t var_a, size_t var_b )
+{
+	double result = gomea_pyfitness_similarity_measure(py_class,var_a,var_b);
+	if( result < 0.0 )
+	{
+		throw std::runtime_error("Fitness function does not implement similarity_measure(size_t,size_t).");
+	}
+	else
+	{
+		return result;
+	}
+}
+
 template class pyBBOFitnessFunction_t<char>;
 template class pyBBOFitnessFunction_t<double>;
 

@@ -325,7 +325,7 @@ template<>
 void solution_t<char>::print()
 {
 	for( size_t i = 0; i < variables.size(); i++ )
-		printf("%c ",variables[i]);
+		printf("%d",variables[i]);
 	printf("\n");
 }
 

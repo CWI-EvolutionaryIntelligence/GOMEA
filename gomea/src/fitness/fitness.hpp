@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gomea/src/common/gomea_defs.hpp"
+#include "gomea/src/common/linkage_config.hpp"
 #include "gomea/src/common/solution.hpp"
 #include "gomea/src/common/partial_solution.hpp"
 #include "gomea/src/common/output_statistics.hpp"
@@ -76,6 +77,9 @@ class fitness_t : public fitness_generic_t
 		
 		static fitness_t *getFitnessClass( int problem_index, int number_of_variables, double vtr );
 		bool betterFitness( solution_t<T> *sol_x, solution_t<T> *sol_y );
+		bool betterFitness( solution_t<T> *sol_x, partial_solution_t<T> *sol_y );
+		bool betterFitness( partial_solution_t<T> *sol_x, solution_t<T> *sol_y );
+		bool betterFitness( partial_solution_t<T> *sol_x, partial_solution_t<T> *sol_y );
 		bool betterFitness( double objective_value_x, double constraint_value_x, double objective_value_y, double constraint_value_y );
 
 		virtual void initialize();
@@ -85,7 +89,7 @@ class fitness_t : public fitness_generic_t
 		bool hasVariableInteractionGraph();
 		void printVariableInteractionGraph();
 		
-		vec_t<vec_t<double>> getSimilarityMatrix( int similarity_measure_index );
+		vec_t<vec_t<double>> getSimilarityMatrix( linkage::similarity_measure_type similarity_measure );
 		virtual double getSimilarityMeasure( size_t var_a, size_t var_b );
 		
 		
