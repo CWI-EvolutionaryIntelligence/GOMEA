@@ -23,6 +23,8 @@ class pyBBOFitnessFunction_t : public BBOFitnessFunction_t<T>
 		
 		double getLowerRangeBound( int dimension );
 		double getUpperRangeBound( int dimension );
+
+		double getSimilarityMeasure( size_t var_a, size_t var_b );
 	
 	protected:
 		PyObject *py_class;

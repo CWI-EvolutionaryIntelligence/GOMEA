@@ -6,12 +6,18 @@ from libcpp cimport bool
 
 cdef extern from "gomea/src/common/linkage_config.hpp" namespace "gomea":
     cdef cppclass linkage_config_t:
-        linkage_config_t() except +
-        linkage_config_t(bool,int) except +
-        linkage_config_t(int,bool,int,bool) except +
-        linkage_config_t(int,bool,bool) except +
-        linkage_config_t(vector[vector[int]]) except +
-        linkage_config_t(string) except +
+        @staticmethod
+        linkage_config_t *constructor_UNI()
+        @staticmethod
+        linkage_config_t *constructor_MPM(int)
+        @staticmethod
+        linkage_config_t *constructor_LT(string,bool,int,bool)
+        @staticmethod
+        linkage_config_t *constructor_COND(int,bool,bool)
+        @staticmethod
+        linkage_config_t *constructor_CUSTOM(vector[vector[int]])
+        @staticmethod
+        linkage_config_t *constructor_FILE(string)
 
 cdef class LinkageModel:
     cdef linkage_config_t *c_inst

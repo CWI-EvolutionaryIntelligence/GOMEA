@@ -111,6 +111,8 @@ cdef class FitnessFunction:
 
     cdef fitness_t[char] *c_inst_discrete
     cdef fitness_t[double] *c_inst_realvalued
+
+    cpdef double similarity_measure( self, size_t, size_t ) except? INFINITY
     
     cpdef void initialize_rotation_matrix(self, int rotation_block_size, double rotation_angle)
     cpdef np.ndarray rotate_variables(self, np.ndarray variables, double rotation_angle)
@@ -125,7 +127,6 @@ cdef class GBOFitnessFunction(FitnessFunction):
     cpdef int number_of_fitness_buffers( self ) except -1
     cpdef int fitness_buffer_index_for_subfunction( self, int ) except -1
     
-    cpdef double similarity_measure( self, size_t, size_t ) except? INFINITY
 
 cdef class GBOFitnessFunctionDiscrete(GBOFitnessFunction):
     pass

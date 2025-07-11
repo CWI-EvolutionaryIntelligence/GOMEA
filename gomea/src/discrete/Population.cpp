@@ -22,14 +22,10 @@ Population::Population(Config *config_, output_statistics_t *output_, fitness_t<
         vec_t<int> allGenes(problemInstance->number_of_variables);
         iota(allGenes.begin(), allGenes.end(), 0);
 
-        for (size_t i = 0; i < populationSize; ++i)
-        {
-            noImprovementStretches[i] = 0;
+        initializeAndEvaluatePopulation();
 
-            population[i] = new solution_t<char>(problemInstance->number_of_variables, problemInstance->alphabet_size);
-            population[i]->randomInit(&gomea::utils::rng);
-            problemInstance->evaluate(population[i]);
-            
+        for (size_t i = 0; i < populationSize; ++i)
+        {            
             offspringPopulation[i] = new solution_t<char>(problemInstance->number_of_variables, problemInstance->alphabet_size);
             *offspringPopulation[i] = *population[i];
         }
@@ -44,6 +40,9 @@ Population::Population(Config *config_, output_statistics_t *output_, fitness_t<
 			FOSInstance = linkage_model_t::createLinkageTreeFOSInstance(config->FOSIndex, problemInstance->number_of_variables, config->linkage_config->lt_similarity_measure, config->linkage_config->lt_maximum_set_size);
 		}
 		else FOSInstance = FOSInstance_;
+        if( config->gene_invariant ){
+            FOSInstance->MI_truncation_factor = 0.5;
+        }
         
         #ifdef DEBUG
             std::cout << "New Population created! Population #" << GOMEAIndex << " PopulationSize:" << populationSize << endl;
@@ -80,6 +79,58 @@ bool Population::allSolutionsAreEqual()
         }
     }
     return true;
+}
+
+void Population::initializeAndEvaluatePopulation()
+{
+    for (size_t i = 0; i < populationSize; ++i)
+    {
+        noImprovementStretches[i] = 0;
+        population[i] = new solution_t<char>(problemInstance->number_of_variables, problemInstance->alphabet_size);
+    }
+
+    if( config->gene_invariant ){
+        initializePopulationProbabilisticallyComplete();
+    }
+    else{
+        initializePopulationRandomUniform();
+    }
+
+    // Evaluate the initial population
+    for (size_t i = 0; i < populationSize; ++i){
+        problemInstance->evaluate(population[i]);
+        population[i]->print();
+    }
+}
+
+// Initialize the population with a probabilistically complete set of solutions, ensuring that each gene has an equal frequency in the population.
+void Population::initializePopulationProbabilisticallyComplete()
+{
+    // Find nearest (smaller) multiple of alphabet_size
+    int permutation_size = problemInstance->alphabet_size * (populationSize / problemInstance->alphabet_size);
+    for( int j = 0; j < problemInstance->number_of_variables; j++ )
+    {
+        // Fill the first part of the population with an equal number of each gene
+        vec_t<int> perm = gomea::utils::randomPermutation(permutation_size);
+        for( int i = 0; i < permutation_size; i++ ){
+            population[i]->variables[j] = perm[i] % problemInstance->alphabet_size;
+        }
+        // Fill the rest of the population with random (unique) values
+        if(permutation_size != populationSize){
+            vec_t<int> perm_last_chunk = gomea::utils::randomPermutation(problemInstance->alphabet_size);
+            for( int i = permutation_size; i < populationSize; i++ ){
+                population[i]->variables[j] = perm_last_chunk[i]; // already in range [0, alphabet_size)
+            }
+        }
+    }
+}
+
+void Population::initializePopulationRandomUniform()
+{
+    // Initialize the population with random uniform solutions
+    for (size_t i = 0; i < populationSize; ++i){
+        population[i]->randomInit(&gomea::utils::rng);
+    }
 }
 
 void Population::calculateAverageFitness()
@@ -179,19 +230,19 @@ void Population::makeOffspring()
             updateElitistAndCheckVTR(population[i]);
     }
 
-    if( FOSInstance->type == linkage::LINKAGE_TREE )
+    if( FOSInstance->type == linkage::linkage_model_type::LINKAGE_TREE )
     {
         if (FOSInstance->is_static)
         {
             if (FOSInstance->size() == 0)
             {
-                FOSInstance->learnLinkageTreeFOS(problemInstance->getSimilarityMatrix(FOSInstance->getSimilarityMeasure()), false);
+                FOSInstance->learnLinkageTreeFOS(problemInstance, population);
                 FOSInstance->initializeDependentSubfunctions( problemInstance->subfunction_dependency_map );
             }
         }
         else
         {
-            FOSInstance->learnLinkageTreeFOS(population, problemInstance->alphabet_size );
+            FOSInstance->learnLinkageTreeFOS(problemInstance, population);
             FOSInstance->initializeDependentSubfunctions(problemInstance->subfunction_dependency_map);
         }
     }
@@ -201,6 +252,10 @@ void Population::makeOffspring()
     {
         FOSInstance->writeToFileFOS(config->folder, GOMEAIndex, numberOfGenerations);
     }
+
+    // Initialize the offspring population with copies of the current population
+    for( size_t offspringIndex = 0; offspringIndex < populationSize; offspringIndex++ )
+        *offspringPopulation[offspringIndex] = *population[offspringIndex];
  
     generateOffspring();
 
@@ -211,115 +266,207 @@ void Population::makeOffspring()
 
 void Population::generateOffspring()
 {
-    vec_t<vec_t<int> > neighbors;
-   
-	assert( !config->useParallelFOSOrder || !config->fixFOSOrderForPopulation );
+    assert( !config->useParallelFOSOrder || !config->fixFOSOrderForPopulation );
    	if( config->fixFOSOrderForPopulation )
-    	FOSInstance->shuffleFOS(); 
+    	FOSInstance->shuffleFOS();
 	else if( config->useParallelFOSOrder )
     {
         assert( problemInstance->hasVariableInteractionGraph() );
 		FOSInstance->determineParallelFOSOrder(problemInstance->variable_interaction_graph );
     }
+    
+    if(config->gene_invariant){
+        std::vector<std::pair<int, int>> GOM_pairs;
+        // Generate random pairs of (individual_index, FOS_index)
+        for (int i = 0; i < populationSize; ++i) {
+            for (int j = 0; j < FOSInstance->size(); ++j) {
+                GOM_pairs.emplace_back(i, j);
+            }
+        }
+        std::shuffle(GOM_pairs.begin(), GOM_pairs.end(), gomea::utils::rng);
 
-    for (size_t i = 0; i < populationSize; i++)
-    {
-        if (!config->useParallelFOSOrder && !config->fixFOSOrderForPopulation)
-            FOSInstance->shuffleFOS();
+        for (auto &[individual_index, FOS_index] : GOM_pairs) {
+            GeneInvariantGOM(individual_index, FOS_index);
+        }
+    }
+    else{
+        bool solutionHasChanged[populationSize] = {false};
+        bool isTheElitistSolution[populationSize] = {false};
+        for (size_t i = 0; i < populationSize; i++){
+            isTheElitistSolution[i] = *offspringPopulation[i] == sharedInformationPointer->elitist;
+        }
 
-        solution_t<char> backup = *population[i];
-
-        bool solutionHasChanged;
-        solutionHasChanged = GOM(i);
+        /* Phase 1: optimal mixing with random donors */
+        for (size_t i = 0; i < populationSize; i++){
+            if (!config->useParallelFOSOrder && !config->fixFOSOrderForPopulation)
+                FOSInstance->shuffleFOS();
+    
+            for (size_t j = 0; j < FOSInstance->size(); j++){
+                solutionHasChanged[i] |= GOM(i, FOSInstance->FOSorder[j], isTheElitistSolution[i]);
+            }
+        }
 
         /* Phase 2 (Forced Improvement): optimal mixing with elitist solution */
         if (config->useForcedImprovements)
         {
-            if ((!solutionHasChanged) || (noImprovementStretches[i] > (1 + (log(populationSize) / log(10)))))
-                FI(i);
+            for (size_t i = 0; i < populationSize; i++)
+            {
+                if ((!solutionHasChanged[i]) || (noImprovementStretches[i] > (1 + (log(populationSize) / log(10)))))
+                    FI(i);
+            }
         }
+    }
 
-        if (!(offspringPopulation[i]->getObjectiveValue() > population[i]->getObjectiveValue()))
+    /* Update or reset no-improvement stretch */
+    for (size_t i = 0; i < populationSize; i++)
+    {
+        if (!problemInstance->betterFitness(offspringPopulation[i], population[i]))
             noImprovementStretches[i]++;
         else
             noImprovementStretches[i] = 0;
     }
 }
 
-bool Population::GOM(size_t offspringIndex)
+bool Population::GOM(size_t offspringIndex, int FOS_index, bool isElitistSolution)
 {
-    size_t donorIndex;
+    int ind = FOS_index; //FOSInstance->FOSorder[i];
     bool solutionHasChanged = false;
-    bool thisIsTheElitistSolution = *offspringPopulation[offspringIndex] == sharedInformationPointer->elitist;//(sharedInformationPointer->elitistSolutionGOMEAIndex == GOMEAIndex) && (sharedInformationPointer->elitistSolutionOffspringIndex == offspringIndex);
-    
-    *offspringPopulation[offspringIndex] = *population[offspringIndex];
-            
+
+    if (FOSInstance->elementSize(ind) == 0 || (int) FOSInstance->elementSize(ind) == problemInstance->number_of_variables){
+        return solutionHasChanged;
+    }
+           
     vec_t<int> donorIndices(populationSize);
     iota(donorIndices.begin(), donorIndices.end(), 0);
 
-    for (size_t i = 0; i < FOSInstance->size(); i++)
+    bool donorEqualToOffspring = true;
+    size_t indicesTried = 0;
+    while (donorEqualToOffspring && indicesTried < donorIndices.size())
     {
-        int ind = FOSInstance->FOSorder[i];
+        int j = gomea::utils::rng() % (donorIndices.size() - indicesTried);
+        std::swap(donorIndices[indicesTried], donorIndices[indicesTried + j]);
+        size_t donorIndex = donorIndices[indicesTried];
+        indicesTried++;
 
-        if (FOSInstance->elementSize(ind) == 0 || (int) FOSInstance->elementSize(ind) == problemInstance->number_of_variables)
+        if (donorIndex == offspringIndex)
             continue;
 
-        bool donorEqualToOffspring = true;
-        size_t indicesTried = 0;
-
-        while (donorEqualToOffspring && indicesTried < donorIndices.size())
+        vec_t<char> donorGenes;
+        for(size_t j = 0; j < FOSInstance->elementSize(ind); j++)
         {
-            int j = gomea::utils::rng() % (donorIndices.size() - indicesTried);
-            std::swap(donorIndices[indicesTried], donorIndices[indicesTried + j]);
-            donorIndex = donorIndices[indicesTried];
-            indicesTried++;
-
-            if (donorIndex == offspringIndex)
-                continue;
-
-            vec_t<char> donorGenes;
-            for(size_t j = 0; j < FOSInstance->elementSize(ind); j++)
-            {
-                int variableFromFOS = FOSInstance->FOSStructure[ind][j];
-                //offspringPopulation[offspringIndex]->variables[variableFromFOS] = population[donorIndex]->variables[variableFromFOS];
-                donorGenes.push_back(population[donorIndex]->variables[variableFromFOS]);
-                if (donorGenes[j] != offspringPopulation[offspringIndex]->variables[variableFromFOS])
-                    donorEqualToOffspring = false;
-            }
-            partial_solution_t<char> *partial_offspring = new partial_solution_t<char>(donorGenes, FOSInstance->FOSStructure[ind]);
-
-            if (!donorEqualToOffspring)
-            {
-                //evaluateSolution(offspringPopulation[offspringIndex], backup, touchedGenes, backup->getObjectiveValue());
-                //problemInstance->evaluatePartialSolution(offspringPopulation[offspringIndex], partial_offspring, FOSInstance->getDependentSubfunctions(ind) );
-                problemInstance->evaluatePartialSolution(offspringPopulation[offspringIndex], partial_offspring );
-                if( problemInstance->output_frequency == NEW_ELITE && !problemInstance->elitist_was_written )
-                    writeStatistics();
-
-                // accept the change if this solution is not the elitist and the fitness is at least equally good (allows random walk in neutral fitness landscape)
-                // however, if this is the elitist solution, only accept strict improvements, to avoid convergence problems
-                if ((!thisIsTheElitistSolution && (partial_offspring->getObjectiveValue() >= offspringPopulation[offspringIndex]->getObjectiveValue())) || 
-                        (thisIsTheElitistSolution && (partial_offspring->getObjectiveValue() > offspringPopulation[offspringIndex]->getObjectiveValue())))     
-                {
-                    offspringPopulation[offspringIndex]->insertPartialSolution(partial_offspring);
-                    // offspringPopulation[offspringIndex]->variables[variableFromFOS] = population[donorIndex]->variables[variableFromFOS];
-                    //*backup = *offspringPopulation[offspringIndex];
-                    
-                    solutionHasChanged = true;
-                    updateElitistAndCheckVTR(offspringPopulation[offspringIndex]);
-
-                    FOSInstance->improvementCounters[ind]++;
-                }
-
-                FOSInstance->usageCounters[ind]++;
-
-            }
-            delete partial_offspring;
-
-            break;
+            int variableFromFOS = FOSInstance->FOSStructure[ind][j];
+            donorGenes.push_back(population[donorIndex]->variables[variableFromFOS]);
+            if (donorGenes[j] != offspringPopulation[offspringIndex]->variables[variableFromFOS])
+                donorEqualToOffspring = false;
         }
+        partial_solution_t<char> *partial_offspring = new partial_solution_t<char>(donorGenes, FOSInstance->FOSStructure[ind]);
+
+        if (!donorEqualToOffspring)
+        {
+            problemInstance->evaluatePartialSolution(offspringPopulation[offspringIndex], partial_offspring );
+            if( problemInstance->output_frequency == NEW_ELITE && !problemInstance->elitist_was_written )
+                writeStatistics();
+
+            // accept the change if this solution is not the elitist and the fitness is at least equally good (allows random walk in neutral fitness landscape)
+            // however, if this is the elitist solution, only accept strict improvements, to avoid convergence problems
+            if ((!isElitistSolution && (partial_offspring->getObjectiveValue() >= offspringPopulation[offspringIndex]->getObjectiveValue())) || 
+                    (isElitistSolution && (partial_offspring->getObjectiveValue() > offspringPopulation[offspringIndex]->getObjectiveValue())))     
+            {
+                offspringPopulation[offspringIndex]->insertPartialSolution(partial_offspring);
+                
+                solutionHasChanged = true;
+                updateElitistAndCheckVTR(offspringPopulation[offspringIndex]);
+
+                FOSInstance->improvementCounters[ind]++;
+            }
+
+            FOSInstance->usageCounters[ind]++;
+
+        }
+        delete partial_offspring;
+
+        break;
     }
     return solutionHasChanged;
+}
+
+void Population::GeneInvariantGOM(size_t parent_index, int FOS_index)
+{
+    if (FOSInstance->elementSize(FOS_index) == 0 || (int) FOSInstance->elementSize(FOS_index) == problemInstance->number_of_variables){
+        return;
+    }
+           
+    vec_t<int> mateIndices(populationSize);
+    iota(mateIndices.begin(), mateIndices.end(), 0);
+
+    size_t mate_index = 1 - parent_index; // population size == 2
+    if( populationSize > 2 ){ // Choose 2 random mates, then pick best
+        std::vector<size_t> mates;
+        size_t indicesTried = 0;
+        while (mates.size() < 2)
+        {
+            int j = gomea::utils::rng() % (mateIndices.size() - indicesTried);
+            std::swap(mateIndices[indicesTried], mateIndices[indicesTried + j]);
+            size_t ind = mateIndices[indicesTried];
+            indicesTried++;
+            if (ind != parent_index)
+                mates.push_back(ind);
+        }
+        assert(mates.size() == 2);
+        mate_index = mates[1];
+        if( problemInstance->betterFitness(offspringPopulation[mates[0]], offspringPopulation[mates[1]]) )
+            mate_index = mates[0];
+    }
+
+    // Swap parent and mate indices if mate is at least as good as parent
+    if( !problemInstance->betterFitness(offspringPopulation[parent_index], offspringPopulation[mate_index]) )
+        std::swap(parent_index, mate_index);
+
+    bool parent_and_mate_equal = true;
+    vec_t<char> donor_genes_parent, donor_genes_mate;
+    for(size_t j = 0; j < FOSInstance->elementSize(FOS_index); j++)
+    {
+        int variableFromFOS = FOSInstance->FOSStructure[FOS_index][j];
+        donor_genes_parent.push_back(offspringPopulation[parent_index]->variables[variableFromFOS]);
+        donor_genes_mate.push_back(offspringPopulation[mate_index]->variables[variableFromFOS]);
+        if (donor_genes_parent[j] != donor_genes_mate[j])
+            parent_and_mate_equal = false;
+    }
+
+    if (!parent_and_mate_equal)
+    {
+        // Evaluate parent with donor genes from mate
+        partial_solution_t<char> *partial_offspring_parent = new partial_solution_t<char>(donor_genes_mate, FOSInstance->FOSStructure[FOS_index]);
+        problemInstance->evaluatePartialSolution(offspringPopulation[parent_index], partial_offspring_parent );
+        
+        if( problemInstance->output_frequency == NEW_ELITE && !problemInstance->elitist_was_written )
+            writeStatistics();
+
+        // Accept the change if change to parent is at least equally good (allows random walk in neutral fitness landscape)
+        if ( !problemInstance->betterFitness(offspringPopulation[parent_index], partial_offspring_parent) )  // accept
+        {
+            // Also evaluate the mate with donor genes from parent
+            partial_solution_t<char> *partial_offspring_mate = new partial_solution_t<char>(donor_genes_parent, FOSInstance->FOSStructure[FOS_index]);
+            problemInstance->evaluatePartialSolution(offspringPopulation[mate_index], partial_offspring_mate );
+        
+            // Then accept changes to both parent and mate
+            offspringPopulation[parent_index]->insertPartialSolution(partial_offspring_parent);
+            offspringPopulation[mate_index]->insertPartialSolution(partial_offspring_mate);
+            
+            updateElitistAndCheckVTR(offspringPopulation[parent_index]);
+            updateElitistAndCheckVTR(offspringPopulation[mate_index]);
+
+            FOSInstance->improvementCounters[FOS_index]++;
+     
+            delete partial_offspring_mate;
+        }
+        // Do nothing if change is rejected
+
+        FOSInstance->usageCounters[FOS_index]++;
+
+        delete partial_offspring_parent;
+    }
+
 }
 
 

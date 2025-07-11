@@ -137,9 +137,9 @@ bool Config::parseCommandLine(int argc, char **argv)
     }
 
     // Linkage model parameters
-    int mpm_block_size = -1, lt_similarity_measure = 0, cond_max_clique_size = 1, lt_max_set_size = -1;
-    bool filtered_lt, static_lt, cond_include_cliques_as_fos_elements, cond_include_full_fos_element;
-    std::string filename;
+    int mpm_block_size = -1, cond_max_clique_size = 1, lt_max_set_size = -1;
+    bool filtered_lt, cond_include_cliques_as_fos_elements, cond_include_full_fos_element, static_lt;
+    std::string filename, lt_similarity_measure = "MI";
     if(result.count("FOS_index"))
     {
         FOSIndex = result["FOS_index"].as<int>();
@@ -150,7 +150,7 @@ bool Config::parseCommandLine(int argc, char **argv)
     }
     if(result.count("lt_similarity_measure"))
     {
-        lt_similarity_measure = result["lt_similarity_measure"].as<int>();
+        lt_similarity_measure = result["lt_similarity_measure"].as<std::string>();
     }
     if(result.count("lt_max_set_size"))
     {
@@ -189,10 +189,10 @@ bool Config::parseCommandLine(int argc, char **argv)
             throw std::invalid_argument("Full FOS is invalid for discrete optimization.");
             break;
         case linkage::linkage_model_type::MPM:
-            linkage_config = new linkage_config_t(true, mpm_block_size);
+            linkage_config = new linkage_config_t(mpm_block_size);
             break;
         case linkage::linkage_model_type::LINKAGE_TREE:
-            linkage_config = new linkage_config_t(lt_similarity_measure, filtered_lt, lt_max_set_size, static_lt);
+            linkage_config = new linkage_config_t(lt_similarity_measure.c_str(), filtered_lt, lt_max_set_size, static_lt);
             break;
         case linkage::linkage_model_type::CONDITIONAL:
             linkage_config = new linkage_config_t(cond_max_clique_size, cond_include_cliques_as_fos_elements, cond_include_full_fos_element);

@@ -32,6 +32,9 @@ namespace utils{
 	void initializeRandomNumberGenerator();
 	void initializeRandomNumberGenerator( long long seed );
 
+	std::string toLower(std::string _str);
+	std::string toUpper(std::string _str);
+
 	extern std::mt19937 rng;
 	extern long long random_seed;
 

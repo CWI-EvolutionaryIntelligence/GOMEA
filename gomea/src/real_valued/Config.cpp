@@ -234,25 +234,28 @@ void Config::initializeFOSFromIndex( int FOSIndex )
 {
 	int max_clique_size;
 	bool include_cliques_as_fos_elements, include_full_fos_element, filtered_lt;
-    int lt_similarity_measure = 0, lt_max_set_size = -1;
-	if( FOSIndex == 1 ) // UNIVARIATE
+    int lt_max_set_size = -1;
+    if( FOSIndex == 1 ) // UNIVARIATE
     {
         linkage_config = new linkage_config_t();
     }
     else if( FOSIndex > 1 ) // MPM
 	{
-		linkage_config = new linkage_config_t(true, FOSIndex);
+		linkage_config = new linkage_config_t(FOSIndex);
 	}
 	else if( FOSIndex == -1 ) // FULL
 	{
-		linkage_config = new linkage_config_t(true, number_of_variables);
+		linkage_config = new linkage_config_t(number_of_variables);
 	}
-	else if( FOSIndex == -2 ) // Dynamic LT
+	else if( FOSIndex == -2 ) // Dynamic LT -- based on MI by default
 	{
-		linkage_config = new linkage_config_t(lt_similarity_measure, filtered_lt, lt_max_set_size, false);
+		const char *lt_similarity_measure = "MI";
+	    linkage_config = new linkage_config_t(lt_similarity_measure, filtered_lt, lt_max_set_size, false);
 	}
-    else if( FOSIndex == -3 ) // Static LT
+    else if( FOSIndex == -2 ) // Static LT -- based on VIG and filtered by default
 	{
+        const char *lt_similarity_measure = "VIG";
+        filtered_lt = true;
 		linkage_config = new linkage_config_t(lt_similarity_measure, filtered_lt, lt_max_set_size, true);
 	}
 	else if( FOSIndex <= -10 ) // CONDITIONAL
