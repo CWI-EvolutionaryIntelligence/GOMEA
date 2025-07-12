@@ -25,7 +25,7 @@ hierarchicalDeceptiveTrapBBO_t::hierarchicalDeceptiveTrapBBO_t( int number_of_va
 double hierarchicalDeceptiveTrapBBO_t::objectiveFunction( int objective_index, vec_t<char> &variables )
 {
 	int number_of_symbols = number_of_variables;
-	char symbols[number_of_symbols];
+	char *symbols = new char[number_of_symbols];
 	for( int i = 0; i < number_of_variables; i++ )
 		symbols[i] = (variables[i] == 1) ? '1' : '0';
 
@@ -88,6 +88,7 @@ double hierarchicalDeceptiveTrapBBO_t::objectiveFunction( int objective_index, v
 		}
 		number_of_symbols /= trap_size;
 	}
+	delete[] symbols;
 	return result;
 }
 
