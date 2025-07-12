@@ -289,10 +289,11 @@ void Population::generateOffspring()
         }
     }
     else{
-        bool solutionHasChanged[populationSize] = {false};
-        bool isTheElitistSolution[populationSize] = {false};
+        bool *solutionHasChanged = new bool[populationSize];
+        bool *isTheElitistSolution = new bool[populationSize];
         for (size_t i = 0; i < populationSize; i++){
-            isTheElitistSolution[i] = *offspringPopulation[i] == sharedInformationPointer->elitist;
+            solutionHasChanged[i] = false;
+            isTheElitistSolution[i] = (*offspringPopulation[i] == sharedInformationPointer->elitist);
         }
 
         /* Phase 1: optimal mixing with random donors */
@@ -314,6 +315,9 @@ void Population::generateOffspring()
                     FI(i);
             }
         }
+        
+        delete[] isTheElitistSolution;
+        delete[] solutionHasChanged;
     }
 
     /* Update or reset no-improvement stretch */
