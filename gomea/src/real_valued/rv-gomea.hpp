@@ -5,7 +5,6 @@
 #include "gomea/src/real_valued/tools.hpp"
 #include "gomea/src/real_valued/linkage_model.hpp"
 #include "gomea/src/real_valued/Config.hpp"
-#include "gomea/src/utils/embed.hpp"
 #include "gomea/src/fitness/fitness.hpp"
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
