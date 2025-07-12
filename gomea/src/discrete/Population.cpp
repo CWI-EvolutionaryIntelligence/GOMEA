@@ -99,7 +99,6 @@ void Population::initializeAndEvaluatePopulation()
     // Evaluate the initial population
     for (size_t i = 0; i < populationSize; ++i){
         problemInstance->evaluate(population[i]);
-        population[i]->print();
     }
 }
 
