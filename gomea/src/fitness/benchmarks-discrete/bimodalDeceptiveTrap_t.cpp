@@ -4,25 +4,27 @@
 namespace gomea{
 namespace fitness{
 
-deceptiveTrap_t::deceptiveTrap_t( int number_of_variables, int trap_size ) : GBOFitnessFunction_t<char>(number_of_variables)
+bimodalDeceptiveTrap_t::bimodalDeceptiveTrap_t( int number_of_variables, int trap_size ) : GBOFitnessFunction_t<char>(number_of_variables)
 {
 	if(number_of_variables % trap_size != 0)
 		throw std::runtime_error("Number of variables must be a multiple of trap size.");
-	if(trap_size < 3)
-		throw std::runtime_error("Deceptive trap function requires a trap size of at least 3.");
-	this->name = "Deceptive trap function";
+	if(trap_size % 2 != 0)
+		throw std::runtime_error("Bimodal deceptive trap function requires an even trap size.");
+	if(trap_size < 4)
+		throw std::runtime_error("Bimodal deceptive trap function requires a trap size of at least 4.");
+	this->name = "Bimodal deceptive trap function";
 	this->trap_size = trap_size;
 	this->vtr = number_of_variables;
 	this->use_vtr = true;
 	this->initialize();
 }
 
-int deceptiveTrap_t::getNumberOfSubfunctions() 
+int bimodalDeceptiveTrap_t::getNumberOfSubfunctions() 
 {
 	return number_of_variables / trap_size;
 }
 		
-double deceptiveTrap_t::subfunction( int subfunction_index, vec_t<char> &variables )
+double bimodalDeceptiveTrap_t::subfunction( int subfunction_index, vec_t<char> &variables )
 {
 	int trap_index = subfunction_index; 
 	int unitation = 0;
@@ -31,13 +33,13 @@ double deceptiveTrap_t::subfunction( int subfunction_index, vec_t<char> &variabl
 	for( int ind : inputs )
 		unitation += variables[ind];
 	
-	if( unitation == trap_size )
-		return unitation;
+	if( unitation == 0 || unitation == trap_size )
+		return trap_size;
 	else
-		return trap_size - unitation - 1.0;
+		return trap_size - fabs(2*unitation - trap_size) - 2;
 }
 
-vec_t<int> deceptiveTrap_t::inputsToSubfunction( int subfunction_index )
+vec_t<int> bimodalDeceptiveTrap_t::inputsToSubfunction( int subfunction_index )
 {
 	vec_t<int> inputs;
 	int trap_index = subfunction_index; 

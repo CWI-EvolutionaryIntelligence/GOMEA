@@ -248,6 +248,68 @@ cdef class DeceptiveTrapFunctionBBO(BBOFitnessFunction):
         self.number_of_variables = self.c_inst_discrete.getNumberOfVariables()
         self.value_to_reach = self.c_inst_discrete.getVTR()
 
+cdef class AsymmetricDeceptiveTrapFunction(GBOFitnessFunction):
+    def __cinit__(self, 
+        number_of_variables : int,
+        trap_size : int
+    ):
+        self.c_inst_discrete = new asymmetricDeceptiveTrap_t(number_of_variables,trap_size)
+        self.number_of_variables = self.c_inst_discrete.getNumberOfVariables()
+        self.value_to_reach = self.c_inst_discrete.getVTR()
+
+cdef class AsymmetricDeceptiveTrapFunctionBBO(BBOFitnessFunction):
+    def __cinit__(self, 
+        number_of_variables : int,
+        trap_size : int
+    ):
+        self.c_inst_discrete = new asymmetricDeceptiveTrapBBO_t(number_of_variables,trap_size)
+        self.number_of_variables = self.c_inst_discrete.getNumberOfVariables()
+        self.value_to_reach = self.c_inst_discrete.getVTR()
+
+cdef class BimodalDeceptiveTrapFunction(GBOFitnessFunction):
+    def __cinit__(self, 
+        number_of_variables : int,
+        trap_size : int
+    ):
+        self.c_inst_discrete = new bimodalDeceptiveTrap_t(number_of_variables,trap_size)
+        self.number_of_variables = self.c_inst_discrete.getNumberOfVariables()
+        self.value_to_reach = self.c_inst_discrete.getVTR()
+
+cdef class BimodalDeceptiveTrapFunctionBBO(BBOFitnessFunction):
+    def __cinit__(self, 
+        number_of_variables : int,
+        trap_size : int
+    ):
+        self.c_inst_discrete = new bimodalDeceptiveTrapBBO_t(number_of_variables,trap_size)
+        self.number_of_variables = self.c_inst_discrete.getNumberOfVariables()
+        self.value_to_reach = self.c_inst_discrete.getVTR()
+
+cdef class HierarchicalDeceptiveTrapFunctionBBO(BBOFitnessFunction):
+    def __cinit__(self, 
+        number_of_variables : int,
+        trap_size : int
+    ):
+        self.c_inst_discrete = new hierarchicalDeceptiveTrapBBO_t(number_of_variables,trap_size)
+        self.number_of_variables = self.c_inst_discrete.getNumberOfVariables()
+        self.value_to_reach = self.c_inst_discrete.getVTR()
+
+cdef class AsymmetricHierarchicalDeceptiveTrapFunctionBBO(BBOFitnessFunction):
+    def __cinit__(self, 
+        number_of_variables : int,
+        trap_size : int
+    ):
+        self.c_inst_discrete = new asymmetricHierarchicalDeceptiveTrapBBO_t(number_of_variables,trap_size)
+        self.number_of_variables = self.c_inst_discrete.getNumberOfVariables()
+        self.value_to_reach = self.c_inst_discrete.getVTR()
+
+cdef class HierarchicalIfAndOnlyIfFunctionBBO(BBOFitnessFunction):
+    def __cinit__(self, 
+        number_of_variables : int
+    ):
+        self.c_inst_discrete = new hierarchicalIfAndOnlyIfBBO_t(number_of_variables)
+        self.number_of_variables = self.c_inst_discrete.getNumberOfVariables()
+        self.value_to_reach = self.c_inst_discrete.getVTR()
+
 cdef class MaxCut(GBOFitnessFunction):
     def __cinit__(self,
         input_file : str,

@@ -1,4 +1,3 @@
-//#include "utils/embed.hpp"
 #include "gomea/src/fitness/fitness.hpp"
 
 namespace gomea{
