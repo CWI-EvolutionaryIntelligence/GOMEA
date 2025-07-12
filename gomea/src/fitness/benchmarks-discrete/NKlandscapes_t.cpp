@@ -6,7 +6,7 @@ namespace fitness{
 
 NKlandscapes_t::NKlandscapes_t( int number_of_variables, int K, long long fitness_table_seed ) : GBOFitnessFunction_t<char>(number_of_variables)
 {
-	this->name = "NK Landscapes function";
+	this->name = "NK Landscapes function (S=1)";
 	this->vtr = -1;
 	this->use_vtr = false;
 	this->K = K;

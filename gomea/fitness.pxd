@@ -87,6 +87,34 @@ cdef extern from "gomea/src/fitness/benchmarks-discrete.hpp" namespace "gomea::f
         deceptiveTrapBBO_t() except +
         deceptiveTrapBBO_t(int,int) except +
 
+    cdef cppclass asymmetricDeceptiveTrap_t(GBOFitnessFunction_t[char]):
+        asymmetricDeceptiveTrap_t() except +
+        asymmetricDeceptiveTrap_t(int,int) except +
+
+    cdef cppclass asymmetricDeceptiveTrapBBO_t(BBOFitnessFunction_t[char]):
+        asymmetricDeceptiveTrapBBO_t() except +
+        asymmetricDeceptiveTrapBBO_t(int,int) except +
+
+    cdef cppclass bimodalDeceptiveTrap_t(GBOFitnessFunction_t[char]):
+        bimodalDeceptiveTrap_t() except +
+        bimodalDeceptiveTrap_t(int,int) except +
+
+    cdef cppclass bimodalDeceptiveTrapBBO_t(BBOFitnessFunction_t[char]):
+        bimodalDeceptiveTrapBBO_t() except +
+        bimodalDeceptiveTrapBBO_t(int,int) except +
+
+    cdef cppclass hierarchicalDeceptiveTrapBBO_t(BBOFitnessFunction_t[char]):
+        hierarchicalDeceptiveTrapBBO_t() except +
+        hierarchicalDeceptiveTrapBBO_t(int,int) except +
+
+    cdef cppclass asymmetricHierarchicalDeceptiveTrapBBO_t(BBOFitnessFunction_t[char]):
+        asymmetricHierarchicalDeceptiveTrapBBO_t() except +
+        asymmetricHierarchicalDeceptiveTrapBBO_t(int,int) except +
+
+    cdef cppclass hierarchicalIfAndOnlyIfBBO_t(BBOFitnessFunction_t[char]):
+        hierarchicalIfAndOnlyIfBBO_t() except +
+        hierarchicalIfAndOnlyIfBBO_t(int) except +
+
     cdef cppclass maxCut_t(GBOFitnessFunction_t[char]):
         maxCut_t() except +
         maxCut_t(string,string) except +

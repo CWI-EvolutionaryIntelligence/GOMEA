@@ -47,9 +47,91 @@ class deceptiveTrapBBO_t: public BBOFitnessFunction_t<char>
 	public:
 		deceptiveTrapBBO_t( int number_of_variables, int trap_size );
 		double objectiveFunction( int objective_index, vec_t<char> &variables );
+		double getSimilarityMeasure( size_t var_a, size_t var_b ) override;
 		
 	private:
 		int trap_size;
+};
+
+class bimodalDeceptiveTrap_t: public GBOFitnessFunction_t<char>
+{
+	public:
+		bimodalDeceptiveTrap_t( int number_of_variables, int trap_size );
+		int getNumberOfSubfunctions(); 
+		vec_t<int> inputsToSubfunction( int subfunction_index );
+		
+	private:
+		int trap_size;
+		double subfunction( int subfunction_index, vec_t<char> &variables );
+};
+
+class bimodalDeceptiveTrapBBO_t: public BBOFitnessFunction_t<char>
+{
+	public:
+		bimodalDeceptiveTrapBBO_t( int number_of_variables, int trap_size );
+		double objectiveFunction( int objective_index, vec_t<char> &variables );
+		double getSimilarityMeasure( size_t var_a, size_t var_b ) override;
+		
+	private:
+		int trap_size;
+};
+
+class asymmetricDeceptiveTrap_t: public GBOFitnessFunction_t<char>
+{
+	public:
+		asymmetricDeceptiveTrap_t( int number_of_variables, int trap_size );
+		int getNumberOfSubfunctions(); 
+		vec_t<int> inputsToSubfunction( int subfunction_index );
+		
+	private:
+		int trap_size;
+		double subfunction( int subfunction_index, vec_t<char> &variables );
+};
+
+class asymmetricDeceptiveTrapBBO_t: public BBOFitnessFunction_t<char>
+{
+	public:
+		asymmetricDeceptiveTrapBBO_t( int number_of_variables, int trap_size );
+		double objectiveFunction( int objective_index, vec_t<char> &variables );
+		double getSimilarityMeasure( size_t var_a, size_t var_b ) override;
+		
+	private:
+		int trap_size;
+};
+
+class hierarchicalDeceptiveTrapBBO_t: public BBOFitnessFunction_t<char>
+{
+	public:
+		hierarchicalDeceptiveTrapBBO_t( int number_of_variables, int trap_size );
+		double objectiveFunction( int objective_index, vec_t<char> &variables );
+		double getSimilarityMeasure( size_t var_a, size_t var_b ) override;
+		
+	private:
+		int trap_size;
+		double computeVTR();
+};
+
+class asymmetricHierarchicalDeceptiveTrapBBO_t: public BBOFitnessFunction_t<char>
+{
+	public:
+		asymmetricHierarchicalDeceptiveTrapBBO_t( int number_of_variables, int trap_size );
+		double objectiveFunction( int objective_index, vec_t<char> &variables );
+		double getSimilarityMeasure( size_t var_a, size_t var_b ) override;
+		
+	private:
+		int trap_size;
+		double computeVTR();
+};
+
+class hierarchicalIfAndOnlyIfBBO_t: public BBOFitnessFunction_t<char>
+{
+	public:
+		hierarchicalIfAndOnlyIfBBO_t( int number_of_variables );
+		double objectiveFunction( int objective_index, vec_t<char> &variables );
+		double getSimilarityMeasure( size_t var_a, size_t var_b ) override;
+		
+	private:
+		double computeVTR();
 };
 
 class maxCut_t: public GBOFitnessFunction_t<char>
